@@ -12,6 +12,7 @@ This is a multiple task, single user, x86 operating system.
 	
 
 * Ubuntu 10.04 LTS amd64
+========================
 	* 汇编器和编译器
 
 		apt-get install nasm	#NASM 已存在则跳过
@@ -62,6 +63,7 @@ This is a multiple task, single user, x86 operating system.
 
 
 * Ubuntu 10.04 LTS i386
+========================
 	* 汇编器和编译器
 
 		apt-get install nasm	#NASM 已存在则跳过
