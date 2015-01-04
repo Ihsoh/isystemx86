@@ -1,0 +1,116 @@
+ISystem II(x86) Help
+Ihsoh Software 2014
+
+?, help:    
+    Show help.
+
+ver:
+    Show system ver.
+
+print {message}:
+    Print a message.
+
+error {message}:
+    Print a error message.
+
+disks:
+    Show disk infomations.
+
+mm:
+    Show memory infomations.
+
+date:
+    Show current date.
+
+time:
+    Show current time.
+
+dt:
+    Show current date and time.
+
+clock {on|off}:
+    Enable or disbale clock.
+
+format {VA|VB|DA|DB}:
+    Format disk.
+
+cdisk {VA|VB|DA|DB}:
+    Check the disk is IFS1.
+
+mkdir {path} {name}:
+    Create a directory {name} in {path}.
+
+mkfile {path} {name}:
+    Create a file {name} in {path}.
+
+deldir {path}:
+    Delete a directory {path}. the directory must empry!
+
+deldirs {path}:
+    Delete a directory {path} and sub files/directorys!
+
+delfile {path}:
+    Delete a file {path}.
+
+rndir {path} {new name}:
+    Rename a directory.
+
+rnfile {path} {new name}:
+    Rename a file.
+
+files [-d path] [-s] [-p]:
+    -d path:    specify directory path.
+    -s:            simple mode.
+    -p:            part mode.
+    Show all file infomations.
+
+cpfile {source file} {target path} {filename}:
+    Copy a file.
+    {source file} ==Copy==> {target path}/{filename}
+
+kill {pid}:
+    Kill a task. {pid} = 0 ~ 255.
+
+tasks [-p]:
+    -p:        part mode.
+    Show all task infomations.
+
+clear:
+    Clear screen.
+    
+reboot:
+    Reset computer.
+
+shutdown:
+	Shutdown computer.
+    
+vmode {text|vesa640_480|vesa800_600|vesa1024_768|vesa1280_1024}:
+    Set video mode.
+
+cpuid:
+    Show cpu information.
+
+set {property} {value}:
+    Set value to property.
+    Propertys      Meanings
+    ============   ============
+    cursor_color   Cursor color
+    char_color     Char color
+    
+rem [Comment]:
+    Comment.
+    
+goto {label}:
+    go to label.
+    
+def {variable name} [value]:
+    define a variable.
+    
+rpn {rpn expression}:
+	calc rpn expression
+
+${varible}:
+    Get local variable.
+
+@{varible}:
+    Get global variable.

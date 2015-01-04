@@ -1,0 +1,36 @@
+;*------------------------------------------------------*
+;|文件名:	common.mac									|
+;|作者:		Ihsoh										|
+;|创建时间:	2013-5-13									|
+;|														|
+;|概述:													|
+;|	公共宏文件											|
+;*------------------------------------------------------*
+
+%IFNDEF	_COMMON_MAC_
+%DEFINE	_COMMON_MAC_
+
+;宏名:		Procedure
+;功能:		定义一个过程的开始.
+;参数:		参数1=过程名
+;返回值:	无
+%MACRO Procedure 1
+	%IFDEF %1__Proc
+		%ERROR redefined procedure %1
+	%ELSE
+		%DEFINE %1__Proc
+		%1:
+	%ENDIF
+%ENDMACRO
+
+;宏名:		EndProc
+;功能:		定义一个宏的结束.
+;参数:		参数1=过程名
+;返回值:	无
+%MACRO EndProc 1
+	%IFNDEF %1__Proc
+		%ERROR undefined procedure %1
+	%ENDIF
+%ENDMACRO
+
+%ENDIF

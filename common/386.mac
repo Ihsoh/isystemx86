@@ -1,0 +1,573 @@
+;*------------------------------------------------------*
+;|文件名:	386.mac										|
+;|作者:		Ihsoh										|
+;|创建时间:	2013-5-13									|
+;|														|
+;|概述:													|
+;|	386编程宏文件											|
+;*------------------------------------------------------*
+
+%IFNDEF	_386_MAC_
+%DEFINE	_386_MAC_
+
+;*------------------------------------------------------*
+;|						结构定义							|
+;*------------------------------------------------------*
+
+;宏名:		Desc
+;描述:		段描述符
+;参数:		参数1=段界限
+;			参数2=段属性
+;			参数3=基地址
+%MACRO	Desc 3
+	DW	(%1) & 0FFFFH							;LimitL
+	DW	(%3) & 0FFFFH							;BaseL
+	DB	((%3) >> 16) & 0FFH						;BaseM
+	DW	((%2) & 0FFFFH) | (((%1) >> 8) & 0F00H)	;Attr
+	DB	((%3) >> 24) & 0FFH 					;BaseH
+%ENDMACRO
+Desc_SLength	EQU 8
+
+Desc_LimitL	EQU 0
+Desc_BaseL	EQU 2
+Desc_BaseM	EQU 4
+Desc_Attr	EQU 5
+Desc_BaseH	EQU 7
+
+;宏名:		Desc_Get_Limit
+;描述:		获取段描述符的段界限
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=32位目标寄存器(低20位有效)
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=32位目标寄存器(低20位有效)
+;返回值:	无
+%MACRO	Desc_Get_Limit 2-3
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			PUSH	EAX
+		%ENDIF
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			PUSH	EAX
+		%ENDIF
+	%ENDIF
+	
+	%IF %0 == 2
+		MOV		AX, [%1 + Desc_Attr]
+	%ELIF %0 == 3
+		MOV		AX, [%1:%2 + Desc_Attr]
+	%ENDIF
+	AND		AX, 0FH
+	SHL		EAX, 16
+	%IF %0 == 2
+		MOV		AX, [%1 + Desc_LimitL]
+		%IFNIDNI %2, EAX
+			MOV		%2, EAX
+		%ENDIF
+	%ELIF %0 == 3
+		MOV		AX, [%1:%2 + Desc_LimitL]
+		%IFNIDNI %3, EAX
+			MOV		%3, EAX
+		%ENDIF
+	%ENDIF
+
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			POP		EAX
+		%ENDIF
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			POP		EAX
+		%ENDIF
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Desc_Get_Attr
+;描述:		获取段描述符的属性
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=16目标寄存器(低4位无意义)
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=16目标寄存器(低4位无意义)
+;返回值:	无
+%MACRO	Desc_Get_Attr 2-3
+	%IF		%0 == 2
+		MOV		%2, [%1 + Desc_Attr]
+	%ELSE
+		MOV		%3, [%1:%2 + Desc_Attr]
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Desc_Get_Base
+;描述:		获取段描述符的基地址
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=32位目标寄存器
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=32位目标寄存器
+;返回值:	无
+%MACRO	Desc_Get_Base 2-3
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			PUSH	EAX
+		%ENDIF
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			PUSH	EAX
+		%ENDIF
+	%ENDIF
+	
+	%IF %0 == 2
+		MOV		AH, [%1 + Desc_BaseH]
+		MOV		AL, [%1 + Desc_BaseM]
+	%ELIF %0 == 3
+		MOV		AH, [%1:%2 + Desc_BaseH]
+		MOV		AL, [%1:%2 + Desc_BaseM]
+	%ENDIF
+	SHL		EAX, 16
+	%IF %0 == 2
+		MOV		AX, [%1 + Desc_BaseL]
+		%IFNIDNI %2, EAX
+			MOV		%2, EAX
+		%ENDIF
+	%ELIF %0 == 3
+		MOV		AX, [%1:%2 + Desc_BaseL]
+		%IFNIDNI %3, EAX
+			MOV		%3, EAX
+		%ENDIF
+	%ENDIF
+	
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			POP		EAX
+		%ENDIF
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			POP		EAX
+		%ENDIF
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Desc_Set_Limit
+;描述:		设置段描述符的段界限
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=32位源寄存器(低20位有效)
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=32位源寄存器(低20位有效)
+%MACRO	Desc_Set_Limit 2-3
+	PUSH	EAX
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			MOV		EAX, %2 
+		%ENDIF
+		MOV		[%1 + Desc_LimitL], AX
+		SHR		EAX, 16
+		AND		AL, 0FH
+		AND		BYTE [%1 + Desc_Attr], 0FH
+		OR		[%1 + Desc_Attr], AL
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			MOV		EAX, %3 
+		%ENDIF
+		MOV		[%1:%2 + Desc_LimitL], AX
+		SHR		EAX, 16
+		AND		AL, 0FH
+		AND		BYTE [%1:%2 + Desc_Attr], 0FH
+		OR		[%1:%2 + Desc_Attr], AL
+	%ENDIF
+	POP		EAX
+%ENDMACRO
+
+;宏名:		Desc_Set_Attr
+;描述:		设置段描述符的属性
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=16位寄存器(低4位无效)
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=16位寄存器(低4位无效)
+;返回值:	无
+%MACRO	Desc_Set_Attr 2-3
+	PUSH	AX
+	%IF %0 == 2
+		%IFNIDNI %2, AX
+			MOV		AX, %2
+		%ENDIF
+		AND		WORD [%1 + Desc_Attr], 0FH
+		AND		AX, 0FFF0H
+		OR		[%1 + Desc_Attr], AX
+	%ELIF %0 == 3
+		%IFNIDNI %3, AX
+			MOV		AX, %3
+		%ENDIF
+		AND		WORD [%1:%2 + Desc_Attr], 0FH
+		AND		AX, 0FFF0H
+		OR		[%1:%2 + Desc_Attr], AX
+	%ENDIF
+	POP		AX
+%ENDMACRO
+
+;宏名:		Desc_Set_Base
+;描述:		设置段描述符的基地址
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=32位段寄存器
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=32位段寄存器
+;返回值:	无
+%MACRO	Desc_Set_Base 2-3
+	PUSH	EAX
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			MOV		EAX, %2
+		%ENDIF
+		MOV		[%1 + Desc_BaseL], AX
+		SHR		EAX, 16
+		MOV		[%1 + Desc_BaseM], AL
+		MOV		[%1 + Desc_BaseH], AH
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			MOV		EAX, %3
+		%ENDIF
+		MOV		[%1:%2 + Desc_BaseL], AX
+		SHR		EAX, 16
+		MOV		[%1:%2 + Desc_BaseM], AL
+		MOV		[%1:%2 + Desc_BaseH], AH
+	%ENDIF
+	POP		EAX
+%ENDMACRO
+
+;宏名:		Gate
+;描述:		门描述符
+;参数:		参数1=偏移
+;			参数2=选择子
+;			参数3=要传递的双字个数
+;			参数4=门属性
+;返回值:	无
+%MACRO	Gate 4
+	DW	((%1) & 0FFFFH)
+	DW	(%2)
+	DB	(%3)
+	DB	(%4)
+	DW	(((%1) >> 16) & 0FFFFH)
+%ENDMACRO
+Gate_SLength	EQU 8
+
+Gate_OffsetL	EQU 0
+Gate_Selector	EQU 2
+Gate_DCount		EQU 4
+Gate_Attr		EQU 5
+Gate_OffsetH	EQU 6
+
+;宏名:		Gate_Get_Offset
+;描述:		获取门描述符的偏移
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=32位目标寄存器
+;			三个参数的版本:
+;			参数1=段描述符
+;			参数2=地址
+;			参数3=32位目标寄存器
+;返回值:	无
+%MACRO	Gate_Get_Offset 2-3
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			PUSH	EAX
+		%ENDIF
+		MOV		AX, [%1 + Gate_OffsetH]
+		SHL		EAX, 16
+		MOV		AX, [%1 + Gate_OffsetL]
+		%IFNIDNI %2, EAX
+			MOV		%2, EAX
+			POP		EAX
+		%ENDIF
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			PUSH	EAX
+		%ENDIF
+		MOV		AX, [%1:%2 + Gate_OffsetH]
+		SHL		EAX, 16
+		MOV		AX, [%1:%2 + Gate_OffsetL]
+		%IFNIDNI %3, EAX
+			MOV		%3, EAX
+			POP		EAX
+		%ENDIF
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Gate_Get_Selector
+;描述:		获取门描述符的选择子
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=16位目标寄存器
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=16位目标寄存器
+;返回值:	无
+%MACRO	Gate_Get_Selector 2-3
+	%IF %0 == 2
+		MOV		%2, [%1 + Gate_Selector]
+	%ELIF %0 == 3
+		MOV		%3, [%1:%2 + Gate_Selector]
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Gate_Get_DCount
+;描述:		获取门描述符的双字个数
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=8位目标寄存器
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=8位目标寄存器
+;返回值:	无
+%MACRO	Gate_Get_DCount 2-3
+	%IF %0 == 2
+		MOV		%2, [%1 + Gate_DCount]
+	%ELIF %0 == 3
+		MOV		%3, [%1:%2 + Gate_DCount]
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Gate_Get_Attr
+;描述:		获取门描述符的属性
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=8位目标寄存器
+;			三个参数的版本:
+;			参数1=段寄存器
+;			参数2=地址
+;			参数3=8位目标寄存器
+;返回值:	无
+%MACRO	Gate_Get_Attr 2-3
+	%IF %0 == 2
+		MOV		%2, [%1 + Gate_Attr]
+	%ELIF %0 == 3
+		MOV		%3, [%1:%2 + Gate_Attr]
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Gate_Set_Offset
+;描述:		设置门描述符的偏移
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=32位源寄存器
+;			三个参数的版本:
+;			参数1=段描述符
+;			参数2=地址
+;			参数3=32位源寄存器
+;返回值:	无
+%MACRO	Gate_Set_Offset 2-3
+	PUSH	EAX
+	%IF %0 == 2
+		%IFNIDNI %2, EAX
+			MOV		EAX, %2
+		%ENDIF
+		MOV		[%1 + Gate_OffsetL], AX
+		SHR		EAX, 16
+		MOV		[%1 + Gate_OffsetH], AX
+	%ELIF %0 == 3
+		%IFNIDNI %3, EAX
+			MOV		EAX, %3
+		%ENDIF
+		MOV		[%1:%2 + Gate_OffsetL], AX
+		SHR		EAX, 16
+		MOV		[%1:%2 + Gate_OffsetH], AX
+	%ENDIF
+	POP		EAX
+%ENDMACRO
+
+;宏名:		Gate_Set_Selector
+;描述:		设置门描述符的选择子
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=16位源寄存器
+;			三个参数的版本:
+;			参数1=段描述符
+;			参数2=地址
+;			参数3=16位源寄存器
+;返回值:	无	
+%MACRO	Gate_Set_Selector 2-3
+	%IF %0 == 2
+		MOV		[%1 + Gate_Selector], %2
+	%ELIF %0 == 3
+		MOV		[%1:%2 + Gate_Selector], %3
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Gate_Set_DCount
+;描述:		设置门描述符的双字个数
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=8位源寄存器
+;			三个参数的版本:
+;			参数1=段描述符
+;			参数2=地址
+;			参数3=8位源寄存器
+;返回值:	无	
+%MACRO	Gate_Set_DCount 2-3
+	%IF %0 == 2
+		MOV		[%1 + Gate_DCount], %2
+	%ELIF %0 == 3
+		MOV		[%1:%2 + Gate_DCount], %3
+	%ENDIF
+%ENDMACRO
+
+;宏名:		Gate_Set_Attr
+;描述:		设置门描述符的属性
+;参数:		两个参数的版本:
+;			参数1=地址
+;			参数2=8位源寄存器
+;			三个参数的版本:
+;			参数1=段描述符
+;			参数2=地址
+;			参数3=8位源寄存器
+;返回值:	无	
+%MACRO	Gate_Set_Attr 2-3
+	%IF %0 == 2
+		MOV		[%1 + Gate_Attr], %2
+	%ELIF %0 == 3
+		MOV		[%1:%2 + Gate_Attr], %3
+	%ENDIF
+%ENDMACRO
+
+;宏名:		虚描述符
+;描述:		用于描述全局描述符表
+;参数:		参数1=界限
+;			参数2=地址
+%MACRO	VDesc 2
+	DW	%1	;Limit
+	DD	%2	;Base
+%ENDMACRO
+VDesc_SLength	EQU 6
+
+VDesc_Limit	EQU 0
+VDesc_Base	EQU 2
+
+;宏名:		TSS
+;描述:		任务状态段
+;参数:		无
+;返回值:	无
+%MACRO	TSS 0
+	DW	0, 0	;Link
+	DD	0		;ESP0
+	DW	0, 0	;SS0
+	DD	0		;ESP1
+	DW	0, 0	;SS1
+	DD	0		;ESP2
+	DW	0, 0	;SS2
+	DD	0		;CR3
+	DD	0		;EIP
+	DD	0		;Flags
+	DD	0		;EAX
+	DD	0		;ECX
+	DD	0		;EDX
+	DD	0		;EBX
+	DD	0		;ESP
+	DD	0		;EBP
+	DD	0		;ESI
+	DD	0		;EDI
+	DW	0, 0	;ES
+	DW	0, 0	;CS
+	DW	0, 0	;SS
+	DW	0, 0	;DS
+	DW	0, 0	;FS
+	DW	0, 0	;GS
+	DW	0, 0	;LDT
+	DW	0		;T
+	DW	$ + 2	;IO Map
+%ENDMACRO
+
+TSS_Link	EQU 0
+TSS_ESP0	EQU 4
+TSS_SS0		EQU 8
+TSS_ESP1	EQU 12
+TSS_SS1		EQU 16
+TSS_ESP2	EQU 20
+TSS_SS2		EQU 24
+TSS_CR3		EQU 28
+TSS_EIP		EQU 32
+TSS_Flags	EQU 36
+TSS_EAX		EQU 40
+TSS_ECX		EQU 44
+TSS_EDX		EQU 48
+TSS_EBX		EQU 52
+TSS_ESP		EQU 56
+TSS_EBP		EQU 60
+TSS_ESI		EQU 64
+TSS_EDI		EQU 68
+TSS_ES		EQU	72
+TSS_CS		EQU 76
+TSS_SS		EQU 80
+TSS_DS		EQU 84
+TSS_FS		EQU 88
+TSS_GS		EQU 92
+TSS_LDT		EQU 96
+TSS_T		EQU 100
+TSS_IOMap	EQU 102
+
+
+;*------------------------------------------------------*
+;|						其他宏定义						|
+;*------------------------------------------------------*
+
+;宏名:		Jump32
+;描述:		32位段间跳转
+;参数:		参数1=描述符
+;			参数2=偏移
+;返回值:	无
+%MACRO	Jump32 2
+	DB	0EAH
+	DD	%2
+	DW	%1
+%ENDMACRO
+
+;宏名:		Call32
+;描述:		32位段间调用
+;参数:		参数1=描述符
+;			参数2=偏移
+;返回值:	无
+%MACRO	Call32 2
+	DB	9AH
+	DD	%2
+	DW	%1
+%ENDMACRO
+
+;宏名:		Jump16
+;描述:		16位段间跳转
+;参数:		参数1=描述符
+;			参数2=偏移
+;返回值:	无
+%MACRO	Jump16 2
+	DB	0EAH
+	DW	%2
+	DW	%1
+%ENDMACRO
+
+;宏名:		Call16
+;描述:		16位段间调用
+;参数:		参数1=描述符
+;			参数2=偏移
+;返回值:	无
+%MACRO	Call16 2
+	DB	9AH
+	DW	%2
+	DW	%1
+%ENDMACRO
+
+%ENDIF
