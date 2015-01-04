@@ -57,6 +57,10 @@ This is a multiple task, single user, x86 operating system.
 		make
 
 
+
+
+
+
 * Ubuntu 10.04 LTS i386
 	* 汇编器和编译器
 
@@ -89,5 +93,5 @@ This is a multiple task, single user, x86 operating system.
 	* 构建 ISystem x86
 
 		make Clear
-		
+
 		make
