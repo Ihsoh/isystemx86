@@ -22,8 +22,8 @@ rpn @__path__ @__path__ @__system__ strcat "bins/" strcat ";" strcat
 
 rem Go to window mode
 rpn :is_window_mode @__video_mode__ "text" seq not
-vmode vesa800_600
-reboot
+rem vmode vesa800_600
+rem reboot
 :is_window_mode
 
 clear
