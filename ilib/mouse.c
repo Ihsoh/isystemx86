@@ -11,20 +11,20 @@ void get_mouse_position(int * x, int * y)
 {
 	struct SParams sparams;
 	system_call(SCALL_MOUSE, SCALL_GET_MPOSITION, &sparams);
-	*x = (int)(sparams.param0);
-	*y = (int)(sparams.param1);
+	*x = INT32_SPARAM(sparams.param0);
+	*y = INT32_SPARAM(sparams.param1);
 }
 
 int is_mouse_left_button_down(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_MOUSE, SCALL_GET_MLBSTATE, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }
 
 int is_mouse_right_button_down(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_MOUSE, SCALL_GET_MRBSTATE, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }

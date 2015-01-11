@@ -22,7 +22,7 @@ void * allocm(uint len)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(len);
 	system_call(SCALL_SYSTEM, SCALL_ALLOC_M, &sparams);
-	return (void *)(sparams.param0);
+	return (void *)UINT32_PTR_SPARAM(sparams.param0);
 }
 
 int freem(void * ptr)
@@ -30,7 +30,7 @@ int freem(void * ptr)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(ptr);
 	system_call(SCALL_SYSTEM, SCALL_FREE_M, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }
 
 void get_param(char * buffer)

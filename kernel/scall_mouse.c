@@ -51,7 +51,8 @@ system_call_mouse(	IN uint32 func,
 		//	Param0=0:未按下, 1:按下
 		case SCALL_GET_MLBSTATE:
 		{
-			sparams->param0 = SPARAM(is_mouse_left_button_down());
+			BOOL r = is_mouse_left_button_down();
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//获取鼠标右键状态
@@ -60,7 +61,8 @@ system_call_mouse(	IN uint32 func,
 		//	Param0=0:未按下, 1:按下
 		case SCALL_GET_MRBSTATE:
 		{
-			sparams->param0 = SPARAM(is_mouse_right_button_down());
+			BOOL r = is_mouse_right_button_down();
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 	}

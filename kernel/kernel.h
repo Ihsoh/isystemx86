@@ -22,11 +22,11 @@ get_mouse_position(	OUT int32 * x,
 					OUT int32 * y);
 
 extern
-int32
+BOOL
 is_mouse_left_button_down(void);
 
 extern
-int32
+BOOL
 is_mouse_right_button_down(void);
 
 extern

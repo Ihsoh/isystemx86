@@ -74,10 +74,16 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 					sparams->param0 = SPARAM(start);
 				}
 				else
-					sparams->param0 = SPARAM(NULL);
+				{
+					void * voidptr = NULL;
+					sparams->param0 = SPARAM(voidptr);
+				}
 			}
 			else
-				sparams->param0 = SPARAM(NULL);
+			{
+				void * voidptr = NULL;
+				sparams->param0 = SPARAM(voidptr);
+			}
 			break;
 		}
 		//释放内存
@@ -93,13 +99,15 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			void * ptr = (void *)(sparams->param0);	//线性地址
 			if(ptr == NULL)
 			{
-				sparams->param0 = SPARAM(0);
+				BOOL r = FALSE;
+				sparams->param0 = SPARAM(r);
 				break;
 			}			
 			void * physical_address = (void *)get_physical_address(tid, ptr);	//物理地址
 			if(physical_address == NULL)
 			{
-				sparams->param0 = SPARAM(0);
+				BOOL r = FALSE;
+				sparams->param0 = SPARAM(r);
 				break;
 			}	
 			uint32 ui;
@@ -108,19 +116,29 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			{
 				uint32 length = get_memory_block_size(physical_address);
 				if(length == 0)
-					sparams->param0 = SPARAM(0);
+				{
+					BOOL r = FALSE;
+					sparams->param0 = SPARAM(r);
+				}
 				else
 					if(!free_pages((uint32 *)task->real_pagedt_addr, (uint32)ptr, length))
-						sparams->param0 = SPARAM(0);
+					{
+						BOOL r = FALSE;
+						sparams->param0 = SPARAM(r);
+					}
 					else
 					{
 						task->memory_block_ptrs[ui] = NULL;
 						task->used_memory_size -= align_4kb(length);
-						sparams->param0 = SPARAM(free_memory(physical_address));
+						BOOL r = free_memory(physical_address);
+						sparams->param0 = SPARAM(r);
 					}	
 			}	
 			else
-				sparams->param0 = SPARAM(0);
+			{
+				BOOL r = FALSE;
+				sparams->param0 = SPARAM(r);
+			}
 			break;
 		}
 		//获取程序的调用参数

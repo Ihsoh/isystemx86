@@ -51,7 +51,8 @@ parse_path(	IN int8 * path,
 			OUT int32 * type);
 
 extern
-int32 df_count(IN int8 * path);
+int32
+df_count(IN int8 * path);
 
 extern
 int32

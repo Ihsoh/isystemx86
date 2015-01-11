@@ -38,7 +38,8 @@ void system_call_keyboard(	IN uint32 func,
 		//	Param0=读入的字符
 		case SCALL_GET_CHAR:
 		{
-			sparams->param0 = SPARAM(get_char());
+			uint8 chr = get_char();
+			sparams->param0 = SPARAM(chr);
 			break;
 		}
 		//读入字符串. 以回车结束, 但字符串不包含回车.
@@ -51,7 +52,8 @@ void system_call_keyboard(	IN uint32 func,
 		case SCALL_GET_STR_N:
 		{
 			int8 * buffer = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			sparams->param0 = SPARAM(get_strn(buffer, UINT32_SPARAM(sparams->param1)));
+			uint32 count = get_strn(buffer, UINT32_SPARAM(sparams->param1));
+			sparams->param0 = SPARAM(count);
 			break;
 		}
 		//获取Shift键的状态
@@ -60,7 +62,8 @@ void system_call_keyboard(	IN uint32 func,
 		//	Param0=1则按下, 0则弹起
 		case SCALL_GET_SHIFT:
 		{
-			sparams->param0 = SPARAM(get_shift());
+			BOOL r = get_shift();
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//获取Control键的状态
@@ -69,7 +72,8 @@ void system_call_keyboard(	IN uint32 func,
 		//	Param0=1则按下, 0则弹起
 		case SCALL_GET_CONTROL:
 		{
-			sparams->param0 = SPARAM(get_control());
+			BOOL r = get_control();
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//获取Alt键的状态
@@ -78,7 +82,8 @@ void system_call_keyboard(	IN uint32 func,
 		//	Param0=1则按下, 0则弹起
 		case SCALL_GET_ALT:
 		{
-			sparams->param0 = SPARAM(get_alt());
+			BOOL r = get_alt();
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//获取按键状态
@@ -90,7 +95,8 @@ void system_call_keyboard(	IN uint32 func,
 		case SCALL_GET_KEY_STATUS:
 		{
 			int32 key = INT32_SPARAM(sparams->param0);
-			sparams->param0 = SPARAM(get_key_status(key));			
+			int32 status = get_key_status(key);
+			sparams->param0 = SPARAM(status);
 			break;
 		}
 		//键盘缓冲区是否包含输入的字符
@@ -99,7 +105,8 @@ void system_call_keyboard(	IN uint32 func,
 		//	Param0=1则有, 0则无
 		case SCALL_HAS_KEY:
 		{
-			sparams->param0 = SPARAM(has_key());		
+			BOOL r = has_key();
+			sparams->param0 = SPARAM(r);		
 			break;
 		}
 	}

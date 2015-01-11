@@ -57,8 +57,8 @@ void get_cursor(ushort * x, ushort * y)
 {
 	struct SParams sparams;
 	system_call(SCALL_SCREEN, SCALL_GET_CURSOR, &sparams);
-	*x = (ushort)(sparams.param0);
-	*y = (ushort)(sparams.param1);
+	*x = UINT16_SPARAM(sparams.param0);
+	*y = UINT16_SPARAM(sparams.param1);
 }
 
 void print_date(struct CMOSDateTime * date)
@@ -100,15 +100,15 @@ int vesa_is_valid(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_SCREEN, SCALL_VESA_IS_VALID, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }
 
 void get_screen_size(uint * width, uint * height)
 {
 	struct SParams sparams;
 	system_call(SCALL_SCREEN, SCALL_GET_SCREEN_SIZE, &sparams);
-	*width = sparams.param0;
-	*height = sparams.param1;
+	*width = UINT32_SPARAM(sparams.param0);
+	*height = UINT32_SPARAM(sparams.param1);
 }
 
 void set_screen_pixel(uint x, uint y, uint color)
@@ -126,7 +126,7 @@ uint get_screen_pixel(uint x, uint y)
 	sparams.param0 = SPARAM(x);
 	sparams.param1 = SPARAM(y);
 	system_call(SCALL_SCREEN, SCALL_GET_SCREEN_PIXEL, &sparams);
-	return sparams.param0;
+	return UINT32_SPARAM(sparams.param0);
 }
 
 void draw_screen_image(uint x, uint y, uint width, uint height, uint * image)
@@ -144,8 +144,8 @@ void get_text_screen_size(uint * column, uint * row)
 {
 	struct SParams sparams;
 	system_call(SCALL_SCREEN, SCALL_GET_TEXT_SCREEN_SIZE, &sparams);
-	*column = sparams.param0;
-	*row = sparams.param1;
+	*column = UINT32_SPARAM(sparams.param0);
+	*row = UINT32_SPARAM(sparams.param1);
 }
 
 void lock_cursor(void)
@@ -193,7 +193,7 @@ create_window(	uint32		width,
 	sparams.param3 = SPARAM(style);
 	sparams.param4 = SPARAM(title);
 	system_call(SCALL_SCREEN, SCALL_CREATE_WINDOW, &sparams);
-	return sparams.param0;
+	return UINT32_SPARAM(sparams.param0);
 }
 
 BOOL
@@ -202,7 +202,7 @@ destroy_window(uint32 id)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(id);
 	system_call(SCALL_SCREEN, SCALL_DESTROY_WINDOW, &sparams);
-	return sparams.param0;
+	return INT32_SPARAM(sparams.param0);
 }
 
 void
@@ -227,7 +227,7 @@ window_get_key(uint32 id)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(id);
 	system_call(SCALL_SCREEN, SCALL_WINDOW_GET_KEY, &sparams);
-	return sparams.param0;
+	return UINT8_SPARAM(sparams.param0);
 }
 
 BOOL
@@ -237,5 +237,5 @@ draw_window(uint32 id, struct CommonImage * image)
 	sparams.param0 = SPARAM(id);
 	sparams.param1 = SPARAM(image);
 	system_call(SCALL_SCREEN, SCALL_DRAW_WINDOW, &sparams);
-	return sparams.param0;
+	return INT32_SPARAM(sparams.param0);
 }

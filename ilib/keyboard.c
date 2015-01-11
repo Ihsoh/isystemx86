@@ -11,7 +11,7 @@ uchar get_char(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_KEYBOARD, SCALL_GET_CHAR, &sparams);
-	return (uchar)(sparams.param0);
+	return UINT8_SPARAM(sparams.param0);
 }
 
 uint get_strn(char * input_buffer, uint n)
@@ -20,28 +20,28 @@ uint get_strn(char * input_buffer, uint n)
 	sparams.param0 = SPARAM(input_buffer);
 	sparams.param1 = SPARAM(n);
 	system_call(SCALL_KEYBOARD, SCALL_GET_STR_N, &sparams);
-	return (uint)(sparams.param0);
+	return UINT32_SPARAM(sparams.param0);
 }
 
 int get_shift(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_KEYBOARD, SCALL_GET_SHIFT, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }
 
 int get_control(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_KEYBOARD, SCALL_GET_CONTROL, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }
 
 int get_alt(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_KEYBOARD, SCALL_GET_ALT, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }
 
 int get_key_status(int key)
@@ -49,12 +49,12 @@ int get_key_status(int key)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(key);
 	system_call(SCALL_KEYBOARD, SCALL_GET_KEY_STATUS, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }
 
 int has_key(void)
 {
 	struct SParams sparams;
 	system_call(SCALL_KEYBOARD, SCALL_HAS_KEY, &sparams);
-	return (int)(sparams.param0);
+	return INT32_SPARAM(sparams.param0);
 }

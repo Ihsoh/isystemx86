@@ -90,10 +90,16 @@ system_call_fs(	IN uint32 func,
 					sparams->param0 = SPARAM(fptr);
 				}
 				else
-					sparams->param0 = SPARAM(NULL);
+				{
+					FILE * fptr = NULL;
+					sparams->param0 = SPARAM(fptr);
+				}
 			}
 			else
-				sparams->param0 = SPARAM(NULL);
+			{
+				FILE * fptr = NULL;
+				sparams->param0 = SPARAM(fptr);
+			}
 			break;
 		}
 		//关闭文件
@@ -114,13 +120,20 @@ system_call_fs(	IN uint32 func,
 				if(ui < MAX_TASK_OPENED_FILE_COUNT)
 				{
 					task->opened_file_ptrs[ui] = NULL;
-					sparams->param0 = SPARAM(fclose(fptr));
+					BOOL r = fclose(fptr);
+					sparams->param0 = SPARAM(r);
 				}
-				else					
-					sparams->param0 = SPARAM(0);		
+				else
+				{
+					BOOL r = FALSE;
+					sparams->param0 = SPARAM(r);
+				}
 			}
 			else
-				sparams->param0 = SPARAM(0);
+			{
+				BOOL r = FALSE;
+				sparams->param0 = SPARAM(r);
+			}
 			break;
 		}
 		//写文件
@@ -139,10 +152,14 @@ system_call_fs(	IN uint32 func,
 			{
 				uint8 * buffer = (uint8 *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				sparams->param0 = SPARAM(fwrite(fptr, buffer, len));
+				BOOL r = fwrite(fptr, buffer, len);
+				sparams->param0 = SPARAM(r);
 			}
 			else
-				sparams->param0 = SPARAM(0);
+			{
+				BOOL r = FALSE;
+				sparams->param0 = SPARAM(r);
+			}
 			break;
 		}
 		//读文件
@@ -161,10 +178,14 @@ system_call_fs(	IN uint32 func,
 			{
 				uint8 * buffer = (uint8 *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				sparams->param0 = SPARAM(fread(fptr, buffer, len));
+				uint32 real_len = fread(fptr, buffer, len);
+				sparams->param0 = SPARAM(real_len);
 			}
 			else
-				sparams->param0 = SPARAM(0);	
+			{
+				uint32 len = 0;
+				sparams->param0 = SPARAM(len);	
+			}
 			break;
 		}
 		//追加文件
@@ -183,10 +204,14 @@ system_call_fs(	IN uint32 func,
 			{
 				uint8 * buffer = (uint8 *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				sparams->param0 = SPARAM(fappend(fptr, buffer, len));
+				BOOL r = fappend(fptr, buffer, len);
+				sparams->param0 = SPARAM(r);
 			}
 			else
-				sparams->param0 = SPARAM(0);
+			{
+				BOOL r = FALSE;
+				sparams->param0 = SPARAM(r);
+			}
 			break;
 		}
 		//重置文件读取指针
@@ -210,7 +235,8 @@ system_call_fs(	IN uint32 func,
 		case SCALL_EXISTS_DF:
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			sparams->param0 = SPARAM(exists_df(path));
+			BOOL r = exists_df(path);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//创建文件夹
@@ -224,7 +250,8 @@ system_call_fs(	IN uint32 func,
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			sparams->param0 = SPARAM(create_dir(path, name));
+			BOOL r = create_dir(path, name);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//创建文件
@@ -238,7 +265,8 @@ system_call_fs(	IN uint32 func,
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			sparams->param0 = SPARAM(create_file(path, name));
+			BOOL r = create_file(path, name);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//删除文件夹
@@ -250,7 +278,8 @@ system_call_fs(	IN uint32 func,
 		case SCALL_DEL_DIR:
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			sparams->param0 = SPARAM(del_dir(path));
+			BOOL r = del_dir(path);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//删除文件
@@ -262,7 +291,8 @@ system_call_fs(	IN uint32 func,
 		case SCALL_DEL_FILE:
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			sparams->param0 = SPARAM(del_file(path));
+			BOOL r = del_file(path);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//删除文件夹, 包括文件夹内的内容
@@ -274,7 +304,8 @@ system_call_fs(	IN uint32 func,
 		case SCALL_DEL_DIRS:
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			sparams->param0 = SPARAM(del_dirs(path));
+			BOOL r = del_dirs(path);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//重命名文件夹
@@ -288,7 +319,8 @@ system_call_fs(	IN uint32 func,
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			int8 * new_name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			sparams->param0 = SPARAM(rename_dir(path, new_name));
+			BOOL r = rename_dir(path, new_name);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//重命名文件
@@ -302,7 +334,8 @@ system_call_fs(	IN uint32 func,
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			int8 * new_name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			sparams->param0 = SPARAM(rename_file(path, new_name));
+			BOOL r = rename_file(path, new_name);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//文件长度
@@ -318,7 +351,10 @@ system_call_fs(	IN uint32 func,
 			if(check_priviledge(tid, fptr))
 				sparams->param0 = SPARAM(flen(fptr));
 			else
-				sparams->param0 = SPARAM(0);
+			{
+				uint32 len = 0;
+				sparams->param0 = SPARAM(len);
+			}
 			break;
 		}
 		//获取文件创建日期时间
@@ -362,7 +398,8 @@ system_call_fs(	IN uint32 func,
 		case SCALL_DF_COUNT:
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			sparams->param0 = SPARAM(df_count(path));
+			int32 count = df_count(path);
+			sparams->param0 = SPARAM(count);
 			break;
 		}
 		//获取指定目录下的文件Block以及文件夹Block
@@ -376,7 +413,8 @@ system_call_fs(	IN uint32 func,
 		{
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			struct RawBlock * raw_blocks = (struct RawBlock *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			sparams->param0 = SPARAM(df(path, raw_blocks));
+			int32 count = df(path, raw_blocks);
+			sparams->param0 = SPARAM(count);
 			break;
 		}
 	}

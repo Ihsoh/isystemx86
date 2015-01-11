@@ -23,7 +23,23 @@ struct SParams
 	int		tid;
 };
 
-#define	SPARAM(p)	((uint)p)
+#define	INT8_SPARAM(sp)		(*((char *)&(sp)))
+#define	INT16_SPARAM(sp)	(*((short *)&(sp)))
+#define	INT32_SPARAM(sp)	(*((int *)&(sp)))
+
+#define	UINT8_SPARAM(sp)	((uchar)sp)
+#define	UINT16_SPARAM(sp)	((ushort)sp)
+#define	UINT32_SPARAM(sp)	((uint)sp)
+
+#define	INT8_PTR_SPARAM(sp)		((char *)sp)
+#define	INT16_PTR_SPARAM(sp)	((short *)sp)
+#define	INT32_PTR_SPARAM(sp)	((int *)sp)
+
+#define	UINT8_PTR_SPARAM(sp)	((uchar *)sp)
+#define	UINT16_PTR_SPARAM(sp)	((ushort *)sp)
+#define	UINT32_PTR_SPARAM(sp)	((uint *)sp)
+
+#define	SPARAM(p)	(*((uint *)&(p)))
 
 extern void system_call(uint func, uint sub_func, struct SParams * sparams);
 

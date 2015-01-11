@@ -112,7 +112,8 @@ system_call_screen(	IN uint32 func,
 		//	Param0=1为可用, 否则不可用
 		case SCALL_VESA_IS_VALID:
 		{
-			sparams->param0 = SPARAM(vesa_is_valid());
+			BOOL r = vesa_is_valid();
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 		//获取屏幕大小
@@ -122,8 +123,10 @@ system_call_screen(	IN uint32 func,
 		//	Param1=高度
 		case SCALL_GET_SCREEN_SIZE:
 		{
-			sparams->param0 = SPARAM(vesa_get_width());
-			sparams->param1 = SPARAM(vesa_get_height());
+			uint32 width = vesa_get_width();
+			uint32 height = vesa_get_height();
+			sparams->param0 = SPARAM(width);
+			sparams->param1 = SPARAM(height);
 			break;
 		}
 		//设置屏幕像素
@@ -150,7 +153,8 @@ system_call_screen(	IN uint32 func,
 		{
 			uint32 x = UINT32_SPARAM(sparams->param0);
 			uint32 y = UINT32_SPARAM(sparams->param1);
-			sparams->param0 = SPARAM(vesa_get_pixel(x, y));
+			uint32 pixel = vesa_get_pixel(x, y);
+			sparams->param0 = SPARAM(pixel);
 			break;
 		}
 		//画位图
@@ -178,8 +182,10 @@ system_call_screen(	IN uint32 func,
 		//	Param1=行数
 		case SCALL_GET_TEXT_SCREEN_SIZE:
 		{
-			sparams->param0 = SPARAM(COLUMN);
-			sparams->param1 = SPARAM(ROW);
+			uint32 column = COLUMN;
+			uint32 row = ROW;
+			sparams->param0 = SPARAM(column);
+			sparams->param1 = SPARAM(row);
 			break;
 		}
 		//锁定光标
@@ -242,7 +248,10 @@ system_call_screen(	IN uint32 func,
 			struct Window * window;
 			window = create_window(width, height, bgcolor, style, title, event);
 			if(window == NULL)
-				sparams->param0 = SPARAM(0);
+			{
+				uint32 id = 0;
+				sparams->param0 = SPARAM(id);
+			}
 			else
 				sparams->param0 = SPARAM(window->id);
 			break;
@@ -271,7 +280,8 @@ system_call_screen(	IN uint32 func,
 		{
 			uint32 id = UINT32_SPARAM(sparams->param0);
 			struct Window * window = (struct Window *)id;
-			sparams->param0 = SPARAM(window_get_key(window));
+			uint8 key = window_get_key(window);
+			sparams->param0 = SPARAM(key);
 			break;
 		}
 		case SCALL_DRAW_WINDOW:
@@ -285,8 +295,8 @@ system_call_screen(	IN uint32 func,
 			memcpy(&new, image, sizeof(struct CommonImage));
 			new.data = get_physical_address(	sparams->tid, 
 												VOID_PTR_SPARAM(new.data));
-			draw_common_image(&window->workspace, &new, 0, 0, new.width, new.height);
-			sparams->param0 = SPARAM(TRUE);
+			BOOL r = draw_common_image(&window->workspace, &new, 0, 0, new.width, new.height);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 	}

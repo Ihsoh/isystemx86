@@ -41,6 +41,6 @@ struct SParams
 
 #define	VOID_PTR_SPARAM(sp)		((void *)sp)
 
-#define	SPARAM(p)	((uint)(p))
+#define	SPARAM(p)	(*((uint32 *)&(p)))
 
 #endif
