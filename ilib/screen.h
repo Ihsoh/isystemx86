@@ -65,27 +65,67 @@
 #define	CBGC_GRAYWHITE	(CC_GRAYWHITE << 4)
 
 extern void print_char(char chr);
-extern void print_char_p(char chr, uchar p);
-extern void print_str(char * str);
-extern void print_str_p(char * str, uchar p);
-extern void clear_screen(void);
-extern void set_cursor(ushort x, ushort y);
-extern void get_cursor(ushort * x, ushort * y);
-extern void print_date(struct CMOSDateTime * date);
-extern void print_time(struct CMOSDateTime * time);
-extern void print_datetime(struct CMOSDateTime * dt);
-extern int vesa_is_valid(void);
-extern void get_screen_size(uint * width, uint * height);
-extern void set_screen_pixel(uint x, uint y, uint color);
-extern uint get_screen_pixel(uint x, uint y);
-extern void draw_screen_image(uint x, uint y, uint width, uint height, uint * image);
-extern void get_text_screen_size(uint * column, uint * row);
-extern void lock_cursor(void);
-extern void unlock_cursor(void);
-extern void enable_flush_screen(void);
-extern void disable_flush_screen(void);
-extern void set_target_screen(struct CommonImage * ts);
+#define	il_print_char(chr)	(print_char((chr)))
 
+extern void print_char_p(char chr, uchar p);
+#define	il_print_char_p(chr, p)	(print_char_p((chr), (p)))
+
+extern void print_str(char * str);
+#define	il_print_str(str)	(print_str(str))
+
+extern void print_str_p(char * str, uchar p);
+#define	il_print_str_p(str, p)	(print_str_p((str), (p)))
+
+extern void clear_screen(void);
+#define	il_clear_screen()	(clear_screen())
+
+extern void set_cursor(ushort x, ushort y);
+#define	il_set_cursor(x, y)	(set_cursor((x), (y))
+
+extern void get_cursor(ushort * x, ushort * y);
+#define	il_get_cursor(x, y)	(get_cursor((x), (y)))
+
+extern void print_date(struct CMOSDateTime * date);
+#define	il_print_date(date)	(print_date((date)))
+
+extern void print_time(struct CMOSDateTime * time);
+#define	il_print_time(time)	(print_time((time)))
+
+extern void print_datetime(struct CMOSDateTime * dt);
+#define	il_print_datetime(dt)	(print_datetime((dt)))
+
+extern int vesa_is_valid(void);
+#define	il_vesa_is_valid()	(vesa_is_valid())
+
+extern void get_screen_size(uint * width, uint * height);
+#define	il_get_screen_size(width, height)	(get_screen_size((width), (height)))
+
+extern void set_screen_pixel(uint x, uint y, uint color);
+#define	il_set_screen_pixel(x, y, color)	(set_screen_pixel((x), (y), (color)))
+
+extern uint get_screen_pixel(uint x, uint y);
+#define	il_get_screen_pixel(x, y)	(get_screen_pixel((x), (y)))
+
+extern void draw_screen_image(uint x, uint y, uint width, uint height, uint * image);
+#define	il_draw_screen_image(x, y, width, height, image)	(draw_screen_image((x), (y), (width), (height), (image)))
+
+extern void get_text_screen_size(uint * column, uint * row);
+#define	il_get_text_screen_size(column, row)	(get_text_screen_size((column), (row)))
+
+extern void lock_cursor(void);
+#define	il_lock_cursor()	(lock_cursor())
+
+extern void unlock_cursor(void);
+#define	il_unlock_cursor()	(unlock_cursor())
+
+extern void enable_flush_screen(void);
+#define	il_enable_flush_screen()	(enable_flush_screen())
+
+extern void disable_flush_screen(void);
+#define	il_disable_flush_screen()	(disable_flush_screen())
+
+extern void set_target_screen(struct CommonImage * ts);
+#define	il_set_target_screen(ts)	(set_target_screen((ts)))
 
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\
@@ -134,10 +174,21 @@ create_window(	uint32		width,
 				uint32		bgcolor,
 				uint32		style,
 				int8 *		title);
+#define	il_create_window(width, height, bgcolor, style, title)	create_window((width), (height), (bgcolor), (style), (title))
+
 extern BOOL destroy_window(uint32 id);
+#define	il_destroy_window(id)	(destroy_window((id)))
+
 extern void show_window(uint32 id);
+#define	il_show_window(id)	(show_window((id)))
+
 extern void hide_window(uint32 id);
+#define	il_hide_window(id)	(hide_window((id)))
+
 extern uint8 window_get_key(uint32 id);
+#define	il_window_get_key(id)	(window_get_key((id)))
+
 extern BOOL draw_window(uint32 id, struct CommonImage * image);
+#define	il_draw_window(id, image)	(draw_window((id), (image)))
 
 #endif

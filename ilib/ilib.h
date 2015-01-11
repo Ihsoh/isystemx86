@@ -6,6 +6,9 @@
 #ifndef	_ILIB_H_
 #define	_ILIB_H_
 
+#include "stdarg.h"
+#include "stdio.h"
+
 #include "fs.h"
 #include "keyboard.h"
 #include "screen.h"

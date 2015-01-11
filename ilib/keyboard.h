@@ -111,12 +111,24 @@
 #define	KEY_KEYUP		0x80 
 
 extern uchar get_char(void);
+#define	il_get_char()	(get_char())
+
 extern uint get_strn(char * input_buffer, uint n);
+#define	il_get_strn(input_buffer, n)	(get_strn((input_buffer), (n)))
+
 extern int get_shift(void);
+#define	il_get_shift()	(get_shift())
+
 extern int get_control(void);
+#define	il_get_control()	(get_control())
+
 extern int get_alt(void);
+#define	il_get_alt()	(get_alt())
+
 extern int get_key_status(int key);
+#define	il_get_key_status(key)	(get_key_status((key)))
+
 extern int has_key(void);
+#define	il_has_key()	(has_key())
 
 #endif
-

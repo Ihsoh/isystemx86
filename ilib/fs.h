@@ -108,24 +108,60 @@ struct DirBlock
 #define	FILE	void
 
 extern FILE * fopen(char * path, int mode);
+#define	il_fopen(path, mode) (fopen((path), (mode)))
+
 extern int fclose(FILE * fptr);
+#define	il_fclose(fptr)	(fclose((fptr)))
+
 extern int fwrite(FILE * fptr, uchar * buffer, uint len);
+#define	il_fwrite(fptr, buffer, len) (fwrite((fptr), (buffer), (len)))
+
 extern uint fread(FILE * fptr, uchar * buffer, uint len);
+#define	il_fread(fptr, buffer, len)	(fread((fptr), (buffer), (len)))
+
 extern int fappend(FILE * fptr, uchar * buffer, uint len);
+#define	il_fappend(fptr, buffer, len)	(fappend((fptr), (buffer), (len)))
+
 extern void freset(FILE * fptr);
+#define	il_freset(fptr)	(freset((fptr)))
+
 extern int exists_df(char * path);
+#define	il_exists_df(path)	(exists_df((path)))
+
 extern int create_dir(char * path, char * name);
+#define	il_create_dir(path, name)	(create_dir((path), (name)))
+
 extern int create_file(char * path, char * name);
+#define	il_create_file(path, name)	(create_file((path), (name)))
+
 extern int del_dir(char * path);
+#define	il_del_dir(path)	(del_dir((path)))
+
 extern int del_file(char * path);
+#define	il_del_file(path)	(del_file((path)))
+
 extern int del_dirs(char * path);
+#define	il_del_dirs(path)	(del_dirs((path)))
+
 extern int rename_dir(char * path, char * new_name);
+#define	il_rename_dir(path, new_name)	(rename_dir((path), (new_name)))
+
 extern int rename_file(char * path, char * new_name);
+#define	il_rename_file(path, new_name)	(rename_file((path), (new_name)))
+
 extern uint flen(FILE * fptr);
+#define	il_flen(fptr)	(flen((fptr)))
+
 extern void fcreate_dt(FILE * fptr, struct CMOSDateTime * dt);
+#define	il_fcreate_dt(fptr, dt)	(fcreate_dt((fptr), (dt)))
+
 extern void fchange_dt(FILE * fptr, struct CMOSDateTime * dt);
+#define	il_fchange_dt(fptr, dt)	(fchange_dt((fptr), (dt)))
+
 extern int df_count(char * path);
+#define	il_df_count(path)	(df_count((path))
+
 extern int df(char * path, struct RawBlock * raw_blocks);
+#define	il_df(path, raw_blocks)	(df((path), (raw_blocks)))
 
 #endif
-

@@ -9,7 +9,7 @@ Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -I. -m32 -march=i386 -mtune=i386
 Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
-bin/fs.obj bin/image.obj bin/mouse.obj
+bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj
 AR=ar
 
 $(Target): bin $(Objs)
@@ -41,6 +41,9 @@ bin/image.obj: image.c image.h
 
 bin/mouse.obj: mouse.c mouse.h
 	$(CC) $(CFlags) -c mouse.c -o bin/mouse.obj
+
+bin/stdio.obj: stdio.c stdio.h
+	$(CC) $(CFlags) -c stdio.c -o bin/stdio.obj
 
 .PHONY:Clear
 
