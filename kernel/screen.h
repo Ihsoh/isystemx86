@@ -1,7 +1,9 @@
-//Filename:		screen.h
-//Author:		Ihsoh
-//Date:			2014-1-29
-//Descriptor:	Screen
+/**
+	@File:			screen.h
+	@Author:		Ihsoh
+	@Date:			2014-1-29
+	@Description:
+*/
 
 #ifndef	_SCREEN_H_
 #define	_SCREEN_H_

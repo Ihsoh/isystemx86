@@ -19,7 +19,8 @@ struct die_info
 };
 
 extern
-void die(IN struct die_info * info);
+void
+die(IN struct die_info * info);
 
 #define	fill_info(info, c, txt)	{\
 										(info).code = (c);\

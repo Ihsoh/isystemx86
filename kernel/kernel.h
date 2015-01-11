@@ -17,26 +17,33 @@
 #define	SCALL_MOUSE			4
 
 extern
-void get_mouse_position(OUT int32 * x,
-						OUT int32 * y);
+void
+get_mouse_position(	OUT int32 * x,
+					OUT int32 * y);
 
 extern
-int32 is_mouse_left_button_down(void);
+int32
+is_mouse_left_button_down(void);
 
 extern
-int32 is_mouse_right_button_down(void);
+int32
+is_mouse_right_button_down(void);
 
 extern
-void enable_flush_screen(void);
+void
+enable_flush_screen(void);
 
 extern
-void disable_flush_screen(void);
+void
+disable_flush_screen(void);
 
 extern
-void shutdown_system(void);
+void
+shutdown_system(void);
 
 extern
-void reboot_system(void);
+void
+reboot_system(void);
 
 DEFINE_LOCK_EXTERN(kernel)
 

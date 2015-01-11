@@ -37,112 +37,139 @@ typedef struct File
 } FILE;
 
 extern
-BOOL format_disk(IN int8 * symbol);
+BOOL
+format_disk(IN int8 * symbol);
 
 extern
-BOOL check_disk(IN int8 * symbol);
+BOOL
+check_disk(IN int8 * symbol);
 
 extern
-uint32 parse_path(	IN int8 * path, 
-					OUT int8 * symbol, 
-					OUT int32 * type);
+uint32
+parse_path(	IN int8 * path, 
+			OUT int8 * symbol, 
+			OUT int32 * type);
 
 extern
 int32 df_count(IN int8 * path);
 
 extern
-int32 df(	IN int8 * path,
-			OUT struct RawBlock * blocks);
+int32
+df(	IN int8 * path,
+	OUT struct RawBlock * blocks);
 
 extern
-BOOL create_dir(IN int8 * path,
-				IN int8 * name);
+BOOL
+create_dir(	IN int8 * path,
+			IN int8 * name);
 
 extern
-BOOL create_file(	IN int8 * path,
-					IN int8 * name);
+BOOL
+create_file(IN int8 * path,
+			IN int8 * name);
 
 extern
-BOOL del_dir(IN int8 * path);
+BOOL
+del_dir(IN int8 * path);
 
 extern
-BOOL del_file(IN int8 * path);
+BOOL
+del_file(IN int8 * path);
 
 extern
-BOOL del_dirs(IN int8 * path);
+BOOL
+del_dirs(IN int8 * path);
 
 extern
-BOOL prev_dir(	IN int8 * path,
-				OUT int8 * new_path);
+BOOL
+prev_dir(	IN int8 * path,
+			OUT int8 * new_path);
 
 extern
-BOOL file_dir(	IN int8 * path,
-				OUT int8 * new_patn);
+BOOL
+file_dir(	IN int8 * path,
+			OUT int8 * new_patn);
 
 extern
-BOOL is_valid_df_name(IN int8 * name);
+BOOL
+is_valid_df_name(IN int8 * name);
 
 extern
-BOOL rename_dir(IN int8 * path,
-				IN int8 * new_name);
+BOOL
+rename_dir(	IN int8 * path,
+			IN int8 * new_name);
 
 extern
-BOOL rename_file(	IN int8 * path,
-					IN int8 * new_name);
+BOOL
+rename_file(IN int8 * path,
+			IN int8 * new_name);
 
 extern
-BOOL fix_path(	IN int8 * path,
-				IN int8 * current_path,
-				OUT int8 * new_path);
+BOOL
+fix_path(	IN int8 * path,
+			IN int8 * current_path,
+			OUT int8 * new_path);
 
 extern
-BOOL is_sub_dir(IN int8 * dir,
-				IN int8 * sub_dir);
+BOOL
+is_sub_dir(	IN int8 * dir,
+			IN int8 * sub_dir);
 
 extern
-BOOL copy_file(	IN int8 * src_path,
-				IN int8 * dst_path,
-				IN int8 * dst_name);
+BOOL
+copy_file(	IN int8 * src_path,
+			IN int8 * dst_path,
+			IN int8 * dst_name);
 
 
 extern
-BOOL exists_dir(IN int8 * path,
-				IN int8 * name);
+BOOL
+exists_dir(	IN int8 * path,
+			IN int8 * name);
 
 extern
-BOOL exists_file(	IN int8 * path,
-					IN int8 * name);
+BOOL
+exists_file(IN int8 * path,
+			IN int8 * name);
 
 extern
-BOOL exists_df(IN int8 * path);
+BOOL
+exists_df(IN int8 * path);
 
 extern
-FILE * fopen(	IN int8 * path,
-				IN int32 mode);
+FILE *
+fopen(	IN int8 * path,
+		IN int32 mode);
 
 extern
-BOOL fclose(IN FILE * fptr);
+BOOL
+fclose(IN FILE * fptr);
 
 extern
-BOOL fwrite(IN FILE * fptr,
-			IN uint8 * buffer,
-			IN uint32 len);
+BOOL
+fwrite(	IN FILE * fptr,
+		IN uint8 * buffer,
+		IN uint32 len);
 
 extern
-uint32 fread(	IN FILE * fptr,
-				OUT uint8 * buffer,
-				IN uint32 len);
+uint32
+fread(	IN FILE * fptr,
+		OUT uint8 * buffer,
+		IN uint32 len);
 
 extern
-void freset(IN FILE * fptr);
+void
+freset(IN FILE * fptr);
 
 extern
-BOOL fappend(	IN FILE * fptr,
-				IN uint8 * buffer,
-				IN uint32 len);
+BOOL
+fappend(IN FILE * fptr,
+		IN uint8 * buffer,
+		IN uint32 len);
 
 extern
-BOOL repair_ifs1(IN int8 * symbol);
+BOOL
+repair_ifs1(IN int8 * symbol);
 
 #define	flen(fptr)	((fptr)->file_block->length)
 

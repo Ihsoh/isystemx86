@@ -24,27 +24,36 @@ extern
 void init_paging(void);
 
 extern
-uint32 * create_empty_user_pagedt(OUT uint32 * cr3);
+uint32 *
+create_empty_user_pagedt(OUT uint32 * cr3);
 
 extern
-BOOL map_user_pagedt_with_rw(	OUT uint32 * cr3,
-								IN uint32 start,
-								IN uint32 length,
-								IN uint32 real_address,
-								IN uint32 rw);
-
-extern
-BOOL find_free_pages(	IN uint32 * cr3, 
-						IN uint32 length,
-						IN uint32 * start);
-
-extern BOOL free_pages(	OUT uint32 * cr3,
+BOOL
+map_user_pagedt_with_rw(OUT uint32 * cr3,
 						IN uint32 start,
-						IN uint32 length);
+						IN uint32 length,
+						IN uint32 real_address,
+						IN uint32 rw);
 
-extern uint32 get_kernel_cr3(void);
+extern
+BOOL
+find_free_pages(IN uint32 * cr3, 
+				IN uint32 length,
+				IN uint32 * start);
 
-extern void enable_paging(void);
+extern
+BOOL
+free_pages(	OUT uint32 * cr3,
+			IN uint32 start,
+			IN uint32 length);
+
+extern
+uint32
+get_kernel_cr3(void);
+
+extern
+void
+enable_paging(void);
 
 DEFINE_LOCK_EXTERN(paging)
 

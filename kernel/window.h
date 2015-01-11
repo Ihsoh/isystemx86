@@ -1,7 +1,9 @@
-//Filename:		window.h
-//Author:		Ihsoh
-//Date:			2014-11-20
-//Descriptor:	Window
+/**
+	@File:			window.h
+	@Author:		Ihsoh
+	@Date:			2014-11-20
+	@Description:
+*/
 
 #ifndef	_WINDOW_H_
 #define	_WINDOW_H_
@@ -62,10 +64,23 @@ struct Window
 	uint32				key_count;
 };
 
-extern BOOL init_window_resources(void);
-extern void destroy_window_resources(void);
-extern BOOL render_window(struct Window * window, struct CommonImage * image, int32 top);
-extern uint8 window_get_key(struct Window * window);
+extern
+BOOL
+init_window_resources(void);
+
+extern
+void
+destroy_window_resources(void);
+
+extern
+BOOL
+render_window(	IN struct Window * window,
+				OUT struct CommonImage * image,
+				IN BOOL top);
+
+extern
+uint8
+window_get_key(IN struct Window * window);
 
 #define	window_has_key(window)	((window) == NULL ? 0 : (window)->key_count)
 

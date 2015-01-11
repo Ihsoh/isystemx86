@@ -11,32 +11,41 @@
 #include "types.h"
 
 extern
-void tran_key(IN uint8 scan_code);
+void
+tran_key(IN uint8 scan_code);
 
 extern
-uint8 get_char(void);
+uint8
+get_char(void);
 
 extern
-uint32 get_strn(OUT int8 * input_buffer,
-				IN uint32 n);
+uint32
+get_strn(	OUT int8 * input_buffer,
+			IN uint32 n);
 
 extern
-BOOL get_shift(void);
+BOOL
+get_shift(void);
 
 extern
-BOOL get_control(void);
+BOOL
+get_control(void);
 
 extern
-BOOL get_alt(void);
+BOOL
+get_alt(void);
 
 extern
-void init_keyboard_driver(void);
+void
+init_keyboard_driver(void);
 
 extern
-int32 get_key_status(IN int32 key);
+int32
+get_key_status(IN int32 key);
 
 extern
-BOOL has_key(void);
+BOOL
+has_key(void);
 
 #define	get_str(input_buffer) get_strn(input_buffer, 0x7FFFFFFF);
 

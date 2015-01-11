@@ -31,49 +31,61 @@ struct MemoryBlockDescriptor
 } __attribute__((packed));
 
 extern
-void copy_memory(	IN uint8 * src,
-					OUT uint8 * dst,
-					IN uint32 length);
+void
+copy_memory(IN uint8 * src,
+			OUT uint8 * dst,
+			IN uint32 length);
 
 extern
-void clear_memory(	OUT uint8 * dst,
-					IN uint8 data,
-					IN uint32 len);
+void
+clear_memory(	OUT uint8 * dst,
+				IN uint8 data,
+				IN uint32 len);
 
 extern
-void init_memory(void);
+void
+init_memory(void);
 
 extern
-void get_mbdt_info(	OUT uint32 * total_mbd_count,
-					OUT uint32 * used_mbd_count,
-					OUT uint32 * m_size);
+void
+get_mbdt_info(	OUT uint32 * total_mbd_count,
+				OUT uint32 * used_mbd_count,
+				OUT uint32 * m_size);
 
 extern
-void get_umbdt_info(OUT uint32 * total_umbd_count,
-					OUT uint32 * used_umbd_count,
-					OUT uint32 * m_size);
+void
+get_umbdt_info(	OUT uint32 * total_umbd_count,
+				OUT uint32 * used_umbd_count,
+				OUT uint32 * m_size);
 
 extern
-uint32 align_4kb(IN uint32 n);
+uint32
+align_4kb(IN uint32 n);
 
 extern
-uint64 get_used_memory_length(void);
+uint64
+get_used_memory_length(void);
 
 extern
-void * alloc_memory_with_start(	IN uint32 m_start,
-								IN uint32 length);
+void *
+alloc_memory_with_start(IN uint32 m_start,
+						IN uint32 length);
 
 extern
-void * alloc_memory(IN uint32 length);
+void *
+alloc_memory(IN uint32 length);
 
 extern
-void * alloc_memory_unsafe(IN uint length);
+void *
+alloc_memory_unsafe(IN uint length);
 
 extern
-BOOL free_memory(IN void * address);
+BOOL
+free_memory(IN void * address);
 
 extern
-uint32 get_memory_block_size(IN void * ptr);
+uint32
+get_memory_block_size(IN void * ptr);
 
 DEFINE_LOCK_EXTERN(memory)
 

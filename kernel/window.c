@@ -1,7 +1,10 @@
-//Filename:		window.c
-//Author:		Ihsoh
-//Date:			2014-11-20
-//Descriptor:	Window
+/**
+	@File:			window.c
+	@Author:		Ihsoh
+	@Date:			2014-11-20
+	@Description:
+		提供窗体操作相关的功能
+*/
 
 #include "window.h"
 #include "memory.h"
@@ -19,9 +22,24 @@ static struct CommonImage close_button_s;
 static struct CommonImage hidden_button_ns;
 static struct CommonImage hidden_button_s;
 
+/**
+	@Function:		load_image
+	@Access:		Private
+	@Description:
+		加载图片。
+	@Parameters:
+		common_image, struct CommonImage *, OUT
+			图片。
+		path, int8 *, IN
+			图片路径。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 static
 BOOL
-load_image(struct CommonImage * common_image, int8 * path)
+load_image(	OUT struct CommonImage * common_image,
+			IN int8 * path)
 {
 	FILE * fptr = fopen(path, FILE_MODE_READ);
 	if(fptr == NULL)
@@ -40,6 +58,16 @@ load_image(struct CommonImage * common_image, int8 * path)
 	return TRUE;
 }
 
+/**
+	@Function:		init_window_resources
+	@Access:		Public
+	@Description:
+		初始化窗体所需的资源。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
 init_window_resources(void)
 {
@@ -49,6 +77,14 @@ init_window_resources(void)
 			&& load_image(&hidden_button_s, HIDDEN_BUTTON_S_IMAGE_PATH);
 }
 
+/**
+	@Function:		destroy_window_resources
+	@Access:		Public
+	@Description:
+		销毁窗体所需的资源。
+	@Parameters:
+	@Return:
+*/
 void
 destroy_window_resources(void)
 {
@@ -58,8 +94,26 @@ destroy_window_resources(void)
 	destroy_common_image(&hidden_button_s);
 }
 
+/**
+	@Function:		render_window
+	@Access:		Public
+	@Description:
+		渲染窗体。
+	@Parameters:
+		window, struct Window *, IN
+			指向窗体结构体的指针。
+		image, struct CommonImage *, OUT
+			指向图片缓冲区。
+		top, BOOL, IN
+			TRUE 则为置顶窗体，否则不是。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-render_window(struct Window * window, struct CommonImage * image, int32 top)
+render_window(	IN struct Window * window,
+				OUT struct CommonImage * image,
+				IN BOOL top)
 {
 	if(window == NULL || image == NULL)
 		return FALSE;
@@ -109,8 +163,20 @@ render_window(struct Window * window, struct CommonImage * image, int32 top)
 	return TRUE;	
 }
 
+/**
+	@Function:		window_get_key
+	@Access:		Public
+	@Description:
+		获取指定窗体的按键缓冲区的按键。
+	@Parameters:
+		window, struct Window *, IN
+			指向窗体结构体的指针。
+	@Return:
+		uint8
+			键值。		
+*/
 uint8
-window_get_key(struct Window * window)
+window_get_key(IN struct Window * window)
 {
 	if(window == NULL || !window_has_key(window))
 		return 0;

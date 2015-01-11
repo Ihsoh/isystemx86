@@ -1,0 +1,15 @@
+DIM sh AS SHORT, i AS INTEGER, l AS LONG, str AS STRING
+
+FUNCTION Max(BYVAL a AS INTEGER, BYVAL b AS INTEGER) AS INTEGER
+	IF a > b THEN
+		RETURN a
+	ELSE
+		RETURN b
+	END IF
+END FUNCTION
+
+Print("a: ")
+Input(a)
+Print("b: ")
+Input(b)
+Print("Max" + Max(a, b))

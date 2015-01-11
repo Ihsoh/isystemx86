@@ -1,7 +1,9 @@
-//Filename:		vars.h
-//Author:		Ihsoh
-//Date:			2014-8-27
-//Descriptor:	Variables
+/**
+	@File:			vars.h
+	@Author:		Ihsoh
+	@Date:			2014-8-27
+	@Description:
+*/
 
 #ifndef	_VARS_H_
 #define	_VARS_H_
@@ -26,13 +28,46 @@ struct Vars
 	struct Var *	vars;
 };
 
-extern struct Vars * alloc_vars(uint32 n);
-extern BOOL free_vars(struct Vars * vars);
-extern BOOL new_var(struct Vars * vars_s, int8 * name);
-extern BOOL set_var_value(struct Vars * vars_s, int8 * name, int8 * value);
-extern BOOL get_var_value(struct Vars * vars_s, int8 * name, int8 * value);
-extern BOOL get_var_int_value(struct Vars * vars_s, int8 * name, int32 * value);
-extern BOOL get_var_double_value(struct Vars * vars_s, int8 * name, double * value);
-extern BOOL del_var(struct Vars * vars_s, int8 * name);
+extern
+struct Vars *
+alloc_vars(IN uint32 n);
+
+extern
+BOOL
+free_vars(IN struct Vars * vars);
+
+extern
+BOOL
+new_var(IN struct Vars * vars_s,
+		IN int8 * name);
+
+extern
+BOOL
+set_var_value(	IN OUT struct Vars * vars_s,
+				IN int8 * name,
+				IN int8 * value);
+
+extern
+BOOL
+get_var_value(	IN struct Vars * vars_s,
+				IN int8 * name,
+				OUT int8 * value);
+
+extern
+BOOL
+get_var_int_value(	IN struct Vars * vars_s,
+					IN int8 * name,
+					OUT int32 * value);
+
+extern
+BOOL
+get_var_double_value(	IN struct Vars * vars_s,
+						IN int8 * name,
+						OUT double * value);
+
+extern
+BOOL
+del_var(IN OUT struct Vars * vars_s,
+		IN int8 * name);
 
 #endif

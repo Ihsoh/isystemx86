@@ -15,37 +15,45 @@
 #define VDISK_BUFFER_SIZE		(VDISK_SECTORS * VDISK_SECTOR_SIZE)
 
 extern
-void init_vdisk(IN int8 * symbol);
+void
+init_vdisk(IN int8 * symbol);
 
 extern
-void destroy_vdisk(IN int8 * symbol);
+void
+destroy_vdisk(IN int8 * symbol);
 
 extern
-uint32 sector_count_v(void);
+uint32
+sector_count_v(void);
 
 extern
-uint32 get_vdisk_size(IN int8 * symbol);
+uint32
+get_vdisk_size(IN int8 * symbol);
 
 extern
-BOOL read_sector_v(	IN int8 * symbol,
-					IN uint32 pos,
-					OUT uint8 * buffer);
+BOOL
+read_sector_v(	IN int8 * symbol,
+				IN uint32 pos,
+				OUT uint8 * buffer);
 
 extern
-BOOL write_sector_v(IN int8 * symbol,
-					IN uint32 pos, 
-					IN uint8 * buffer);
+BOOL
+write_sector_v(	IN int8 * symbol,
+				IN uint32 pos, 
+				IN uint8 * buffer);
 
 extern
-BOOL read_sectors_v(IN int8 * symbol,
-					IN uint32 pos,
-					IN uint8 count,
-					OUT uint8 * buffer);
+BOOL
+read_sectors_v(	IN int8 * symbol,
+				IN uint32 pos,
+				IN uint8 count,
+				OUT uint8 * buffer);
 
 extern
-BOOL write_sectors_v(	IN int8 * symbol,
-						IN uint32 pos,
-						IN uint8 count,
-						IN uint8 * buffer);
+BOOL
+write_sectors_v(IN int8 * symbol,
+				IN uint32 pos,
+				IN uint8 count,
+				IN uint8 * buffer);
 
 #endif

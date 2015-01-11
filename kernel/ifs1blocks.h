@@ -54,15 +54,15 @@ struct FileBlock
 struct DataBlock
 {
 	//12
-	int32	used;					//1=使用, 0=未使用
-	int32	type;					//2
-	uint32	length;					//长度
+	int32	used;						//1=使用, 0=未使用
+	int32	type;						//2
+	uint32	length;						//长度
 	
 	//500
-	uint8	reserve[500];			//保留
+	uint8	reserve[500];				//保留
 
 	//65024
-	uint8	data[65024];			//数据
+	uint8	data[DATA_BLOCK_DATA_LEN];	//数据
 } __attribute__((packed));
 
 //结构名:	DirBlock
@@ -84,32 +84,39 @@ struct DirBlock
 } __attribute__((packed));
 
 extern
-BOOL get_block(	IN int8 * symbol, 
+BOOL
+get_block(	IN int8 * symbol, 
 				IN uint32 id, 
 				OUT struct RawBlock * block);
 
 extern
-BOOL set_block(	IN int8 * symbol, 
+BOOL
+set_block(	IN int8 * symbol, 
 				IN uint32 id, 
 				IN struct RawBlock * block);
 
 extern
-BOOL del_block(	IN int8 * symbol, 
+BOOL
+del_block(	IN int8 * symbol, 
 				IN uint32 id);
 
 extern
-BOOL del_all_blocks(IN int8 * symbol);
+BOOL
+del_all_blocks(IN int8 * symbol);
 
 extern
-uint32 add_block(	IN int8 * symbol, 
+uint32
+add_block(	IN int8 * symbol, 
 					IN struct RawBlock * block);
 
 extern
-BOOL fill_dir_block(IN int8 * name,
+BOOL
+fill_dir_block(IN int8 * name,
 					OUT struct DirBlock * dir);
 
 extern
-BOOL fill_file_block(	IN int8 * name, 
+BOOL
+fill_file_block(	IN int8 * name, 
 						OUT struct FileBlock * file);
 
 #endif

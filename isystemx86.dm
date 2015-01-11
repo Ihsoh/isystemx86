@@ -17,6 +17,10 @@ WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1280_1024.bin kernelldr/bin/kernel
 #System command directory
 MAKE_DIR	VA:/isystem/ bins
 
+#Basic
+MAKE_FILE	VA:/isystem/bins/ basic
+WRITE_FILE	VA:/isystem/bins/basic apps/basic/bin/basic.bin
+
 #Edit
 MAKE_FILE	VA:/isystem/bins/ edit
 WRITE_FILE	VA:/isystem/bins/edit apps/edit/bin/edit.bin

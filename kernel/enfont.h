@@ -15,12 +15,15 @@
 #define	ENFONT_HEIGHT	16
 
 extern
-uint8 * get_enfont_ptr(void);
+uint8 *
+get_enfont_ptr(void);
 
 extern
-uint8 * get_enfont(IN uint8 chr);
+uint8 *
+get_enfont(IN uint8 chr);
 
 extern
-void init_enfont(void);
+void
+init_enfont(void);
 
 #endif

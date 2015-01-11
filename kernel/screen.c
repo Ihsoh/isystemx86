@@ -1,7 +1,10 @@
-//Filename:		screen.c
-//Author:		Ihsoh
-//Date:			2014-1-28
-//Descriptor:	Screen
+/**
+	@File:			screen.c
+	@Author:		Ihsoh
+	@Date:			2014-1-28
+	@Description:
+		提供与屏幕显示相关的功能。
+*/
 
 #include "types.h"
 #include "386.h"
@@ -42,45 +45,113 @@ static int32 flush_cbuffer = 1;
 
 struct CommonImage * target_screen = NULL;
 
+/**
+	@Function:		flush_char_buffer
+	@Access:		Public
+	@Description:
+		允许刷新字符缓冲区。
+	@Parameters:
+	@Return:	
+*/
 void
 flush_char_buffer(void)
 {
 	flush_cbuffer = 1;
 }
 
+/**
+	@Function:		no_flush_char_buffer
+	@Access:		Public
+	@Description:
+		禁止刷新字符缓冲区。
+	@Parameters:
+	@Return:	
+*/
 void
 no_flush_char_buffer(void)
 {
 	flush_cbuffer = 0;
 }
 
+/**
+	@Function:		set_char_color
+	@Access:		Public
+	@Description:
+		设置字符颜色属性。
+	@Parameters:
+		cc, uint8, IN
+			字符颜色属性。
+	@Return:	
+*/
 void
-set_char_color(uchar cc)
+set_char_color(IN uint8 cc)
 {
 	char_color = cc;
 }
 
+/**
+	@Function:		get_char_color
+	@Access:		Public
+	@Description:
+		获取字符颜色属性。
+	@Parameters:
+	@Return:
+		uint8
+			字符颜色属性。		
+*/
 uint8
 get_char_color(void)
 {
 	return char_color;
 }
 
+/**
+	@Function:		set_cursor_color
+	@Access:		Public
+	@Description:
+		设置光标颜色属性。
+	@Parameters:
+		cc, uint8, IN
+			光标颜色属性。
+	@Return:		
+*/
 void
-set_cursor_color(uint8 cc)
+set_cursor_color(IN uint8 cc)
 {
 	cursor_color = cc;
 }
 
+/**
+	@Function:		get_cursor_color
+	@Access:		Public
+	@Description:
+		获取光标颜色属性。
+	@Parameters:
+	@Return:
+		uint8
+			光标颜色属性。		
+*/
 uint8
 get_cursor_color(void)
 {
 	return cursor_color;
 }
 
+/**
+	@Function:		property_to_real_color
+	@Access:		Private
+	@Description:
+		把属性颜色转换为真彩色。
+	@Parameters:
+		p, uint8, IN
+			属性颜色。
+	@Return:
+		uint32
+			真彩色。		
+*/
 static
 uint32
-property_to_real_color(uint8 p)
+property_to_real_color(IN uint8 p)
 {
 	switch(p)
 	{
@@ -128,6 +199,16 @@ static BOOL move_window = 0;
 static BOOL mouse_left_button_down = 0;
 static int32 old_mouse_x = 0, old_mouse_y = 0;
 
+/**
+	@Function:		new_window
+	@Access:		Private
+	@Description:
+		新建窗体。
+	@Parameters:
+	@Return:
+		struct Window * 
+			指向窗体结构体的指针。		
+*/
 static 
 struct Window * 
 new_window(void)
@@ -143,9 +224,21 @@ new_window(void)
 	return NULL;
 }
 
+/**
+	@Function:		free_window
+	@Access:		Private
+	@Description:
+		释放窗体。
+	@Parameters:
+		window, struct Window *, OUT
+			指向窗体结构体的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 static
 BOOL
-free_window(struct Window * window)
+free_window(OUT struct Window * window)
 {
 	if(window == NULL)
 		return FALSE;
@@ -163,13 +256,33 @@ free_window(struct Window * window)
 	return FALSE;
 }
 
+/**
+	@Function:		create_window
+	@Access:		Public
+	@Description:
+		创建窗体。
+	@Parameters:
+		width, uint32, IN
+			宽度。
+		height, uint32, IN
+			高度。
+		bgcolor, uint32, IN
+			窗体背景颜色。
+		title, int8 *, IN
+			标题。
+		event, WindowEvent, IN
+			窗体事件处理函数。
+	@Return:
+		struct Window *
+			指向窗体结构体。如果创建失败则返回 NULL。	
+*/
 struct Window *
-create_window(	uint32		width,
-				uint32		height,
-				uint32		bgcolor,
-				uint32		style,
-				int8 *		title,
-				WindowEvent	event)
+create_window(	IN uint32		width,
+				IN uint32		height,
+				IN uint32		bgcolor,
+				IN uint32		style,
+				IN int8 *		title,
+				IN WindowEvent	event)
 {
 	struct Window * window = new_window();
 	window->x = 0;
@@ -199,8 +312,20 @@ create_window(	uint32		width,
 	return window;
 }
 
+/**
+	@Function:		destroy_window
+	@Access:		Public
+	@Description:
+		销毁窗体。
+	@Parameters:
+		window, struct Window *, IN
+			指向窗体结构体的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-destroy_window(struct Window * window)
+destroy_window(IN struct Window * window)
 {
 	if(window == NULL)
 		return FALSE;
@@ -212,6 +337,16 @@ destroy_window(struct Window * window)
 	return TRUE;
 }
 
+/**
+	@Function:		get_top_window
+	@Access:		Public
+	@Description:
+		获取顶层窗体的结构体的指针。
+	@Parameters:
+	@Return:
+		struct Window *
+			顶层窗体的结构体的指针。		
+*/
 struct Window *
 get_top_window(void)
 {
@@ -221,6 +356,14 @@ get_top_window(void)
 		return windows[0];
 }
 
+/**
+	@Function:		flush_screen
+	@Access:		Public
+	@Description:
+		刷新屏幕。
+	@Parameters:
+	@Return:
+*/
 void
 flush_screen(void)
 {
@@ -368,27 +511,69 @@ flush_screen(void)
 		draw_common_image(target_screen, &screen_buffer, 0, 0, screen_width, screen_height);
 }
 
+/**
+	@Function:		lock_cursor
+	@Access:		Public
+	@Description:
+		锁定窗体。
+	@Parameters:
+	@Return:	
+*/
 void
 lock_cursor(void)
 {
 	lock_csr = 1;
 }
 
+/**
+	@Function:		unlock_cursor
+	@Access:		Public
+	@Description:
+		解锁窗体。
+	@Parameters:
+	@Return:	
+*/
 void
 unlock_cursor(void)
 {
 	lock_csr = 0;
 }
 
+/**
+	@Function:		set_cursor_pos
+	@Access:		Public
+	@Description:
+		设置光标位置，但不改变在屏幕上的显示位置。
+	@Parameters:
+		x, uint16, IN
+			X 坐标。
+		y, uint16, IN
+			Y 坐标。
+	@Return:	
+*/
 void
-set_cursor_pos(uint16 x, uint16 y)
+set_cursor_pos(	IN uint16 x,
+				IN uint16 y)
 {
 	cursor_x = x;
 	cursor_y = y;
 }
 
+/**
+	@Function:		set_cursor
+	@Access:		Public
+	@Description:
+		设置光标位置，并且改变在屏幕上的显示位置。
+	@Parameters:
+		x, uint16, IN
+			X 坐标。
+		y, uint16, IN
+			Y 坐标。
+	@Return:	
+*/
 void
-set_cursor(uint16 x, uint16 y)
+set_cursor(	IN uint16 x,
+			IN uint16 y)
 {
 	set_cursor_pos(x, y);
 	if(!lock_csr)
@@ -404,13 +589,34 @@ set_cursor(uint16 x, uint16 y)
 		}
 }
 
+/**
+	@Function:		get_cursor
+	@Access:		Public
+	@Description:
+		获取光标位置。
+	@Parameters:
+		x, uint16 *, OUT
+			X 坐标。
+		y, uint16 *, OUT
+			Y 坐标。
+	@Return:	
+*/
 void
-get_cursor(uint16 * x, uint16 * y)
+get_cursor(	OUT uint16 * x,
+			OUT uint16 * y)
 {
 	*x = cursor_x;
 	*y = cursor_y;
 }
 
+/**
+	@Function:		screen_up
+	@Access:		Public
+	@Description:
+		向上滚一行。
+	@Parameters:
+	@Return:	
+*/
 void
 screen_up(void)
 {
@@ -436,8 +642,21 @@ screen_up(void)
 			*(dst + i) = char_color;
 }
 
+/**
+	@Function:		print_char_p
+	@Access:		Public
+	@Description:
+		打印一个字符。
+	@Parameters:
+		chr, int8, IN
+			字符。
+		p, uint8, IN
+			字符颜色属性。
+	@Return:	
+*/
 void
-print_char_p(int8 chr, uint8 p)
+print_char_p(	IN int8 chr,
+				IN uint8 p)
 {
 	uint8 * off;
 	if(chr == '\n')
@@ -478,26 +697,67 @@ print_char_p(int8 chr, uint8 p)
 	}
 }
 
+/**
+	@Function:		print_char
+	@Access:		Public
+	@Description:
+		打印一个字符。
+	@Parameters:
+		chr, int8, IN
+			字符。
+	@Return:	
+*/
 void
-print_char(int8 chr)
+print_char(IN int8 chr)
 {
 	print_char_p(chr, char_color);
 }
 
+/**
+	@Function:		print_str
+	@Access:		Public
+	@Description:
+		打印字符串。
+	@Parameters:
+		str, const int8 *, IN
+			字符串。
+	@Return:
+*/
 void
-print_str(const int8 * str)
+print_str(IN const int8 * str)
 {
 	while(*str != '\0')
 		print_char(*(str++));
 }
 
+/**
+	@Function:		print_str_p
+	@Access:		Public
+	@Description:
+		打印字符串。
+	@Parameters:
+		str, const int8 *, IN
+			字符串。
+		p, uint8, IN
+			字符颜色属性。
+	@Return:
+*/
 void
-print_str_p(const int8 * str, uint8 p)
+print_str_p(IN const int8 * str,
+			IN uint8 p)
 {
 	while(*str != '\0')
 		print_char_p(*(str++), p);
 }
 
+/**
+	@Function:		clear_screen
+	@Access:		Public
+	@Description:
+		清除屏幕。
+	@Parameters:
+	@Return:		
+*/
 void
 clear_screen(void)
 {
@@ -508,6 +768,14 @@ clear_screen(void)
 	set_cursor(0, 0);
 }
 
+/**
+	@Function:		init_screen
+	@Access:		Public
+	@Description:
+		初始化屏幕功能。
+	@Parameters:
+	@Return:		
+*/
 void
 init_screen(void)
 {
@@ -609,8 +877,18 @@ init_screen(void)
 	}
 }
 
+/**
+	@Function:		print_date
+	@Access:		Public
+	@Description:
+		打印日期。
+	@Parameters:
+		date, struct CMOSDateTime *, IN
+			日期。
+	@Return:	
+*/
 void
-print_date(struct CMOSDateTime * date)
+print_date(IN struct CMOSDateTime * date)
 {
 	printn(date->year);
 	print_str("-");
@@ -623,8 +901,18 @@ print_date(struct CMOSDateTime * date)
 	printn(date->day);
 }
 
+/**
+	@Function:		print_time
+	@Access:		Public
+	@Description:
+		打印时间。
+	@Parameters:
+		time, struct CMOSDateTime *, IN
+			时间。
+	@Return:	
+*/
 void
-print_time(struct CMOSDateTime * time)
+print_time(IN struct CMOSDateTime * time)
 {
 	if(time->hour < 10)
 		print_str("0");
@@ -639,16 +927,36 @@ print_time(struct CMOSDateTime * time)
 	printn(time->second);
 }
 
+/**
+	@Function:		print_datetime
+	@Access:		Public
+	@Description:
+		打印日期和时间。
+	@Parameters:
+		dt, struct CMOSDateTime *, IN
+			时间。
+	@Return:	
+*/
 void
-print_datetime(struct CMOSDateTime * dt)
+print_datetime(IN struct CMOSDateTime * dt)
 {
 	print_date(dt);
 	print_str(" ");
 	print_time(dt);
 }
 
+/**
+	@Function:		set_target_screen
+	@Access:		Public
+	@Description:
+		设置目标屏幕。
+	@Parameters:
+		ts, struct CommonImage *, IN
+			目标屏幕。
+	@Return:	
+*/
 void
-set_target_screen(struct CommonImage * ts)
+set_target_screen(IN struct CommonImage * ts)
 {
 	target_screen = ts;
 }

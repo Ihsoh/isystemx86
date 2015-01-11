@@ -32,8 +32,9 @@
 #define	SCALL_DF			18
 
 extern
-void system_call_fs(IN uint32 func,
-					IN uint32 base,
-					IN OUT struct SParams * sparams);
+void
+system_call_fs(	IN uint32 func,
+				IN uint32 base,
+				IN OUT struct SParams * sparams);
 
 #endif

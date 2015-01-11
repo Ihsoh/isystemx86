@@ -1,7 +1,10 @@
-//Filename:		tasks.c
-//Author:		Ihsoh
-//Date:			2014-7-22
-//Descriptor:	Task schedule
+/**
+	@File:			tasks.c
+	@Author:		Ihsoh
+	@Date:			2014-7-22
+	@Description:
+		提供多任务功能。
+*/
 
 #include "tasks.h"
 #include "types.h"
@@ -19,6 +22,16 @@ static int32 running_tid = -1;
 
 DEFINE_LOCK_IMPL(tasks)
 
+/**
+	@Function:		init_tasks
+	@Access:		Public
+	@Description:
+		初始化多任务。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
 init_tasks(void)
 {
@@ -61,8 +74,29 @@ init_tasks(void)
 	return TRUE;
 }
 
+/**
+	@Function:		create_task
+	@Access:		Public
+	@Description:
+		创建一个任务。
+	@Parameters:
+		name, int8 *, IN
+			任务名。
+		param, int8 *, IN
+			运行这个任务所提供的参数。
+		app, uint8, IN
+			程序。
+		app_len, uint32, IN
+			程序的长度。
+	@Return:
+		int32
+			如果失败则返回-1, 否则返回任务的 ID。		
+*/
 int32
-create_task(int8 * name, int8 * param, uint8 * app, uint32 app_len)
+create_task(IN int8 * name,
+			IN int8 * param,
+			IN uint8 * app,
+			IN uint32 app_len)
 {
 	if(app_len > MAX_APP_LEN)
 		return -1;
@@ -189,8 +223,20 @@ create_task(int8 * name, int8 * param, uint8 * app, uint32 app_len)
 	return tid;
 }
 
+/**
+	@Function:		kill_task
+	@Access:		Public
+	@Description:
+		杀死一个任务。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-kill_task(int32 tid)
+kill_task(IN int32 tid)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
@@ -219,6 +265,14 @@ kill_task(int32 tid)
 	return TRUE;
 }
 
+/**
+	@Function:		kill_all_tasks
+	@Access:		Public
+	@Description:
+		杀死所有任务。
+	@Parameters:
+	@Return:	
+*/
 void
 kill_all_tasks(void)
 {
@@ -228,8 +282,23 @@ kill_all_tasks(void)
 			kill_task(ui);
 }
 
+/**
+	@Function:		get_task_info
+	@Access:		Public
+	@Description:
+		获取任务信息。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+		task, struct Task *, IN
+			指向任务信息结构体的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-get_task_info(int32 tid, struct Task * task)
+get_task_info(	IN int32 tid,
+				OUT struct Task * task)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
@@ -237,8 +306,23 @@ get_task_info(int32 tid, struct Task * task)
 	return TRUE;
 }
 
+/**
+	@Function:		set_task_info
+	@Access:		Public
+	@Description:
+		设置任务信息。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+		task, struct Task *, OUT
+			指向任务信息结构体的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。				
+*/
 BOOL
-set_task_info(int32 tid, struct Task * task)
+set_task_info(	IN int32 tid,
+				IN struct Task * task)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
@@ -246,16 +330,43 @@ set_task_info(int32 tid, struct Task * task)
 	return TRUE;
 }
 
+/**
+	@Function:		get_task_info_ptr
+	@Access:		Public
+	@Description:
+		获取任务信息结构体的指针。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+	@Return:
+		struct Task *
+			任务信息结构体的指针。		
+*/
 struct Task *
-get_task_info_ptr(int32 tid)
+get_task_info_ptr(IN int32 tid)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return NULL;
 	return tasks + tid;
 }
 
+/**
+	@Function:		create_task_by_file
+	@Access:		Public
+	@Description:
+		通过程序文件创建一个任务。
+	@Parameters:
+		filename, int8 *, IN
+			程序文件路径。
+		param, int8 *, IN
+			运行这个任务所提供的参数。
+	@Return:
+		int32
+			如果失败则返回-1, 否则返回任务的 ID。
+*/
 int32
-create_task_by_file(int8 * filename, int8 * param)
+create_task_by_file(IN int8 * filename,
+					IN int8 * param)
 {
 	uint8 * app;
 	FILE * fptr = fopen(filename, FILE_MODE_READ);
@@ -290,6 +401,16 @@ create_task_by_file(int8 * filename, int8 * param)
 	return tid;
 }
 
+/**
+	@Function:		get_next_task_id
+	@Access:		Public
+	@Description:
+		获取下一个将要执行的任务的 ID。
+	@Parameters:
+	@Return:
+		int32
+			下一个将要执行的任务的 ID。		
+*/
 int32
 get_next_task_id(void)
 {
@@ -333,20 +454,55 @@ get_next_task_id(void)
 	return running_tid;
 }
 
+/**
+	@Function:		set_task_ran_state
+	@Access:		Public
+	@Description:
+		设置指定任务的状态为已运行。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+	@Return:	
+*/
 void
-set_task_ran_state(int32 tid)
+set_task_ran_state(IN int32 tid)
 {
 	tasks[running_tid].ran = 1;
 }
 
+/**
+	@Function:		get_running_tid
+	@Access:		Public
+	@Description:
+		获取正在运行的任务的 ID。
+	@Parameters:
+	@Return:
+		int32
+			正在运行的任务的 ID。		
+*/
 int32
 get_running_tid(void)
 {
 	return running_tid;
 }
 
+/**
+	@Function:		get_physical_address
+	@Access:		Public
+	@Description:
+		把线性地址转换为物理地址。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+		line_address, void *, IN
+			线性地址。
+	@Return:
+		void *
+			物理地址。
+*/
 void *
-get_physical_address(int32 tid, void * line_address)
+get_physical_address(	IN int32 tid, 
+						IN void * line_address)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || tasks[tid].used == 0)
 		return NULL;

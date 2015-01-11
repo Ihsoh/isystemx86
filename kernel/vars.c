@@ -1,15 +1,30 @@
-//Filename:		vars.c
-//Author:		Ihsoh
-//Date:			2014-8-27
-//Descriptor:	Variables
+/**
+	@File:			vars.c
+	@Author:		Ihsoh
+	@Date:			2014-8-27
+	@Description:
+		提供系统变量的功能。
+*/
 
 #include "vars.h"
 #include "types.h"
 #include "memory.h"
 #include <string.h>
 
+/**
+	@Function:		alloc_vars
+	@Access:		Public
+	@Description:
+		创建变量列表。
+	@Parameters:
+		n, uint32, IN
+			最大变量数。
+	@Return:
+		struct Vars *
+			指向分配的变量列表的指针。		
+*/
 struct Vars *
-alloc_vars(uint32 n)
+alloc_vars(IN uint32 n)
 {
 	if(n == 0)
 		return NULL;
@@ -26,8 +41,20 @@ alloc_vars(uint32 n)
 	return vars_s;
 }
 
+/**
+	@Function:		free_vars
+	@Access:		Public
+	@Description:
+		释放变量列表。
+	@Parameters:
+		vars_s, struct Vars *, IN
+			指向分配的变量列表的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-free_vars(struct Vars * vars_s)
+free_vars(IN struct Vars * vars_s)
 {
 	if(free_memory(vars_s->vars) && free_memory(vars_s))
 		return TRUE;
@@ -35,9 +62,21 @@ free_vars(struct Vars * vars_s)
 		return FALSE;
 }
 
+/**
+	@Function:		is_valid_var_name
+	@Access:		Public
+	@Description:
+		检查变量名是否合法。
+	@Parameters:
+		name, int8 *, IN
+			变量名。
+	@Return:
+		BOOL
+			返回TRUE则合法，否则不合法。		
+*/
 static
 BOOL
-is_valid_var_name(int8 * name)
+is_valid_var_name(IN int8 * name)
 {
 	if(name == NULL)
 		return FALSE;
@@ -54,9 +93,24 @@ is_valid_var_name(int8 * name)
 	return TRUE;
 }
 
+/**
+	@Function:		get_var
+	@Access:		Public
+	@Description:
+		获取变量。
+	@Parameters:
+		vars_s, struct Vars *, IN
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+	@Return:
+		struct Var *
+			指向变量的结构体的指针。		
+*/
 static
 struct Var *
-get_var(struct Vars * vars_s, int8 * name)
+get_var(IN struct Vars * vars_s,
+		IN int8 * name)
 {
 	uint32 ui;
 	struct Var * vars = vars_s->vars;
@@ -66,9 +120,24 @@ get_var(struct Vars * vars_s, int8 * name)
 	return NULL;
 }
 
+/**
+	@Function:		var_is_exists
+	@Access:		Private
+	@Description:
+		获取变量。
+	@Parameters:
+		vars_s, struct Vars *, IN
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+	@Return:
+		BOOL
+			返回TRUE则存在，否则不存在。		
+*/
 static
 BOOL
-var_is_exists(struct Vars * vars_s, int8 * name)
+var_is_exists(	IN struct Vars * vars_s,
+				IN int8 * name)
 {
 	if(get_var(vars_s, name) != NULL)
 		return TRUE;
@@ -76,8 +145,23 @@ var_is_exists(struct Vars * vars_s, int8 * name)
 		return FALSE;
 }
 
+/**
+	@Function:		new_var
+	@Access:		Public
+	@Description:
+		新建变量。
+	@Parameters:
+		vars_s, struct Vars *, IN OUT
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-new_var(struct Vars * vars_s, int8 * name)
+new_var(IN OUT struct Vars * vars_s,
+		IN int8 * name)
 {
 	if(	vars_s == NULL 
 		|| !is_valid_var_name(name) 
@@ -94,8 +178,26 @@ new_var(struct Vars * vars_s, int8 * name)
 	return TRUE;
 }
 
+/**
+	@Function:		set_var_value
+	@Access:		Public
+	@Description:
+		设置变量的值。
+	@Parameters:
+		vars_s, struct Vars *, IN OUT
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+		value, int8 *, IN
+			值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-set_var_value(struct Vars * vars_s, int8 * name, int8 * value)
+set_var_value(	IN OUT struct Vars * vars_s,
+				IN int8 * name,
+				IN int8 * value)
 {
 	if(	vars_s == NULL 
 		|| !is_valid_var_name(name)
@@ -110,8 +212,26 @@ set_var_value(struct Vars * vars_s, int8 * name, int8 * value)
 	return TRUE;
 }
 
+/**
+	@Function:		get_var_value
+	@Access:		Public
+	@Description:
+		获取变量的值。
+	@Parameters:
+		vars_s, struct Vars *, IN
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+		value, int8 *, OUT
+			值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-get_var_value(struct Vars * vars_s, int8 * name, int8 * value)
+get_var_value(	IN struct Vars * vars_s,
+				IN int8 * name,
+				OUT int8 * value)
 {
 	if(	vars_s == NULL 
 		|| !is_valid_var_name(name)
@@ -124,8 +244,26 @@ get_var_value(struct Vars * vars_s, int8 * name, int8 * value)
 	return TRUE;
 }
 
+/**
+	@Function:		get_var_int_value
+	@Access:		Public
+	@Description:
+		获取变量的值。
+	@Parameters:
+		vars_s, struct Vars *, IN
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+		value, int32 *, OUT
+			值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-get_var_int_value(struct Vars * vars_s, int8 * name, int32 * value)
+get_var_int_value(	IN struct Vars * vars_s,
+					IN int8 * name,
+					OUT int32 * value)
 {
 	int8 buffer[MAX_VAR_VALUE_BUFFER_LEN];
 	if(!get_var_value(vars_s, name, buffer))
@@ -134,8 +272,26 @@ get_var_int_value(struct Vars * vars_s, int8 * name, int32 * value)
 	return TRUE;
 }
 
+/**
+	@Function:		get_var_double_value
+	@Access:		Public
+	@Description:
+		获取变量的值。
+	@Parameters:
+		vars_s, struct Vars *, IN
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+		value, double *, OUT
+			值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-get_var_double_value(struct Vars * vars_s, int8 * name, double * value)
+get_var_double_value(	IN struct Vars * vars_s,
+						IN int8 * name,
+						OUT double * value)
 {
 	int8 buffer[MAX_VAR_VALUE_BUFFER_LEN];
 	if(!get_var_value(vars_s, name, buffer))
@@ -144,8 +300,23 @@ get_var_double_value(struct Vars * vars_s, int8 * name, double * value)
 	return TRUE;
 }
 
+/**
+	@Function:		del_var
+	@Access:		Public
+	@Description:
+		删除变量。
+	@Parameters:
+		vars_s, struct Vars *, IN OUT
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
 BOOL
-del_var(struct Vars * vars_s, int8 * name)
+del_var(IN OUT struct Vars * vars_s,
+		IN int8 * name)
 {
 	if(	vars_s == NULL 
 		|| !is_valid_var_name(name)

@@ -1,7 +1,9 @@
-//Filename:		tasks.h
-//Author:		Ihsoh
-//Date:			2014-7-22
-//Descriptor:	Task schedule
+/**
+	@File:			tasks.h
+	@Author:		Ihsoh
+	@Date:			2014-7-22
+	@Description:
+*/
 
 #ifndef	_TASKS_H_
 #define	_TASKS_H_
@@ -38,18 +40,61 @@ struct Task
 	uint32				used_memory_size;	//任务内存使用量
 };
 
-extern BOOL init_tasks(void);
-extern int32 create_task(int8 * name, int8 * param, uint8 * app, uint32 app_len);
-extern BOOL kill_task(int32 tid);
-extern void kill_all_tasks(void);
-extern BOOL get_task_info(int32 tid, struct Task * task);
-extern BOOL set_task_info(int32 tid, struct Task * task);
-extern struct Task * get_task_info_ptr(int32 tid);
-extern int32 create_task_by_file(int8 * filename, int8 * param);
-extern int32 get_next_task_id(void);
-extern void set_task_ran_state(int32 tid);
-extern int32 get_running_tid(void);
-extern void * get_physical_address(int32 tid, void * line_address);
+
+extern
+BOOL
+init_tasks(void);
+
+extern
+int32
+create_task(IN int8 * name,
+			IN int8 * param,
+			IN uint8 * app,
+			IN uint32 app_len);
+
+extern
+BOOL
+kill_task(IN int32 tid);
+
+extern
+void
+kill_all_tasks(void);
+
+extern
+BOOL
+get_task_info(	IN int32 tid,
+				OUT struct Task * task);
+
+extern
+BOOL
+set_task_info(	IN int32 tid,
+				IN struct Task * task);
+
+extern
+struct Task *
+get_task_info_ptr(IN int32 tid);
+
+extern
+int32
+create_task_by_file(IN int8 * filename,
+					IN int8 * param);
+
+extern
+int32
+get_next_task_id(void);
+
+extern
+void
+set_task_ran_state(IN int32 tid);
+
+extern
+int32
+get_running_tid(void);
+
+extern
+void *
+get_physical_address(	IN int32 tid, 
+						IN void * line_address);
 
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()

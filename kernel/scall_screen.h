@@ -17,7 +17,7 @@
 #define	SCALL_PRINT_STR_P			3
 #define	SCALL_CLEAR_SCREEN			4
 #define	SCALL_SET_CURSOR			5
-#define	SCALL_GET_CURSOR			6	
+#define	SCALL_GET_CURSOR			6
 #define	SCALL_VESA_IS_VALID			7
 #define	SCALL_GET_SCREEN_SIZE		8
 #define	SCALL_SET_SCREEN_PIXEL		9
@@ -37,8 +37,9 @@
 #define	SCALL_DRAW_WINDOW			23
 
 extern
-void system_call_screen(IN uint32 func,
-						IN uint32 base,
-						IN OUT struct SParams * sparams);
+void
+system_call_screen(	IN uint32 func,
+					IN uint32 base,
+					IN OUT struct SParams * sparams);
 
 #endif

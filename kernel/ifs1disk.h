@@ -13,47 +13,58 @@
 #define MAX_DISK_COUNT	8
 
 extern
-void get_disk_symbol(	IN uint32 index, 
+void
+get_disk_symbol(	IN uint32 index, 
 						OUT int8 * symbol);
 
 extern
-uint32 get_disk_count(void);
+uint32
+get_disk_count(void);
 
 extern
-uint32 get_disk_size(IN int8 * symbol);
+uint32
+get_disk_size(IN int8 * symbol);
 
 extern
-BOOL is_system_disk(IN int8 * symbol);
+BOOL
+is_system_disk(IN int8 * symbol);
 
 extern
-void init_disk(IN int8 * symbol);
+void
+init_disk(IN int8 * symbol);
 
 extern
-void destroy_disk(IN int8 * symbol);
+void
+destroy_disk(IN int8 * symbol);
 
 extern
-uint32 sector_count(IN int8 * symbol);
+uint32
+sector_count(IN int8 * symbol);
 
 extern
-BOOL read_sector(	IN int8 * symbol, 
-					IN uint32 pos, 
-					OUT uint8 * buffer);
+BOOL
+read_sector(IN int8 * symbol, 
+			IN uint32 pos, 
+			OUT uint8 * buffer);
 
 extern
-BOOL write_sector(	IN int8 * symbol, 
-					IN uint32 pos, 
-					IN uint8 * buffer);
+BOOL
+write_sector(	IN int8 * symbol, 
+				IN uint32 pos, 
+				IN uint8 * buffer);
 
 extern
-BOOL read_sectors(	IN int8 * symbol, 
-					IN uint32 pos, 
-					IN uint8 count, 
-					OUT uint8 * buffer);
+BOOL
+read_sectors(	IN int8 * symbol, 
+				IN uint32 pos, 
+				IN uint8 count, 
+				OUT uint8 * buffer);
 
 extern
-BOOL write_sectors(	IN int8 * symbol, 
-					IN uint32 pos, 
-					IN uint8 count, 
-					IN uint8 * buffer);
+BOOL
+write_sectors(	IN int8 * symbol, 
+				IN uint32 pos, 
+				IN uint8 count, 
+				IN uint8 * buffer);
 
 #endif

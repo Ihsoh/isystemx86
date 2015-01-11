@@ -19,22 +19,28 @@ struct CacheInfo
 };
 
 extern 
-void init_cpu(void);
+void
+init_cpu(void);
 
 extern
-void get_vendor_id_string(OUT int8 * buffer);
+void
+get_vendor_id_string(OUT int8 * buffer);
 
 extern
-void get_brand_string(OUT int8 * buffer);
+void
+get_brand_string(OUT int8 * buffer);
 
 extern
-BOOL get_cpu_L1(OUT struct CacheInfo * cache_info);
+BOOL
+get_cpu_L1(OUT struct CacheInfo * cache_info);
 
 extern
-BOOL get_cpu_L2(OUT struct CacheInfo * cache_info);
+BOOL
+get_cpu_L2(OUT struct CacheInfo * cache_info);
 
 extern
-BOOL get_cpu_L3(OUT struct CacheInfo * cache_info);
+BOOL
+get_cpu_L3(OUT struct CacheInfo * cache_info);
 
 
 extern uint32 cpu_feature_ecx, cpu_feature_edx;

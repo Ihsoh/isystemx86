@@ -10,7 +10,8 @@ Target=$(TargetDir)/$(Out)
 $(Target): 	ilib/bin/libilib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
-	mkdir bin
+	-mkdir bin
+	cd apps/basic && make
 	cd apps/edit && make
 	cd apps/paint && make
 #tools/diskmaker/bin/diskmaker boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
