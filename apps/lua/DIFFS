@@ -1,0 +1,23 @@
+diff ORIG/iolib.c ./iolib.c
+20c20
+< static FILE *in=stdin, *out=stdout;
+---
+> static FILE *in=NULL, *out=NULL;
+394a395
+>  in=stdin; out=stdout;
+diff ORIG/lex_yy.c ./lex_yy.c
+20c20
+< FILE *yyin = {stdin}, *yyout = {stdout};
+---
+> FILE *yyin = {NULL}, *yyout = {NULL};
+diff ORIG/lua.c ./lua.c
+33c33
+< void main (int argc, char *argv[])
+---
+> int main (int argc, char *argv[])
+39c39
+<   return;
+---
+>   return 0;
+51a52
+>  return 0;
