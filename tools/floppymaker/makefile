@@ -10,8 +10,11 @@ CC=gcc
 CFlags=-o2
 Objs=bin/floppymaker.obj
 
-$(Target): $(Objs)
+$(Target): bin $(Objs)
 	$(CC) $(CFlags) $(Objs) -o $(Target)
+
+bin:
+	-mkdir bin
 
 bin/floppymaker.obj: floppymaker.c floppymaker.h
 	$(CC) $(CFlags) -c floppymaker.c -o bin/floppymaker.obj

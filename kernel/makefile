@@ -19,8 +19,11 @@ bin/klib.obj bin/sfunc_window.obj $(StringObj)
 Linker=ld -m elf_i386
 Include=-I../ilib
 
-$(Target): $(Objs)
+$(Target): bin $(Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)
+
+bin:
+	-mkdir bin
 
 bin/kernel.obj: kernel.c
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include)

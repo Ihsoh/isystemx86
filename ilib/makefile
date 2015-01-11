@@ -12,12 +12,14 @@ Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.o
 bin/fs.obj bin/image.obj bin/mouse.obj
 AR=ar
 
-$(Target): $(Objs)
+$(Target): bin $(Objs)
 	$(AR) -rc $(Target) $(Objs)
+
+bin:
+	-mkdir bin
 
 bin/string.obj: string.c string.h
 	$(CC) $(CFlags) -c string.c -o bin/string.obj
-	$(CC) $(CFlags) -c string.c -S
 	
 bin/sparams.obj: sparams.c sparams.h
 	$(CC) $(CFlags) -c sparams.c -o bin/sparams.obj

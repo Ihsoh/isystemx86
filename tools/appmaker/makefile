@@ -10,8 +10,11 @@ CC=gcc
 CFlags=-o2
 Objs=bin/appmaker.obj
 
-$(Target): $(Objs)
+$(Target): bin $(Objs)
 	$(CC) $(CFlags) $(Objs) -o $(Target)
+
+bin:
+	-mkdir bin
 
 bin/appmaker.obj: appmaker.c
 	$(CC) $(CFlags) -c appmaker.c -o bin/appmaker.obj

@@ -8,9 +8,12 @@ Linker=ld -m elf_i386
 Include=-I../../ilib
 AppMaker=../../tools/appmaker/bin/appmaker
 
-$(Target): $(Objs)
+$(Target): bin $(Objs)
 	$(Linker) -Tsegs.lds -e main --oformat binary -o $(Target) $(Objs) -L../../ilib/bin -lilib
 	$(AppMaker) $(Target)
+
+bin:
+	-mkdir bin
 
 bin/main.obj: main.c
 	$(CC) $(CFlags) -c main.c -o bin/main.obj $(Include)

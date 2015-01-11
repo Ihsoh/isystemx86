@@ -12,9 +12,12 @@ Out=boot.bin
 Target=$(TargetDir)/$(Out)
 ASM=nasm
 
-$(Target): boot.asm
+$(Target): bin boot.asm
 #$(ASM) -f bin boot.asm -o $(Target)
 	$(ASM) -f bin hdboot.asm -o $(Target)
+
+bin:
+	-mkdir bin
 
 .PHONY:Clear
 

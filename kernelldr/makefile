@@ -16,12 +16,15 @@ GMOut_1280_1024=kernelldrgm_1280_1024.bin
 GMTarget_1280_1024=$(TargetDir)/$(GMOut_1280_1024)
 ASM=nasm
 
-$(TMTarget): kernelldr.asm
+$(TMTarget): bin kernelldr.asm
 	nasm -f bin kernelldr.asm -o $(TMTarget)
 	nasm -f bin kernelldr.asm -o $(GMTarget_640_480) -DVESA -DSIZE_640_480
 	nasm -f bin kernelldr.asm -o $(GMTarget_800_600) -DVESA -DSIZE_800_600
 	nasm -f bin kernelldr.asm -o $(GMTarget_1024_768) -DVESA -DSIZE_1024_768
 	nasm -f bin kernelldr.asm -o $(GMTarget_1280_1024) -DVESA -DSIZE_1280_1024
+
+bin:
+	-mkdir bin
 
 .PHONY:Clear
 
