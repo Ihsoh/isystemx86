@@ -25,8 +25,6 @@ struct yysvf {
 	int *yystops;};
 struct yysvf *yyestate;
 extern struct yysvf yysvec[], *yybgin;
-#include <stdlib.h>
-#include <string.h>
 
 #include "opcode.h"
 #include "hash.h"
@@ -739,6 +737,8 @@ char yyextra[] = {
 #ifndef lint
 static	char ncform_sccsid[] = "@(#)ncform 1.6 88/02/08 SMI"; /* from S5R2 1.2 */
 #endif
+
+#define YYLMAX 8192
 
 int yylineno =1;
 # define YYU(x) x

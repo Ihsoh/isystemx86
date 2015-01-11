@@ -8,8 +8,7 @@
 ** 11 May 93
 */
 
-#include <stdio.h>
-#include <string.h>
+#include "ilib.h"
 
 #include "opcode.h"
 #include "hash.h"
@@ -28,9 +27,15 @@ int lua_debugline;
 static struct { int file; int function; } funcstack[MAXFUNCSTACK];
 static int nfuncstack=0;
 
-static FILE *fp;
+static IL_FILE *fp;
 static char *st;
 static void (*usererror) (char *s);
+
+static void _not_impl_func(char * name)
+{
+ printf("\n\nError: inout.c: Not implement function: %s\n\n", name);
+ app_exit();
+}
 
 /*
 ** Function to set user function to handle errors.
@@ -45,8 +50,15 @@ void lua_errorfunction (void (*fn) (char *s))
 */
 static int fileinput (void)
 {
+ /*
  int c = fgetc (fp);
  return (c == EOF ? 0 : c);
+ */
+ char c;
+ if(il_fread(fp, &c, 1) == 0)
+  return 0;
+ else
+  return c;
 }
 
 /*
@@ -54,7 +66,8 @@ static int fileinput (void)
 */
 static void fileunput (int c)
 {
- ungetc (c, fp);
+ _not_impl_func("fileunput");
+ //ungetc (c, fp);
 }
 
 /*
@@ -83,7 +96,7 @@ int lua_openfile (char *fn)
  lua_linenumber = 1;
  lua_setinput (fileinput);
  lua_setunput (fileunput);
- fp = fopen (fn, "r");
+ fp = il_fopen(fn, FILE_MODE_READ);
  if (fp == NULL) return 1;
  if (lua_addfile (fn)) return 1;
  return 0;
@@ -96,7 +109,7 @@ void lua_closefile (void)
 {
  if (fp != NULL)
  {
-  fclose (fp);
+  il_fclose (fp);
   fp = NULL;
  }
 }
@@ -112,7 +125,7 @@ int lua_openstring (char *s)
  st = s;
  {
   char sn[64];
-  sprintf (sn, "String: %10.10s...", s);
+  sprintf (sn, "String: %s...", s);
   if (lua_addfile (sn)) return 1;
  }
  return 0;
@@ -125,7 +138,11 @@ int lua_openstring (char *s)
 void lua_error (char *s)
 {
  if (usererror != NULL) usererror (s);
- else			    fprintf (stderr, "lua: %s\n", s);
+ else
+ {
+  printf("lua: %s\n", s);
+  app_exit();
+ }
 }
 
 /*

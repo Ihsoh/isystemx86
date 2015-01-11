@@ -5,8 +5,7 @@
 ** 11 May 93
 */
 
-#include <stdlib.h>
-#include <string.h>
+#include "ilib.h"
 
 #include "opcode.h"
 #include "hash.h"

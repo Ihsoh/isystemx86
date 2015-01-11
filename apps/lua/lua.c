@@ -5,7 +5,7 @@
 ** 28 Apr 93
 */
 
-#include <stdio.h>
+#include "ilib.h"
 
 #include "lua.h"
 #include "lualib.h"

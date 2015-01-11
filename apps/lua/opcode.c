@@ -4,12 +4,7 @@
 ** 26 Apr 93
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef __GNUC__
-#include <floatingpoint.h>
-#endif
+#include "ilib.h"
 
 #include "opcode.h"
 #include "hash.h"
