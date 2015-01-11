@@ -106,8 +106,9 @@ struct DirBlock
 #define	FILE_MODE_ALL		(FILE_MODE_READ | FILE_MODE_WRITE | FILE_MODE_APPEND)
 
 #define	FILE	void
+#define	IL_FILE	FILE
 
-extern FILE * fopen(char * path, int mode);
+extern IL_FILE * fopen(char * path, int mode);
 #define	il_fopen(path, mode) (fopen((path), (mode)))
 
 extern int fclose(FILE * fptr);

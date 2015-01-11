@@ -10,8 +10,10 @@
 
 typedef unsigned char * va_list;
 
-#define	va_start(vl, a) (vl = ((unsigned char *)&a) + sizeof(a))
+#define	_INTSIZEOF(t)	(sizeof(t) <= 4 ? 4 : 8)
 
-#define	va_arg(vl, t) (*((vl += sizeof(t)) - sizeof(t)))
+#define	va_start(vl, a) (vl = ((unsigned char *)&a) + _INTSIZEOF(a))
+
+#define	va_arg(vl, t) (*(t *)((vl += _INTSIZEOF(t)) - _INTSIZEOF(t)))
 
 #define	va_end(vl)	(vl = NULL)
