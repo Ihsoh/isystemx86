@@ -10,12 +10,13 @@ Target=$(TargetDir)/$(Out)
 $(Target): 	ilib/bin/libilib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
-	-mkdir bin
+	cd ilib && make
 	cd apps/basic && make
 	cd apps/edit && make
 	cd apps/paint && make
 #tools/diskmaker/bin/diskmaker boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
 	tools/diskmaker/bin/diskmaker boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
+
 ilib/bin/libilib.a:
 	cd ilib && make
 
@@ -37,5 +38,6 @@ Clear:
 	cd kernelldr && make Clear
 	cd kernel && make Clear
 
+	cd apps/basic && make Clear
 	cd apps/edit && make Clear
 	cd apps/paint && make Clear

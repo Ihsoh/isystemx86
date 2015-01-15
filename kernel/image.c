@@ -41,7 +41,7 @@ new_common_image(	OUT struct CommonImage * common_image,
 {
 	if(common_image == NULL || data == NULL)
 		return FALSE;
-	if(strcmpn(data, CMMNIMAGE_IMG0_SYMBOL, 6))
+	if(strcmpn(data, CMMNIMAGE_IMG0_SYMBOL, 6) == 0)
 	{
 		common_image->type = CMMNIMAGE_IMG0;
 		common_image->width = *(uint32 *)(data + 6);

@@ -6,6 +6,9 @@
 		提供函数变参相关功能。
 */
 
+#ifndef	_STDARG_H_
+#define	_STDARG_H_
+
 #include "ilib.h"
 
 typedef unsigned char * va_list;
@@ -17,3 +20,5 @@ typedef unsigned char * va_list;
 #define	va_arg(vl, t) (*(t *)((vl += _INTSIZEOF(t)) - _INTSIZEOF(t)))
 
 #define	va_end(vl)	(vl = NULL)
+
+#endif

@@ -22,5 +22,3 @@ bin/main.obj: main.c
 
 Clear:
 	-rm -f $(Objs) $(Target)
-
-

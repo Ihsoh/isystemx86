@@ -4,6 +4,7 @@
 //Descriptor:	String functions
 
 #include "string.h"
+#include <types.h>
 
 unsigned int _strlen(const char * str)
 {
@@ -83,8 +84,24 @@ int _strcmpn(const char * str1, const char * str2, unsigned int n)
 	unsigned int ui;
 	for(ui = 0; ui < n; ui++)
 		if(str1[ui] != str2[ui])
-			return  0;
-	return 1;
+			return str1[ui] - str2[ui];
+	return 0;
+}
+
+int _memcmp(const unsigned char * str1, const unsigned char * str2, unsigned int n)
+{
+	unsigned int ui;
+	for(ui = 0; ui < n; ui++)
+		if(str1[ui] != str2[ui])
+			return str1[ui] - str2[ui];
+	return 0;
+}
+
+char * _strchr(const char * s, char c)
+{
+	while(*s != '\0' && *s != c)
+		++s;
+	return *s == c ? s : NULL;
 }
 
 char * ultos(char * str, unsigned long n)

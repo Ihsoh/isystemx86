@@ -5,14 +5,16 @@
 	@Description:
 */
 
-#ifndef	_ILIB_H_
-#define	_ILIB_H_
+#ifndef	_STDIO_H_
+#define	_STDIO_H_
 
-#include "ilib.h"
+#include <types.h>
+#include <stdarg.h>
 
 extern int vsprintf_s(char * buffer, uint size, const char * format, va_list va);
 extern int sprintf_s(char * buffer, uint size, const char * format, ...);
 extern int sprintf(char * buffer, const char * format, ...);
 extern int printf(const char * format, ...);
+extern int puts(const char * string);
 
 #endif

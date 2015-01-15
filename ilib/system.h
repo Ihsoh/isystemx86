@@ -35,7 +35,7 @@ extern void * allocm(uint len);
 #define	il_allocm(len)	(allocm((len)))
 
 extern int freem(void * ptr);
-#define	il_freem(ptr)	(allocm((ptr)))
+#define	il_freem(ptr)	(freem((ptr)))
 
 extern void get_param(char * buffer);
 #define	il_get_param(buffer)	(get_param((buffer)))

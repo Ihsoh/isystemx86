@@ -6,12 +6,16 @@
 		提供标准输入输出功能。
 */
 
-#include "ilib.h"
+#include <stdio.h>
+#include <types.h>
+#include <stdarg.h>
+
+#include <screen.h>
 
 int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 {
 	char chr;
-	int buf_len = 0;
+	uint buf_len = 0;
 	int end = 0;
 	while(!end && (chr = *(format++)) != '\0' && buf_len + 1 < size)
 		if(chr != '%')
@@ -114,11 +118,26 @@ int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 						}
 						break;
 					}
+					case 's':
+					{
+						char * str = va_arg(va, char *);
+						uint str_len = strlen(str);
+						if(buf_len + str_len >= size)
+							end = 1;
+						else
+						{
+							strncpy(buffer, str, str_len);
+							buffer += str_len;
+							buf_len += str_len;
+						}
+						break;
+					}
 					default:
 						*(buffer++) = chr;
 						buf_len++;
 						break;
 				}
+
 	*buffer = '\0';
 	return buf_len;
 }
@@ -146,8 +165,13 @@ int printf(const char * format, ...)
 	char buffer[10 * 1024];
 	va_list va;
 	va_start(va, format);
-	int r = vsprintf_s(buffer, 0xffffffff, format, va);
+	int r = vsprintf_s(buffer, 10 * 1024, format, va);
 	va_end(va);
-	print_str(buffer);
+	il_print_str(buffer);
 	return r;
+}
+
+int puts(const char * string)
+{
+	return printf(string);
 }
