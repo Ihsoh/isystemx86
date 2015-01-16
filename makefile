@@ -7,7 +7,7 @@ TargetDir=bin
 Out=isystemx86.img
 Target=$(TargetDir)/$(Out)
 
-$(Target): 	ilib/bin/libilib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
+$(Target): 	bin ilib/bin/libilib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
 	cd ilib && make
@@ -16,6 +16,9 @@ $(Target): 	ilib/bin/libilib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 	cd apps/paint && make
 #tools/diskmaker/bin/diskmaker boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
 	tools/diskmaker/bin/diskmaker boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
+
+bin:
+	-mkdir bin
 
 ilib/bin/libilib.a:
 	cd ilib && make

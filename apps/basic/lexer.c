@@ -1,17 +1,10 @@
 #include "lexer.h"
+#include "die.h"
 #include "ilib.h"
 
 static char * keywords[] = {"DIM", "AS", "SHORT", "LONG", "STRING", "BOOLEAN", "FUNCTION",
 							"BYVAL", "BYREF", "IF", "THEN", "RETURN", "ELSE", "END",
 							"SUB", "CALL", NULL};
-
-static
-void
-lexer_die(char * message)
-{
-	printf(message);
-	app_exit();
-}
 
 static
 int
@@ -46,17 +39,27 @@ int lexer(	const char * code,
 {
 	char chr;
 	int row = 0;
+	int count = 0;
+	if(max == 0)
+		return 0;
 	eof_word(words, row, file);
-	while((chr = *(code++)) != '\0')
+	count++;
+	if(max == 1)
+		return 1;
+	while(count < max && (chr = *(code++)) != '\0')
 		switch(chr)
 		{
+			//处理换行符。
 			case '\n':
 				row++;
 				break;
+			//处理空格，制表符和回车符。直接忽略。
 			case ' ':
 			case '\t':
 			case '\r':
 				break;
+			//处理'a' ~ 'z', 'A' ~ 'Z', '_'开头的字符，
+			//其后包含'a' ~ 'z', 'A' ~ 'Z', '0' ~ '9', '_'。
 			case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':
 			case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n':
 			case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u':
@@ -74,7 +77,7 @@ int lexer(	const char * code,
 						&& chr != ' '
 						&& chr != '\t'
 						&& chr != '\r')
-					if((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'Z') || chr == '_')
+					if((chr >= 'a' && chr <= 'z') || (chr >= 'A' && chr <= 'Z') || (chr >= '0' && chr <= '9') || chr == '_')
 						words->name[index++] = chr;
 					else
 						break;
@@ -86,12 +89,12 @@ int lexer(	const char * code,
 				words->row = row;
 				strcpy(words->file, file);
 				eof_word(++words, row, file);
+				count++;
 				if(chr == '\0')
 					return 1;
-				else
-					code--;
 				break;
 			}
+			//处理'0' ~ '9'开头的字符。
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			{
@@ -111,14 +114,33 @@ int lexer(	const char * code,
 				words->row = row;
 				strcpy(words->file, file);
 				eof_word(++words, row, file);
+				count++;
 				if(chr == '\0')
 					return 1;
-				else
-					code--;
 				break;
 			}
+			//处理'"'开头的字符。
+			case '"':
+			{
+				int index = 0;
+				while((chr = *(code++)) != '"')
+				{
+					if(chr == '\0')
+						die("String constant expect '\"'.");
+					words->name[index++] = chr;
+					words->name[index] = '\0';
+				}
+				words->type = LEXWORD_STRING;
+				words->row = row;
+				strcpy(words->file, file);
+				eof_word(++words, row, file);
+				count++;
+				break;
+			}
+			//处理'+', '-', '*', '/', '=', '>', '<', '%', '(', ')', ','开头的字符。
 			case '+': case '-': case '*': case '/': case '=':
 			case '>': case '<': case '%': case '(': case ')':
+			case ',':
 			{
 				char next_chr = *(code++);
 				words->type = LEXWORD_OPERATOR;
@@ -147,10 +169,15 @@ int lexer(	const char * code,
 					words->type = LEXWORD_NUMBER;
 				}
 				else
+				{
+					words->name[0] = chr;
+					words->name[1] = '\0';
 					code--;
+				}
 				words->row = row;
 				strcpy(words->file, file);
 				eof_word(++words, row, file);
+				count++;
 				break;
 			}
 		}

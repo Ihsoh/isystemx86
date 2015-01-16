@@ -173,5 +173,7 @@ int printf(const char * format, ...)
 
 int puts(const char * string)
 {
-	return printf(string);
+	il_print_str(string);
+	il_print_char('\n');
+	return strlen(string);
 }
