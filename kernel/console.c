@@ -1062,7 +1062,7 @@ tasks(IN int32 part)
 			运行该程序时所使用的命令。
 	@Return:
 		int32
-			返回0则失败，否则成功。	
+			返回-1则失败，否则成功。	
 */
 static
 int32
@@ -1072,14 +1072,14 @@ run(IN int8 * path,
 	if(strcmp(path, "") == 0)
 	{
 		error(FORMAT("run {path}"));
-		return 0;
+		return -1;
 	}
 	int32 r;
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!fix_path(path, current_path, temp))
 	{
 		error("Invalid path!");
-		return 0;
+		return -1;
 	}
 	if((r = create_task_by_file(temp, cmd)) == -1)
 		error("Failed to run application!");
@@ -1098,7 +1098,7 @@ run(IN int8 * path,
 			运行该程序时所使用的命令。
 	@Return:
 		int32
-			返回0则失败，否则成功。		
+			返回-1则失败，否则成功。		
 */
 static
 int32
@@ -1108,14 +1108,14 @@ run_wait(	IN int8 * path,
 	if(strcmp(path, "") == 0)
 	{
 		error(FORMAT("{application path}"));
-		return 0;
+		return -1;
 	}
 	int32 r = -1;
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!fix_path(path, current_path, temp))
 	{
 		error("Invalid path!");
-		return 0;
+		return -1;
 	}
 
 	//在这里调用 lock 是为了确保 wait_app_tid = r; 的执行。
@@ -1748,7 +1748,7 @@ exec(	IN int8 * cmd,
 		{
 			int8 src_path[MAX_PATH_BUFFER_LEN];
 			parse_cmd(NULL, src_path, MAX_PATH_LEN);
-			r = run(src_path, cmd);
+			r = run(src_path, cmd) == -1 ? 0 : 1;
 			print_str("\n");
 		}
 		else if(strcmp(name, "clear") == 0)
@@ -1882,7 +1882,7 @@ exec(	IN int8 * cmd,
 					if(strcmp(word, "add") == 0)
 						n_r = n0 + n1;
 					else if(strcmp(word, "sub") == 0)
-						n_r = n0 + n1;
+						n_r = n0 - n1;
 					else if(strcmp(word, "mul") == 0)
 						n_r = n0 * n1;
 					else if(strcmp(word, "div") == 0)
@@ -1980,10 +1980,10 @@ exec(	IN int8 * cmd,
 				int8 temp[1024];
 				strcpy(temp, SYSTEM_BINS_PATH);
 				strcat(temp, name);
-				r = run_wait(temp, cmd);
+				r = run_wait(temp, cmd) == -1 ? 0 : 1;
 			}
 			else
-				r = run_wait(name, cmd);
+				r = run_wait(name, cmd) == -1 ? 0 : 1;
 	}
 	while(wait_app_tid != -1)
 		if(get_task_info_ptr(wait_app_tid) == NULL)
