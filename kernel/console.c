@@ -26,6 +26,8 @@
 #include "vesa.h"
 #include "die.h"
 
+DEFINE_LOCK_IMPL(console)
+
 #define	FORMAT(message)	"Foramt:\n\t"message
 
 static int32 enable_clock = 1;
@@ -1115,9 +1117,20 @@ run_wait(	IN int8 * path,
 		error("Invalid path!");
 		return 0;
 	}
+
+	//在这里调用 lock 是为了确保 wait_app_tid = r; 的执行。
+	//如果在 wait_app_tid = r; 被执行之前内核任务被切换到新的任务，
+	//并且新的任务在被切换之前调用了 app_exit，新的任务将不能正常的
+	//退出。因为 wait_app_tid 此时等于-1。
+	lock();
 	if((r = create_task_by_file(temp, cmd)) == -1)
+	{
+		unlock();
 		error("Failed to run application!");
+	}
 	wait_app_tid = r;
+	unlock();
+
 	return r;
 }
 
@@ -1972,7 +1985,9 @@ exec(	IN int8 * cmd,
 			else
 				r = run_wait(name, cmd);
 	}
-	while(wait_app_tid != -1);
+	while(wait_app_tid != -1)
+		if(get_task_info_ptr(wait_app_tid) == NULL)
+			wait_app_tid = -1;
 	return r;
 }
 

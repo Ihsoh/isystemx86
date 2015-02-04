@@ -25,81 +25,106 @@
 #include "lock.h"
 
 static
-void fpu_error_int(void);
+void
+fpu_error_int(void);
 
 static
-void init_interrupt(void);
+void
+init_interrupt(void);
 
 static
-void init_noimpl(void);
+void
+init_noimpl(void);
 
 static
-void set_noimpl(IN uint32 int_num);
+void
+set_noimpl(IN uint32 int_num);
 
 static
-void noimpl_int(void);
+void
+noimpl_int(void);
 
 static
-void init_gp(void);
+void
+init_gp(void);
 
 static
-void gp_int(void);
+void
+gp_int(void);
 
 static
-void init_timer(void);
+void
+init_timer(void);
 
 static
-void timer_int(void);
+void
+timer_int(void);
 
 static
-void init_mouse(void);
+void
+init_mouse(void);
 
 static
-void mouse_int(void);
+void
+mouse_int(void);
 
 static
-void init_keyboard(void);
+void
+init_keyboard(void);
 
 static
-void keyboard_int(void);
+void
+keyboard_int(void);
 
 static
-void init_ide(void);
+void
+init_ide(void);
 
 static
-void ide_int(void);
+void
+ide_int(void);
 
 static
-void init_fpu(void);
+void
+init_fpu(void);
 
 static
-void fpu_int(void);
+void
+fpu_int(void);
 
 static
-void init_pf(void);
+void
+init_pf(void);
 
 static
-void pf_int(void);
+void
+pf_int(void);
 
 static
-void system_call_screen(IN uint32 func,
-						IN uint32 base,
-						IN OUT struct SParams * sparams);
+void
+system_call_screen(	IN uint32 func,
+					IN uint32 base,
+					IN OUT struct SParams * sparams);
 
 static
-void system_call(void);
+void
+system_call(void);
 
 static
-void system_call_int(void);
+void
+system_call_int(void);
 
 static
-void init_system_call(void);
+void
+init_system_call(void);
 
 static
-void enter_system(void);
+void
+enter_system(void);
 
 static
-void leave_system(void);
+void
+leave_system(void);
 
 static struct TSS * system_call_tss = NULL;
 static uint8 * system_call_stack = NULL;
@@ -135,6 +160,7 @@ main(void)
 	disable_paging_lock();
 	disable_kernel_lock();
 	disable_tasks_lock();
+	disable_console_lock();
 
 	init_vesa();
 	init_paging();
@@ -165,6 +191,7 @@ main(void)
 	enable_paging_lock();
 	enable_kernel_lock();
 	enable_tasks_lock();
+	enable_console_lock();
 
 	enter_system();
 	console();

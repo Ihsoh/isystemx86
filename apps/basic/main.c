@@ -2,7 +2,7 @@
 #include "lexer.h"
 #include "die.h"
 
-char * code = 	"SUB Sum(BYVAL min AS INTEGER, BYVAL max AS INTEGER)\"ABC DEF GE\tasda\"123.321 +123.32 == 1 + 2";
+char * code = 	"SUB Sum(BYVAL min AS INTEGER)";
 
 void main(void)
 {
@@ -18,9 +18,4 @@ void main(void)
 		printf("%s\n", (words++)->name);
 	free(words);
 	app_exit();
-}
-
-void printf_my(char * str)
-{
-	printf(str);
 }
