@@ -36,7 +36,12 @@ console_window_event(	IN struct Window * window,
 {
 	struct CommonImage * screen = params->screen;
 	if(params->event_type == WINDOW_EVENT_PAINT)
-		draw_common_image(screen, &console_screen_buffer, 0, 0, console_screen_buffer.width, console_screen_buffer.height);
+		draw_common_image(	screen, 
+							&console_screen_buffer, 
+							0, 
+							0, 
+							console_screen_buffer.width, 
+							console_screen_buffer.height);
 }
 
 /**
@@ -52,7 +57,12 @@ console_window_event(	IN struct Window * window,
 BOOL
 init_console_window(void)
 {
-	console_window = create_window(WINDOW_WIDTH, WINDOW_HEIGHT, 0xffbbbbbb, WINDOW_STYLE_HIDDEN_BUTTON, WINDOW_TITLE, console_window_event);
+	console_window = create_window(	WINDOW_WIDTH, 
+									WINDOW_HEIGHT, 
+									0xffbbbbbb, 
+									WINDOW_STYLE_HIDDEN_BUTTON, 
+									WINDOW_TITLE, 
+									console_window_event);
 	if(console_window == NULL)
 		return FALSE;
 	

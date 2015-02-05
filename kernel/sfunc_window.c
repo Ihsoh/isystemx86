@@ -39,25 +39,67 @@ sfunc_window_event(struct Window * window, struct WindowEventParams * params)
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
 		rect_common_image(screen, 0, 0, 320, 200, 0xffffffff);
-		if(point_in_rect(params->mouse_x, params->mouse_y, 20, 20, strlen("Clock") * ENFONT_WIDTH, ENFONT_HEIGHT))
+		if(point_in_rect(	params->mouse_x, 
+							params->mouse_y, 
+							20, 
+							20, 
+							strlen("Clock") * ENFONT_WIDTH, 
+							ENFONT_HEIGHT))
 		{
-			rect_common_image(screen, 20, 20, strlen("Clock") * ENFONT_WIDTH, ENFONT_HEIGHT, 0xffbbbbbb);
+			rect_common_image(	screen, 
+								20, 
+								20, 
+								strlen("Clock") * ENFONT_WIDTH, 
+								ENFONT_HEIGHT, 
+								0xffbbbbbb);
 			if(is_mouse_left_button_down())
 				show_clock_window();
 		}		
 		else
-			rect_common_image(screen, 20, 20, strlen("Clock") * ENFONT_WIDTH, ENFONT_HEIGHT, 0xff999999);
-		text_common_image(screen, 20, 20, get_enfont_ptr(), "Clock", strlen("Clock"), 0xff000000);
+			rect_common_image(	screen, 
+								20, 
+								20, 
+								strlen("Clock") * ENFONT_WIDTH, 
+								ENFONT_HEIGHT, 
+								0xff999999);
+		text_common_image(	screen, 
+							20, 
+							20, 
+							get_enfont_ptr(), 
+							"Clock", 
+							strlen("Clock"), 
+							0xff000000);
 		
-		if(point_in_rect(params->mouse_x, params->mouse_y, 20, 40, strlen("Console") * ENFONT_WIDTH, ENFONT_HEIGHT))
+		if(point_in_rect(	params->mouse_x, 
+							params->mouse_y, 
+							20, 
+							40, 
+							strlen("Console") * ENFONT_WIDTH, 
+							ENFONT_HEIGHT))
 		{
-			rect_common_image(screen, 20, 40, strlen("Console") * ENFONT_WIDTH, ENFONT_HEIGHT, 0xffbbbbbb);
+			rect_common_image(	screen, 
+								20, 
+								40, 
+								strlen("Console") * ENFONT_WIDTH, 
+								ENFONT_HEIGHT, 
+								0xffbbbbbb);
 			if(is_mouse_left_button_down())
 				show_console_window();
 		}		
 		else
-			rect_common_image(screen, 20, 40, strlen("Console") * ENFONT_WIDTH, ENFONT_HEIGHT, 0xff999999);
-		text_common_image(screen, 20, 40, get_enfont_ptr(), "Console", strlen("Console"), 0xff000000);
+			rect_common_image(	screen, 
+								20, 
+								40, 
+								strlen("Console") * ENFONT_WIDTH, 
+								ENFONT_HEIGHT, 
+								0xff999999);
+		text_common_image(	screen, 
+							20, 
+							40, 
+							get_enfont_ptr(), 
+							"Console", 
+							strlen("Console"), 
+							0xff000000);
 	}
 }
 
@@ -74,7 +116,12 @@ sfunc_window_event(struct Window * window, struct WindowEventParams * params)
 BOOL
 init_sfunc_window(void)
 {
-	sfunc_window = create_window(320, 200, 0xffffffff, WINDOW_STYLE_HIDDEN_BUTTON, "System Function", sfunc_window_event);
+	sfunc_window = create_window(	320, 
+									200, 
+									0xffffffff, 
+									WINDOW_STYLE_HIDDEN_BUTTON, 
+									"System Function", 
+									sfunc_window_event);
 	if(sfunc_window == NULL)
 		return FALSE;
 	return TRUE;

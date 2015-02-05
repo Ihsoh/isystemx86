@@ -432,11 +432,19 @@ flush_screen(void)
 	if(window_count != 0)
 	{
 		struct Window * top_window = windows[0];
-		if(point_in_rect(mouse_x, mouse_y, top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH), top_window->y, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT))
+		if(point_in_rect(	mouse_x, mouse_y, 
+							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH),
+							top_window->y, 
+							CLOSE_BUTTON_WIDTH, 
+							CLOSE_BUTTON_HEIGHT))
 			top_window->over_close_button = 1;
 		else
 			top_window->over_close_button = 0;
-		if(point_in_rect(mouse_x, mouse_y, top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH), top_window->y, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT))
+		if(point_in_rect(	mouse_x, mouse_y, 
+							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH),
+							top_window->y, 
+							HIDDEN_BUTTON_WIDTH, 
+							HIDDEN_BUTTON_HEIGHT))
 			top_window->over_hidden_button = 1;
 		else
 			top_window->over_hidden_button = 0;
@@ -449,20 +457,35 @@ flush_screen(void)
 			struct Window * top_window = windows[0];
 			if(!move_window)
 				if(	top_window->has_close_button
-					&& point_in_rect(mouse_x, mouse_y, top_window->x + top_window->width - CLOSE_BUTTON_WIDTH, top_window->y, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT))
+					&& point_in_rect(	mouse_x, 
+										mouse_y, 
+										top_window->x + top_window->width - CLOSE_BUTTON_WIDTH, 
+										top_window->y, 
+										CLOSE_BUTTON_WIDTH, 
+										CLOSE_BUTTON_HEIGHT))
 				{
 					destroy_window(top_window);
 					return;
 				}
 				else if(top_window->has_hidden_button
-						&& point_in_rect(mouse_x, mouse_y, top_window->x + top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, top_window->y, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT))
+						&& point_in_rect(	mouse_x, 
+											mouse_y, 
+											top_window->x + top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 
+											top_window->y, 
+											CLOSE_BUTTON_WIDTH, 
+											CLOSE_BUTTON_HEIGHT))
 				{
 					top_window->state = WINDOW_STATE_HIDDEN;
 					for(ui = 0; ui < window_count - 1; ui++)
 						windows[ui] = windows[ui + 1];
 					windows[window_count - 1] = top_window;
 				}
-				else if(point_in_rect(mouse_x, mouse_y, top_window->x, top_window->y, top_window->width, TITLE_BAR_HEIGHT))
+				else if(point_in_rect(	mouse_x, 
+										mouse_y, 
+										top_window->x, 
+										top_window->y, 
+										top_window->width, 
+										TITLE_BAR_HEIGHT))
 				{
 					old_mouse_x = mouse_x;
 					old_mouse_y = mouse_y;
@@ -472,7 +495,12 @@ flush_screen(void)
 					for(ui = 1; ui < window_count; ui++)
 					{
 						struct Window * window = windows[ui];
-						if(point_in_rect(mouse_x, mouse_y, window->x, window->y, window->width, TITLE_BAR_HEIGHT))
+						if(point_in_rect(	mouse_x, 
+											mouse_y, 
+											window->x, 
+											window->y, 
+											window->width, 
+											TITLE_BAR_HEIGHT))
 						{
 							windows[ui] = windows[0];
 							windows[0] = window;
@@ -501,14 +529,34 @@ flush_screen(void)
 		if(window->state == WINDOW_STATE_CLOSED)
 			continue;
 		if(render_window(window, &window->image, i == 0 ? TRUE : FALSE))
-			draw_common_image(&screen_buffer, &window->image, window->x, window->y, window->image.width, window->image.height);
+			draw_common_image(	&screen_buffer, 
+								&window->image, 
+								window->x, 
+								window->y, 
+								window->image.width, 
+								window->image.height);
 	}
-	draw_common_image_t(&screen_buffer, &pointer_image, mouse_x, mouse_y, pointer_image.width, pointer_image.height, TCOLOR);
+	draw_common_image_t(&screen_buffer, 
+						&pointer_image, 
+						mouse_x, 
+						mouse_y, 
+						pointer_image.width, 
+						pointer_image.height, 
+						TCOLOR);
 
 	if(target_screen == NULL)	
-		vesa_draw_image(0, 0, screen_width, screen_height, screen_buffer.data);
+		vesa_draw_image(0, 
+						0, 
+						screen_width, 
+						screen_height, 
+						screen_buffer.data);
 	else
-		draw_common_image(target_screen, &screen_buffer, 0, 0, screen_width, screen_height);
+		draw_common_image(	target_screen, 
+							&screen_buffer, 
+							0, 
+							0, 
+							screen_width, 
+							screen_height);
 }
 
 /**

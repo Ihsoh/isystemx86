@@ -29,6 +29,7 @@ void die(char * message)
 {
 	clear_screen();
 	print_str_p(message, CC_RED);
+	print_str("\n");
 	if(screen_buffer != NULL)
 		freem(screen_buffer);
 	app_exit();
@@ -215,7 +216,7 @@ void flush(void)
 	print_str(screen_buffer);
 	char buffer[100];
 	print_str("                                                                      ");
-	set_cursor(0, row - 1);
+	set_cursor(0, row);
 	print_str_p(uitos(buffer, top_column + cursor_x), CC_YELLOW | CBGC_GRAYWHITE);
 	print_str_p(",", CC_YELLOW | CBGC_GRAYWHITE);
 	print_str_p(uitos(buffer, top_row + cursor_y), CC_YELLOW | CBGC_GRAYWHITE);
@@ -262,6 +263,9 @@ void load(void)
 
 void save(void)
 {
+	clear_screen();
+	print_str("Saving file");
+
 	FILE * fptr = fopen(filepath, FILE_MODE_WRITE | FILE_MODE_APPEND);
 	if(fptr == NULL)
 		die("Cannot open file!");
@@ -273,6 +277,8 @@ void save(void)
 		for(len = 0; len < MAX_COLUMN && content_buffer[line][len] != '\0'; len++);
 		fappend(fptr, content_buffer[line], len);
 		fappend(fptr, "\n", 1);
+		if(line % (total_line / 10) == 0)
+			print_str(".");
 	}
 	fclose(fptr);
 }
