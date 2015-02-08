@@ -15,7 +15,7 @@ bin/kfuncs.obj bin/ifs1hdisk.obj bin/cmos.obj bin/ifs1fs.obj bin/tasks.obj \
 bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scall_fs.obj \
 bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
-bin/klib.obj bin/sfunc_window.obj $(StringObj)
+bin/klib.obj bin/sfunc_window.obj bin/kstring.obj $(StringObj)
 Linker=ld -m elf_i386
 Include=-I../ilib
 
@@ -120,6 +120,9 @@ bin/klib.obj: klib.c klib.h
 
 bin/sfunc_window.obj: sfunc_window.c sfunc_window.h
 	$(CC) $(CFlags) -c sfunc_window.c -o bin/sfunc_window.obj $(Include)
+
+bin/kstring.obj: kstring.c kstring.h
+	$(CC) $(CFlags) -c kstring.c -o bin/kstring.obj $(Include)
 
 .PHONY:Clear
 

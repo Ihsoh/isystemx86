@@ -17,8 +17,8 @@ rem Define system path variable "@__system__"
 def @__system__ "DA:/isystem/"
 
 rem Define application path variable "@__path__"
-def @__path__ ";"
-rpn @__path__ @__path__ @__system__ strcat "bins/" strcat ";" strcat
+def @__path__ ".;"
+rpn @__path__ @__path__ @__system__ strcat "bins/;" strcat
 
 rem Go to window mode
 rpn :is_window_mode @__video_mode__ "text" seq not

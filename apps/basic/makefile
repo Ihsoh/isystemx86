@@ -5,11 +5,11 @@ CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -I../ilib -m32 -march=i386 -mtune=i386
 Objs=bin/main.obj bin/lexer.obj bin/die.obj
 Linker=ld -m elf_i386
-Include=-I../../ilib
+Include=-I../../ilib -I../../dslib
 AppMaker=../../tools/appmaker/bin/appmaker
 
 $(Target): bin $(Objs)
-	$(Linker) -Tsegs.lds -e main --oformat binary -o $(Target) $(Objs) -L../../ilib/bin -lilib
+	$(Linker) -Tsegs.lds -e main --oformat binary -o $(Target) $(Objs) -L../../ilib/bin -lilib -L../../dslib/bin -ldslib
 	$(AppMaker) $(Target)
 
 bin:

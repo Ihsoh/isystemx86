@@ -233,14 +233,47 @@ get_var_value(	IN struct Vars * vars_s,
 				IN int8 * name,
 				OUT int8 * value)
 {
+	return get_var_value_with_size(vars_s, name, value, 0x7fffffff);
+}
+
+/**
+	@Function:		get_var_value_with_size
+	@Access:		Public
+	@Description:
+		获取变量的值，并且可以指定储存值的缓冲区的大小。
+	@Parameters:
+		vars_s, struct Vars *, IN
+			指向分配的变量列表的指针。
+		name, int8 *, IN
+			变量名。
+		value, int8 *, OUT
+			值。
+		size, uint32, IN
+			储存值的缓冲区的大小。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+get_var_value_with_size(IN struct Vars * vars_s,
+						IN int8 * name,
+						OUT int8 * value,
+						IN uint32 size)
+{
 	if(	vars_s == NULL 
+		|| size == 0
 		|| !is_valid_var_name(name)
 		|| !var_is_exists(vars_s, name))
 		return FALSE;
 	struct Var * var = get_var(vars_s, name);
 	if(var == NULL)
 		return FALSE;
-	strcpy(value, var->value);
+	char chr;
+	int32 index = 0;
+	size--;	//'\0'
+	while(size-- != 0 && (chr = var->value[index++]) != '\0')
+		*(value++) = chr;
+	*value = '\0';
 	return TRUE;
 }
 

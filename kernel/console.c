@@ -20,6 +20,7 @@
 #include "system.h"
 #include "vars.h"
 #include "cpu.h"
+#include "kstring.h"
 #include <string.h>
 
 #include "386.h"
@@ -1963,14 +1964,25 @@ exec(	IN int8 * cmd,
 		}
 		else if(strlen(name) >= 4 && strcmp(name + strlen(name) - 4, ".bat") == 0)
 		{
-			if(exists_file(SYSTEM_BINS_PATH, name))
-			{
-				int8 temp[1024];
-				strcpy(temp, SYSTEM_BINS_PATH);
-				strcat(temp, name);
-				r = batch(temp);
-			}
-			else
+			BOOL ran = FALSE;
+			int8 buffer[10 * 1024];
+			int8 path[1024];
+			get_var_value_with_size(global_vars_s,
+									"__path__",
+									buffer,
+									10 * 1024);
+			split_string(NULL, NULL, 0, 0);
+			while(split_string(path, buffer, ';', 1024) != NULL)
+				if(exists_file(path, name))
+				{
+					int8 temp[1024];
+					strcpy(temp, path);
+					strcat(temp, name);
+					r = batch(temp);
+					ran = TRUE;
+					break;
+				}
+			if(!ran)
 				r = batch(name);
 			print_str("\n");
 		}

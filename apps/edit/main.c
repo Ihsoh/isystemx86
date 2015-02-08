@@ -277,7 +277,7 @@ void save(void)
 		for(len = 0; len < MAX_COLUMN && content_buffer[line][len] != '\0'; len++);
 		fappend(fptr, content_buffer[line], len);
 		fappend(fptr, "\n", 1);
-		if(line % (total_line / 10) == 0)
+		if(total_line / 10 > 0 && line % (total_line / 10) == 0)
 			print_str(".");
 	}
 	fclose(fptr);

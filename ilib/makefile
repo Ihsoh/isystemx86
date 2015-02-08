@@ -52,4 +52,3 @@ bin/stdlib.obj: stdlib.c stdlib.h
 
 Clear:
 	-rm -f $(Target) $(Objs)
-

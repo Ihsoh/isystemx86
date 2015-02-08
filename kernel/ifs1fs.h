@@ -26,6 +26,8 @@
 
 #define	MAX_OPENED_FILE_COUNT	(10 * 1024)
 
+#define	INVALID_BLOCK_ID	0xffffffff
+
 typedef struct File
 {
 	int8				symbol[3];

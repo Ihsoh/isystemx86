@@ -7,10 +7,9 @@ TargetDir=bin
 Out=isystemx86.img
 Target=$(TargetDir)/$(Out)
 
-$(Target): 	bin ilib/bin/libilib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
+$(Target): 	bin ilib/bin/libilib.a dslib/bin/libdslib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
-	cd ilib && make
 	cd apps/basic && make
 	cd apps/edit && make
 	cd apps/paint && make
@@ -22,6 +21,9 @@ bin:
 
 ilib/bin/libilib.a:
 	cd ilib && make
+
+dslib/bin/libdslib.a:
+	cd dslib && make
 
 boot/bin/boot.bin:
 	cd boot && make
@@ -37,6 +39,7 @@ kernel/bin/kernel.bin:
 Clear:
 	-rm -f $(Target)
 	cd ilib && make Clear
+	cd dslib && make Clear
 	cd boot && make Clear
 	cd kernelldr && make Clear
 	cd kernel && make Clear

@@ -55,6 +55,13 @@ get_var_value(	IN struct Vars * vars_s,
 
 extern
 BOOL
+get_var_value_with_size(IN struct Vars * vars_s,
+						IN int8 * name,
+						OUT int8 * value,
+						IN uint32 size);
+
+extern
+BOOL
 get_var_int_value(	IN struct Vars * vars_s,
 					IN int8 * name,
 					OUT int32 * value);

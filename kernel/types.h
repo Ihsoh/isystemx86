@@ -22,6 +22,10 @@ typedef uint32	uint;
 typedef uint32	ulong;
 typedef uint64	ullong;
 
+typedef	void *	object;
+
+typedef	int32	bool;
+
 #define	NULL	((void *)0)
 
 #define	BYTE(n)	(n)
@@ -29,11 +33,26 @@ typedef uint64	ullong;
 #define	MB(n)	((n) * 1024 * 1024)
 #define	GB(n)	((n) * 1024 * 1024 * 1024)
 
-#define	BOOL	int32
+#define	BOOL	bool
 #define	TRUE	1
 #define	FALSE	0
 
-#define	IN	//修饰函数的参数，参数作为输入
-#define	OUT	//修饰函数的参数，参数作为输出
+//修饰函数的参数，参数作为输入。
+//应用场合：
+//	1.	如果参数的类型不为指针，必须标注 IN。
+//	2. 	如果参数的类型为指针，但是函数使用该参数来获取一个地址值，
+//		而非通过该地址去引用内存进行读操作，必须标注 IN。
+//	3.	如果参数的类型为指针，但是函数使用该参数保存的地址去引用
+//		内存，而且包含对引用的内存进行读操作的代码，必须标注 IN。
+//	4.	如果参数的类型为指针，但是函数使用该参数保存的地址去引用
+//		内存，但是不包含对引用的内存进行读操作的代码，但是包含确认
+//		指针的合法性的代码，不须标注 IN。
+#define	IN	
+
+//修饰函数的参数，参数作为输出
+//应用场合：
+//	1.	如果参数的类型为指针，并且包含对引用的内存进行写操作的代码，
+//		必须标注 OUT。
+#define	OUT
 
 #endif

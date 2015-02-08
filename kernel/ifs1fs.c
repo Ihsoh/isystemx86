@@ -32,7 +32,7 @@ format_disk(IN int8 * symbol)
 		return FALSE;
 	struct DirBlock dir;
 	fill_dir_block("/", &dir);
-	if(add_block(symbol, (struct RawBlock *)&dir) != 0xFFFFFFFF)
+	if(add_block(symbol, (struct RawBlock *)&dir) != INVALID_BLOCK_ID)
 		return TRUE;
 	else
 		return FALSE;
@@ -86,7 +86,7 @@ _exists_dir(IN int8 * symbol,
 			IN int8 * name)
 {
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
 		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
@@ -98,7 +98,7 @@ _exists_dir(IN int8 * symbol,
 	{
 		uint32 subdir_id = dir.blockids[ui];
 		struct DirBlock subdir;
-		if(	subdir_id != 0xFFFFFFFF 
+		if(	subdir_id != INVALID_BLOCK_ID 
 			&& get_block(symbol, subdir_id, (struct RawBlock *)&subdir) 
 			&& subdir.type == BLOCK_TYPE_DIR
 			&& strcmp(subdir.dirname, name) == 0)
@@ -130,7 +130,7 @@ _exists_file(	IN int8 * symbol,
 				IN int8 * name)
 {
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
 		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
@@ -142,7 +142,7 @@ _exists_file(	IN int8 * symbol,
 	{
 		uint32 subfile_id = dir.blockids[ui];
 		struct FileBlock subfile;
-		if(	subfile_id != 0xFFFFFFFF 
+		if(	subfile_id != INVALID_BLOCK_ID 
 			&& get_block(symbol,subfile_id, (struct RawBlock *)&subfile) 
 			&& subfile.type == BLOCK_TYPE_FILE
 			&& strcmp(subfile.filename, name) == 0)
@@ -174,7 +174,7 @@ _create_dir(IN int8 * symbol,
 			IN int8 * name)
 {
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
 		|| strlen(name) > MAX_DIRNAME_LEN
@@ -186,11 +186,11 @@ _create_dir(IN int8 * symbol,
 	struct DirBlock new_dir;
 	fill_dir_block(name, &new_dir);
 	uint32 new_dir_id = add_block(symbol, (struct RawBlock *)&new_dir);
-	if(new_dir_id == 0xFFFFFFFF)
+	if(new_dir_id == INVALID_BLOCK_ID)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
-		if(dir.blockids[ui] == 0xFFFFFFFF)
+		if(dir.blockids[ui] == INVALID_BLOCK_ID)
 		{
 			dir.blockids[ui] = new_dir_id;
 			set_block(symbol, id, (struct RawBlock *)&dir);
@@ -222,7 +222,7 @@ _create_file(	IN int8 * symbol,
 				IN int8 * name)
 {
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
 		|| strlen(name) > MAX_FILENAME_LEN
@@ -234,11 +234,11 @@ _create_file(	IN int8 * symbol,
 	struct FileBlock new_file;
 	fill_file_block(name, &new_file);
 	uint32 new_file_id = add_block(symbol, (struct RawBlock *)&new_file);
-	if(new_file_id == 0xFFFFFFFF)
+	if(new_file_id == INVALID_BLOCK_ID)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
-		if(dir.blockids[ui] == 0xFFFFFFFF)
+		if(dir.blockids[ui] == INVALID_BLOCK_ID)
 		{
 			dir.blockids[ui] = new_file_id;
 			set_block(symbol, id, (struct RawBlock *)&dir);
@@ -267,7 +267,7 @@ _del_dir(	IN int8 * symbol,
 			IN uint32 id)
 {
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
@@ -275,7 +275,7 @@ _del_dir(	IN int8 * symbol,
 		return FALSE;
 	uint32 ui;	
 	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
-		if(dir.blockids[ui] != 0xFFFFFFFF)
+		if(dir.blockids[ui] != INVALID_BLOCK_ID)
 			return FALSE;
 	dir.used = 0;
 	return set_block(symbol, id, (struct RawBlock *)&dir);
@@ -301,7 +301,7 @@ _del_file(	IN int8 * symbol,
 			IN uint32 id)
 {
 	struct FileBlock file;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| !get_block(symbol, id, (struct RawBlock *)&file)
 		|| file.used == 0
@@ -333,7 +333,7 @@ _df_count(	IN int8 * symbol,
 {
 	int32 count = 0; 
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
@@ -344,7 +344,7 @@ _df_count(	IN int8 * symbol,
 	{
 		uint32 sub_block_id = dir.blockids[ui];
 		struct RawBlock sub_block;
-		if(	sub_block_id != 0xFFFFFFFF
+		if(	sub_block_id != INVALID_BLOCK_ID
 			&& get_block(symbol, sub_block_id, &sub_block)
 			&& sub_block.used)
 			count++;
@@ -376,7 +376,7 @@ _df(IN int8 * symbol,
 {
 	int32 count = 0; 
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| blocks == NULL
 		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
@@ -388,7 +388,7 @@ _df(IN int8 * symbol,
 	{
 		uint sub_blockid = dir.blockids[ui];
 		struct RawBlock raw_block;
-		if(	sub_blockid != 0xFFFFFFFF 
+		if(	sub_blockid != INVALID_BLOCK_ID 
 			&& get_block(symbol, sub_blockid, &raw_block)
 			&& raw_block.used)
 		{
@@ -396,7 +396,7 @@ _df(IN int8 * symbol,
 			count++;
 		}
 		else
-			dir.blockids[ui] = 0xFFFFFFFF;
+			dir.blockids[ui] = INVALID_BLOCK_ID;
 	}
 	if(set_block(symbol, id, (struct RawBlock *)&dir))
 		return count;
@@ -427,7 +427,7 @@ _rename_dir(IN int8 * symbol,
 			IN int8 * new_name)
 {
 	struct DirBlock dir;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| new_name == NULL
 		|| strlen(new_name) > MAX_DIRNAME_LEN
@@ -462,7 +462,7 @@ _rename_file(	IN int8 * symbol,
 				IN int8 * new_name)
 {
 	struct FileBlock file;
-	if(	id == 0xFFFFFFFF
+	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| new_name == NULL
 		|| strlen(new_name) > MAX_FILENAME_LEN
@@ -499,7 +499,7 @@ parse_path(	IN int8 * path,
 	if(	path == NULL
 		|| symbol == NULL
 		|| type == NULL)
-		return 0xFFFFFFFF;
+		return INVALID_BLOCK_ID;
 	int8 * s = path;	
 	int8 chr;
 	int32 state = 0;
@@ -508,7 +508,7 @@ parse_path(	IN int8 * path,
 	int8 * n = name;
 	int32 processed = 0;
 	*type = 0;
-	uint32 blockid = 0xFFFFFFFF;
+	uint32 blockid = INVALID_BLOCK_ID;
 	name[0] = '\0';
 	while((chr = *(s++)) != '\0')
 		if(state == 0)
@@ -539,7 +539,7 @@ parse_path(	IN int8 * path,
 		else if(state == 4 && chr != '/')
 		{
 			if(strlen(name) > MAX_FILENAME_LEN)
-				return 0xFFFFFFFF;
+				return INVALID_BLOCK_ID;
 			*(n++) = chr;
 			*n = '\0';
 			processed = 0;
@@ -547,18 +547,18 @@ parse_path(	IN int8 * path,
 		else if(state == 4 && chr == '/')
 		{
 			if(strcmp(name, "") == 0)
-				return 0xFFFFFFFF;
+				return INVALID_BLOCK_ID;
 			struct DirBlock dir;
 			if(	!get_block(disk, blockid, (struct RawBlock *)&dir) 
 				|| dir.used == 0 
 				|| dir.type != BLOCK_TYPE_DIR)
-				return 0xFFFFFFFF;
+				return INVALID_BLOCK_ID;
 			uint32 ui;
 			for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
 			{
 				uint32 subdir_id = dir.blockids[ui];
 				struct DirBlock subdir;
-				if(	subdir_id != 0xFFFFFFFF 
+				if(	subdir_id != INVALID_BLOCK_ID 
 					&& get_block(disk, subdir_id, (struct RawBlock *)&subdir) 
 					&& subdir.type == BLOCK_TYPE_DIR
 					&& strcmp(subdir.dirname, name) == 0)
@@ -578,13 +578,13 @@ parse_path(	IN int8 * path,
 		if(	!get_block(disk, blockid, (struct RawBlock *)&dir) 
 			|| dir.used == 0 
 			|| dir.type != BLOCK_TYPE_DIR)
-			return 0xFFFFFFFF;
+			return INVALID_BLOCK_ID;
 		uint32 ui;
 		for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
 		{
 			uint32 file_id = dir.blockids[ui];
 			struct FileBlock file;
-			if(	file_id != 0xFFFFFFFF 
+			if(	file_id != INVALID_BLOCK_ID 
 				&& get_block(disk, file_id, (struct RawBlock *)&file)
 				&& file.type == BLOCK_TYPE_FILE 
 				&& strcmp(file.filename, name) == 0)
@@ -593,7 +593,7 @@ parse_path(	IN int8 * path,
 				return file_id;
 			}
 		}
-		return 0xFFFFFFFF;
+		return INVALID_BLOCK_ID;
 	}
 	strcpy(symbol, disk);
 	return blockid;
@@ -726,7 +726,7 @@ del_dir(IN int8 * path)
 	for(ui = 0; ui < sizeof(pdir.blockids) / sizeof(uint32); ui++)
 		if(pdir.blockids[ui] == id)
 		{
-			pdir.blockids[ui] = 0xFFFFFFFF;
+			pdir.blockids[ui] = INVALID_BLOCK_ID;
 			if(!set_block(symbol, pdir_id, (struct RawBlock *)&pdir))
 				return FALSE;
 			break;
@@ -764,7 +764,7 @@ del_file(IN int8 * path)
 	for(ui = 0; ui < sizeof(pdir.blockids) / sizeof(uint32); ui++)
 		if(pdir.blockids[ui] == id)
 		{
-			pdir.blockids[ui] = 0xFFFFFFFF;
+			pdir.blockids[ui] = INVALID_BLOCK_ID;
 			if(!set_block(symbol, pdir_id, (struct RawBlock *)&pdir))
 				return FALSE;
 			break;
@@ -847,7 +847,10 @@ is_valid_df_name(IN int8 * name)
 	for(ui = 0; ui < len; ui++)
 	{
 		int8 chr = name[ui];
-		if(!(chr >= 'a' && chr <= 'z') && !(chr >= 'A' && chr <= 'Z') && !(chr >= '0' && chr <= '9') && chr != '.' && chr != '_')
+		if(	!(chr >= 'a' && chr <= 'z') 
+			&& !(chr >= 'A' && chr <= 'Z') 
+			&& !(chr >= '0' && chr <= '9') 
+			&& chr != '.' && chr != '_')
 			return FALSE;
 	}
 	return TRUE;
@@ -1330,7 +1333,7 @@ fopen(	IN int8 * path,
 	int32 type;
 	int8 symbol[3];
 	uint32 id = parse_path(path, symbol, &type);
-	if(type != BLOCK_TYPE_FILE || id == 0xFFFFFFFF)
+	if(type != BLOCK_TYPE_FILE || id == INVALID_BLOCK_ID)
 		return NULL;
 	fptr->mode = mode;
 	strcpy(fptr->symbol, symbol);
@@ -1413,13 +1416,13 @@ fwrite(	IN FILE * fptr,
 	for(ui = 0; ui < sizeof(fptr->file_block->blockids) / sizeof(uint32); ui++)
 	{
 		uint32 block_id = fptr->file_block->blockids[ui];
-		if(block_id != 0xFFFFFFFF)
+		if(block_id != INVALID_BLOCK_ID)
 		{
 			struct DataBlock data_block;
 			data_block.used = 0;
 			if(!set_block(fptr->symbol, block_id, (struct RawBlock *)&data_block))
 				return FALSE;
-			fptr->file_block->blockids[ui] = 0xFFFFFFFF;
+			fptr->file_block->blockids[ui] = INVALID_BLOCK_ID;
 		}
 	}
 	int32 i;
@@ -1546,7 +1549,7 @@ fappend(IN FILE * fptr,
 		data_block.type = BLOCK_TYPE_DATA;
 		data_block.length = 0;
 		uint32 new_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
-		if(new_block_id == 0xFFFFFFFF)
+		if(new_block_id == INVALID_BLOCK_ID)
 			return FALSE;	
 		fptr->file_block->blockids[block_index] = new_block_id;
 	}
@@ -1575,7 +1578,7 @@ fappend(IN FILE * fptr,
 				data_block.used = 1;
 				data_block.type = BLOCK_TYPE_DATA;
 				uint new_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
-				if(new_block_id == 0xFFFFFFFF)
+				if(new_block_id == INVALID_BLOCK_ID)
 					return FALSE;
 				fptr->file_block->blockids[cblock_index - 1] = new_block_id;
 			}
@@ -1603,7 +1606,7 @@ fappend(IN FILE * fptr,
 		uint id = fptr->file_block->blockids[(is_next ? cblock_index - 1 : cblock_index)];
 		
 		//检查未保存Data Block是否存在.
-		if(id != 0xFFFFFFFF)
+		if(id != INVALID_BLOCK_ID)
 		{
 			if(!set_block(fptr->symbol, id, (struct RawBlock *)&data_block))
 				return FALSE;
@@ -1611,7 +1614,7 @@ fappend(IN FILE * fptr,
 		else
 		{
 			id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
-			if(id == 0xFFFFFFFF)
+			if(id == INVALID_BLOCK_ID)
 				return FALSE;
 			fptr->file_block->blockids[(is_next ? cblock_index - 1 : cblock_index)] = id;
 		}
@@ -1658,7 +1661,7 @@ repair_files(	IN int8 * symbol,
 	for(ui = 0; ui < sizeof(dir->blockids) / sizeof(uint32); ui++)
 	{		
 		uint32 id = blockids[ui];
-		if(id == 0xFFFFFFFF)
+		if(id == INVALID_BLOCK_ID)
 			continue;
 		struct RawBlock raw_block;
 		if(!get_block(symbol, id, &raw_block))

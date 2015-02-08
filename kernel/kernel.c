@@ -1244,6 +1244,7 @@ pf_int(void)
 {
 	while(1)
 	{
+		print_str("Task-");
 		printn(current_tid);
 		print_str(" is Died! Page Fault!\n\n");
 		kill_task(current_tid);
