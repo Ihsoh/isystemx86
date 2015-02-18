@@ -1074,7 +1074,7 @@ run(IN int8 * path,
 		error("Invalid path!");
 		return -1;
 	}
-	if((r = create_task_by_file(temp, cmd)) == -1)
+	if((r = create_task_by_file(temp, cmd, current_path)) == -1)
 		error("Failed to run application!");
 	return r;
 }
@@ -1116,7 +1116,7 @@ run_wait(	IN int8 * path,
 	//并且新的任务在被切换之前调用了 app_exit，新的任务将不能正常的
 	//退出。因为 wait_app_tid 此时等于-1。
 	lock();
-	if((r = create_task_by_file(temp, cmd)) == -1)
+	if((r = create_task_by_file(temp, cmd, current_path)) == -1)
 	{
 		unlock();
 		error("Failed to run application!");

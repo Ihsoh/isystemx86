@@ -38,6 +38,7 @@ struct Task
 	FILE **				opened_file_ptrs;	//打开文件指针列表
 	void **				memory_block_ptrs;	//内存块指针列表
 	uint32				used_memory_size;	//任务内存使用量
+	int8				working_dir[1024];	//作业目录
 };
 
 
@@ -50,7 +51,8 @@ int32
 create_task(IN int8 * name,
 			IN int8 * param,
 			IN uint8 * app,
-			IN uint32 app_len);
+			IN uint32 app_len,
+			IN int8 * working_dir);
 
 extern
 BOOL
@@ -77,7 +79,8 @@ get_task_info_ptr(IN int32 tid);
 extern
 int32
 create_task_by_file(IN int8 * filename,
-					IN int8 * param);
+					IN int8 * param,
+					IN int8 * working_dir);
 
 extern
 int32

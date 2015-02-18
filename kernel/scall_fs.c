@@ -427,11 +427,10 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_FIX_PATH:
 		{
-			int8 current_path[1024];
-			get_current_path(current_path);
+			struct Task * task = get_task_info_ptr(sparams->tid);
 			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			int8 * new_path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			BOOL r = fix_path(path, current_path, new_path);
+			BOOL r = fix_path(path, task->working_dir, new_path);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

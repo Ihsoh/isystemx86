@@ -1941,7 +1941,7 @@ repair_files(	IN int8 * symbol,
 			盘符。
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。		
+			返回TRUE则成功，否则失败。
 */
 BOOL
 repair_ifs1(IN int8 * symbol)

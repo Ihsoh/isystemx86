@@ -88,6 +88,8 @@ init_tasks(void)
 			程序。
 		app_len, uint32, IN
 			程序的长度。
+		working_dir, int8 *, IN
+			工作目录。
 	@Return:
 		int32
 			如果失败则返回-1, 否则返回任务的 ID。		
@@ -96,7 +98,8 @@ int32
 create_task(IN int8 * name,
 			IN int8 * param,
 			IN uint8 * app,
-			IN uint32 app_len)
+			IN uint32 app_len,
+			IN int8 * working_dir)
 {
 	if(app_len > MAX_APP_LEN)
 		return -1;
@@ -117,6 +120,7 @@ create_task(IN int8 * name,
 		task->running = 0;
 		strcpy(task->name, name);
 		strcpy(task->param, param);
+		strcpy(task->working_dir, working_dir);
 		task->app_len = app_len;
 		uint32 real_task_len = 3 * 1024 * 1024 + MAX_APP_LEN;
 		task->addr = (uint8 *)alloc_memory(real_task_len);
@@ -360,13 +364,16 @@ get_task_info_ptr(IN int32 tid)
 			程序文件路径。
 		param, int8 *, IN
 			运行这个任务所提供的参数。
+		working_dir, int8 *, IN
+			工作目录。
 	@Return:
 		int32
 			如果失败则返回-1, 否则返回任务的 ID。
 */
 int32
 create_task_by_file(IN int8 * filename,
-					IN int8 * param)
+					IN int8 * param,
+					IN int8 * working_dir)
 {
 	uint8 * app;
 	FILE * fptr = fopen(filename, FILE_MODE_READ);
@@ -395,7 +402,10 @@ create_task_by_file(IN int8 * filename,
 		return -1;
 	}
 
-	int32 tid = create_task(filename, param, app + 256, flen(fptr) - 256);
+	int32 tid = create_task(filename,
+							param, app + 256,
+							flen(fptr) - 256,
+							working_dir);
 	free_memory(app);
 	fclose(fptr);
 	return tid;
