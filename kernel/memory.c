@@ -11,6 +11,7 @@
 #include "kfuncs.h"
 #include "tasks.h"
 #include "lock.h"
+#include "log.h"
 
 static uint32 memory_limit = 0xFFFFFFFF;
 static uint64 used = 0x1000000;
@@ -447,6 +448,15 @@ alloc_memory(uint length)
 {
 	lock();
 	void * r = _alloc_memory(length);
+	if(r == NULL)
+	{
+		int8 buffer[1024];
+		sprintf_s(	buffer, 
+					1024, 
+					"Memory manager cannot allocate %d byte(s) of memory.", 
+					length);
+		log(LOG_ERROR, buffer);
+	}
 	unlock();
 	return r;
 }
@@ -537,6 +547,16 @@ free_memory(void * ptr)
 {
 	lock();
 	BOOL r = _free_memory(ptr);
+	if(!r)
+	{
+		uint32 address = (uint32)ptr;
+		int8 buffer[1024];
+		sprintf_s(	buffer, 
+					1024, 
+					"Memory manager cannot release a block of memory, the memory address is %X.", 
+					address);
+		log(LOG_ERROR, buffer);
+	}
 	unlock();
 	return r;
 }

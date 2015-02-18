@@ -9,6 +9,8 @@
 #include "kstring.h"
 #include "types.h"
 
+#include <string.h>
+
 /**
 	@Function:		split_string
 	@Access:		Public
@@ -62,4 +64,225 @@ split_string(	OUT int8 * dest,
 			return dest;
 		}
 	}
+}
+
+typedef uint8 * va_list;
+
+#define	_INTSIZEOF(t)	(sizeof(t) <= 4 ? 4 : 8)
+
+#define	va_start(vl, a) (vl = ((uint8 *)&a) + _INTSIZEOF(a))
+
+#define	va_arg(vl, t) (*(t *)((vl += _INTSIZEOF(t)) - _INTSIZEOF(t)))
+
+#define	va_end(vl)	(vl = NULL)
+
+/**
+	@Function:		vsprintf_s
+	@Access:		Public
+	@Description:
+		格式化字符串。
+	@Parameters:
+		buffer, int8 *, OUT
+			保存结果的缓冲区。
+		size, uint32, IN
+			缓冲区大小。
+		format, const int8 *, IN
+			格式字符串。
+		va, va_list, IN
+			参数列表。
+	@Return:
+		int32
+			字符串长度。		
+*/
+int32
+vsprintf_s(	OUT int8 * buffer,
+			IN uint32 size,
+			IN const int8 * format,
+			IN va_list va)
+{
+	int8 chr;
+	uint32 buf_len = 0;
+	int32 end = 0;
+	while(!end && (chr = *(format++)) != '\0' && buf_len + 1 < size)
+		if(chr != '%')
+		{
+			*(buffer++) = chr;
+			buf_len++;
+		}
+		else
+			if((chr = *(format++)) == '\0')
+				break;
+			else
+				switch(chr)
+				{
+					case '%':
+						if(buf_len + 1 >= size)
+							end = 1;
+						else
+						{
+							*(buffer++) = '%';
+							buf_len++;
+						}
+						break;
+					case 'c':
+					{
+						if(buf_len + 1 >= size)
+							end = 1;
+						else
+						{
+							char c = va_arg(va, char);
+							*(buffer++) = c;
+							buf_len++;
+						}						
+						break;
+					}
+					case 'd':
+					{
+						int d = va_arg(va, int);
+						char temp[100];
+						char * d_s = itos(temp, d);
+						uint d_s_len = strlen(d_s);
+						if(buf_len + d_s_len >= size)
+							end = 1;
+						else
+						{
+							strncpy(buffer, d_s, d_s_len);
+							buffer += d_s_len;
+							buf_len += d_s_len;
+						}
+						break;
+					}
+					case 'f':
+					{
+						float f = va_arg(va, float);
+						char temp[100];
+						char * f_s = dtos(temp, (double)f);
+						uint f_s_len = strlen(f_s);
+						if(buf_len + f_s_len >= size)
+							end = 1;
+						else
+						{
+							strncpy(buffer, f_s, f_s_len);
+							buffer += f_s_len;
+							buf_len += f_s_len;
+						}
+						break;
+					}
+					case 'x':
+					{
+						uint x = va_arg(va, int);
+						char temp[100];
+						char * x_s = uitohexs(temp, x);
+						uint x_s_len = strlen(x_s);
+						int i;
+						for(i = 0; i < x_s_len; i++)
+							if(temp[i] >= 'A' && temp[i] <= 'Z')
+								temp[i] = 'a' + (temp[i] - 'A');
+						if(buf_len + x_s_len >= size)
+							end = 1;
+						else
+						{
+							strncpy(buffer, x_s, x_s_len);
+							buffer += x_s_len;
+							buf_len += x_s_len;
+						}
+						break;
+					}
+					case 'X':
+					{
+						uint x = va_arg(va, int);
+						char temp[100];
+						char * x_s = uitohexs(temp, x);
+						uint x_s_len = strlen(x_s);
+						if(buf_len + x_s_len >= size)
+							end = 1;
+						else
+						{
+							strncpy(buffer, x_s, x_s_len);
+							buffer += x_s_len;
+							buf_len += x_s_len;
+						}
+						break;
+					}
+					case 's':
+					{
+						char * str = va_arg(va, char *);
+						uint str_len = strlen(str);
+						if(buf_len + str_len >= size)
+							end = 1;
+						else
+						{
+							strncpy(buffer, str, str_len);
+							buffer += str_len;
+							buf_len += str_len;
+						}
+						break;
+					}
+					default:
+						*(buffer++) = chr;
+						buf_len++;
+						break;
+				}
+
+	*buffer = '\0';
+	return buf_len;
+}
+
+/**
+	@Function:		sprintf_s
+	@Access:		Public
+	@Description:
+		格式化字符串。
+	@Parameters:
+		buffer, int8 *, OUT
+			保存结果的缓冲区。
+		size, uint32, IN
+			缓冲区大小。
+		format, const int8 *, IN
+			格式字符串。
+		..., VALIST, IN
+			参数列表。
+	@Return:
+		int32
+			字符串长度。		
+*/
+int32
+sprintf_s(	OUT int8 * buffer,
+			IN uint32 size,
+			IN const int8 * format,
+			...)
+{
+	va_list va;
+	va_start(va, format);
+	int32 r = vsprintf_s(buffer, size, format, va);
+	va_end(va);
+	return r;
+}
+
+/**
+	@Function:		sprintf
+	@Access:		Public
+	@Description:
+		格式化字符串。
+	@Parameters:
+		buffer, int8 *, OUT
+			保存结果的缓冲区。
+		format, const int8 *, IN
+			格式字符串。
+		..., VALIST, IN
+			参数列表。
+	@Return:
+		int32
+			字符串长度。		
+*/
+int32
+sprintf(OUT int8 * buffer,
+		IN const int8 * format,
+		...)
+{
+	va_list va;
+	va_start(va, format);
+	int32 r = vsprintf_s(buffer, 0xffffffff, format, va);
+	va_end(va);
+	return r;
 }

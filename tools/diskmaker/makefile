@@ -7,7 +7,7 @@ TargetDir=bin
 Out=diskmaker
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-o2
+CFlags=-O2
 Request= main.c memory.c memory.h types.h ifs1blocks.c ifs1blocks.h ifs1disk.c ifs1disk.h \
 ifs1vdisk.c cmos.c cmos.h ifs1fs.c ifs1fs.h
 

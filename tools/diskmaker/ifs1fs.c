@@ -1031,4 +1031,3 @@ int IFS1_fappend(IFS1_FILE * fptr, uchar * buffer, uint len)
 	get_cmos_date_time(&(fptr->file_block->change));
 	return set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block));
 }
-

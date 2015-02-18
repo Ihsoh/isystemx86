@@ -23,6 +23,13 @@
 #include "ifs1fs.h"
 #include "system.h"
 #include "lock.h"
+#include "log.h"
+
+#include <dslib.h>
+
+static
+BOOL
+init_dsl(void);
 
 static
 void
@@ -161,6 +168,7 @@ main(void)
 	disable_kernel_lock();
 	disable_tasks_lock();
 	disable_console_lock();
+	disable_ifs1_lock();
 
 	init_vesa();
 	init_paging();
@@ -184,6 +192,8 @@ main(void)
 	init_keyboard_driver();
 	init_cpu();
 	enable_paging();
+	init_dsl();
+	init_log();
 	sti();
 
 	//在这里启用所有锁
@@ -192,12 +202,92 @@ main(void)
 	enable_kernel_lock();
 	enable_tasks_lock();
 	enable_console_lock();
+	enable_ifs1_lock();
 
 	enter_system();
 	console();
 }
 
 DEFINE_LOCK_IMPL(kernel)
+
+/**
+	@Function:		knl_dsl_malloc
+	@Access:		Private
+	@Description:
+		为 DSL 库准备的释放 malloc 函数。
+	@Parameters:
+		num_bytes, uint32, IN
+			分配大小。
+	@Return:
+		void *
+			分配的内存的指针。返回 NULL 则失败。
+*/
+static
+void *
+knl_dsl_malloc(IN uint32 num_bytes)
+{
+	return alloc_memory(num_bytes);
+}
+
+/**
+	@Function:		knl_dsl_calloc
+	@Access:		Private
+	@Description:
+		为 DSL 库准备的释放 calloc 函数。
+	@Parameters:
+		n, uint32, IN
+			分配数量。
+		size, uint32, IN
+			分配大小。
+	@Return:
+		void *
+			分配的内存的指针。返回 NULL 则失败。
+*/
+static
+void *
+knl_dsl_calloc(	IN uint32 n, 
+			IN uint32 size)
+{
+	return alloc_memory(n * size);
+}
+
+/**
+	@Function:		knl_dsl_free
+	@Access:		Private
+	@Description:
+		为 DSL 库准备的释放 free 函数。
+	@Parameters:
+		ptr, void *, IN
+			要释放的内存的指针。
+	@Return:
+*/
+static
+void
+knl_dsl_free(IN void * ptr)
+{
+	free_memory(ptr);
+}
+
+/**
+	@Function:		init_dsl
+	@Access:		Private
+	@Description:
+		初始化 DSL 库。
+	@Parameters:
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。
+*/
+static
+BOOL
+init_dsl(void)
+{
+	DSLEnvironment env;
+	env.dsl_malloc = knl_dsl_malloc;
+	env.dsl_calloc = knl_dsl_calloc;
+	env.dsl_free = knl_dsl_free;
+	return dsl_init(&env);
+}
 
 /**
 	@Function:		init_interrupt
@@ -1244,14 +1334,24 @@ pf_int(void)
 {
 	while(1)
 	{
-		print_str("Task-");
-		printn(current_tid);
-		print_str(" is Died! Page Fault!\n\n");
+		struct Task * task = get_task_info_ptr(current_tid);
+
+		int8 buffer[1024];
+		sprintf_s(	buffer,
+					1024,
+					"A task causes a error of page fault, the id is %d, the name is '%s'\n",
+					current_tid,
+					task->name);
+		log(LOG_ERROR, buffer);
+
+		print_str_p(buffer, CC_RED);
+		print_str("\n");
+
 		kill_task(current_tid);
 		
 		enable_flush_screen();
 
-		int wait_app_tid = get_wait_app_tid();
+		int32 wait_app_tid = get_wait_app_tid();
 		if(current_tid == wait_app_tid)
 			set_wait_app_tid(-1);
 
@@ -1347,6 +1447,7 @@ enter_system(void)
 	}
 	//press_key_to_continue();
 	clear_screen();
+	log(LOG_NORMAL, "Enter system.");
 }
 
 /**
@@ -1362,6 +1463,11 @@ void
 leave_system(void)
 {
 	FILE * fptr = fopen(SYSTEM_FLAGS_CHECK_FS, FILE_MODE_WRITE);
-	fwrite(fptr, "", 0);
-	fclose(fptr);
+	if(fptr != NULL)
+	{
+		fwrite(fptr, "", 0);
+		fclose(fptr);
+	}
+	log(LOG_NORMAL, "Leave system.");
+	write_log_to_disk();
 }

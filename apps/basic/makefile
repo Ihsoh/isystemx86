@@ -7,9 +7,10 @@ Objs=bin/main.obj bin/lexer.obj bin/die.obj
 Linker=ld -m elf_i386
 Include=-I../../ilib -I../../dslib
 AppMaker=../../tools/appmaker/bin/appmaker
+MTA32Obj=../../ilib/bin/mta32.obj
 
 $(Target): bin $(Objs)
-	$(Linker) -Tsegs.lds -e main --oformat binary -o $(Target) $(Objs) -L../../ilib/bin -lilib -L../../dslib/bin -ldslib
+	$(Linker) -Tsegs.lds -e mta32main --oformat binary -o $(Target) $(MTA32Obj) $(Objs) -L../../ilib/bin -lilib -L../../dslib/bin -ldslib
 	$(AppMaker) $(Target)
 
 bin:

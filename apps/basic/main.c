@@ -7,19 +7,31 @@
 
 char * code = 	"SUB Sum(BYVAL min AS INTEGER)";
 
-void main(void)
+int main(int argc, char * argv[])
 {
-	DSLEnvironment env;
-	env.dsl_malloc = malloc;
-	env.dsl_calloc = calloc;
-	env.dsl_free = free;
-	dsl_init(&env);
-	if(dsl_lnklst_test())
-		printf("OK!\n");
-	else
-		printf("Failed!\n");
-	app_exit();
-
+	int i, i1;
+	*((int *)0xf0000000) = 100;
+	create_file("DA:/", "test.txt");
+	for(i = 0; i < 1; i++)
+	{
+		FILE * fptr = fopen("DA:/test.txt", FILE_MODE_WRITE | FILE_MODE_APPEND);
+		if(fptr == NULL)
+		{
+			printf("ERROR!\n");
+			return -1;
+		}
+		printf("==========%d==========\n", i);
+		fwrite(fptr, "", 0);
+		for(i1 = 0; i1 < 20; i1++)
+		{
+			char buffer[100];
+			sprintf(buffer, "ABCDEFGHIJKLMNOPQRSTUVWXYZ%d\n", i1);
+			fappend(fptr, buffer, strlen(buffer));
+		}
+		fclose(fptr);
+	}
+	return 0;
+	/*
 	struct LEXWord * words = calloc(500, sizeof(struct LEXWord));
 	if(words == NULL)
 	{
@@ -31,5 +43,5 @@ void main(void)
 	while(words->type != LEXWORD_EOF)
 		printf("%s\n", (words++)->name);
 	free(words);
-	app_exit();
+	return 0;*/
 }

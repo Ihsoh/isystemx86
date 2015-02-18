@@ -15,12 +15,12 @@ bin/kfuncs.obj bin/ifs1hdisk.obj bin/cmos.obj bin/ifs1fs.obj bin/tasks.obj \
 bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scall_fs.obj \
 bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
-bin/klib.obj bin/sfunc_window.obj bin/kstring.obj $(StringObj)
+bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj $(StringObj)
 Linker=ld -m elf_i386
-Include=-I../ilib
+Include=-I../ilib -I../dslib
 
 $(Target): bin $(Objs)
-	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)
+	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) -L../dslib/bin -ldslib
 
 bin:
 	-mkdir bin
@@ -123,6 +123,9 @@ bin/sfunc_window.obj: sfunc_window.c sfunc_window.h
 
 bin/kstring.obj: kstring.c kstring.h
 	$(CC) $(CFlags) -c kstring.c -o bin/kstring.obj $(Include)
+
+bin/log.obj: log.c log.h
+	$(CC) $(CFlags) -c log.c -o bin/log.obj $(Include)
 
 .PHONY:Clear
 

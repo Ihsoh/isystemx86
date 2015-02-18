@@ -12,7 +12,7 @@ Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.o
 bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj
 AR=ar
 
-$(Target): bin $(Objs)
+$(Target): bin  bin/mta32.obj $(Objs)
 	$(AR) -rc $(Target) $(Objs)
 
 bin:
@@ -47,6 +47,11 @@ bin/stdio.obj: stdio.c stdio.h
 
 bin/stdlib.obj: stdlib.c stdlib.h
 	$(CC) $(CFlags) -c stdlib.c -o bin/stdlib.obj
+
+
+
+bin/mta32.obj: mta32.c
+	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj
 
 .PHONY:Clear
 

@@ -53,6 +53,24 @@ dsl_lnklst_remove_node(	IN OUT DSLLinkedList * list,
 
 extern
 BOOL
+dsl_lnklst_delete_node(	IN OUT DSLLinkedList * list,
+						IN OUT DSLLinkedListNode * node);
+
+extern
+BOOL
+dsl_lnklst_delete_all_node(IN OUT DSLLinkedList * list);
+
+extern
+BOOL
+dsl_lnklst_delete_object_node(	IN OUT DSLLinkedList * list,
+								IN OUT DSLLinkedListNode * node);
+
+extern
+BOOL
+dsl_lnklst_delete_all_object_node(IN OUT DSLLinkedList * list);
+
+extern
+BOOL
 dsl_lnklst_clear(OUT DSLLinkedList * list);
 
 extern
@@ -66,7 +84,7 @@ dsl_lnklst_get(	IN DSLLinkedList * list,
 				IN int32 index);
 
 extern
-BOOL
-dsl_lnklst_test(void);
+int32
+dsl_lnklst_count(IN DSLLinkedList * list);
 
 #endif

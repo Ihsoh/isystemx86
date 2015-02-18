@@ -10,8 +10,8 @@
 #include "types.h"
 #include "memory.h"
 #include "ifs1disk.h"
-#include "screen.h"
 #include "cmos.h"
+#include <string.h>
 
 /**
 	@Function:		max_block_count
@@ -158,15 +158,15 @@ add_block(	IN int8 * symbol,
 	{
 		struct RawBlock temp;
 		if(!get_block(symbol, ui, &temp))
-			return 0xFFFFFFFF;
+			return INVALID_BLOCK_ID;
 		if(!temp.used)
 		{
 			if(!set_block(symbol, ui, (struct RawBlock *)block))
-				return 0xFFFFFFFF;
+				return INVALID_BLOCK_ID;
 			return ui;
 		}
 	}
-	return 0xFFFFFFFF;
+	return INVALID_BLOCK_ID;
 }
 
 /**
@@ -200,7 +200,7 @@ fill_dir_block(	IN int8 * name,
 	for(ui = 0; ui < sizeof(dir->reserve); ui++)
 		dir->reserve[ui] = 0;
 	for(ui = 0; ui < sizeof(dir->blockids) / sizeof(uint); ui++)
-		dir->blockids[ui] = 0xFFFFFFFF;
+		dir->blockids[ui] = INVALID_BLOCK_ID;
 	return TRUE;
 }
 
@@ -237,6 +237,6 @@ fill_file_block(IN int8 * name,
 	for(ui = 0; ui < sizeof(file->reserve); ui++)
 		file->reserve[ui] = 0;
 	for(ui = 0; ui < sizeof(file->blockids) / sizeof(uint32); ui++)
-		file->blockids[ui] = 0xFFFFFFFF;
+		file->blockids[ui] = INVALID_BLOCK_ID;
 	return TRUE;
 }

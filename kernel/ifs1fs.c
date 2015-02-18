@@ -11,7 +11,12 @@
 #include "ifs1blocks.h"
 #include "cmos.h"
 #include "screen.h"
+#include "lock.h"
 #include <string.h>
+
+#include <linked_list.h>
+
+DEFINE_LOCK_IMPL(ifs1)
 
 /**
 	@Function:		format_disk
@@ -386,13 +391,70 @@ _df(IN int8 * symbol,
 	uint32 ui;
 	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
 	{
-		uint sub_blockid = dir.blockids[ui];
+		uint32 sub_blockid = dir.blockids[ui];
 		struct RawBlock raw_block;
 		if(	sub_blockid != INVALID_BLOCK_ID 
 			&& get_block(symbol, sub_blockid, &raw_block)
 			&& raw_block.used)
 		{
 			memcpy(blocks + count, &raw_block, sizeof(struct RawBlock));
+			count++;
+		}
+		else
+			dir.blockids[ui] = INVALID_BLOCK_ID;
+	}
+	if(set_block(symbol, id, (struct RawBlock *)&dir))
+		return count;
+	else
+		return -1;
+}
+
+/**
+	@Function:		_dir_list
+	@Access:		Private
+	@Description:
+		获取指定磁盘的指定目录下的文件和文件夹的块集合。
+	@Parameters:
+		symbol, int8 *, IN
+			盘符。
+		id, uint32, IN
+			目录的块ID。
+		list, DSLLinkedList *, OUT
+			用于储存块的列表。
+	@Return:
+		int32
+			失败则返回-1，否则返回目录下的文件和文件夹数量的总和。
+*/
+static
+int32
+_dir_list(	IN int8 * symbol,
+			IN uint32 id,
+			OUT DSLLinkedList * list)
+{
+	int32 count = 0; 
+	struct DirBlock dir;
+	if(	id == INVALID_BLOCK_ID
+		|| symbol == NULL
+		|| list == NULL
+		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| dir.used == 0 
+		|| dir.type != BLOCK_TYPE_DIR)
+		return -1;
+	uint32 ui;
+	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
+	{
+		uint32 sub_blockid = dir.blockids[ui];
+		struct RawBlock raw_block;
+		if(	sub_blockid != INVALID_BLOCK_ID 
+			&& get_block(symbol, sub_blockid, &raw_block)
+			&& raw_block.used)
+		{
+			struct RawBlock * new_raw_block = alloc_memory(sizeof(struct RawBlock));
+			if(new_raw_block == NULL)
+				return -1;
+			memcpy(new_raw_block, &raw_block, sizeof(struct RawBlock));
+			DSLLinkedListNode * node = dsl_lnklst_new_object_node(new_raw_block);
+			dsl_lnklst_add_node(list, node);
 			count++;
 		}
 		else
@@ -646,6 +708,32 @@ df(	IN int8 * path,
 	if(type != BLOCK_TYPE_DIR)
 		return -1;
 	return _df(symbol, id, blocks);
+}
+
+/**
+	@Function:		dir_list
+	@Access:		Public
+	@Description:
+		获取指定磁盘的指定目录下的文件和文件夹的块集合。
+	@Parameters:
+		path, int8 *, IN
+			路径。
+		list, DSLLinkedList *, OUT
+			用于储存块的列表。
+	@Return:
+		int32
+			失败则返回-1，否则返回目录下的文件和文件夹数量的总和。
+*/
+int32
+dir_list(	IN int8 * path,
+			OUT DSLLinkedList * list)
+{
+	int32 type;
+	int8 symbol[3];
+	uint32 id = parse_path(path, symbol, &type);
+	if(type != BLOCK_TYPE_DIR)
+		return -1;
+	return _dir_list(symbol, id, list);
 }
 
 /**
@@ -1310,10 +1398,10 @@ exists_df(IN int8 * path)
 }
 
 /**
-	@Function:		fopen
-	@Access:		Public
+	@Function:		_fopen_unsafe
+	@Access:		Private
 	@Description:
-		打开一个文件。
+		打开一个文件。非安全版本。
 	@Parameters:
 		path, int8 *, IN
 			文件路径。
@@ -1323,9 +1411,10 @@ exists_df(IN int8 * path)
 		FILE *
 			文件结构体指针。		
 */
+static
 FILE * 
-fopen(	IN int8 * path, 
-		IN int32 mode)
+_fopen_unsafe(	IN int8 * path, 
+				IN int32 mode)
 {
 	FILE * fptr = (FILE *)alloc_memory(sizeof(FILE));
 	if(fptr == NULL)
@@ -1364,6 +1453,57 @@ fopen(	IN int8 * path,
 }
 
 /**
+	@Function:		fopen
+	@Access:		Public
+	@Description:
+		打开一个文件。
+	@Parameters:
+		path, int8 *, IN
+			文件路径。
+		mode, int32, IN
+			打开模式。
+	@Return:
+		FILE *
+			文件结构体指针。		
+*/
+FILE * 
+fopen(	IN int8 * path, 
+		IN int32 mode)
+{
+	lock();
+	FILE * fptr = _fopen_unsafe(path, mode);
+	unlock();
+	return fptr;
+}
+
+/**
+	@Function:		_fclose_unsafe
+	@Access:		Private
+	@Description:
+		关闭文件。非安全版本。
+	@Parameters:
+		fptr, FILE *, IN
+			文件指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+static
+BOOL
+_fclose_unsafe(IN FILE * fptr)
+{
+	if(fptr == NULL)
+		return FALSE;
+	int32 r = TRUE;
+	fptr->file_block->lock = 0;
+	if(!set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block)))
+		r = FALSE;
+	free_memory(fptr->file_block);
+	free_memory(fptr);
+	return r;
+}
+
+/**
 	@Function:		fclose
 	@Access:		Public
 	@Description:
@@ -1378,22 +1518,17 @@ fopen(	IN int8 * path,
 BOOL
 fclose(IN FILE * fptr)
 {
-	if(fptr == NULL)
-		return FALSE;
-	int32 r = TRUE;
-	fptr->file_block->lock = 0;
-	if(!set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block)))
-		r = FALSE;
-	free_memory(fptr->file_block);
-	free_memory(fptr);
+	lock();
+	BOOL r = _fclose_unsafe(fptr);
+	unlock();
 	return r;
 }
 
 /**
-	@Function:		fwrite
-	@Access:		Public
+	@Function:		_fwrite_unsafe
+	@Access:		Private
 	@Description:
-		写文件。
+		写文件。非安全版本。
 	@Parameters:
 		fptr, FILE *, IN
 			文件指针。
@@ -1405,10 +1540,11 @@ fclose(IN FILE * fptr)
 		BOOL
 			返回TRUE则成功，否则失败。		
 */
+static
 BOOL
-fwrite(	IN FILE * fptr, 
-		IN uint8 * buffer, 
-		IN uint32 len)
+_fwrite_unsafe(	IN FILE * fptr, 
+				IN uint8 * buffer, 
+				IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_WRITE) == 0 || len > MAX_FILE_LEN)
 		return FALSE;
@@ -1440,7 +1576,7 @@ fwrite(	IN FILE * fptr,
 			data_block.reserve[ui] = 0;
 		memcpy(data_block.data, buffer, data_block.length);
 		buffer += data_block.length;
-		uint data_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
+		uint32 data_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
 		fptr->file_block->blockids[index++] = data_block_id;
 	}
 	fptr->file_block->length = len;
@@ -1449,10 +1585,37 @@ fwrite(	IN FILE * fptr,
 }
 
 /**
-	@Function:		fread
+	@Function:		fwrite
 	@Access:		Public
 	@Description:
-		读文件。
+		写文件。
+	@Parameters:
+		fptr, FILE *, IN
+			文件指针。
+		buffer, uint8 *, IN
+			数据缓冲区。
+		len, uint32, IN
+			写入长度。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+fwrite(	IN FILE * fptr, 
+		IN uint8 * buffer, 
+		IN uint32 len)
+{
+	lock();
+	BOOL r = _fwrite_unsafe(fptr, buffer, len);
+	unlock();
+	return r;
+}
+
+/**
+	@Function:		_fread_unsafe
+	@Access:		Private
+	@Description:
+		读文件。非安全版本。
 	@Parameters:
 		fptr, FILE *, IN
 			文件指针。
@@ -1464,10 +1627,11 @@ fwrite(	IN FILE * fptr,
 		uint32
 			实际读入长度。		
 */
+static
 uint32
-fread(	IN FILE * fptr, 
-		OUT uint8 * buffer, 
-		IN uint32 len)
+_fread_unsafe(	IN FILE * fptr, 
+				OUT uint8 * buffer, 
+				IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_READ) == 0 || len == 0)
 		return 0;
@@ -1497,6 +1661,33 @@ fread(	IN FILE * fptr,
 }
 
 /**
+	@Function:		fread
+	@Access:		Public
+	@Description:
+		读文件。
+	@Parameters:
+		fptr, FILE *, IN
+			文件指针。
+		buffer, uint8 *, OUT
+			数据缓冲区。
+		len, uint32, IN
+			最大读入长度。
+	@Return:
+		uint32
+			实际读入长度。		
+*/
+uint32
+fread(	IN FILE * fptr, 
+		OUT uint8 * buffer, 
+		IN uint32 len)
+{
+	lock();
+	uint32 r = _fread_unsafe(fptr, buffer, len);
+	unlock();
+	return r;
+}
+
+/**
 	@Function:		freset
 	@Access:		Public
 	@Description:
@@ -1514,10 +1705,10 @@ freset(IN FILE * fptr)
 }
 
 /**
-	@Function:		fappend
-	@Access:		Public
+	@Function:		_fappend_unsafe
+	@Access:		Private
 	@Description:
-		追加文件。
+		追加文件。非安全版本。
 	@Parameters:
 		fptr, FILE *, IN
 			文件指针。
@@ -1529,10 +1720,11 @@ freset(IN FILE * fptr)
 		BOOL
 			返回TRUE则成功，否则失败。		
 */
+static
 BOOL
-fappend(IN FILE * fptr, 
-		IN uint8 * buffer, 
-		IN uint32 len)
+_fappend_unsafe(IN FILE * fptr, 
+				IN uint8 * buffer, 
+				IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_APPEND) == 0 || fptr->file_block->length + len > MAX_FILE_LEN)
 		return FALSE;
@@ -1577,7 +1769,7 @@ fappend(IN FILE * fptr,
 				//不存在. 新建一个Data Block并追加到File Block里.
 				data_block.used = 1;
 				data_block.type = BLOCK_TYPE_DATA;
-				uint new_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
+				uint32 new_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
 				if(new_block_id == INVALID_BLOCK_ID)
 					return FALSE;
 				fptr->file_block->blockids[cblock_index - 1] = new_block_id;
@@ -1603,7 +1795,7 @@ fappend(IN FILE * fptr,
 	if(!is_save)
 	{
 		//获取未保存的Data Block的ID.
-		uint id = fptr->file_block->blockids[(is_next ? cblock_index - 1 : cblock_index)];
+		uint32 id = fptr->file_block->blockids[(is_next ? cblock_index - 1 : cblock_index)];
 		
 		//检查未保存Data Block是否存在.
 		if(id != INVALID_BLOCK_ID)
@@ -1622,6 +1814,33 @@ fappend(IN FILE * fptr,
 	fptr->file_block->length += append_len;
 	get_cmos_date_time(&(fptr->file_block->change));
 	return set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block));
+}
+
+/**
+	@Function:		fappend
+	@Access:		Public
+	@Description:
+		追加文件。
+	@Parameters:
+		fptr, FILE *, IN
+			文件指针。
+		buffer, uint8 *, IN
+			数据缓冲区。
+		len, uint32, IN
+			追加的数据的长度。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+fappend(IN FILE * fptr, 
+		IN uint8 * buffer, 
+		IN uint32 len)
+{
+	lock();
+	BOOL r = _fappend_unsafe(fptr, buffer, len);
+	unlock();
+	return r;
 }
 
 static int8 repairing_path[MAX_PATH_BUFFER_LEN];
@@ -1657,7 +1876,7 @@ repair_files(	IN int8 * symbol,
 	{
 		strcat(repairing_path, dir->dirname);
 		strcat(repairing_path, "/");
-	}	
+	}
 	for(ui = 0; ui < sizeof(dir->blockids) / sizeof(uint32); ui++)
 	{		
 		uint32 id = blockids[ui];

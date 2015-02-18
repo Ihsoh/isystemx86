@@ -30,10 +30,16 @@ MAKE_FILE	VA:/isystem/bins/ paint
 WRITE_FILE	VA:/isystem/bins/paint apps/paint/bin/paint.bin
 
 #System dump directory
-MAKE_DIR	VA:/isystem/ dumps
+MAKE_DIR	VA:/isystem/ dump
 
 #System data directory
-MAKE_DIR	VA:/isystem/ datas
+MAKE_DIR	VA:/isystem/ data
+
+#Log directory
+MAKE_DIR	VA:/isystem/data/ log
+
+#System log file
+MAKE_FILE	VA:/isystem/data/log/ system.log
 
 #System resource directory
 MAKE_DIR	VA:/isystem/ resources

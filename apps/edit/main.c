@@ -18,11 +18,17 @@ void flush(void);
 void load(void);
 void save(void);
 
-void main(void)
+int main(int argc, char * argv[])
 {
+	if(argc != 2)
+	{
+		printf("Format:\n\tedit {file}\n");
+		return -1;
+	}
+	strcpy(filepath, argv[1]);
 	init();
 	edit();
-	app_exit();
+	return 0;
 }
 
 void die(char * message)
@@ -37,11 +43,6 @@ void die(char * message)
 
 void init(void)
 {
-	get_param_w(NULL);
-	get_param_w(filepath);
-	get_param_w(filepath);	
-	if(strlen(filepath) == 0)
-		die("edit {file}");
 	uint ui, ui1;
 	for(ui = 0; ui < MAX_ROW; ui++)
 		for(ui1 = 0; ui1 < MAX_COLUMN; ui1++)

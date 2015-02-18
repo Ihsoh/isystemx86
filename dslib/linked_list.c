@@ -102,6 +102,56 @@ dsl_lnklst_remove_node(	IN OUT DSLLinkedList * list,
 }
 
 BOOL
+dsl_lnklst_delete_node(	IN OUT DSLLinkedList * list,
+						IN OUT DSLLinkedListNode * node)
+{
+	if(list == NULL || node == NULL)
+		return FALSE;
+	if(dsl_lnklst_remove_node(list, node))
+	{
+		dsl_free(node);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+BOOL
+dsl_lnklst_delete_all_node(IN OUT DSLLinkedList * list)
+{
+	if(list == NULL)
+		return FALSE;
+	while(list->head != NULL)
+		dsl_lnklst_delete_node(list, list->head);
+	return TRUE;
+}
+
+BOOL
+dsl_lnklst_delete_object_node(	IN OUT DSLLinkedList * list,
+								IN OUT DSLLinkedListNode * node)
+{
+	if(list == NULL || node == NULL || node->value.type != DSLVALUE_OBJECT)
+		return FALSE;
+	if(dsl_lnklst_remove_node(list, node))
+	{
+		dsl_free(node->value.value.object_value);
+		dsl_free(node);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+BOOL
+dsl_lnklst_delete_all_object_node(IN OUT DSLLinkedList * list)
+{
+	if(list == NULL)
+		return FALSE;
+	while(list->head != NULL)
+		dsl_lnklst_delete_object_node(list, list->head);
+}
+
+BOOL
 dsl_lnklst_clear(OUT DSLLinkedList * list)
 {
 	if(list == NULL)
@@ -142,39 +192,10 @@ dsl_lnklst_get(	IN DSLLinkedList * list,
 	return next;
 }
 
-BOOL
-dsl_lnklst_test(void)
+int32
+dsl_lnklst_count(IN DSLLinkedList * list)
 {
-	DSLLinkedListNode * node0 = dsl_lnklst_new_int32_node(100);
-	if(	node0 == NULL
-		|| NODEPTR_TYPE(node0) != DSLVALUE_INT32
-		|| NODEPTR_VALUE(node0).int32_value != 100)
-		return FALSE;
-	DSLLinkedListNode * node1 = dsl_lnklst_new_int32_node(200);
-	if(node1 == NULL)
-		return FALSE;
-	DSLLinkedListNode * node2 = dsl_lnklst_new_int32_node(300);
-	if(node2 == NULL)
-		return FALSE;
-	DSLLinkedListNode * node3 = dsl_lnklst_new_int32_node(400);
-	if(node3 == NULL)
-		return FALSE;
-	DSLLinkedList * list = dsl_lnklst_new();
 	if(list == NULL)
-		return FALSE;
-	if(!dsl_lnklst_add_node(list, node0))
-		return FALSE;
-	if(!dsl_lnklst_add_node(list, node1))
-		return FALSE;
-	if(!dsl_lnklst_add_node(list, node2))
-		return FALSE;
-	if(!dsl_lnklst_add_node(list, node3))
-		return FALSE;
-	if(!dsl_lnklst_remove_node(list, node1))
-		return FALSE;
-	if(dsl_lnklst_find(list, node2) != 1)
-		return FALSE;
-	if(NODEPTR_VALUE(dsl_lnklst_get(list, 1)).int32_value != 300)
-		return FALSE;
-	return TRUE;
+		return -1;
+	return list->count;	
 }

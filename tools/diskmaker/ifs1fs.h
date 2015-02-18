@@ -69,4 +69,3 @@ extern int test_fappend(void);
 #define	flen(fptr)	((fptr)->file_block->length)
 
 #endif
-

@@ -34,4 +34,6 @@
 #define	SYSTEM_FLAGS_PATH			SYSTEM_PATH"flags/"
 #define	SYSTEM_FLAGS_CHECK_FS		SYSTEM_FLAGS_PATH"cfs.flg"
 
+#define	SYSTEM_LOG_FILE				SYSTEM_PATH"data/log/system.log"
+
 #endif

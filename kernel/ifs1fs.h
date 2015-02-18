@@ -10,6 +10,9 @@
 
 #include "types.h"
 #include "ifs1blocks.h"
+#include "lock.h"
+
+#include <linked_list.h>
 
 #define	MAX_FILENAME_LEN		255
 #define	MAX_FILENAME_BUFFER_LEN	(MAX_FILENAME_LEN + 1)
@@ -25,8 +28,6 @@
 #define	FILE_MODE_ALL		(FILE_MODE_READ | FILE_MODE_WRITE | FILE_MODE_APPEND)
 
 #define	MAX_OPENED_FILE_COUNT	(10 * 1024)
-
-#define	INVALID_BLOCK_ID	0xffffffff
 
 typedef struct File
 {
@@ -60,6 +61,11 @@ extern
 int32
 df(	IN int8 * path,
 	OUT struct RawBlock * blocks);
+
+extern
+int32
+dir_list(	IN int8 * path,
+			OUT DSLLinkedList * list);
 
 extern
 BOOL
@@ -175,5 +181,7 @@ BOOL
 repair_ifs1(IN int8 * symbol);
 
 #define	flen(fptr)	((fptr)->file_block->length)
+
+DEFINE_LOCK_EXTERN(ifs1)
 
 #endif

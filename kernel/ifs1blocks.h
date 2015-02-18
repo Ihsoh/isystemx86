@@ -18,6 +18,8 @@
 #define	BLOCK_SECTORS	128
 #define	START_BLOCK_ID	10
 
+#define	INVALID_BLOCK_ID	0xffffffff
+
 //结构名:	RawBlock
 //说明:		无格式块
 struct RawBlock

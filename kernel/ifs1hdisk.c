@@ -9,6 +9,8 @@
 #include "ifs1hdisk.h"
 #include "types.h"
 #include "386.h"
+#include "log.h"
+
 #include <string.h>
 
 struct HardDiskArguments
@@ -213,11 +215,22 @@ wait_ready(void)
 	uint32 timeout_counter = 0;
 	while(1)
 	{
+		while(inb(HD_STATUS) & STAT_BUSY);
 		uint8 state = inb(HD_STATUS);
+		if((state & STAT_ERR) || (state & STAT_ECC) || (state & STAT_WRERR))
+		{
+			log(LOG_ERROR,
+				"ATA Driver causes a error when the driver is waiting ready state.");
+			return FALSE;
+		}
 		if(state & STAT_READY)
 			break;
 		if(++timeout_counter == MAX_TIMEOUT)
+		{
+			log(LOG_WARNING,
+				"ATA Driver causes a timeout when the driver is waiting ready state.");
 			return FALSE;
+		}
 	}
 	return TRUE;
 }
@@ -239,11 +252,22 @@ wait_data(void)
 	uint32 timeout_counter = 0;
 	while(1)
 	{
+		while(inb(HD_STATUS) & STAT_BUSY);
 		uint8 state = inb(HD_STATUS);
+		if((state & STAT_ERR) || (state & STAT_ECC) || (state & STAT_WRERR))
+		{
+			log(LOG_ERROR,
+				"ATA Driver causes a error when the driver is waiting data.");
+			return FALSE;
+		}
 		if(state & STAT_DRQ)
 			break;
 		if(++timeout_counter == MAX_TIMEOUT)
+		{
+			log(LOG_WARNING,
+				"ATA Driver causes a timeout when the driver is waiting data.");
 			return FALSE;
+		}
 	}
 	return TRUE;
 }
@@ -278,6 +302,8 @@ _read_sector_h(	IN int8 * symbol,
 	uint32 c, h, s;
 	chs(symbol, pos, &c, &h, &s);
 	outb(HD_CMD, hdisk->control_byte);
+	if(!wait_ready())
+		return FALSE;
 	uint16 port = HD_DATA;
 	outb(++port, hdisk->wpc >> 2);
 	outb(++port, 1);
@@ -357,6 +383,8 @@ _write_sector_h(IN int8 * symbol,
 	uint32 c, h, s;
 	chs(symbol, pos, &c, &h, &s);
 	outb(HD_CMD, hdisk->control_byte);
+	if(!wait_ready())
+		return FALSE;
 	uint16 port = HD_DATA;
 	outb(++port, hdisk->wpc >> 2);
 	outb(++port, 1);
@@ -439,6 +467,8 @@ _read_sectors_h(IN int8 * symbol,
 	uint32 c, h, s;
 	chs(symbol, pos, &c, &h, &s);
 	outb(HD_CMD, hdisk->control_byte);
+	if(!wait_ready())
+		return FALSE;
 	uint16 port = HD_DATA;
 	outb(++port, hdisk->wpc >> 2);
 	outb(++port, count);
@@ -530,6 +560,8 @@ _write_sectors_h(	IN int8 * symbol,
 	uint32 c, h, s;
 	chs(symbol, pos, &c, &h, &s);
 	outb(HD_CMD, hdisk->control_byte);
+	if(!wait_ready())
+		return FALSE;
 	uint16 port = HD_DATA;
 	outb(++port, hdisk->wpc >> 2);
 	outb(++port, count);

@@ -15,4 +15,3 @@ typedef unsigned long long ullong;
 #define	NULL	((void *)0)
 
 #endif
-

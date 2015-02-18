@@ -21,6 +21,8 @@
 #include "vars.h"
 #include "cpu.h"
 #include "kstring.h"
+#include "log.h"
+
 #include <string.h>
 
 #include "386.h"
@@ -791,22 +793,11 @@ files(	IN int8 * path,
 	}
 	path = temp;
 	uint ui, ui1;
-	int32 count = df_count(path);
+	DSLLinkedList * list = dsl_lnklst_new();
+	int32 count = dir_list(path, list);
 	if(count == -1)
 	{
 		error("Invalid path!");
-		return 0;
-	}
-	struct RawBlock * blocks = (struct RawBlock *)alloc_memory(count * sizeof(struct RawBlock));
-	if(blocks == NULL)
-	{
-		error("No memory!");
-		return 0;
-	}
-	if(df(path, blocks) == -1)
-	{
-		error("Invalid path!");
-		free_memory(blocks);
 		return 0;
 	}
 	for(ui = 0; ui < count; ui++)
@@ -819,7 +810,7 @@ files(	IN int8 * path,
 		}
 		if(simple)
 		{
-			struct RawBlock * block = blocks + ui;
+			struct RawBlock * block = dsl_lnklst_get(list, ui)->value.value.object_value;
 			if(block->type == BLOCK_TYPE_FILE)
 			{
 				struct FileBlock * file = (struct FileBlock *)block;
@@ -840,7 +831,7 @@ files(	IN int8 * path,
 			for(ui1 = 0; ui1 < sizeof(name) - 1; ui1++)
 				name[ui1] = ' ';
 			name[sizeof(name) - 1] = '\0';
-			struct RawBlock * block = blocks + ui;
+			struct RawBlock * block = dsl_lnklst_get(list, ui)->value.value.object_value;
 			if(block->type == BLOCK_TYPE_FILE)
 			{
 				struct FileBlock * file = (struct FileBlock *)block;
@@ -881,7 +872,8 @@ files(	IN int8 * path,
 			print_str("\n");
 		}
 	}
-	free_memory(blocks);
+	dsl_lnklst_delete_all_object_node(list);
+	free_memory(list);
 	return 1;
 }
 
@@ -1441,12 +1433,16 @@ batch(IN int8 * path)
 		return 0;
 	FILE * fptr = fopen(path, FILE_MODE_READ);
 	if(fptr == NULL)
+	{
+		free_vars(local_vars_s);
 		return 0;
+	}
 	uint32 file_len = flen(fptr);
 	int8 * cmds = (int8 *)alloc_memory(file_len);
 	if(cmds == NULL)
 	{
 		fclose(fptr);
+		free_vars(local_vars_s);
 		return 0;
 	}
 	fread(fptr, cmds, file_len);
@@ -1457,6 +1453,7 @@ batch(IN int8 * path)
 	if(lines == NULL)
 	{
 		free_memory(cmds);
+		free_vars(local_vars_s);
 		return 0;
 	}
 	uint32 line = 0;
@@ -1489,11 +1486,13 @@ batch(IN int8 * path)
 			print_str("\n");
 			free_memory(cmds);
 			free_memory(lines);
+			free_vars(local_vars_s);
 			return 0;
 		}
 	}
 	free_memory(cmds);
 	free_memory(lines);
+	free_vars(local_vars_s);
 	return 1;
 }
 
@@ -1786,6 +1785,11 @@ exec(	IN int8 * cmd,
 			parse_cmd(NULL, value, 1023);
 			r = set(property, value);
 			print_str("\n");
+		}
+		else if(strcmp(name, "flushlog") == 0)
+		{
+			write_log_to_disk();
+			clear_log();
 		}
 		//Batch
 		else if(strcmp(name, "goto") == 0)

@@ -109,4 +109,3 @@ int fill_file_block(char * name, struct FileBlock * file)
 		file->blockids[ui] = 0xFFFFFFFF;
 	return 1;
 }
-
