@@ -31,6 +31,10 @@ extern
 void
 set_clock(int32 enable);
 
+extern
+void
+get_current_path(OUT int8 * path);
+
 DEFINE_LOCK_EXTERN(console)
 
 #endif

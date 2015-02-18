@@ -26,6 +26,7 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	strcpy(filepath, argv[1]);
+	fix_path(filepath, filepath);
 	init();
 	edit();
 	return 0;

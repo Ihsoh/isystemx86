@@ -1748,7 +1748,25 @@ exec(	IN int8 * cmd,
 		{
 			int8 src_path[MAX_PATH_BUFFER_LEN];
 			parse_cmd(NULL, src_path, MAX_PATH_LEN);
-			r = run(src_path, cmd) == -1 ? 0 : 1;
+			BOOL ran = FALSE;
+			int8 buffer[10 * 1024];
+			int8 path[1024];
+			get_var_value_with_size(global_vars_s,
+									"__path__",
+									buffer,
+									10 * 1024);
+			split_string(NULL, NULL, 0, 0);
+			while(split_string(path, buffer, ';', 1024) != NULL)
+				if(exists_file(path, src_path))
+				{
+					int8 temp[1024];
+					strcpy(temp, path);
+					strcat(temp, src_path);
+					r = run(temp, cmd) == -1 ? 0 : 1;
+					ran = TRUE;
+				}
+			if(!ran)
+				r = run(src_path, cmd) == -1 ? 0 : 1;
 			print_str("\n");
 		}
 		else if(strcmp(name, "clear") == 0)
@@ -1991,15 +2009,28 @@ exec(	IN int8 * cmd,
 			print_str("\n");
 		}
 		else
-			if(exists_file(SYSTEM_BINS_PATH, name))
-			{
-				int8 temp[1024];
-				strcpy(temp, SYSTEM_BINS_PATH);
-				strcat(temp, name);
-				r = run_wait(temp, cmd) == -1 ? 0 : 1;
-			}
-			else
+		{
+			BOOL ran = FALSE;
+			int8 buffer[10 * 1024];
+			int8 path[1024];
+			get_var_value_with_size(global_vars_s,
+									"__path__",
+									buffer,
+									10 * 1024);
+			split_string(NULL, NULL, 0, 0);
+			while(split_string(path, buffer, ';', 1024) != NULL)
+				if(exists_file(path, name))
+				{
+					int8 temp[1024];
+					strcpy(temp, path);
+					strcat(temp, name);
+					r = run_wait(temp, cmd) == -1 ? 0 : 1;
+					ran = TRUE;
+				}
+			if(!ran)
 				r = run_wait(name, cmd) == -1 ? 0 : 1;
+			print_str("\n");
+		}
 	}
 	while(wait_app_tid != -1)
 		if(get_task_info_ptr(wait_app_tid) == NULL)
@@ -2137,7 +2168,7 @@ get_wait_app_tid(void)
 	@Return:	
 */
 void
-set_wait_app_tid(int32 tid)
+set_wait_app_tid(IN int32 tid)
 {
 	wait_app_tid = tid;
 }
@@ -2153,7 +2184,23 @@ set_wait_app_tid(int32 tid)
 	@Return:	
 */
 void
-set_clock(int32 enable)
+set_clock(IN int32 enable)
 {
 	enable_clock = enable;
+}
+
+/**
+	@Function:		get_current_path
+	@Access:		Public
+	@Description:
+		获取当前目录路径。
+	@Parameters:
+		path, int8 *, IN
+			用于储存当前目录路径的缓冲区。
+	@Return:	
+*/
+void
+get_current_path(OUT int8 * path)
+{
+	strcpy(path, current_path);
 }

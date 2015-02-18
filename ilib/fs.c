@@ -170,3 +170,12 @@ int df(char * path, struct RawBlock * raw_blocks)
 	system_call(SCALL_FS, SCALL_DF, &sparams);
 	return INT32_SPARAM(sparams.param0);
 }
+
+int fix_path(char * path, char * new_path)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(path);
+	sparams.param1 = SPARAM(new_path);
+	system_call(SCALL_FS, SCALL_FIX_PATH, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}

@@ -30,6 +30,7 @@
 #define	SCALL_FCHANGE_DT	16
 #define	SCALL_DF_COUNT		17
 #define	SCALL_DF			18
+#define	SCALL_FIX_PATH		19
 
 extern
 void

@@ -99,6 +99,7 @@ struct DirBlock
 #define	SCALL_FCHANGE_DT	16
 #define	SCALL_DF_COUNT		17
 #define	SCALL_DF			18
+#define	SCALL_FIX_PATH		19
 
 #define	FILE_MODE_READ		0x01
 #define	FILE_MODE_WRITE		0x02
@@ -164,5 +165,8 @@ extern int df_count(char * path);
 
 extern int df(char * path, struct RawBlock * raw_blocks);
 #define	il_df(path, raw_blocks)	(df((path), (raw_blocks)))
+
+extern int fix_path(char * path, char * new_path);
+#define	il_fix_path(path, new_path) (fix_path((path), (new_path)))
 
 #endif

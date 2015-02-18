@@ -12,6 +12,7 @@
 #include "386.h"
 #include "kfuncs.h"
 #include "lock.h"
+#include "log.h"
 
 static uint32 kernel_cr3;
 static uint32 * kernel_pagedt;	

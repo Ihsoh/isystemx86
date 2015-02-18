@@ -13,6 +13,7 @@
 #include "cmos.h"
 #include "ifs1blocks.h"
 #include "tasks.h"
+#include "console.h"
 #include <string.h>
 
 /**
@@ -415,6 +416,23 @@ system_call_fs(	IN uint32 func,
 			struct RawBlock * raw_blocks = (struct RawBlock *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
 			int32 count = df(path, raw_blocks);
 			sparams->param0 = SPARAM(count);
+			break;
+		}
+		//根据当前目录，产生一个路径的绝对路径。
+		//
+		//参数:
+		//	Param0=路径(相对于调用程序空间的偏移地址)
+		//	Param1=绝对路径(相对于调用程序空间的偏移地址)
+		//返回值:
+		//	Param0=1则成功, 0则失败
+		case SCALL_FIX_PATH:
+		{
+			int8 current_path[1024];
+			get_current_path(current_path);
+			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * new_path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			BOOL r = fix_path(path, current_path, new_path);
+			sparams->param0 = SPARAM(r);
 			break;
 		}
 	}
