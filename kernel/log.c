@@ -21,6 +21,8 @@ init_log(void)
 	log_buffer = alloc_memory(LOG_BUFFER_SIZE);
 	if(log_buffer == NULL)
 		return;
+	if(!exists_file("DA:/isystem/data/log/", "system.log"))
+		create_file("DA:/isystem/data/log/", "system.log");
 	log_buffer[0] = '\0';
 }
 
