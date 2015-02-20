@@ -7,7 +7,7 @@ TargetDir=bin
 Out=isystemx86.img
 Target=$(TargetDir)/$(Out)
 
-$(Target): 	bin ilib/bin/libilib.a dslib/bin/libdslib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
+$(Target):	bin ilib/bin/libilib.a dslib/bin/libdslib.a boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
 	cd apps/basic && make
@@ -15,6 +15,7 @@ $(Target): 	bin ilib/bin/libilib.a dslib/bin/libdslib.a boot/bin/boot.bin kernel
 	cd apps/paint && make
 #tools/diskmaker/bin/diskmaker boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
 	tools/diskmaker/bin/diskmaker boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
+	cd tools/idoc/ && python idoc.py ../../kernel ../../doc/isystemx86-kernel-doc
 
 bin:
 	-mkdir bin

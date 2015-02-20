@@ -1,0 +1,1134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>			kernel.c</title>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	</head>
+	<body style="background-color:#dddddd;">
+		<h1>			kernel.c</h1>
+		<div style="padding-left: 40px;">
+					Ihsoh, 			2014-1-24
+		</div>
+		<br />
+		<br />
+		<br />
+		<br />
+		<div>
+			<h2>文件描述</h2>
+			<div style="padding-left: 40px;">
+						内核。<br />
+			</div>
+			<br />
+			<br />
+			<br />
+			<br />
+		</div>
+		<div>
+			<h2>函数</h2>
+			<div>
+				<div>
+	<a id="main" name="main" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">main</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				内核入口函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="knl_dsl_malloc" name="knl_dsl_malloc" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">knl_dsl_malloc</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				为 DSL 库准备的释放 malloc 函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		num_bytes</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			分配大小。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		void *</span>
+		<p style="padding-left: 40px;">			分配的内存的指针。返回 NULL 则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="knl_dsl_calloc" name="knl_dsl_calloc" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">knl_dsl_calloc</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				为 DSL 库准备的释放 calloc 函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		n</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			分配数量。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		size</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			分配大小。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		void *</span>
+		<p style="padding-left: 40px;">			分配的内存的指针。返回 NULL 则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="knl_dsl_free" name="knl_dsl_free" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">knl_dsl_free</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				为 DSL 库准备的释放 free 函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		ptr</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			要释放的内存的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_dsl" name="init_dsl" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_dsl</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化 DSL 库。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回 TRUE 则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="init_interrupt" name="init_interrupt" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_interrupt</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化中断。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="fpu_error_int" name="fpu_error_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">fpu_error_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				FPU 错误的中断处理函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="fill_tss" name="fill_tss" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">fill_tss</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				填充 TSS 结构体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tss</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct TSS *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			参数1的说明
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		eip</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			TSS 的 EIP 域。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		esp</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			TSS 的 ESP 域。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_noimpl" name="init_noimpl" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_noimpl</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化未被使用的中断的 TSS 结构体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="set_noimpl" name="set_noimpl" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">set_noimpl</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				可以设置相应的中断为未实现。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		int_num</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			中断号
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="noimpl_int" name="noimpl_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">noimpl_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				未被使用的中断的中断过程。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_gp" name="init_gp" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_gp</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化通用保护的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="gp_int" name="gp_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">gp_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				通用保护的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_timer" name="init_timer" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_timer</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化定时器的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_mouse" name="init_mouse" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_mouse</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化鼠标的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_keyboard" name="init_keyboard" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_keyboard</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化键盘的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_ide" name="init_ide" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_ide</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化 IDE 的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_fpu" name="init_fpu" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_fpu</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化 FPU 的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_system_call" name="init_system_call" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_system_call</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化系统调用的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_pf" name="init_pf" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_pf</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化页失败的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="free_system_call_tss" name="free_system_call_tss" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">free_system_call_tss</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				释放系统调用的 TSS。清除系统调用的 TSS 的 BUSY 状态。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="timer_int" name="timer_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">timer_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				定时器的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="enable_flush_screen" name="enable_flush_screen" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">enable_flush_screen</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				允许刷新屏幕。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="disable_flush_screen" name="disable_flush_screen" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">disable_flush_screen</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				禁用刷新屏幕。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="mouse_int" name="mouse_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">mouse_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				鼠标的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="get_mouse_position" name="get_mouse_position" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">get_mouse_position</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取鼠标的位置。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			鼠标的 X 坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			鼠标的 Y 坐标。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="is_mouse_left_button_down" name="is_mouse_left_button_down" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">is_mouse_left_button_down</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取鼠标的左键是否被按下。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则被按下，否则没被按下。
+</p>
+	</div>
+</div>
+<div>
+	<a id="is_mouse_right_button_down" name="is_mouse_right_button_down" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">is_mouse_right_button_down</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取鼠标的右键是否被按下。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则被按下，否则没被按下。
+</p>
+	</div>
+</div>
+<div>
+	<a id="keyboard_int" name="keyboard_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">keyboard_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				键盘的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="ide_int" name="ide_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">ide_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				IDE 的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="fpu_int" name="fpu_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">fpu_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				FPU 的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="system_call" name="system_call" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">system_call</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				系统调用。由系统调用中断程序调用。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="system_call_int" name="system_call_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">system_call_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				系统调用中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="pf_int" name="pf_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">pf_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				页失败的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="shutdown_system" name="shutdown_system" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">shutdown_system</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				关闭系统。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="reboot_system" name="reboot_system" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">reboot_system</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				重启系统。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="enter_system" name="enter_system" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">enter_system</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化所有资源后被调用。该过程会对系统进行安全检测。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="leave_system" name="leave_system" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">leave_system</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				离开系统时被调用。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+
+			</div>
+		</div>
+	</body>
+</html>

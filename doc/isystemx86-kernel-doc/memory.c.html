@@ -1,0 +1,749 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>			memory.c</title>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	</head>
+	<body style="background-color:#dddddd;">
+		<h1>			memory.c</h1>
+		<div style="padding-left: 40px;">
+					Ihsoh, 			2014-6-7
+		</div>
+		<br />
+		<br />
+		<br />
+		<br />
+		<div>
+			<h2>文件描述</h2>
+			<div style="padding-left: 40px;">
+						提供内存操作功能。<br />
+			</div>
+			<br />
+			<br />
+			<br />
+			<br />
+		</div>
+		<div>
+			<h2>函数</h2>
+			<div>
+				<div>
+	<a id="copy_memory" name="copy_memory" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">copy_memory</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				复制内存中的数据。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		src</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			源地址。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		dst</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			目标地址。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		length</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			复制长度。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="clear_memory" name="clear_memory" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">clear_memory</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				清空内存中的数据。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		dst</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			目标地址。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		data</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			填充的数据。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		len</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			长度。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="get_used_memory_length" name="get_used_memory_length" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">get_used_memory_length</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取已使用内存的长度，单位为Byte。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		uint64</span>
+		<p style="padding-left: 40px;">			已使用的内存的长度。
+</p>
+	</div>
+</div>
+<div>
+	<a id="get_unused_mbd" name="get_unused_mbd" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">get_unused_mbd</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取一个未被使用的内存块描述符。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		mbdt</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct MemoryBlockDescriptor *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			未分配内存块描述符表。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		mbd_count</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			未分配内存块描述符表中内存块描述符的总数。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		struct MemoryBlockDescriptor *</span>
+		<p style="padding-left: 40px;">			未被使用的内存块描述符。
+</p>
+	</div>
+</div>
+<div>
+	<a id="append_mbd" name="append_mbd" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">append_mbd</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				向内存块描述符表结尾添加一个内存块描述符。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		head</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct MemoryBlockDescriptor **</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			内存块描述符表头。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		foot</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct MemoryBlockDescriptor **</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			内存块描述符表尾。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		mbd</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct MemoryBlockDescriptor *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			内存块描述符。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="remove_mbd" name="remove_mbd" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">remove_mbd</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				移除内存块描述符表里的一个内存块描述符。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		head</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct MemoryBlockDescriptor **</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			内存块描述符表头。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		foot</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct MemoryBlockDescriptor **</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			内存块描述符表尾。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		mbd</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct MemoryBlockDescriptor *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			内存块描述符。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="init_memory" name="init_memory" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">init_memory</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化内存。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="get_mbdt_info" name="get_mbdt_info" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">get_mbdt_info</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取未被使用的内存块描述符表的信息。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		total_mbd_count</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			未被使用的内存块描述符总数。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		used_mbd_count</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			未被使用的内存块描述符数量。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		m_size</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			未被使用的内存大小。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="get_umbdt_info" name="get_umbdt_info" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">get_umbdt_info</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取正在被使用的内存块描述符表的信息。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		total_mbd_count</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			正在被使用的内存块描述符总数。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		used_mbd_count</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			正在被使用的内存块描述符数量。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		m_size</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			正在被使用的内存大小。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="align_4kb" name="align_4kb" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">align_4kb</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				使一个值 4KB 对齐。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		n</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			值。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		uint32</span>
+		<p style="padding-left: 40px;">			4KB 对齐之后的值。
+</p>
+	</div>
+</div>
+<div>
+	<a id="_alloc_memory_with_start" name="_alloc_memory_with_start" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">_alloc_memory_with_start</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				分配一段内存。该内存的起始地址必须大于一个指定的地址<br />		或等于该指定的地址。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		m_start</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指定的地址。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		length</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			长度。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		void *</span>
+		<p style="padding-left: 40px;">			分配的内存的地址。返回 NULL 则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="alloc_memory_with_start" name="alloc_memory_with_start" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">alloc_memory_with_start</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				分配一段内存。该内存的起始地址必须大于一个指定的地址<br />		或等于该指定的地址。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		m_start</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指定的地址。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		length</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			长度。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		void *</span>
+		<p style="padding-left: 40px;">			分配的内存的地址。返回 NULL 则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="_alloc_memory" name="_alloc_memory" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">_alloc_memory</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				分配一段内存。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		length</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			长度。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		void *</span>
+		<p style="padding-left: 40px;">			分配的内存的地址。返回 NULL 则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="alloc_memory" name="alloc_memory" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">alloc_memory</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				分配一段内存。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		length</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			长度。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		void *</span>
+		<p style="padding-left: 40px;">			分配的内存的地址。返回 NULL 则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="_free_memory" name="_free_memory" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">_free_memory</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				释放内存。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		ptr</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			要释放的内存的地址。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="free_memory" name="free_memory" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">free_memory</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				释放内存。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		ptr</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			要释放的内存的地址。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="_get_memory_block_size" name="_get_memory_block_size" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">_get_memory_block_size</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取内存块的大小。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		ptr</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			内存的地址。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		uint32</span>
+		<p style="padding-left: 40px;">			内存块的大小。
+</p>
+	</div>
+</div>
+<div>
+	<a id="get_memory_block_size" name="get_memory_block_size" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">get_memory_block_size</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取内存块的大小。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		ptr</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			内存的地址。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		uint32</span>
+		<p style="padding-left: 40px;">			内存块的大小。
+</p>
+	</div>
+</div>
+
+			</div>
+		</div>
+	</body>
+</html>
