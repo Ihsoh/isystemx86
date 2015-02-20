@@ -58,7 +58,8 @@ def process(path, document_path):
 	STATE_FUNC = 2
 	source_file = os.path.split(path)[1]
 	target_file = source_file + '.html'
-	funchtml = u'';
+	funchtml = htmlldr.load_part('func');
+	funclinkshtml = u'';
 	f = codecs.open(path, 'r', 'utf8')
 	lines = []
 	for line in f:
@@ -102,7 +103,10 @@ def process(path, document_path):
 					if file_doc == None:
 						process_die(path, ln, 'Expect file comment')
 					else:
-						funchtml = funchtml + (u'<a href="%s#%s" target="MainIFrame">%s</a><br />' % (os.path.split(target_file)[1], func_name.strip(), func_name.strip()));
+						funclinkhtml = htmlldr.load_part('funclink')
+						funclinkhtml = funclinkhtml.replace('{{{{File}}}}', os.path.split(target_file)[1])
+						funclinkhtml = funclinkhtml.replace('{{{{Name}}}}', func_name.strip())
+						funclinkshtml = funclinkshtml + funclinkhtml
 						func_doc = funcdoc.FuncDoc(func_name, func_access, func_desc)
 						for func_param in func_params:
 							func_doc.add_param(func_param['arr'][0], func_param['arr'][1], func_param['arr'][2], func_param['desc'])
@@ -218,22 +222,19 @@ def process(path, document_path):
 	of.close()
 
 	# 把函数信息写入文件
+	funchtml = funchtml.replace('{{{{Links}}}}', funclinkshtml)
 	of = codecs.open(os.path.join(document_path, '__func__%s.html' % source_file), 'w', 'utf8')
 	of.write(funchtml)
 	of.close()
 
 def build(project_path, document_path, root):
-	dirhtml = u'''
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-	<head>
-		<title>文档</title>
-		<meta http-equiv="content-type" content="text/html;charset=utf-8">
-	</head>
-	<body>
-	''';
+	dirhtml = htmlldr.load_part('dir');
+	dirlinkshtml = u''
 	if not root:
-		dirhtml = dirhtml + u'> <a href="../__dir__.html">..</a><br />';
+		dirlinkhtml = htmlldr.load_part('dirlink')
+		dirlinkhtml = dirlinkhtml.replace(u'{{{{Link}}}}', u'../__dir__.html')
+		dirlinkhtml = dirlinkhtml.replace(u'{{{{Name}}}}', u'..')
+		dirlinkshtml = dirlinkshtml + dirlinkhtml
 	if not os.path.exists(document_path):
 		os.mkdir(document_path)
 	dir_list = sorted(os.listdir(project_path))
@@ -243,20 +244,23 @@ def build(project_path, document_path, root):
 		full_path = os.path.join(project_path, item)
 		if os.path.isfile(full_path) and (os.path.splitext(item)[1] == '.c' or os.path.splitext(item)[1] == '.h'):
 			process(full_path, document_path)
-			dirhtml = dirhtml + u'* <a href="%s" target="MainIFrame" onclick="window.parent.document.getElementById(\'FuncIFrame\').src = \'%s\';">%s</a><br />' % (item + '.html', '__func__%s.html' % item, item)
+			filelinkhtml = htmlldr.load_part('filelink')
+			filelinkhtml = filelinkhtml.replace('{{{{Link}}}}', item + '.html')
+			filelinkhtml = filelinkhtml.replace('{{{{FuncLink}}}}', '__func__%s.html' % item)
+			filelinkhtml = filelinkhtml.replace('{{{{Name}}}}', item)
+			dirlinkshtml = dirlinkshtml + filelinkhtml
 		if os.path.isdir(full_path):
 			build(os.path.join(project_path, item), os.path.join(document_path, item), False)
-			dirhtml = dirhtml + u'> <a href="%s">%s</a><br />' % (item + '/__dir__.html', item)
-
+			dirlinkhtml = htmlldr.load_part('dirlink')
+			dirlinkhtml = dirlinkhtml.replace(u'{{{{Link}}}}', item + '/__dir__.html')
+			dirlinkhtml = dirlinkhtml.replace(u'{{{{Name}}}}', item)
+			dirlinkshtml = dirlinkshtml + dirlinkhtml
 	indexhtml = htmlldr.load_part('index')
 	of = codecs.open(os.path.join(document_path, 'index.html'), 'w', 'utf8')
 	of.write(indexhtml)
 	of.close()
 	# 把目录信息写入文件
-	dirhtml = dirhtml + '''
-	</body>
-</html>
-	''';
+	dirhtml = dirhtml.replace(u'{{{{Links}}}}', dirlinkshtml);
 	of = codecs.open(os.path.join(document_path, '__dir__.html'), 'w', 'utf8')
 	of.write(dirhtml)
 	of.close()
