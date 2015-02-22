@@ -322,67 +322,6 @@
 	</div>
 </div>
 <div>
-	<a id="set_noimpl" name="set_noimpl" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Private</div>
-		<div style="float:left; margin-left:20px;">set_noimpl</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				可以设置相应的中断为未实现。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		int_num</span>,
-	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			中断号
-</p>
-</div>
-
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;"></span>
-		<p style="padding-left: 40px;"></p>
-	</div>
-</div>
-<div>
-	<a id="noimpl_int" name="noimpl_int" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Private</div>
-		<div style="float:left; margin-left:20px;">noimpl_int</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				未被使用的中断的中断过程。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;"></span>
-		<p style="padding-left: 40px;"></p>
-	</div>
-</div>
-<div>
 	<a id="init_gp" name="init_gp" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Private</div>
@@ -583,33 +522,6 @@
 	<hr />
 	<p style="padding-left:40px;">
 				初始化系统调用的中断程序。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;"></span>
-		<p style="padding-left: 40px;"></p>
-	</div>
-</div>
-<div>
-	<a id="init_pf" name="init_pf" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Private</div>
-		<div style="float:left; margin-left:20px;">init_pf</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				初始化页失败的中断程序。<br />
 	</p>
 
 	<h4>参数描述</h4>
@@ -993,6 +905,229 @@
 	</div>
 </div>
 <div>
+	<a id="kill_task_and_jump_to_kernel" name="kill_task_and_jump_to_kernel" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">kill_task_and_jump_to_kernel</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				杀死任务后跳转到内核任务。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			要杀死的任务任务ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_dividing_by_zero" name="init_dividing_by_zero" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_dividing_by_zero</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置除以0时引发的异常处理程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="dividing_by_zero_int" name="dividing_by_zero_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">dividing_by_zero_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				处理除以0时引发的异常的中断过程。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_bound_check" name="init_bound_check" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_bound_check</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置边界检查时引发的异常处理程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="bound_check_int" name="bound_check_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">bound_check_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				处理边界检查时引发的异常的中断过程。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_invalid_opcode" name="init_invalid_opcode" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_invalid_opcode</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置检测到错误的操作码时引发的异常处理程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="invalid_opcode_int" name="invalid_opcode_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">invalid_opcode_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				处理检测到错误的操作码引发的异常的中断过程。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_pf" name="init_pf" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_pf</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化页失败的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
 	<a id="pf_int" name="pf_int" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Private</div>
@@ -1004,6 +1139,67 @@
 	<hr />
 	<p style="padding-left:40px;">
 				页失败的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="set_noimpl" name="set_noimpl" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">set_noimpl</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				可以设置相应的中断为未实现。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		int_num</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			中断号。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="noimpl_int" name="noimpl_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">noimpl_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				未被使用的中断的中断过程。<br />
 	</p>
 
 	<h4>参数描述</h4>

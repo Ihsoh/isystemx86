@@ -52,6 +52,9 @@ def get_node_value(text):
 def process_die(path, ln, message):
 	raise Exception(u'[Error]: %s: %d: %s' % (path, ln + 1, message))
 
+global total_line
+total_line = 0
+
 def process(path, document_path):
 	STATE_NONE = 0
 	STATE_FILE = 1
@@ -65,6 +68,10 @@ def process(path, document_path):
 	for line in f:
 		lines.append(line.rstrip())
 	f.close()
+
+	global total_line
+	total_line = total_line + len(lines)
+
 	ln = 0
 	state = STATE_NONE
 	comment = False
@@ -273,6 +280,7 @@ def main():
 	project_path = sys.argv[1]
 	document_path = sys.argv[2]
 	build(project_path, document_path, True)
+	print total_line
 
 if __name__ == '__main__':
 	main()

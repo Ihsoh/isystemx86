@@ -69,5 +69,22 @@ die(IN struct die_info * info);
 	#define	DC_INIT_TSKMGR		0x0000000E
 	#define	DI_INIT_TSKMGR		"Failed to init task manager"
 
-#endif
+	#define DC_INIT_DIV_BY_0	0x0000000F
+	#define	DI_INIT_DIV_BY_0	"Failed to init procedure to process exception of dividing by zero"
 
+	#define	DC_DIV_BY_0 		0x00000010
+	#define	DI_DIV_BY_0 		"Kernel causes a exception of dividing by zero"
+
+	#define	DC_INIT_BOUND_CHK	0x00000011
+	#define	DI_INIT_BOUND_CHK	"Failed to init procedure to process exception of bound check"
+
+	#define	DC_BOUND_CHK		0x00000012
+	#define	DI_BOUND_CHK		"Kernel causes a exception of bound check"
+
+	#define	DC_INIT_INVALID_OPC	0x00000013
+	#define	DI_INIT_INVALID_OPC	"Failed to init procedure to process exception of invalid opcode"
+
+	#define	DC_INVALID_OPC 		0x00000014
+	#define	DI_INVALID_OPC 		"Kernel causes a exception of invalid opcode"
+
+#endif

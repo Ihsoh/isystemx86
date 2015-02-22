@@ -9,8 +9,10 @@ char * code = 	"SUB Sum(BYVAL min AS INTEGER)";
 
 int main(int argc, char * argv[])
 {
+	asm volatile ("lock\n\t");
+	return 0;
+
 	int i, i1;
-	*((int *)0xf0000000) = 100;
 	create_file("DA:/", "test.txt");
 	for(i = 0; i < 1; i++)
 	{
