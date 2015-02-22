@@ -87,4 +87,10 @@ die(IN struct die_info * info);
 	#define	DC_INVALID_OPC 		0x00000014
 	#define	DI_INVALID_OPC 		"Kernel causes a exception of invalid opcode"
 
+	#define	DC_INIT_INVALID_TSS	0x00000015
+	#define DI_INIT_INVALID_TSS "Failed to init procedure to process exception of invalid tss"
+
+	#define	DC_INVALID_TSS 		0x00000016
+	#define	DI_INVALID_TSS 		"Kernel causes a exception of invalid tss"
+
 #endif

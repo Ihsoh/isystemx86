@@ -159,6 +159,14 @@ static
 void
 invalid_opcode_int(void);
 
+static
+void
+init_invalid_tss(void);
+
+static
+void
+invalid_tss_int(void);
+
 static struct TSS * system_call_tss = NULL;
 static uint8 * system_call_stack = NULL;
 static uint32 gdt_addr = NULL;
@@ -205,6 +213,7 @@ main(void)
 	init_dividing_by_zero();
 	init_bound_check();
 	init_invalid_opcode();
+	init_invalid_tss();
 	init_interrupt();
 	init_disk("VA");
 	init_disk("VB");
@@ -337,6 +346,7 @@ init_interrupt(void)
 		if(	n == 0x00
 			|| n == 0x05
 			|| n == 0x06
+			|| n == 0x0a
 			|| n == 0x21 
 			|| n == 0x22 
 			|| n == 0x0d 
@@ -459,64 +469,6 @@ init_noimpl(void)
 	set_desc_to_gdt(17, (uint8 *)&tss_desc);
 
 	fill_tss(tss, (uint32)noimpl_int, (uint32)stack);
-}
-
-/**
-	@Function:		init_gp
-	@Access:		Private
-	@Description:
-		初始化通用保护的中断程序。
-	@Parameters:
-	@Return:		
-*/
-static
-void
-init_gp(void)
-{
-	struct die_info info;
-	struct TSS * tss = &gp_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
-	if(tss == NULL)
-	{
-		fill_info(info, DC_INIT_GP, DI_INIT_GP);
-		die(&info);
-	}
-	struct Desc tss_desc;	
-	struct Gate task_gate;	
-
-	uint32 temp = (uint32)tss;
-	tss_desc.limitl = sizeof(struct TSS) - 1;
-	tss_desc.basel = (uint16)(temp & 0xFFFF);
-	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
-	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
-	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(18, (uint8 *)&tss_desc);
-
-	task_gate.offsetl = 0;
-	task_gate.offseth = 0;
-	task_gate.dcount = 0;
-	task_gate.selector = (18 << 3) | RPL0;
-	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x0d, (uint8 *)&task_gate);
-
-	fill_tss(tss, (uint32)gp_int, (uint32)stack);
-}
-
-/**
-	@Function:		gp_int
-	@Access:		Private
-	@Description:
-		通用保护的中断程序。
-	@Parameters:
-	@Return:	
-*/
-static
-void
-gp_int(void)
-{
-	struct die_info info;
-	fill_info(info, DC_GP_INT, DI_GP_INT);
-	die(&info);
 }
 
 /**
@@ -1549,6 +1501,176 @@ invalid_opcode_int(void)
 						1024,
 						"A task causes a exception of invalid opcode"
 						", the id is %d, the name is '%s'\n",
+						current_tid,
+						task->name);
+			log(LOG_ERROR, buffer);
+
+			print_str_p(buffer, CC_RED);
+			print_str("\n");
+
+			kill_task_and_jump_to_kernel(current_tid);
+		}
+	}
+}
+
+/*================================================================================
+							处理非法的TSS的中断程序, 0x0a
+================================================================================*/
+
+/**
+	@Function:		init_invalid_tss
+	@Access:		Private
+	@Description:
+		初始化检测到非法的TSS的中断程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+init_invalid_tss(void)
+{
+	struct die_info info;
+	struct TSS * tss = &pf_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_INVALID_TSS, DI_INIT_INVALID_TSS);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(24, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (24 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x0a, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)invalid_tss_int, (uint32)stack);
+}
+
+/**
+	@Function:		invalid_tss_int
+	@Access:		Private
+	@Description:
+		检测到非法的TSS的中断程序
+	@Parameters:
+	@Return:		
+*/
+static
+void
+invalid_tss_int(void)
+{
+	while(1)
+	{
+		if(is_kernel_task)
+		{
+			struct die_info info;
+			fill_info(info, DC_INVALID_TSS, DI_INVALID_TSS);
+			die(&info);
+		}
+		else
+		{
+			struct Task * task = get_task_info_ptr(current_tid);
+
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						"A task causes a exception of invalid tss, the id is %d, the name is '%s'\n",
+						current_tid,
+						task->name);
+			log(LOG_ERROR, buffer);
+
+			print_str_p(buffer, CC_RED);
+			print_str("\n");
+
+			kill_task_and_jump_to_kernel(current_tid);
+		}
+	}
+}
+
+/*================================================================================
+							通用保护异常, 0x0d
+================================================================================*/
+
+/**
+	@Function:		init_gp
+	@Access:		Private
+	@Description:
+		初始化通用保护的中断程序。
+	@Parameters:
+	@Return:		
+*/
+static
+void
+init_gp(void)
+{
+	struct die_info info;
+	struct TSS * tss = &gp_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_GP, DI_INIT_GP);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(18, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (18 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x0d, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)gp_int, (uint32)stack);
+}
+
+/**
+	@Function:		gp_int
+	@Access:		Private
+	@Description:
+		通用保护的中断程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+gp_int(void)
+{
+	while(1)
+	{
+		if(is_kernel_task)
+		{
+			struct die_info info;
+			fill_info(info, DC_GP_INT, DI_GP_INT);
+			die(&info);
+		}
+		else
+		{
+			struct Task * task = get_task_info_ptr(current_tid);
+
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						"A task causes a global protected exception, the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
