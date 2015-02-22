@@ -167,6 +167,22 @@ static
 void
 invalid_tss_int(void);
 
+static
+void
+init_invalid_seg(void);
+
+static
+void
+invalid_seg_int(void);
+
+static
+void
+init_invalid_stack(void);
+
+static
+void
+invalid_stack_int(void);
+
 static struct TSS * system_call_tss = NULL;
 static uint8 * system_call_stack = NULL;
 static uint32 gdt_addr = NULL;
@@ -214,6 +230,8 @@ main(void)
 	init_bound_check();
 	init_invalid_opcode();
 	init_invalid_tss();
+	init_invalid_seg();
+	init_invalid_stack();
 	init_interrupt();
 	init_disk("VA");
 	init_disk("VB");
@@ -347,10 +365,12 @@ init_interrupt(void)
 			|| n == 0x05
 			|| n == 0x06
 			|| n == 0x0a
+			|| n == 0x0b
+			|| n == 0x0c
+			|| n == 0x0d
+			|| n == 0x0e
 			|| n == 0x21 
 			|| n == 0x22 
-			|| n == 0x0d 
-			|| n == 0x0e
 			|| n == 0x40 
 			|| n == 0x41
 			|| n == 0x75
@@ -671,7 +691,7 @@ init_fpu(void)
 		die(&info);
 	}
 	struct Desc tss_desc;
-	struct Gate task_gate;		
+	struct Gate task_gate;
 
 	uint32 temp = (uint32)tss;
 	tss_desc.limitl = sizeof(struct TSS) - 1;
@@ -1586,6 +1606,176 @@ invalid_tss_int(void)
 			sprintf_s(	buffer,
 						1024,
 						"A task causes a exception of invalid tss, the id is %d, the name is '%s'\n",
+						current_tid,
+						task->name);
+			log(LOG_ERROR, buffer);
+
+			print_str_p(buffer, CC_RED);
+			print_str("\n");
+
+			kill_task_and_jump_to_kernel(current_tid);
+		}
+	}
+}
+
+/*================================================================================
+							段不存在故障, 0x0b
+================================================================================*/
+
+/**
+	@Function:		init_invalid_seg
+	@Access:		Private
+	@Description:
+		初始化处理段不存在故障的中断程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+init_invalid_seg(void)
+{
+	struct die_info info;
+	struct TSS * tss = &pf_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_INVALID_SEG, DI_INIT_INVALID_SEG);
+		die(&info);
+	}
+	struct Desc tss_desc;
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(25, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (25 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x0b, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)invalid_seg_int, (uint32)stack);
+}
+
+/**
+	@Function:		invalid_seg_int
+	@Access:		Private
+	@Description:
+		处理段不存在故障的中断程序。
+	@Parameters:
+	@Return:		
+*/
+static
+void
+invalid_seg_int(void)
+{
+	while(1)
+	{
+		if(is_kernel_task)
+		{
+			struct die_info info;
+			fill_info(info, DC_INVALID_SEG, DI_INVALID_SEG);
+			die(&info);
+		}
+		else
+		{
+			struct Task * task = get_task_info_ptr(current_tid);
+
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						"A task causes a exception of non-existent segment, the id is %d, the name is '%s'\n",
+						current_tid,
+						task->name);
+			log(LOG_ERROR, buffer);
+
+			print_str_p(buffer, CC_RED);
+			print_str("\n");
+
+			kill_task_and_jump_to_kernel(current_tid);
+		}
+	}
+}
+
+/*================================================================================
+							堆栈段故障, 0x0c
+================================================================================*/
+
+/**
+	@Function:		init_invalid_stack
+	@Access:		Private
+	@Description:
+		初始化处理堆栈段故障的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+init_invalid_stack(void)
+{
+	struct die_info info;
+	struct TSS * tss = &pf_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_INVALID_STACK, DI_INIT_INVALID_STACK);
+		die(&info);
+	}
+	struct Desc tss_desc;
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(26, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (26 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x0c, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)invalid_stack_int, (uint32)stack);
+}
+
+/**
+	@Function:		invalid_stack_int
+	@Access:		Private
+	@Description:
+		处理堆栈段故障的中断程序。
+	@Parameters:
+	@Return:		
+*/
+static
+void
+invalid_stack_int(void)
+{
+	while(1)
+	{
+		if(is_kernel_task)
+		{
+			struct die_info info;
+			fill_info(info, DC_INVALID_STACK, DI_INVALID_STACK);
+			die(&info);
+		}
+		else
+		{
+			struct Task * task = get_task_info_ptr(current_tid);
+
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						"A task causes a exception of invalid stack, the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
