@@ -19,6 +19,16 @@ uint16 slp_type_b = 0;
 
 static struct FADT * fadt = NULL;
 
+/**
+	@Function:		acpi_init
+	@Access:		Public
+	@Description:
+		初始化 ACPI。
+	@Parameters:
+	@Return:
+		BOOL
+			初始化成功则返回 TRUE，否则返回 FALSE。
+*/
 BOOL
 acpi_init(void)
 {
@@ -87,6 +97,16 @@ acpi_init(void)
 		return FALSE;
 }
 
+/**
+	@Function:		acpi_power_off
+	@Access:		Public
+	@Description:
+		ACPI 关机。
+	@Parameters:
+	@Return:
+		BOOL
+			始终返回 FALSE。		
+*/
 BOOL
 acpi_power_off(void)
 {
@@ -95,5 +115,5 @@ acpi_power_off(void)
  	outw((uint16)(fadt->pm1a_control_block), slp_type_a | SLP_EN);
  	if(fadt->pm1b_control_block != 0)
  		outw((uint16)(fadt->pm1b_control_block), slp_type_b | SLP_EN);
-	return TRUE;
+	return FALSE;
 }
