@@ -24,6 +24,7 @@
 #include "system.h"
 #include "lock.h"
 #include "log.h"
+#include "acpi.h"
 
 #include <dslib.h>
 
@@ -251,6 +252,7 @@ main(void)
 	enable_paging();
 	init_dsl();
 	init_log();
+	acpi_init();
 	sti();
 
 	//在这里启用所有锁
@@ -2040,6 +2042,7 @@ void
 shutdown_system(void)
 {
 	leave_system();
+	acpi_power_off();
 	halt_cpu();
 }
 

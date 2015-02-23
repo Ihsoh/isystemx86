@@ -29,10 +29,6 @@
 #include "vesa.h"
 #include "die.h"
 
-#include "rsdp.h"
-#include "rsdt.h"
-#include "fadt.h"
-
 DEFINE_LOCK_IMPL(console)
 
 #define	FORMAT(message)	"Foramt:\n\t"message
@@ -1813,15 +1809,6 @@ exec(	IN int8 * cmd,
 			write_log_to_disk();
 			clear_log();
 		}
-
-		else if(strcmp(name, "test") == 0)
-		{
-			if(acpi_init())
-				acpi_power_off();
-			else
-				print_str("ERROR!\n");
-		}
-
 		//Batch
 		else if(strcmp(name, "goto") == 0)
 		{
