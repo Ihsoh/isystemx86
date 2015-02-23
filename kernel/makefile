@@ -15,7 +15,8 @@ bin/kfuncs.obj bin/ifs1hdisk.obj bin/cmos.obj bin/ifs1fs.obj bin/tasks.obj \
 bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scall_fs.obj \
 bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
-bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj $(StringObj)
+bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
+bin/rsdt.obj bin/fadt.obj $(StringObj)
 Linker=ld -m elf_i386
 Include=-I../ilib -I../dslib
 
@@ -127,9 +128,19 @@ bin/kstring.obj: kstring.c kstring.h
 bin/log.obj: log.c log.h
 	$(CC) $(CFlags) -c log.c -o bin/log.obj $(Include)
 
+bin/rsdp.obj: rsdp.c rsdp.h
+	$(CC) $(CFlags) -c rsdp.c -o bin/rsdp.obj $(Include)
+
+bin/acpi.obj: acpi.c acpi.h
+	$(CC) $(CFlags) -c acpi.c -o bin/acpi.obj $(Include)
+
+bin/rsdt.obj: rsdt.c rsdt.h
+	$(CC) $(CFlags) -c rsdt.c -o bin/rsdt.obj $(Include)
+
+bin/fadt.obj: fadt.c fadt.h
+	$(CC) $(CFlags) -c fadt.c -o bin/fadt.obj $(Include)
+
 .PHONY:Clear
 
 Clear:
 	-rm -f $(Objs) $(Target)
-
-

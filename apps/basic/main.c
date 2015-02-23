@@ -9,7 +9,7 @@ char * code = 	"SUB Sum(BYVAL min AS INTEGER)";
 
 int main(int argc, char * argv[])
 {
-	main(0, 0);
+	asm volatile ("ljmp $0, $0;\n\t");
 	return 0;
 
 	int i, i1;
