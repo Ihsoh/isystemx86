@@ -37,7 +37,7 @@ int main(int argc, char * argv[])
 	env.dsl_free = free;
 	dsl_init(&env);
 
-	Machine * machine = Machine_New1(/*1 * 1024 * */ 512);
+	Machine * machine = Machine_New1(2 * 1024);
 
 	if(machine == NULL)
 	{
