@@ -52,7 +52,17 @@ void CPU_execute(CPU * cpu)
     DSLLinkedListNode * node = dsl_lnklst_get(cpu->memory->program, cpu->eip);
     //printf("CPU Execute Node: %x\n", node);
 	InstructionInfo * ii = node->value.value.object_value;
-    //printf("CPU Excutue, OPCODE: %d\n, PCOUNT: %d\n", ii->ID, ii->pcount);
+    printf("CPU Excutue, OPCODE: %d, PCOUNT: %d\n", ii->ID, ii->pcount);
+    if(ii->pcount != 0)
+    {
+        uint ui;
+        for(ui = 0; ui < ii->pcount; ui++)
+        {
+            DSLLinkedListNode * node = dsl_lnklst_get(ii->pi, ui);
+            ParameterInfo * pi = node->value.value.object_value;
+            printf("type: %d, basevalue: %d, floatvalue: %f\n", pi->type, pi->value, pi->value_float);
+        }
+    }
 	++(cpu->eip);
 	CPU_executeInstruction(cpu, ii);
 	++(cpu->RanCount);
@@ -166,9 +176,8 @@ void CPU_AddInterrupt(CPU * cpu, int id, pInterruptCallback pic)
 
 void CPU_Interrupt(CPU * cpu, int id)
 {
-    printf("Interrupt! %d\n", id);
-	/*if (!cpu->InterruptEnable) 
-		return;*/
+	if (!cpu->InterruptEnable) 
+		return;
     cpu->InterruptId = id;
     InterruptInfo * ii = cpu->InterruptVector + id;
     if (ii->type == Interrupt_Inner)

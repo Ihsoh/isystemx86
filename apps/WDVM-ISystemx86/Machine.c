@@ -87,7 +87,7 @@ void Machine_load0(Machine * machine, FILE * fd)
         	printf("Machine_load0: Cannot add node!\n");
     		app_exit();
         }
-        printf("Read instruction: %d\n", i);
+        //printf("Read instruction: %d\n", i);
     }
 }
 

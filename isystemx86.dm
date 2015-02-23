@@ -37,6 +37,10 @@ WRITE_FILE	VA:/isystem/bins/wdvm apps/WDVM-ISystemx86/bin/wdvm.bin
 MAKE_DIR	VA:/isystem/ wd
 MAKE_FILE	VA:/isystem/wd/ fib.wd
 WRITE_FILE	VA:/isystem/wd/fib.wd isystem/wd/fib.wd
+MAKE_FILE	VA:/isystem/wd/ helloworld.wd
+WRITE_FILE	VA:/isystem/wd/helloworld.wd isystem/wd/helloworld.wd
+MAKE_FILE	VA:/isystem/wd/ a.wd
+WRITE_FILE	VA:/isystem/wd/a.wd isystem/wd/a.wd
 
 #System dump directory
 MAKE_DIR	VA:/isystem/ dump

@@ -10,6 +10,7 @@ void OnInterrupt(void * obj)
     switch(cpu->InterruptId)
     {
         case 5:
+        	printf("{%x}", cpu->eax);
             print_char(cpu->eax);
             break;
         case 9:
