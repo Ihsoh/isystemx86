@@ -391,7 +391,6 @@ cpubasetype CPU_getIntRegisterValue(CPU * cpu, cpubasetype id)
 
 void CPU_setIntRegisterValue(CPU * cpu, cpubasetype id, cpubasetype data)
 {
-    printf("CPU_setIntRegisterValue: cpu is %x, id is %d, data is %x\n", cpu, (uint32)id, (uint32)data);
 
 
     if (id == CPU_Reg_esp)
@@ -422,20 +421,17 @@ void CPU_setIntRegisterValue(CPU * cpu, cpubasetype id, cpubasetype data)
                         {
                             //CPU_Reg_eax
                             cpu->eax=data;
-                            printf("CPU_setIntRegisterValue: 8Bytes\n");
                         }
                         else
                         {
                             //CPU_Reg_ax
                             cpu->eax = (cpu->eax&0xFFFFFFFFFFFF0000) | (data&0xFFFF);
-                            printf("CPU_setIntRegisterValue: 2Bytes\n");
                         }
                     }
                     else
                     {
                         //CPU_Reg_al
                         cpu->eax = (cpu->eax&0xFFFFFFFFFFFFFF00) | (data&0xFF);
-                        printf("CPU_setIntRegisterValue: 1Bytes\n");
                     }
                 }
                 else

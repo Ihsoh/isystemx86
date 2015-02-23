@@ -66,7 +66,6 @@ void Machine_Free(Machine * machine)
 void Machine_load0(Machine * machine, FILE * fd)
 {
     int icount = bh_readint32(fd);
-    printf("Machine_load0: ICount is %d\n", icount);
     int i;
     for(i = 0; i < icount; ++i)
     {

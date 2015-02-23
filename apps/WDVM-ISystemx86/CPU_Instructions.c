@@ -157,7 +157,7 @@ void CPU_executeInstruction(CPU * cpu, InstructionInfo * ii)
                             if (dsl_lnklst_count(ii->pi) > 0)
                             {
                             	DSLLinkedListNode * node = dsl_lnklst_get(ii->pi, 0);
-                                CPU_setIntRegisterValue(cpu, node->value.value.object_value, CPU_popi(cpu));
+                                CPU_setIntRegisterValue(cpu, ((ParameterInfo *)(node->value.value.object_value))->value, CPU_popi(cpu));
                             }
                             else
                             {
@@ -185,7 +185,7 @@ void CPU_executeInstruction(CPU * cpu, InstructionInfo * ii)
                             if (dsl_lnklst_count(ii->pi) > 0)
                             {
                                 DSLLinkedListNode * node = dsl_lnklst_get(ii->pi, 0);
-                                CPU_setFloatRegisterValue(cpu, node->value.value.object_value, CPU_popf(cpu));
+                                CPU_setFloatRegisterValue(cpu, ((ParameterInfo *)(node->value.value.object_value))->value, CPU_popf(cpu));
                             }
                             else
                             {

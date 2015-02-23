@@ -515,7 +515,7 @@ tran_key(IN uint8 scan_code)
 			}
 			case KEY_F3:
 			{
-				if(alt)
+				if(alt && control)
 				{
 					int32 tid = get_wait_app_tid();
 					if(tid != -1)
@@ -526,6 +526,8 @@ tran_key(IN uint8 scan_code)
 						enable_flush_screen();
 					}
 				}
+				else if(alt)
+					set_wait_app_tid(-1);
 				break;
 			}
 		}

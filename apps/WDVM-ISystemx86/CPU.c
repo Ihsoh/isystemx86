@@ -42,17 +42,8 @@ void CPU_ClockTick(CPU * cpu)
 
 void CPU_execute(CPU * cpu)
 {
-    /*printf( "CPU Execute cpu: %x, cpu->eip: %d, cpu->memory: %x, cpu->memory->program: %x\n", 
-            cpu,
-            cpu->eip, 
-            cpu->memory,
-            cpu->memory->program);*/
-
-
     DSLLinkedListNode * node = dsl_lnklst_get(cpu->memory->program, cpu->eip);
-    //printf("CPU Execute Node: %x\n", node);
 	InstructionInfo * ii = node->value.value.object_value;
-    printf("CPU Excutue, OPCODE: %d, PCOUNT: %d\n", ii->ID, ii->pcount);
     if(ii->pcount != 0)
     {
         uint ui;
@@ -60,13 +51,11 @@ void CPU_execute(CPU * cpu)
         {
             DSLLinkedListNode * node = dsl_lnklst_get(ii->pi, ui);
             ParameterInfo * pi = node->value.value.object_value;
-            printf("type: %d, basevalue: %d, floatvalue: %f\n", pi->type, pi->value, pi->value_float);
         }
     }
 	++(cpu->eip);
 	CPU_executeInstruction(cpu, ii);
 	++(cpu->RanCount);
-    //printf("CPU Executed EIP: %d\n", cpu->eip);
 }
 
 cpubasetype CPU_getIntValue(CPU * cpu, ParameterInfo * pi)
