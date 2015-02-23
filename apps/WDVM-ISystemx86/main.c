@@ -35,11 +35,19 @@ int main(int argc, char * argv[])
 	env.dsl_malloc = malloc;
 	env.dsl_calloc = calloc;
 	env.dsl_free = free;
-	return dsl_init(&env);
+	dsl_init(&env);
 
 	Machine * machine = Machine_New1(1 * 1024 * 1024);
 
-	if(!Machine_load(machine, argv[1]))
+	printf("Filename: %s\n", argv[1]);
+
+	if(machine == NULL)
+	{
+		printf("Cannot create machine\n");
+        return -1;
+	}
+
+	if(!Machine_load1(machine, argv[1]))
     {
         printf("Cannot open %s\n", argv[1]);
         return -1;

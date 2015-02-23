@@ -54,7 +54,7 @@ void Machine_load0(Machine * machine, FILE * fd)
     }
 }
 
-void Machine_load1(Machine * machine, const char * fn)
+BOOL Machine_load1(Machine * machine, const char * fn)
 {
 	FILE *fd;
     if(!(fd = fopen(fn, FILE_MODE_READ)))
@@ -66,7 +66,7 @@ void Machine_load1(Machine * machine, const char * fn)
     return TRUE;
 }
 
-void run(Machine * machine)
+void Machine_run(Machine * machine)
 {
 	machine->isRunning = TRUE;
 	CPU_start(machine->cpu);

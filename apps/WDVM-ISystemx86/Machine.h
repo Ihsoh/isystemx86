@@ -25,7 +25,7 @@ extern Machine * Machine_New2(Memory *);
 extern Machine * Machine_New3(CPU *, Memory *);
 extern void Machine_Free(Machine *);
 extern void Machine_load0(Machine *, FILE *);
-extern void Machine_load1(Machine *, const char *);
-extern void run(Machine *);
+extern BOOL Machine_load1(Machine *, const char *);
+extern void Machine_run(Machine *);
 
 #endif
