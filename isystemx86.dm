@@ -29,6 +29,15 @@ WRITE_FILE	VA:/isystem/bins/edit apps/edit/bin/edit.bin
 MAKE_FILE	VA:/isystem/bins/ paint
 WRITE_FILE	VA:/isystem/bins/paint apps/paint/bin/paint.bin
 
+#WDVM
+MAKE_FILE	VA:/isystem/bins/ wdvm
+WRITE_FILE	VA:/isystem/bins/wdvm apps/WDVM-ISystemx86/bin/wdvm.bin
+
+#WDVM application directory
+MAKE_DIR	VA:/isystem/ wd
+MAKE_FILE	VA:/isystem/wd/ fib.wd
+WRITE_FILE	VA:/isystem/wd/fib.wd isystem/wd/fib.wd
+
 #System dump directory
 MAKE_DIR	VA:/isystem/ dump
 
