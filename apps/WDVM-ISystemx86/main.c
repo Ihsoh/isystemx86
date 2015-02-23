@@ -37,9 +37,7 @@ int main(int argc, char * argv[])
 	env.dsl_free = free;
 	dsl_init(&env);
 
-	Machine * machine = Machine_New1(1 * 1024 * 1024);
-
-	printf("Filename: %s\n", argv[1]);
+	Machine * machine = Machine_New1(/*1 * 1024 * */ 512);
 
 	if(machine == NULL)
 	{
@@ -56,6 +54,8 @@ int main(int argc, char * argv[])
 	CPU_AddInterrupt(machine->cpu, 5, OnInterrupt);
 	CPU_AddInterrupt(machine->cpu, 9, OnInterrupt);
 	CPU_AddInterrupt(machine->cpu, 13, OnInterrupt);
+
+	printf("Ready...\n");
 
 	Machine_run(machine);
 

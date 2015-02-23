@@ -15,6 +15,7 @@ CPU * CPU_New(Memory * memory)
         cpu->InterruptVector[i].type = Interrupt_Outer;
         cpu->InterruptVector[i].outer_callback = NULL;
     }
+    cpu->memory = memory;
     return cpu;
 }
 
@@ -41,10 +42,21 @@ void CPU_ClockTick(CPU * cpu)
 
 void CPU_execute(CPU * cpu)
 {
-	InstructionInfo * ii = cpu->memory->program + cpu->eip;
+    /*printf( "CPU Execute cpu: %x, cpu->eip: %d, cpu->memory: %x, cpu->memory->program: %x\n", 
+            cpu,
+            cpu->eip, 
+            cpu->memory,
+            cpu->memory->program);*/
+
+
+    DSLLinkedListNode * node = dsl_lnklst_get(cpu->memory->program, cpu->eip);
+    //printf("CPU Execute Node: %x\n", node);
+	InstructionInfo * ii = node->value.value.object_value;
+    //printf("CPU Excutue, OPCODE: %d\n, PCOUNT: %d\n", ii->ID, ii->pcount);
 	++(cpu->eip);
 	CPU_executeInstruction(cpu, ii);
 	++(cpu->RanCount);
+    //printf("CPU Executed EIP: %d\n", cpu->eip);
 }
 
 cpubasetype CPU_getIntValue(CPU * cpu, ParameterInfo * pi)
@@ -154,8 +166,9 @@ void CPU_AddInterrupt(CPU * cpu, int id, pInterruptCallback pic)
 
 void CPU_Interrupt(CPU * cpu, int id)
 {
-	if (!cpu->InterruptEnable) 
-		return;
+    printf("Interrupt! %d\n", id);
+	/*if (!cpu->InterruptEnable) 
+		return;*/
     cpu->InterruptId = id;
     InterruptInfo * ii = cpu->InterruptVector + id;
     if (ii->type == Interrupt_Inner)
