@@ -88,19 +88,19 @@ struct DirBlock
 extern
 BOOL
 get_block(	IN int8 * symbol, 
-				IN uint32 id, 
-				OUT struct RawBlock * block);
+			IN uint32 id, 
+			OUT struct RawBlock * block);
 
 extern
 BOOL
 set_block(	IN int8 * symbol, 
-				IN uint32 id, 
-				IN struct RawBlock * block);
+			IN uint32 id, 
+			IN struct RawBlock * block);
 
 extern
 BOOL
 del_block(	IN int8 * symbol, 
-				IN uint32 id);
+			IN uint32 id);
 
 extern
 BOOL
@@ -109,16 +109,16 @@ del_all_blocks(IN int8 * symbol);
 extern
 uint32
 add_block(	IN int8 * symbol, 
-					IN struct RawBlock * block);
+			IN struct RawBlock * block);
 
 extern
 BOOL
 fill_dir_block(IN int8 * name,
-					OUT struct DirBlock * dir);
+			OUT struct DirBlock * dir);
 
 extern
 BOOL
-fill_file_block(	IN int8 * name, 
-						OUT struct FileBlock * file);
+fill_file_block(IN int8 * name, 
+				OUT struct FileBlock * file);
 
 #endif

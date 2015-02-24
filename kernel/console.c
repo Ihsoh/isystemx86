@@ -1120,6 +1120,7 @@ run_wait(	IN int8 * path,
 	{
 		unlock();
 		error("Failed to run application!");
+		return -1;
 	}
 	wait_app_tid = r;
 	unlock();

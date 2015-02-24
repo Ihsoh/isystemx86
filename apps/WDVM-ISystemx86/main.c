@@ -45,7 +45,11 @@ int main(int argc, char * argv[])
         return -1;
 	}
 
-	if(!Machine_load1(machine, argv[1]))
+	char file_path[1024];
+	strcpy(file_path, argv[1]);
+	fix_path(file_path, file_path);
+
+	if(!Machine_load1(machine, file_path))
     {
         printf("Cannot open %s\n", argv[1]);
         return -1;
