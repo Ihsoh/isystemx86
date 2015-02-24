@@ -2134,5 +2134,5 @@ leave_system(void)
 		fclose(fptr);
 	}
 	log(LOG_NORMAL, "Leave system.");
-	write_log_to_disk();
+	free_log();
 }

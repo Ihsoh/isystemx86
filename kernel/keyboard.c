@@ -641,13 +641,21 @@ get_strn(	OUT int8 * input_buffer,
 	int32 pos = -1;
 	uint16 startx, starty;
 	get_cursor(&startx, &starty);
+	input_buffer[0] = '\0';
 	UNLOCK_TASK();
 	while(1)
 	{
 		chr = get_char();
 		LOCK_TASK();
 		if(chr == '\n' || count >= n)
+		{
+			int32 i;
+			set_cursor(startx, starty);
+			for(i = 0; i < count; i++)
+				print_char(input_buffer[i]);
+			print_char('\n');
 			break;
+		}
 		switch(chr)
 		{
 			//Backspace
@@ -711,22 +719,36 @@ get_strn(	OUT int8 * input_buffer,
 				count++;
 
 				//刷新屏幕输入的内容
-				lock_cursor();
+				BOOL is_screen_up = FALSE;
+				BOOL is_screen_up1 = FALSE;
 				uint16 x, y;
 				get_cursor(&x, &y);
+				if(pos + 1 != count && (startx + count) % COLUMN == 0 && starty * COLUMN + startx + count == ROW * COLUMN)
+				{
+					starty--;
+					screen_up();
+					is_screen_up1 = TRUE;
+				}
+				else if(pos + 1 == count && x == COLUMN - 1 && y == ROW - 1)
+				{
+					starty--;
+					screen_up();
+					is_screen_up = TRUE;
+				}
+				lock_cursor();
 				set_cursor(startx, starty);
 				for(i = 0; i < count; i++)
 					print_char(input_buffer[i]);
 				unlock_cursor();
-				if(x == COLUMN - 1 && y == ROW - 1)
-				{				
-					screen_up();
-					set_cursor(0, y);
-				}
-				else
-					if(x + 1 == COLUMN)
+				if(x + 1 == COLUMN)
+					if(is_screen_up)
+						set_cursor(0, y);
+					else
 						set_cursor(0, y + 1);
-					else	
+				else
+					if(is_screen_up1)
+						set_cursor(x + 1, y - 1);
+					else
 						set_cursor(x + 1, y);
 				break;
 			}		
@@ -734,7 +756,6 @@ get_strn(	OUT int8 * input_buffer,
 		UNLOCK_TASK();
 	}
 	LOCK_TASK();
-	print_char('\n');
 	input_buffer[count] = '\0';
 	UNLOCK_TASK();
 	return count;
