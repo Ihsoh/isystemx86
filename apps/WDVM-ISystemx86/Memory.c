@@ -12,12 +12,7 @@ Memory * Memory_New(int size)
 		printf("Memory_New: Canoot allocate memory for var memory.\n");
 		return NULL;
 	}
-	memory->program = dsl_lnklst_new();
-	if(memory->program == NULL)
-	{
-		printf("Memory_New: Canoot allocate memory for var memory->program.\n");
-		return NULL;
-	}
+	memory->program = NULL;
 	memory->Size = size;
 	memory->MaxAddress = size * 2;
 	memory->intdata = malloc(sizeof(cpubasetype) * size);
@@ -43,6 +38,15 @@ void Memory_Free(Memory * memory)
 		memory->intdata = NULL;
 	if(memory->floatdata != NULL)
 		memory->floatdata = NULL;
-	dsl_lnklst_delete_all_object_node(memory->program);
+	if(memory->program != NULL)
+		memory->program = NULL;
     free(memory);
+}
+
+BOOL Memory_AllocProgramSpace(Memory * memory, uint count)
+{
+	memory->program = (InstructionInfo **)malloc(sizeof(InstructionInfo *) * count);
+	if(memory->program == NULL)
+		return FALSE;
+	return TRUE;
 }

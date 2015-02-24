@@ -11,10 +11,11 @@ typedef struct
 	int Size, MaxAddress, IntOffset, FloatOffset;
     cpubasetype * intdata;
     double * floatdata;
-	DSLLinkedList * program;
+	InstructionInfo ** program;
 } Memory;
 
 extern Memory * Memory_New(int size);
 extern void Memory_Free(Memory * memory);
+extern BOOL Memory_AllocProgramSpace(Memory * memory, uint count);
 
 #endif

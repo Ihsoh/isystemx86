@@ -180,7 +180,7 @@ void to_big_endian(uchar * data, uint size)
 	free(buffer);
 }
 
-int main(int argc, char * argv[])
+void make_vhd(char * boot, char * kldr, char * kernel, char * image, char * script, char * disk_type)
 {
 	//Init VA
 	init_disk("VA");
@@ -191,20 +191,10 @@ int main(int argc, char * argv[])
 	else
 		die("Failed to format VA\n");
 
-	char * boot, * kldr, * kernel, * image, * script, * disk_type;
 	uchar * bootbuf, * kldrbuf, * kernelbuf;
 	uchar * scriptbuf;
 	FILE * fptr;
-	int i;	
-
-	if(argc != 7)
-		die("Parameter error");
-	boot = argv[1];
-	kldr = argv[2];
-	kernel = argv[3];
-	image = argv[4];
-	script = argv[5];
-	disk_type = argv[6];
+	int i;
 	uint script_len = get_file_size(script) + 1;
 	bootbuf = (uchar *)malloc(BOOT_SIZE);
 	kldrbuf = (uchar *)malloc(KLDR_SIZE);
@@ -324,7 +314,7 @@ int main(int argc, char * argv[])
 			else if(strcmp(word, "") == 0)
 				;
 			else
-				die("Invalid command!");
+				die("Invalid command!\n");
 			s = cmd;
 			cmd[0] = '\0';
 		}
@@ -387,6 +377,90 @@ int main(int argc, char * argv[])
 	free(bootbuf);
 	free(kldrbuf);
 	free(kernelbuf);
+}
+
+void add_file_to_vhd(char * hdfile, char * type, char * path, char * name, char * file)
+{
+	//Init VA
+	init_disk("VA");
+
+	//Format VA
+	if(format_disk("VA"))
+		printf("Format VA is OK\n");
+	else
+		die("Failed to format VA");
+	
+	uchar * diska = get_vdiska();
+	struct VHDFooter vhd_footer;
+	FILE * fptr;
+	fptr = fopen(vhd, "rb");
+	if(fptr == NULL)
+		die("Cannot open hard disk file");
+	fread(diska, sizeof(uchar), VDISK_BUFFER_SIZE, fptr);
+	if(strcmp(type, "vhd") == 0)
+		fread(&vhd_footer, sizeof(struct VHDFooter), 1, fptr);
+	fclose(fptr);
+
+	if(!create_file(path, name))
+		die("Cannot create file");
+
+	
+
+	fptr = fopen(vhd, "wb");
+	if(fptr == NULL)
+		die("Cannot open hard disk file");
+	fwrite(diska, sizeof(uchar), VDISK_BUFFER_SIZE, fptr);
+	fclose(fptr);
+
+	if(strcmp(type, "vhd") == 0)
+	{
+		fptr = fopen(vhd, "ab");
+		if(fptr == NULL)
+			die("Cannot open hard disk file");
+		fwrite(&vhd_footer, sizeof(struct VHDFooter), 1, fptr);
+		fclose(fptr);
+	}
+}
+
+int main(int argc, char * argv[])
+{
+	if(argc < 2)
+		die("Parameter error!");
+	char * option = argv[1];
+
+	if(strcmp(option, "-m") == 0)
+	{
+		if(argc != 8)
+			die("Parameter error");
+		char * boot, * kldr, * kernel, * image, * script, * disk_type;
+		boot = argv[2];
+		kldr = argv[3];
+		kernel = argv[4];
+		image = argv[5];
+		script = argv[6];
+		disk_type = argv[7];
+		if(strcmp(disk_type, "vhd") != 0 && strcmp(disk_type, "flat") == 0)
+			die("Invalid disk type");
+		make_vhd(boot, kldr, kernel, image, script, disk_type);
+	}
+	else if(strcmp(option, "-i") == 0)
+	{
+		if(argc != 7)
+			die("Parameter error!");
+		char * hdfile;
+		char * type;
+		char * path;
+		char * name;
+		char * file;
+		hdfile = argv[2];
+		type = argv[3];
+		path = argv[4];
+		name = argv[5];
+		file = argv[6];
+		if(strcmp(type, "vhd") != 0 && strcmp(type, "flat") == 0)
+			die("Invalid disk type");
+		add_file_to_vhd(hdfile, path, name, file);
+	}
 
 	return 0;
 }

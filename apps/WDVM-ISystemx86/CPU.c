@@ -42,8 +42,7 @@ void CPU_ClockTick(CPU * cpu)
 
 void CPU_execute(CPU * cpu)
 {
-    DSLLinkedListNode * node = dsl_lnklst_get(cpu->memory->program, cpu->eip);
-	InstructionInfo * ii = node->value.value.object_value;
+	InstructionInfo * ii = cpu->memory->program[cpu->eip];
     if(ii->pcount != 0)
     {
         uint ui;

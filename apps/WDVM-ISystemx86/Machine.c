@@ -66,6 +66,11 @@ void Machine_Free(Machine * machine)
 void Machine_load0(Machine * machine, FILE * fd)
 {
     int icount = bh_readint32(fd);
+    if(!Memory_AllocProgramSpace(machine->memory, icount))
+    {
+    	printf("Machine_load0: Cannot allocate memory for instructions!\n");
+    	app_exit();
+    }
     int i;
     for(i = 0; i < icount; ++i)
     {
@@ -75,18 +80,7 @@ void Machine_load0(Machine * machine, FILE * fd)
     		printf("Machine_load0: ii is NULL!\n");
     		app_exit();
     	}
-        DSLLinkedListNode * node = dsl_lnklst_new_object_node(ii);
-        if(node == NULL)
-        {
-        	printf("Machine_load0: node is NULL!\n");
-    		app_exit();
-        }
-        if(!dsl_lnklst_add_node(machine->memory->program, node))
-        {
-        	printf("Machine_load0: Cannot add node!\n");
-    		app_exit();
-        }
-        //printf("Read instruction: %d\n", i);
+        machine->memory->program[i] = ii;
     }
 }
 
