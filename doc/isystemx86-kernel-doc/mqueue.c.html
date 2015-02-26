@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>			mqueue.c</title>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	</head>
+	<body style="background-color:#dddddd;">
+		<h1>			mqueue.c</h1>
+		<div style="padding-left: 40px;">
+					Ihsoh, 			2015-02-26
+		</div>
+		<br />
+		<br />
+		<br />
+		<br />
+		<div>
+			<h2>文件描述</h2>
+			<div style="padding-left: 40px;">
+						消息队列。<br />
+			</div>
+			<br />
+			<br />
+			<br />
+			<br />
+		</div>
+		<div>
+			<h2>函数</h2>
+			<div>
+				<div>
+	<a id="mqueue_init" name="mqueue_init" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">mqueue_init</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化消息队列功能。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回 TRUE 则表示初始化成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="mqueue_validate_name" name="mqueue_validate_name" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">mqueue_validate_name</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				检查是否是一个合法的消息队列名称。<br />		允许使用的字符为：'A' ~ 'Z', 'a' ~ 'z', '_'。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		name</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			名称。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回 TRUE 则符合规定，否则不符合。
+</p>
+	</div>
+</div>
+<div>
+	<a id="mqueue_new" name="mqueue_new" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">mqueue_new</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				新建一个消息队列。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		name</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			消息队列名称。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		MQueuePtr</span>
+		<p style="padding-left: 40px;">			如果新建失败，则返回 NULL。否则，返回新建的消息队列的指针。
+</p>
+	</div>
+</div>
+
+			</div>
+		</div>
+	</body>
+</html>

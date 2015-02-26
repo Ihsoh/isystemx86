@@ -9,14 +9,14 @@ typedef struct _DSLLinkedListNode
 	DSLValue value;
 	struct _DSLLinkedListNode * prev;
 	struct _DSLLinkedListNode * next;
-} DSLLinkedListNode;
+} DSLLinkedListNode, * DSLLinkedListNodePtr;
 
 typedef struct _DSLLinkedList
 {
 	DSLLinkedListNode * head;
 	DSLLinkedListNode * foot;
 	int32 count;
-} DSLLinkedList;
+} DSLLinkedList, * DSLLinkedListPtr;
 
 #define	EXTERN_DSL_LNKLST_NEW_XXX_NODE(xxx)	\
 	extern	\
@@ -40,6 +40,10 @@ EXTERN_DSL_LNKLST_NEW_XXX_NODE(bool)
 extern
 DSLLinkedList *
 dsl_lnklst_new(void);
+
+extern
+BOOL
+dsl_lnklst_free(DSLLinkedListPtr list);
 
 extern
 BOOL

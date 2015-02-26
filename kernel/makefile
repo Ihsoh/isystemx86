@@ -16,9 +16,9 @@ bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scal
 bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
-bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj $(StringObj)
+bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj $(StringObj)
 Linker=ld -m elf_i386
-Include=-I../ilib -I../dslib
+Include=-I../ilib -I../
 
 $(Target): bin $(Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) -L../dslib/bin -ldslib
@@ -145,6 +145,9 @@ bin/atapi.obj: atapi.c atapi.h
 
 bin/serial.obj: serial.c serial.h
 	$(CC) $(CFlags) -c serial.c -o bin/serial.obj $(Include)
+
+bin/mqueue.obj: mqueue.c mqueue.h
+	$(CC) $(CFlags) -c mqueue.c -o bin/mqueue.obj $(Include)
 
 .PHONY:Clear
 

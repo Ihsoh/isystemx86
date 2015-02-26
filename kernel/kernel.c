@@ -26,7 +26,7 @@
 #include "log.h"
 #include "acpi.h"
 
-#include <dslib.h>
+#include <dslib/dslib.h>
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
 
@@ -252,6 +252,7 @@ main(void)
 	enable_paging();
 	init_dsl();
 	init_log();
+	mqueue_init();
 	acpi_init();
 	sti();
 

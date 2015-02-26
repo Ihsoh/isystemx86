@@ -43,6 +43,15 @@ dsl_lnklst_new(void)
 }
 
 BOOL
+dsl_lnklst_free(DSLLinkedListPtr list)
+{
+	if(list == NULL)
+		return FALSE;
+	dsl_free(list);
+	return TRUE;
+}
+
+BOOL
 dsl_lnklst_add_node(IN OUT DSLLinkedList * list, 
 					IN OUT DSLLinkedListNode * node)
 {

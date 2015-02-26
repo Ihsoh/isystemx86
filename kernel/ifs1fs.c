@@ -14,7 +14,7 @@
 #include "lock.h"
 #include <string.h>
 
-#include <linked_list.h>
+#include <dslib/linked_list.h>
 
 DEFINE_LOCK_IMPL(ifs1)
 

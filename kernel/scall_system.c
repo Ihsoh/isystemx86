@@ -172,5 +172,7 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			set_clock(sparams->param0);
 			break;
 		}
+
+		
 	}
 }

@@ -12,7 +12,7 @@
 #include "ifs1blocks.h"
 #include "lock.h"
 
-#include <linked_list.h>
+#include <dslib/linked_list.h>
 
 #define	MAX_FILENAME_LEN		255
 #define	MAX_FILENAME_BUFFER_LEN	(MAX_FILENAME_LEN + 1)
