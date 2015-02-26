@@ -222,7 +222,7 @@ BOOL
 fill_file_block(IN int8 * name, 
 				OUT struct FileBlock * file)
 {
-	if(strlen(name) > sizeof(file->filename))
+	if(strlen(name) >= sizeof(file->filename))
 		return FALSE;
 	uint32 ui;
 	struct CMOSDateTime dt;
@@ -238,5 +238,39 @@ fill_file_block(IN int8 * name,
 		file->reserve[ui] = 0;
 	for(ui = 0; ui < sizeof(file->blockids) / sizeof(uint32); ui++)
 		file->blockids[ui] = INVALID_BLOCK_ID;
+	return TRUE;
+}
+
+/**
+	@Function:		fill_slink_block
+	@Access:		Public
+	@Description:
+		填充软链接块结构体。
+	@Parameters:
+		name, int8 *, IN
+			软链接名称。
+		link, int8 *, IN
+			目标路径。
+		slink, struct SLinkBlock *, OUT
+			指向软链接块结构体的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+fill_slink_block(	IN int8 * name,
+					IN int8 * link,
+					OUT struct SLinkBlock * slink)
+{
+	if(	strlen(name) >= sizeof(slink->filename) 
+		|| strlen(link) >= sizeof(slink->link))
+		return FALSE;
+	slink->used = 1;
+	slink->type = BLOCK_TYPE_SLINK;
+	strcpy(slink->filename, name);
+	uint32 ui;
+	for(ui = 0; ui < sizeof(slink->reserve); ui++)
+		slink->reserve[ui] = 0;
+	strcpy(slink->link, link);
 	return TRUE;
 }

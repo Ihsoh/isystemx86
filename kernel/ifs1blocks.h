@@ -16,7 +16,6 @@
 #define	BLOCK_TYPE_DIR		3
 
 #define	BLOCK_TYPE_SLINK	65536
-#define	BLOCK_TYPE_HLINK	65537
 
 #define	BLOCK_SECTORS	128
 #define	START_BLOCK_ID	10
@@ -88,6 +87,8 @@ struct DirBlock
 	uint32				blockids[16128];			//文件/目录块ID集合. 如果为0xFFFFFFFF, 则未指向任何文件/目录块.
 } __attribute__((packed));
 
+#define	SLINK_BLOCK_LINK_LEN	65024
+
 //结构名:	SLinkBlock
 //说明:		软链接块
 struct SLinkBlock
@@ -98,7 +99,7 @@ struct SLinkBlock
 
 	uint8				reserve[248];				//保留
 
-	int8				link[65024];				//链接
+	int8				link[SLINK_BLOCK_LINK_LEN];	//链接
 } __attribute__((packed));
 
 extern
@@ -136,5 +137,11 @@ extern
 BOOL
 fill_file_block(IN int8 * name, 
 				OUT struct FileBlock * file);
+
+extern
+BOOL
+fill_slink_block(	IN int8 * name,
+					IN int8 * link,
+					OUT struct SLinkBlock * slink);
 
 #endif
