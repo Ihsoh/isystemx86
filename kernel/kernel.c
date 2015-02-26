@@ -1117,7 +1117,7 @@ static
 void
 system_call(void)
 {
-	/*	BUG BUG BUG....Oh!
+	/*
 	while(1)
 	{
 		is_system_call = 1;	
@@ -1234,7 +1234,7 @@ system_call_int(void)
 	system_call_tss->esp0 = (uint)(system_call_stack + 0xffffe);
 	system_call_tss->esp = (uint)(system_call_stack + 0xffffe);
 	system_call_tss->flags = 0x200;
-	
+
 	asm volatile (
 		"popw	%gs\n\t"
 		"popw	%fs\n\t"
