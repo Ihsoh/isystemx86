@@ -48,6 +48,19 @@ BOOL
 check_disk(IN int8 * symbol);
 
 extern
+BOOL
+get_slink_link(	IN int8 * path,
+				IN uint32 len,
+				OUT int8 * link);
+
+extern
+uint32
+parse_path_ex(	IN int8 * path, 
+				OUT int8 * symbol, 
+				OUT int32 * type,
+				IN BOOL ret_slnk);
+
+extern
 uint32
 parse_path(	IN int8 * path, 
 			OUT int8 * symbol, 
@@ -79,6 +92,12 @@ create_file(IN int8 * path,
 
 extern
 BOOL
+create_slink(	IN int8 * path, 
+				IN int8 * name,
+				IN int8 * link);
+
+extern
+BOOL
 del_dir(IN int8 * path);
 
 extern
@@ -88,6 +107,10 @@ del_file(IN int8 * path);
 extern
 BOOL
 del_dirs(IN int8 * path);
+
+extern
+BOOL
+del_slink(IN int8 * path);
 
 extern
 BOOL

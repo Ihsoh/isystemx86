@@ -821,6 +821,11 @@ files(	IN int8 * path,
 				struct DirBlock * dir = (struct DirBlock *)block;
 				print_str_p(dir->dirname, CC_GREEN);
 			}
+			else if(block->type == BLOCK_TYPE_SLINK)
+			{
+				struct SLinkBlock * slink = (struct SLinkBlock *)block;
+				print_str_p(slink->filename, CC_BLUE);
+			}
 			else
 				print_str_p("????", CC_RED);
 			print_str(" ");
@@ -866,6 +871,21 @@ files(	IN int8 * path,
 				print_str_p(name, CC_GREEN);
 				print_str(" <DIR> ");
 				print_datetime(&(dir->change));
+			}
+			else if(block->type == BLOCK_TYPE_SLINK)
+			{
+				struct SLinkBlock * slink = (struct SLinkBlock *)block;
+				if(strlen(slink->filename) > sizeof(name) - 1)
+				{
+					memcpy(name, slink->filename, sizeof(name) - 1);
+					name[19] = '.';
+					name[18] = '.';
+					name[17] = '.';
+				}
+				else		
+					memcpy(name, slink->filename, strlen(slink->filename));
+				print_str_p(name, CC_BLUE);
+				print_str(" <LNK> ");
 			}
 			else
 				print_str_p("????", CC_RED);
@@ -1406,6 +1426,131 @@ set(IN int8 * property,
 	return 1;
 }
 
+/**
+	@Function:		mkslink
+	@Access:		Private
+	@Description:
+		创建软链接。
+	@Parameters:
+		path, int8 *, IN
+			指定创建软链接的目录。
+		name, int8 *, IN
+			软链接名称。
+		link, int8 *, IN
+			链接的目标。
+	@Return:
+		BOOL
+			返回 FALSE 则失败，否则成功。		
+*/
+static
+BOOL
+mkslink(IN int8 * path,
+		IN int8 * name,
+		IN int8 * link)
+{
+	if(strcmp(path, "") == 0 || strcmp(name, "") == 0 || strcmp(link, "") == 0)
+	{
+		error(FORMAT("mkslink {path} {name} {link}"));
+		return FALSE;
+	}
+	int8 temp[MAX_PATH_BUFFER_LEN];
+	if(!fix_path(path, current_path, temp))
+	{
+		error("Invalid path!");
+		return FALSE;
+	}
+	if(create_slink(temp, name, link))
+	{
+		print_str("OK!");
+		return TRUE;
+	}
+	else
+	{
+		error("Failed to create a soft link!");
+		return FALSE;
+	}
+}
+
+/**
+	@Function:		delslink
+	@Access:		Private
+	@Description:
+		删除软链接。
+	@Parameters:
+		path, int8 *, IN
+			软链接的路径。
+	@Return:
+		BOOL
+			返回 FALSE 则失败，否则成功。		
+*/
+static
+BOOL
+delslink(IN int8 * path)
+{
+	if(strcmp(path, "") == 0)
+	{
+		error(FORMAT("delslink {path}"));
+		return FALSE;
+	}
+	int8 temp[MAX_PATH_BUFFER_LEN];
+	if(!fix_path(path, current_path, temp))
+	{
+		error("Invalid path!");
+		return FALSE;
+	}
+	if(del_slink(temp))
+	{
+		print_str("OK!");
+		return TRUE;
+	}
+	else
+	{
+		error("Failed to delete a soft link!");
+		return FALSE;
+	}
+}
+
+/**
+	@Function:		slink
+	@Access:		Private
+	@Description:
+		显示软链接的链接目标。
+	@Parameters:
+		path, int8 *, IN
+			软链接的路径。
+	@Return:
+		BOOL
+			返回 FALSE 则失败，否则成功。		
+*/
+static
+BOOL
+slink(IN int8 * path)
+{
+	if(strcmp(path, "") == 0)
+	{
+		error(FORMAT("slink {path}"));
+		return FALSE;
+	}
+	int8 temp[MAX_PATH_BUFFER_LEN];
+	if(!fix_path(path, current_path, temp))
+	{
+		error("Invalid path!");
+		return FALSE;
+	}
+	int8 link[1024];
+	link[1023] = '\0';
+	if(get_slink_link(temp, 1023, link))
+	{
+		print_str(link);
+		return TRUE;
+	}
+	else
+	{
+		error("Failed to show link target of soft link!");
+		return FALSE;
+	}
+}
+
 static int exec(char * cmd, char * lines, uint * pointer, uint line, struct Vars * local_vars_s);
 
 #define	BATCH_MAX_CMD_LEN		1024	//脚本的命令缓冲区的最大长度
@@ -1809,6 +1954,33 @@ exec(	IN int8 * cmd,
 		{
 			write_log_to_disk();
 			clear_log();
+			r = 1;
+			print_str("\n");
+		}
+		else if(strcmp(name, "mkslink") == 0)
+		{
+			int8 path[1024];
+			int8 name[1024];
+			int8 link[1024];
+			parse_cmd(NULL, path, 1023);
+			parse_cmd(NULL, name, 1023);
+			parse_cmd(NULL, link, 1023);
+			r = mkslink(path, name, link);
+			print_str("\n");
+		}
+		else if(strcmp(name, "delslink") == 0)
+		{
+			int8 path[1024];
+			parse_cmd(NULL, path, 1023);
+			r = delslink(path);
+			print_str("\n");
+		}
+		else if(strcmp(name, "slink") == 0)
+		{
+			int8 path[1024];
+			parse_cmd(NULL, path, 1023);
+			r = slink(path);
+			print_str("\n");
 		}
 		//Batch
 		else if(strcmp(name, "goto") == 0)

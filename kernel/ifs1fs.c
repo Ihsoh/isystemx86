@@ -105,6 +105,7 @@ _exists_dir(IN int8 * symbol,
 		struct DirBlock subdir;
 		if(	subdir_id != INVALID_BLOCK_ID 
 			&& get_block(symbol, subdir_id, (struct RawBlock *)&subdir) 
+			&& subdir.used
 			&& subdir.type == BLOCK_TYPE_DIR
 			&& strcmp(subdir.dirname, name) == 0)
 			return TRUE;
@@ -148,9 +149,55 @@ _exists_file(	IN int8 * symbol,
 		uint32 subfile_id = dir.blockids[ui];
 		struct FileBlock subfile;
 		if(	subfile_id != INVALID_BLOCK_ID 
-			&& get_block(symbol,subfile_id, (struct RawBlock *)&subfile) 
+			&& get_block(symbol, subfile_id, (struct RawBlock *)&subfile)
+			&& subfile.used
 			&& subfile.type == BLOCK_TYPE_FILE
 			&& strcmp(subfile.filename, name) == 0)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+/**
+	@Function:		_exists_slink
+	@Access:		Private
+	@Description:
+		确认指定磁盘的指定目录内是否存在指定名称的软链接。
+	@Parameters:
+		symbol, int8 *, IN
+			盘符。
+		id, int8 *, IN
+			目录的块ID。
+		name, int8 *, IN
+			要确认的软链接的名称。
+	@Return:
+		BOOL
+			返回TRUE则存在，否则不存在。	
+*/
+static
+BOOL
+_exists_slink(	IN int8 * symbol,
+				IN uint32 id,
+				IN int8 * name)
+{
+	struct DirBlock dir;
+	if(	id == INVALID_BLOCK_ID
+		|| symbol == NULL
+		|| name == NULL
+		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| dir.used == 0 
+		|| dir.type != BLOCK_TYPE_DIR)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
+	{
+		uint32 slink_id = dir.blockids[ui];
+		struct SLinkBlock slink;
+		if(	slink_id != INVALID_BLOCK_ID 
+			&& get_block(symbol, slink_id, (struct RawBlock *)&slink)
+			&& slink.used
+			&& slink.type == BLOCK_TYPE_SLINK
+			&& strcmp(slink.filename, name) == 0)
 			return TRUE;
 	}
 	return FALSE;
@@ -161,6 +208,8 @@ _exists_file(	IN int8 * symbol,
 	@Access:		Private
 	@Description:
 		在指定的磁盘的指定目录下创建文件夹。
+		创建的文件夹的名称不能与目录下存在的软链接的名称相同。
+		低级方式。
 	@Parameters:
 		symbol, int8 *, IN
 			盘符。
@@ -186,6 +235,7 @@ _create_dir(IN int8 * symbol,
 		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR
+		|| _exists_slink(symbol, id, name)
 		|| _exists_dir(symbol, id, name))
 		return FALSE;
 	struct DirBlock new_dir;
@@ -209,6 +259,8 @@ _create_dir(IN int8 * symbol,
 	@Access:		Private
 	@Description:
 		在指定的磁盘的指定目录下创建文件。
+		创建的文件的名称不能与目录下存在的软链接的名称相同。
+		低级方式。
 	@Parameters:
 		symbol, int8 *, IN
 			盘符。
@@ -234,6 +286,7 @@ _create_file(	IN int8 * symbol,
 		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR
+		|| _exists_slink(symbol, id, name)
 		|| _exists_file(symbol, id, name))
 		return FALSE;
 	struct FileBlock new_file;
@@ -253,10 +306,68 @@ _create_file(	IN int8 * symbol,
 }
 
 /**
+	@Function:		_create_slink
+	@Access:		Private
+	@Description:
+		在指定的磁盘的指定目录下创建软链接。
+		创建的软链接的名称不能与目录下存在的文件或文件夹名称相同。
+		低级方式。
+	@Parameters:
+		symbol, int8 *, IN
+			盘符。
+		id, int8 *, IN
+			目录的块ID。
+		name, int8 *, IN
+			将要创建的软链接的名称。
+		link, int8 *, IN
+			软链接的目标。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+static
+BOOL
+_create_slink(	IN int8 * symbol,
+				IN uint32 id,
+				IN int8 * name,
+				IN int8 * link)
+{
+	struct DirBlock dir;
+	if(	id == INVALID_BLOCK_ID
+		|| symbol == NULL
+		|| name == NULL
+		|| link == NULL
+		|| strlen(name) > MAX_FILENAME_LEN
+		|| strlen(link) >= SLINK_BLOCK_LINK_LEN
+		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| dir.used == 0 
+		|| dir.type != BLOCK_TYPE_DIR
+		|| _exists_slink(symbol, id, name)
+		|| _exists_file(symbol, id, name)
+		|| _exists_dir(symbol, id, name))
+		return FALSE;
+	struct SLinkBlock new_slink;
+	fill_slink_block(name, link, &new_slink);
+	uint32 new_slink_id = add_block(symbol, (struct RawBlock *)&new_slink);
+	if(new_slink_id == INVALID_BLOCK_ID)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
+		if(dir.blockids[ui] == INVALID_BLOCK_ID)
+		{
+			dir.blockids[ui] = new_slink_id;
+			set_block(symbol, id, (struct RawBlock *)&dir);
+			return TRUE;
+		}
+	return FALSE;
+}
+
+/**
 	@Function:		_del_dir
 	@Access:		Private
 	@Description:
 		删除指定磁盘的指定文件夹。
+		低级方式。
 	@Parameters:
 		symbol, int8 *, IN
 			盘符。
@@ -291,6 +402,7 @@ _del_dir(	IN int8 * symbol,
 	@Access:		Private
 	@Description:
 		删除指定磁盘的指定文件。
+		低级方式。
 	@Parameters:
 		symbol, int8 *, IN
 			盘符。
@@ -315,6 +427,37 @@ _del_file(	IN int8 * symbol,
 		return FALSE;
 	file.used = 0;
 	return set_block(symbol, id, (struct RawBlock *)&file);
+}
+
+/**
+	@Function:		_del_slink
+	@Access:		Private
+	@Description:
+		删除指定磁盘的指定软链接。
+		低级方式。
+	@Parameters:
+		symbol, int8 *, IN
+			盘符。
+		id, uint32, IN
+			软链接的块ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+static
+BOOL
+_del_slink(	IN int8 * symbol,
+			IN uint32 id)
+{
+	struct SLinkBlock slink;
+	if(	id == INVALID_BLOCK_ID
+		|| symbol == NULL
+		|| !get_block(symbol, id, (struct RawBlock *)&slink)
+		|| slink.used == 0
+		|| slink.type != BLOCK_TYPE_SLINK)
+		return FALSE;
+	slink.used = 0;
+	return set_block(symbol, id, (struct RawBlock *)&slink);
 }
 
 /**
@@ -537,7 +680,73 @@ _rename_file(	IN int8 * symbol,
 }
 
 /**
-	@Function:		parse_path
+	@Function:		_get_slink_link
+	@Access:		Private
+	@Description:
+		获取软链接的链接目标。
+		低级方式。
+	@Parameters:
+		symbol, int8 *, IN
+			盘符。
+		id, uint32, IN
+			软链接的块ID。
+		len, uint32, IN
+			缓冲区大小。
+		link, int8 *, OUT
+			用于保存链接目标的缓冲区。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+static
+BOOL
+_get_slink_link(IN int8 * symbol,
+				IN uint32 id,
+				IN uint32 len,
+				OUT int8 * link)
+{
+	struct SLinkBlock slink;
+	if(	id == INVALID_BLOCK_ID
+		|| symbol == NULL
+		|| link == NULL
+		|| !get_block(symbol, id, (struct RawBlock *)&slink)
+		|| slink.used == 0
+		|| slink.type != BLOCK_TYPE_SLINK)
+		return FALSE;
+	memcpy(link, slink.link, len);
+	return TRUE;
+}
+
+/**
+	@Function:		get_slink_link
+	@Access:		Public
+	@Description:
+		获取软链接的链接目标。
+		高级方式。
+	@Parameters:
+		path, int8 *, IN
+			软链接的路径。
+		len, uint32, IN
+			缓冲区大小。
+		link, int8 *, OUT
+			用于保存链接目标的缓冲区。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+get_slink_link(	IN int8 * path,
+				IN uint32 len,
+				OUT int8 * link)
+{
+	int32 type;
+	int8 symbol[3];
+	uint32 id = parse_path_ex(path, symbol, &type, TRUE);
+	return _get_slink_link(symbol, id, len, link);
+}
+
+/**
+	@Function:		parse_path_ex
 	@Access:		Public
 	@Description:
 		解析路径。根据路径获取盘符，块类型以及块ID。
@@ -549,14 +758,17 @@ _rename_file(	IN int8 * symbol,
 		type, int32 *, OUT
 			路径所指定的资源的类型。
 			如果值为 BLOCK_TYPE_FILE 则是文件，为 BLOCK_TYPE_DIR 则是目录。
+		ret_slnk, BOOL, IN
+			是否返回软链接。
 	@Return:
 		uint32
 			如果返回0xffffffff则说明路径无效。否则返回块ID。
 */
 uint32
-parse_path(	IN int8 * path, 
-			OUT int8 * symbol, 
-			OUT int32 * type)
+parse_path_ex(	IN int8 * path, 
+				OUT int8 * symbol, 
+				OUT int32 * type,
+				IN BOOL ret_slnk)
 {
 	if(	path == NULL
 		|| symbol == NULL
@@ -618,19 +830,58 @@ parse_path(	IN int8 * path,
 			uint32 ui;
 			for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
 			{
-				uint32 subdir_id = dir.blockids[ui];
-				struct DirBlock subdir;
-				if(	subdir_id != INVALID_BLOCK_ID 
-					&& get_block(disk, subdir_id, (struct RawBlock *)&subdir) 
-					&& subdir.type == BLOCK_TYPE_DIR
-					&& strcmp(subdir.dirname, name) == 0)
-				{
-					blockid = subdir_id;
-					*type = BLOCK_TYPE_DIR;
-					name[0] = '\0';
-					n = name;
-					processed = 1;
-				}
+				uint32 block_id = dir.blockids[ui];
+				struct RawBlock block;
+				if(	block_id != INVALID_BLOCK_ID
+					&& get_block(disk, block_id, &block))
+					if(	block.type == BLOCK_TYPE_DIR
+						&& strcmp(((struct DirBlock *)&block)->dirname, name) == 0)
+						{
+							blockid = block_id;
+							*type = BLOCK_TYPE_DIR;
+							name[0] = '\0';
+							n = name;
+							processed = 1;
+							break;
+						}
+					else if(block.type == BLOCK_TYPE_SLINK
+							&& strcmp(((struct SLinkBlock *)&block)->filename, name) == 0)
+					{
+						uint32 ui;
+						BOOL found = FALSE;
+						for(ui = 0; ui < 0xffffffff; ui++)
+						{
+							int8 link[1024];
+							link[1023] = '\0';
+							if(_get_slink_link(disk, block_id, 1023, link))
+								if(strlen(link) != 0 && link[strlen(link) - 1] == '/')
+								{
+									uint32 id = parse_path(link, symbol, type);
+									if(id != INVALID_BLOCK_ID && *type == BLOCK_TYPE_DIR)
+									{
+										blockid = id;
+										*type = BLOCK_TYPE_DIR;
+										name[0] = '\0';
+										n = name;
+										processed = 1;
+										found = TRUE;
+										break;
+									}
+									else if(id != INVALID_BLOCK_ID && *type == BLOCK_TYPE_SLINK)
+										block_id = parse_path(link, symbol, type);
+									else
+										return INVALID_BLOCK_ID;
+								}
+								else
+									return INVALID_BLOCK_ID;
+							else
+								return INVALID_BLOCK_ID;
+						}
+						if(!found)
+							return INVALID_BLOCK_ID;
+						else
+							break;
+					}
 			}
 		}
 	if(!processed)
@@ -644,21 +895,63 @@ parse_path(	IN int8 * path,
 		uint32 ui;
 		for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
 		{
-			uint32 file_id = dir.blockids[ui];
-			struct FileBlock file;
-			if(	file_id != INVALID_BLOCK_ID 
-				&& get_block(disk, file_id, (struct RawBlock *)&file)
-				&& file.type == BLOCK_TYPE_FILE 
-				&& strcmp(file.filename, name) == 0)
-			{
-				strcpy(symbol, disk);
-				return file_id;
-			}
+			uint32 block_id = dir.blockids[ui];
+			struct RawBlock block;
+			if(	block_id != INVALID_BLOCK_ID 
+				&& get_block(disk, block_id, &block))
+				if(	block.type == BLOCK_TYPE_FILE
+					&& strcmp(((struct FileBlock *)&block)->filename, name) == 0)
+				{
+					strcpy(symbol, disk);
+					return block_id;
+				}
+				else if(block.type == BLOCK_TYPE_SLINK
+						&& strcmp(((struct SLinkBlock *)&block)->filename, name) == 0)
+					if(ret_slnk)
+					{
+						strcpy(symbol, disk);
+						return block_id;
+					}
+					else
+					{
+						int8 link[1024];
+						link[1023] = '\0';
+						if(_get_slink_link(disk, block_id, 1023, link))
+							if(strlen(link) != 0 && link[strlen(link) - 1] != '/')
+								return parse_path(link, symbol, type);
+							else
+								return INVALID_BLOCK_ID;
+					}
 		}
 		return INVALID_BLOCK_ID;
 	}
 	strcpy(symbol, disk);
 	return blockid;
+}
+
+/**
+	@Function:		parse_path
+	@Access:		Public
+	@Description:
+		解析路径。根据路径获取盘符，块类型以及块ID。
+	@Parameters:
+		path, int8 *, IN
+			路径。
+		symbol, int8 *, OUT
+			路径的盘符。
+		type, int32 *, OUT
+			路径所指定的资源的类型。
+			如果值为 BLOCK_TYPE_FILE 则是文件，为 BLOCK_TYPE_DIR 则是目录。
+	@Return:
+		uint32
+			如果返回0xffffffff则说明路径无效。否则返回块ID。
+*/
+uint32
+parse_path(	IN int8 * path, 
+			OUT int8 * symbol, 
+			OUT int32 * type)
+{
+	return parse_path_ex(path, symbol, type, FALSE);
 }
 
 /**
@@ -782,6 +1075,35 @@ create_file(IN int8 * path,
 	int8 symbol[3];
 	uint32 id = parse_path(path, symbol, &type);
 	return _create_file(symbol, id, name);
+}
+
+/**
+	@Function:		create_slink
+	@Access:		Public
+	@Description:
+		在指定的磁盘的指定目录下创建软链接。
+		创建的软链接的名称不能与目录下存在的文件或文件夹名称相同。
+		高级方式。
+	@Parameters:
+		path, int8 *, IN
+			目录路径。
+		name, int8 *, IN
+			将要创建的软链接的名称。
+		link, int8 *, IN
+			软链接的目标。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+BOOL
+create_slink(	IN int8 * path, 
+				IN int8 * name,
+				IN int8 * link)
+{
+	int32 type;
+	int8 symbol[3];
+	uint32 id = parse_path(path, symbol, &type);
+	return _create_slink(symbol, id, name, link);
 }
 
 /**
@@ -911,6 +1233,28 @@ del_dirs(IN int8 * path)
 		free_memory(subs);
 	}	
 	return del_dir(path);
+}
+
+/**
+	@Function:		del_slink
+	@Access:		Public
+	@Description:
+		删除指定磁盘的指定软链接。
+		高级方式。
+	@Parameters:
+		path, int8 *, IN
+			软链接的路径。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+BOOL
+del_slink(IN int8 * path)
+{
+	int32 type;
+	int8 symbol[3];
+	uint32 id = parse_path_ex(path, symbol, &type, TRUE);
+	return _del_slink(symbol, id);
 }
 
 /**
@@ -1313,7 +1657,7 @@ copy_file(	IN int8 * src_path,
 			返回TRUE则存在，否则不存在。	
 */
 BOOL
-exists_dir(	IN int8 * path, 
+exists_dir(	IN int8 * path,
 			IN int8 * name)
 {
 	int32 type;

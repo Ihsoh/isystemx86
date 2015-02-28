@@ -96,6 +96,18 @@ set {property} {value}:
     ============   ============
     cursor_color   Cursor color
     char_color     Char color
+
+flushlog:
+    write log to disk.
+
+mkslink {path} {name} {target}:
+    Create a soft link.
+
+delslink {path}:
+    Delete a soft link.
+
+slink {path}:
+    Show a target link of soft link.
     
 rem [Comment]:
     Comment.
