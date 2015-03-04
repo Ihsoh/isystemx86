@@ -2,7 +2,7 @@
 #define _MEMORY_H_
 
 #include "ilib.h"
-#include "linked_list.h"
+#include "dslib/linked_list.h"
 #include "type.h"
 #include "InstructionInfo.h"
 

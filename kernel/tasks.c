@@ -136,14 +136,13 @@ create_task(IN int8 * name,
 		for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT; ui++)
 			task->memory_block_ptrs[ui] = NULL;
 
-		//task->addr + 1 * 1024 * 1024 + 0: int32, Task ID
-		//task->addr + 1 * 1024 * 1024 + 4: uint32, System Call Function Number and Sub Function Number
-		//task->addr + 1 * 1024 * 1024 + 8: uint32, SParams Structure address
-		//task->addr + 1 * 1024 * 1024 + 12: uint32, System Call
-		memcpy(task->addr + 1 * 1024 * 1024, (uint8 *)&tid, sizeof(int32));
-		*(uint32 *)(task->addr + 1 * 1024 * 1024 + 4) = 0;
-		*(uint32 *)(task->addr + 1 * 1024 * 1024 + 8) = 0;
-		*(uint32 *)(task->addr + 1 * 1024 * 1024 + 12) = 0;
+		//task->addr + 0: int32, Task ID
+		//task->addr + 4KB + 0: uint32, System Call Function Number and Sub Function Number
+		//task->addr + 4KB + 4: uint32, SParams Structure address
+		memcpy(task->addr + 0, (uint8 *)&tid, sizeof(int32));
+		*(uint32 *)(task->addr + KB(4) + 0) = 0;
+		*(uint32 *)(task->addr + KB(4) + 4) = 0;
+		*(uint32 *)(task->addr + KB(4) + 8) = 0;
 	
 		uint32 code_seg_desc_index = 400 + tid * 5 + 2;
 		uint32 data_seg_desc_index = 400 + tid * 5 + 3;
@@ -190,7 +189,7 @@ create_task(IN int8 * name,
 		task->tss.ecx = 0;
 		task->tss.edx = 0;
 		task->tss.ebx = 0;
-		task->tss.esp = 0x010ffffe;
+		task->tss.esp = 0x011ffffe;
 		task->tss.ebp = 0;
 		task->tss.esi = 0;
 		task->tss.edi = 0;
@@ -216,6 +215,9 @@ create_task(IN int8 * name,
 		
 		//把程序空间的0x01000000到(0x01000000 + task_real_len - 1)映射到物理空间的(task->addr)~(task->addr + task_real_len - 1)
 		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 0x01000000, real_task_len, task->addr, RW_RWE);
+
+		//保护程序空间0x01000000到0x010000000 + 4KB - 1
+		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 0x01000000, KB(4), task->addr, RW_RE);
 
 		task->tss.cr3 = task->real_pagedt_addr;
 		

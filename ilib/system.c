@@ -8,10 +8,16 @@
 #include <types.h>
 #include <string.h>
 
+static int get_tid(void)
+{
+	int tid = *(int *)(0x01000000 + 0);
+	return tid;
+}
+
 void app_exit(void)
 {
 	struct SParams sparams;
-	int tid = *(int *)(0x01000000 + 1 * 1024 * 1024);
+	int tid = get_tid();
 	sparams.param0 = SPARAM(tid);	
 	system_call(SCALL_SYSTEM, SCALL_EXIT, &sparams);
 	while(1);
@@ -166,4 +172,64 @@ void set_clock(int enable)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(enable);
 	system_call(SCALL_SYSTEM, SCALL_SET_CLOCK, &sparams);
+}
+
+uint create_mqueue(char * name)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(name);
+	system_call(SCALL_SYSTEM, SCALL_MQUEUE_S_CREATE, &sparams);
+	return UINT32_SPARAM(sparams.param0);
+}
+
+int delete_mqueue(uint addr)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(addr);
+	system_call(SCALL_SYSTEM, SCALL_MQUEUE_S_DELETE, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int push_message_s(uint addr, MQueueMessagePtr message)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(addr);
+	sparams.param1 = SPARAM(message);
+	system_call(SCALL_SYSTEM, SCALL_MQUEUE_S_PUSH, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int pop_message_s(uint addr, MQueueMessagePtr message)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(addr);
+	sparams.param1 = SPARAM(message);
+	system_call(SCALL_SYSTEM, SCALL_MQUEUE_S_POP, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int push_message_c(char * name, MQueueMessagePtr message)
+{
+	struct SParams sparams;
+	message->tid = get_tid();
+	sparams.param0 = SPARAM(name);
+	sparams.param1 = SPARAM(message);
+	system_call(SCALL_SYSTEM, SCALL_MQUEUE_C_PUSH, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int pop_message_c(char * name, MQueueMessagePtr message)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(name);
+	sparams.param1 = SPARAM(message);
+	system_call(SCALL_SYSTEM, SCALL_MQUEUE_C_POP, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int run_in_bg(void)
+{
+	struct SParams sparams;
+	system_call(SCALL_SYSTEM, SCALL_RUN_IN_BG, &sparams);
+	return INT32_SPARAM(sparams.param0);
 }

@@ -29,6 +29,8 @@
 #include "vesa.h"
 #include "die.h"
 
+#include "mqueue.h"
+
 DEFINE_LOCK_IMPL(console)
 
 #define	FORMAT(message)	"Foramt:\n\t"message

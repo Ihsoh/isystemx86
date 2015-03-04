@@ -25,6 +25,7 @@
 #include "lock.h"
 #include "log.h"
 #include "acpi.h"
+#include "mqueue.h"
 
 #include <dslib/dslib.h>
 
@@ -184,8 +185,6 @@ static
 void
 invalid_stack_int(void);
 
-static struct TSS * system_call_tss = NULL;
-static uint8 * system_call_stack = NULL;
 static uint32 gdt_addr = NULL;
 static uint32 current_tid;
 static BOOL is_kernel_task = TRUE;
@@ -198,7 +197,7 @@ static struct TSS mouse_tss;
 static struct TSS keyboard_tss;
 static struct TSS ide_tss;
 static struct TSS fpu_tss;
-static struct TSS scall_tss;
+static struct TSS scall_tss[MAX_TASK_COUNT];
 static struct TSS pf_tss;
 
 /**
@@ -715,52 +714,6 @@ init_fpu(void)
 }
 
 /**
-	@Function:		init_system_call
-	@Access:		Private
-	@Description:
-		初始化系统调用的中断程序。
-	@Parameters:
-	@Return:
-*/
-static
-void
-init_system_call(void)
-{
-	struct die_info info;
-	struct TSS * tss = &scall_tss;
-	system_call_tss = tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
-	if(tss == NULL)
-	{
-		fill_info(info, DC_INIT_SCALL, DI_INIT_SCALL);
-		die(&info);
-	}
-	system_call_stack = stack;
-	struct Desc tss_desc;
-	struct Gate task_gate;		
-
-	uint32 temp = (uint32)tss;
-	tss_desc.limitl = sizeof(struct TSS) - 1;
-	tss_desc.basel = (uint16)(temp & 0xFFFF);
-	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
-	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
-	tss_desc.attr = AT386TSS + DPL3;
-	set_desc_to_gdt(14, (uint8 *)&tss_desc);
-
-	task_gate.offsetl = 0;
-	task_gate.offseth = 0;
-	task_gate.dcount = 0;
-	task_gate.selector = (14 << 3) | RPL3;
-	task_gate.attr = ATTASKGATE | DPL3;
-	set_desc_to_gdt(15, (uint8 *)&task_gate);
-
-	fill_tss(tss, (uint32)system_call, (uint32)stack);
-	//System Call的任务开中断的原因是如果关闭中断且用户程序调用SCALL_GET_CHAR, SCALL_GET_STR_N等
-	//功能时会导致等待按键队列有数据, 由于关闭了中断, 键盘驱动程序永远不会被启动, 所以导致无限等待.
-	tss->flags = 0x200;
-}
-
-/**
 	@Function:		free_system_call_tss
 	@Access:		Private
 	@Description:
@@ -1102,9 +1055,58 @@ fpu_int(void)
 	}
 }
 
-static uint32 system_call_eax;
-static uint32 system_call_ecx;
-static uint32 system_call_edx;
+static struct TSS * scall_tsses[MAX_TASK_COUNT];
+static uint8 * scall_stacks[MAX_TASK_COUNT];
+
+/**
+	@Function:		init_system_call
+	@Access:		Private
+	@Description:
+		初始化系统调用的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+init_system_call(void)
+{
+	uint32 ui;
+	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
+	{
+		struct die_info info;
+		struct TSS * tss = &(scall_tss[ui]);
+		scall_tsses[ui] = tss;
+		uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+		if(tss == NULL)
+		{
+			fill_info(info, DC_INIT_SCALL, DI_INIT_SCALL);
+			die(&info);
+		}
+		scall_stacks[ui] = stack;
+		struct Desc tss_desc;
+		struct Gate task_gate;
+
+		uint32 temp = (uint32)tss;
+		tss_desc.limitl = sizeof(struct TSS) - 1;
+		tss_desc.basel = (uint16)(temp & 0xFFFF);
+		tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+		tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+		tss_desc.attr = AT386TSS + DPL3;
+		set_desc_to_gdt(30 + ui * 2 + 0, (uint8 *)&tss_desc);
+
+		task_gate.offsetl = 0;
+		task_gate.offseth = 0;
+		task_gate.dcount = 0;
+		task_gate.selector = ((30 + ui * 2 + 0) << 3) | RPL3;
+		task_gate.attr = ATTASKGATE | DPL3;
+		set_desc_to_gdt(30 + ui * 2 + 1, (uint8 *)&task_gate);
+
+		fill_tss(tss, (uint32)system_call, (uint32)stack);
+		//System Call的任务开中断的原因是如果关闭中断且用户程序调用SCALL_GET_CHAR, SCALL_GET_STR_N等
+		//功能时会导致等待按键队列有数据, 由于关闭了中断, 键盘驱动程序永远不会被启动, 所以导致无限等待.
+		tss->flags = 0x200;
+	}
+}
 
 /**
 	@Function:		system_call
@@ -1118,55 +1120,19 @@ static
 void
 system_call(void)
 {
-	/*
-	while(1)
-	{
-		is_system_call = 1;	
-
-		int32 i;
-		for(i = 0; i < MAX_TASK_COUNT; i++)
-		{
-			struct Task task;
-			get_task_info(i, &task); 
-			if(task.used && *(uint32 *)(task.addr + 1 * 1024 * 1024 + 12))
-			{
-				uint32 func = *(uint32 *)(task.addr + 1 * 1024 * 1024 + 4);
-				uint32 addr = *(uint32 *)(task.addr + 1 * 1024 * 1024 + 8);
-				uint32 base = (uint32)get_physical_address(i, 0x01300000);
-				struct SParams * sparams = get_physical_address(i, addr);
-
-				switch(func >> 16)
-				{
-					case SCALL_SCREEN:
-						system_call_screen(func & 0xffff, base, sparams);
-						break;
-					case SCALL_KEYBOARD:
-						system_call_keyboard(func & 0xffff, base, sparams);
-						break;
-					case SCALL_FS:
-						system_call_fs(func & 0xffff, base, sparams);
-						break;
-					case SCALL_SYSTEM:
-						system_call_system(func & 0xffff, base, sparams);
-						break;
-					case SCALL_MOUSE:
-						system_call_mouse(func & 0xffff, base, sparams);
-						break;
-				}
-			
-				*(uint32 *)(task.addr + 1 * 1024 * 1024 + 12) = 0;
-			}
-		}
-
-		is_system_call = 0;
-		asm volatile ("iret");
-	}
-	*/
 	uint32 eax, ecx, edx;
 
-	eax = system_call_eax;
-	ecx = system_call_ecx;
-	edx = system_call_edx;
+	asm volatile (
+		"pushl	%%eax\n\t"
+		"pushl	%%ecx\n\t"
+		"pushl	%%edx\n\t"
+		"popl	%0\n\t"
+		"popl	%1\n\t"
+		"popl	%2\n\t"
+		:
+		:"m"(edx), "m"(ecx), "m"(eax));
+
+	is_system_call++;
 
 	uint32 base = (uint32)get_physical_address(ecx, 0x01300000); 
 	struct SParams * sparams = get_physical_address(ecx, edx); 
@@ -1189,7 +1155,7 @@ system_call(void)
 			break;
 	}
 
-	is_system_call = 0;
+	is_system_call--;
 
 	asm volatile ("iret");
 }
@@ -1206,6 +1172,7 @@ static
 void
 system_call_int(void)
 {
+	uint32 edx, ecx, eax;
 	asm volatile (
 		"pushw	%%si\n\t"
 		"pushw	%%ds\n\t"
@@ -1224,17 +1191,20 @@ system_call_int(void)
 		"popl	%1\n\t"
 		"popl	%2\n\t"
 		:
-		:"m"(system_call_edx), "m"(system_call_ecx), "m"(system_call_eax));
+		:"m"(edx), "m"(ecx), "m"(eax));
 	
-	//等待别的程序使用完System Call
-	while(is_system_call);
-	is_system_call = 1;
-	
-	//重置System Call的TSS
-	system_call_tss->eip = (uint)system_call;
-	system_call_tss->esp0 = (uint)(system_call_stack + 0xffffe);
-	system_call_tss->esp = (uint)(system_call_stack + 0xffffe);
+	//获取指定的TSS和Stack。
+	struct TSS * system_call_tss = scall_tsses[ecx];
+	uint8 * system_call_stack = scall_stacks[ecx];
+
+	//重置System Call的TSS。
+	system_call_tss->eip = (uint32)system_call;
+	system_call_tss->esp0 = (uint32)(system_call_stack + 0xffffe);
+	system_call_tss->esp = (uint32)(system_call_stack + 0xffffe);
 	system_call_tss->flags = 0x200;
+	system_call_tss->edx = edx;
+	system_call_tss->ecx = ecx;
+	system_call_tss->eax = eax;
 
 	asm volatile (
 		"popw	%gs\n\t"
@@ -1242,8 +1212,93 @@ system_call_int(void)
 		"popw	%es\n\t"
 		"popw	%ds\n\t"
 		"popw	%si\n\t");
+	
+	/*
+	????BUG????
 
-	asm volatile ("lcall	$123, $0;");
+	uint16 address[3];
+	address[0] = 0;
+	address[1] = 0;
+	address[2] = (uint16)(((30 + ecx * 2 + 1) << 3) | RPL3);
+	asm volatile ("lcall	%0\n\t"::"m"(address));
+	*/
+
+	#define SYSTEM_CALL(tid_s)	\
+		asm volatile (	".set TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
+						"lcall	$TARGET"tid_s", $0\n\t");
+
+	#define SYSTEM_CALL_CASE(tid, tid_s)	\
+		case tid:	\
+			SYSTEM_CALL(tid_s);	\
+			break;
+
+	switch(ecx)
+	{
+		SYSTEM_CALL_CASE(0, "0")
+		SYSTEM_CALL_CASE(1, "1")
+		SYSTEM_CALL_CASE(2, "2")
+		SYSTEM_CALL_CASE(3, "3")
+		SYSTEM_CALL_CASE(4, "4")
+		SYSTEM_CALL_CASE(5, "5")
+		SYSTEM_CALL_CASE(6, "6")
+		SYSTEM_CALL_CASE(7, "7")
+		SYSTEM_CALL_CASE(8, "8")
+		SYSTEM_CALL_CASE(9, "9")
+		SYSTEM_CALL_CASE(10, "10")
+		SYSTEM_CALL_CASE(11, "11")
+		SYSTEM_CALL_CASE(12, "12")
+		SYSTEM_CALL_CASE(13, "13")
+		SYSTEM_CALL_CASE(14, "14")
+		SYSTEM_CALL_CASE(15, "15")
+		SYSTEM_CALL_CASE(16, "16")
+		SYSTEM_CALL_CASE(17, "17")
+		SYSTEM_CALL_CASE(18, "18")
+		SYSTEM_CALL_CASE(19, "19")
+		SYSTEM_CALL_CASE(20, "20")
+		SYSTEM_CALL_CASE(21, "21")
+		SYSTEM_CALL_CASE(22, "22")
+		SYSTEM_CALL_CASE(23, "23")
+		SYSTEM_CALL_CASE(24, "24")
+		SYSTEM_CALL_CASE(25, "25")
+		SYSTEM_CALL_CASE(26, "26")
+		SYSTEM_CALL_CASE(27, "27")
+		SYSTEM_CALL_CASE(28, "28")
+		SYSTEM_CALL_CASE(29, "29")
+		SYSTEM_CALL_CASE(30, "30")
+		SYSTEM_CALL_CASE(31, "31")
+		SYSTEM_CALL_CASE(32, "32")
+		SYSTEM_CALL_CASE(33, "33")
+		SYSTEM_CALL_CASE(34, "34")
+		SYSTEM_CALL_CASE(35, "35")
+		SYSTEM_CALL_CASE(36, "36")
+		SYSTEM_CALL_CASE(37, "37")
+		SYSTEM_CALL_CASE(38, "38")
+		SYSTEM_CALL_CASE(39, "39")
+		SYSTEM_CALL_CASE(40, "40")
+		SYSTEM_CALL_CASE(41, "41")
+		SYSTEM_CALL_CASE(42, "42")
+		SYSTEM_CALL_CASE(43, "43")
+		SYSTEM_CALL_CASE(44, "44")
+		SYSTEM_CALL_CASE(45, "45")
+		SYSTEM_CALL_CASE(46, "46")
+		SYSTEM_CALL_CASE(47, "47")
+		SYSTEM_CALL_CASE(48, "48")
+		SYSTEM_CALL_CASE(49, "49")
+		SYSTEM_CALL_CASE(50, "50")
+		SYSTEM_CALL_CASE(51, "51")
+		SYSTEM_CALL_CASE(52, "52")
+		SYSTEM_CALL_CASE(53, "53")
+		SYSTEM_CALL_CASE(54, "54")
+		SYSTEM_CALL_CASE(55, "55")
+		SYSTEM_CALL_CASE(56, "56")
+		SYSTEM_CALL_CASE(57, "57")
+		SYSTEM_CALL_CASE(58, "58")
+		SYSTEM_CALL_CASE(59, "59")
+		SYSTEM_CALL_CASE(60, "60")
+		SYSTEM_CALL_CASE(61, "61")
+		SYSTEM_CALL_CASE(62, "62")
+		SYSTEM_CALL_CASE(63, "63")
+	}
 
 	INT_EXIT();
 }

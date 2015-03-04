@@ -67,6 +67,7 @@ halt_cpu(void);
 #define	INT_EXIT() { asm volatile ("leave;iret"); }
 #define	SAVE_REGS()	{ asm volatile ("pushal"); }
 #define	RESUME_REGS() { asm volatile ("popal"); }
+#define	PAUSE()	{ asm volatile("pause"); }
 
 #define	ATDR	0x90
 #define	ATDW	0x92

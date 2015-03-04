@@ -6,7 +6,7 @@ CFlags=-O0 -fno-stack-protector -nostdinc -I../ilib -m32 -march=i386 -mtune=i386
 Objs=bin/main.obj bin/BinaryHelper.obj bin/ParameterInfo.obj bin/CPU.obj bin/CPU_Registers.obj bin/CPU_Instructions.obj 	\
 bin/Machine.obj bin/InterruptInfo.obj bin/Memory.obj bin/InstructionInfo.obj
 Linker=ld -m elf_i386
-Include=-I../../ilib -I../../dslib
+Include=-I../../ilib -I../../
 AppMaker=../../tools/appmaker/bin/appmaker
 MTA32Obj=../../ilib/bin/mta32.obj
 

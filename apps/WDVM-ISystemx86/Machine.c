@@ -1,6 +1,6 @@
 #include "Machine.h"
 #include "ilib.h"
-#include "linked_list.h"
+#include "dslib/linked_list.h"
 
 Machine * Machine_New0(void)
 {

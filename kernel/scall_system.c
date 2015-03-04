@@ -16,7 +16,10 @@
 #include "console.h"
 #include "paging.h"
 #include "lock.h"
+#include "mqueue.h"
 #include <string.h>
+
+#include "screen.h"
 
 /**
 	@Function:		system_call_system
@@ -172,7 +175,135 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			set_clock(sparams->param0);
 			break;
 		}
-
-		
+		//服务端，创建消息队列
+		//
+		//参数:
+		//	Param0=消息队列名称(相对于调用程序空间的偏移地址)
+		//返回值:
+		//	Param0=消息队列指针(相对于内核空间的偏移地址)
+		case SCALL_MQUEUE_S_CREATE:
+		{
+			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			MQueuePtr mqueue = mqueue_new(name);
+			sparams->param0 = SPARAM(mqueue);
+			break;
+		}
+		//服务端，删除消息队列
+		//
+		//参数:
+		//	Param0=消息队列指针(相对于内核空间的偏移地址)
+		//返回值:
+		//	Param0=返回 TRUE 则成功，否则失败。
+		case SCALL_MQUEUE_S_DELETE:
+		{
+			MQueuePtr mqueue = VOID_PTR_SPARAM(sparams->param0);
+			BOOL r = mqueue_free(mqueue);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//服务端，向消息队列里添加消息
+		//
+		//参数:
+		//	Param0=消息队列指针(相对于内核空间的偏移地址)
+		//	Param1=消息的指针(相对于调用程序空间的偏移地址)
+		//返回值:
+		//	Param0=返回 TRUE 则成功，否则失败。
+		case SCALL_MQUEUE_S_PUSH:
+		{
+			MQueuePtr mqueue = VOID_PTR_SPARAM(sparams->param0);
+			MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			BOOL r = mqueue_add_message(mqueue, MQUEUE_IN, message);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//服务端，从消息队列里获取消息
+		//
+		//参数:
+		//	Param0=消息队列指针(相对于内核空间的偏移地址)
+		//	Param1=消息的指针(相对于调用程序空间的偏移地址)
+		//返回值:
+		//	Param0=返回 TRUE 则成功，否则失败。
+		case SCALL_MQUEUE_S_POP:
+		{
+			MQueuePtr mqueue = VOID_PTR_SPARAM(sparams->param0);
+			MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			MQueueMessagePtr poped_message = mqueue_pop_message(mqueue, MQUEUE_OUT);
+			BOOL r = FALSE;
+			if(poped_message == NULL)
+				r = FALSE;
+			else
+			{
+				memcpy(message, poped_message, sizeof(MQueueMessage));
+				free_memory(poped_message);
+				r = TRUE;
+			}
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//客户端，向消息队列里添加消息
+		//
+		//参数:
+		//	Param0=消息队列名称(相对于内核空间的偏移地址)
+		//	Param1=消息的指针(相对于调用程序空间的偏移地址)
+		//返回值:
+		//	Param0=返回 TRUE 则成功，否则失败。
+		case SCALL_MQUEUE_C_PUSH:
+		{
+			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			MQueuePtr mqueue = mqueue_get_ptr_by_name(name);
+			BOOL r = FALSE;
+			if(mqueue != NULL)
+			{
+				MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+				r = mqueue_add_message(mqueue, MQUEUE_OUT, message);
+			}
+			else
+				r = FALSE;
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//客户端，从消息队列里获取消息
+		//
+		//参数:
+		//	Param0=消息队列指针(相对于内核空间的偏移地址)
+		//	Param1=消息的指针(相对于调用程序空间的偏移地址)
+		//返回值:
+		//	Param0=返回 TRUE 则成功，否则失败。
+		case SCALL_MQUEUE_C_POP:
+		{
+			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			MQueuePtr mqueue = mqueue_get_ptr_by_name(name);
+			BOOL r = FALSE;
+			if(mqueue != NULL)
+			{
+				MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+				MQueueMessagePtr poped_message = mqueue_pop_message_with_tid(mqueue, MQUEUE_IN, sparams->tid);
+				if(poped_message == NULL)
+					r = FALSE;
+				else
+				{
+					memcpy(message, poped_message, sizeof(MQueueMessage));
+					free_memory(poped_message);
+					r = TRUE;
+				}
+			}
+			else
+				r = FALSE;
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//设置程序后台运行。
+		//
+		case SCALL_RUN_IN_BG:
+		{
+			BOOL r = FALSE;
+			if(get_wait_app_tid() == sparams->tid)
+			{
+				set_wait_app_tid(-1);
+				r = TRUE;
+			}
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }

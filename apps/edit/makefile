@@ -5,7 +5,7 @@ CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -I../ilib -m32 -march=i386 -mtune=i386
 Objs=bin/main.obj
 Linker=ld -m elf_i386
-Include=-I../../ilib
+Include=-I../../ilib -I../../
 AppMaker=../../tools/appmaker/bin/appmaker
 MTA32Obj=../../ilib/bin/mta32.obj
 
