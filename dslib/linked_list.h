@@ -6,16 +6,16 @@
 
 typedef struct _DSLLinkedListNode
 {
-	DSLValue value;
-	struct _DSLLinkedListNode * prev;
-	struct _DSLLinkedListNode * next;
+	DSLValue						value;
+	struct _DSLLinkedListNode *		prev;
+	struct _DSLLinkedListNode *		next;
 } DSLLinkedListNode, * DSLLinkedListNodePtr;
 
 typedef struct _DSLLinkedList
 {
-	DSLLinkedListNode * head;
-	DSLLinkedListNode * foot;
-	int32 count;
+	DSLLinkedListNode *	head;
+	DSLLinkedListNode *	foot;
+	int32				count;
 } DSLLinkedList, * DSLLinkedListPtr;
 
 #define	EXTERN_DSL_LNKLST_NEW_XXX_NODE(xxx)	\

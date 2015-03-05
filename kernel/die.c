@@ -11,6 +11,7 @@
 #include "screen.h"
 #include "die.h"
 #include "kernel.h"
+#include "log.h"
 
 /**
 	@Function:		die
@@ -27,6 +28,7 @@ die(IN struct die_info * info)
 {
 	enable_flush_screen();
 	asm volatile ("cli");
+	write_log_to_disk();
 	uint16 us;
 	set_cursor(0, 0);
 	set_char_color(CC_YELLOW | CBGC_RED);

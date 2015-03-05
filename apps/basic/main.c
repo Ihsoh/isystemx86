@@ -3,13 +3,27 @@
 #include "die.h"
 
 #include "dslib/dslib.h"
-#include "dslib/linked_list.h"
+#include "dslib/list.h"
+#include "dslib/value.h"
 
 char * code = 	"SUB Sum(BYVAL min AS INTEGER)";
 
 int main(int argc, char * argv[])
 {
-	
+	DSLEnvironment env;
+	env.dsl_malloc = malloc;
+	env.dsl_calloc = calloc;
+	env.dsl_free = free;
+	dsl_init(&env);
+
+	DSLListPtr list = dsl_lst_new();
+	uint32 ui;
+	for(ui = 1; ui <= 100; ui++)
+		dsl_lst_add_value(list, dsl_val_uint32(ui));
+	uint32 sum = 0;
+	for(ui = 0; ui < 100; ui++)
+		sum += DSL_UINT32VAL(dsl_lst_get(list, ui));
+	printf("Sum = %d\n", sum);
 	return 0;
 
 	int i, i1;

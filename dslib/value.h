@@ -38,8 +38,39 @@ typedef union _DSLValueU
 
 typedef struct _DSLValue
 {
-	int32 type;
-	DSLValueU value;
-} DSLValue;
+	int32		type;
+	DSLValueU	value;
+} DSLValue, * DSLValuePtr;
+
+#define	DSL_INT8VAL(valptr)		((valptr)->value.int8_value)
+#define	DSL_INT16VAL(valptr)	((valptr)->value.int16_value)
+#define	DSL_INT32VAL(valptr)	((valptr)->value.int32_value)
+#define	DSL_INT64VAL(valptr)	((valptr)->value.int64_value)
+#define	DSL_UINT8VAL(valptr)	((valptr)->value.uint8_value)
+#define	DSL_UINT16VAL(valptr)	((valptr)->value.uint16_value)
+#define	DSL_UINT32VAL(valptr)	((valptr)->value.uint32_value)
+#define	DSL_UINT64VAL(valptr)	((valptr)->value.uint64_value)
+#define	DSL_FLOATVAL(valptr)	((valptr)->value.float_value)
+#define	DSL_DOUBLEVAL(valptr)	((valptr)->value.double_value)
+#define	DSL_OBJECTVAL(valptr)	((valptr)->value.object_value)
+#define	DSL_BOOLVAL(valptr)		((valptr)->value.bool_value)
+
+#define	EXTERN_DSL_VAL_XXX(xxx)	\
+extern	\
+DSLValuePtr	\
+dsl_val_##xxx(IN xxx val);
+
+EXTERN_DSL_VAL_XXX(int8)
+EXTERN_DSL_VAL_XXX(int16)
+EXTERN_DSL_VAL_XXX(int32)
+EXTERN_DSL_VAL_XXX(int64)
+EXTERN_DSL_VAL_XXX(uint8)
+EXTERN_DSL_VAL_XXX(uint16)
+EXTERN_DSL_VAL_XXX(uint32)
+EXTERN_DSL_VAL_XXX(uint64)
+EXTERN_DSL_VAL_XXX(float)
+EXTERN_DSL_VAL_XXX(double)
+EXTERN_DSL_VAL_XXX(object)
+EXTERN_DSL_VAL_XXX(bool)
 
 #endif
