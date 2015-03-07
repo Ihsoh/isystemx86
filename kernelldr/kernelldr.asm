@@ -27,6 +27,12 @@ MOV		FS, AX
 MOV		GS, AX
 MOV		SP, 0FFFEH
 
+PUSHA
+MOV 	SI, KnlldrMsg0
+MOV 	DX, 1
+CALL 	PrintMessage
+POPA
+
 ;获取内存大小
 MOV		AX, 0E801H
 INT		15H
@@ -71,6 +77,35 @@ AND		EAX, 00000011H
 MOV		CR0, EAX
 
 Jump16	KernelLdrCDesc, ProtectedMode
+
+;过程名:		PrintMessage
+;功能:		打印消息。
+;参数:		SI=消息地址。
+;			DX=行。
+;返回值:		无
+Procedure	PrintMessage
+	PUSHF
+	PUSH 	ES
+	;PUSHA
+	MOV		AX, 0B800H
+	MOV		ES, AX
+	MOV 	AX, 80 * 2
+	MUL		DX
+	MOV		DI, AX
+	CLD
+	MOV		AH, 7
+PrintMessage_Label0:
+	LODSB
+	OR		AL, AL
+	JE		PrintMessage_Label1
+	STOSW
+	JMP		PrintMessage_Label0
+PrintMessage_Label1:
+	;POPA
+	POP 	ES
+	POPF
+	RET
+EndProc		PrintMessage
 
 %IFDEF SIZE_640_480
 ModeNumber	EQU	4112H
@@ -212,38 +247,103 @@ INT22H_End:
 	IRET
 EndProc		INT22H
 
+%MACRO		WaitIO 0
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+	NOP
+%ENDMACRO
+
+PICMasterCMD	EQU	20H
+PICMasterIMR	EQU (PICMasterCMD + 1)
+PICSlaveCMD		EQU	0A0H
+PICSlaveIMR		EQU	(PICSlaveCMD + 1)
+
 Procedure	Set8259A
 	PUSHF
 	PUSH	AX
-	
-	;主8259A
-	;ICW1
+
+	;屏蔽所有IRQs
+	MOV 	AL, 0FFH
+	OUT 	PICMasterIMR, AL
+	WaitIO
+	MOV 	AL, 0FFH
+	OUT 	PICSlaveIMR, AL
+	WaitIO
+
+	;主8259A - ICW1
 	MOV		AL, 0001_0001B	;边沿触发, 级联, 需要写ICW4
-	OUT		20H, AL
-	;ICW2
+	OUT		PICMasterCMD, AL
+	WaitIO
+
+	;从8259A - ICW1
+	MOV		AL, 0001_0001B	;边沿触发, 级联, 需要写ICW4
+	OUT		PICSlaveCMD, AL
+	WaitIO
+
+	;主8259A - ICW2
 	MOV		AL, 0100_0000B	;40H
-	OUT		21H, AL
-	;ICW3
-	MOV		AL, 0000_0100B	;主8259A的IRQ2接从8259A
-	OUT		21H, AL
-	;ICW4
-	MOV		AL, 0001_0001B	;特殊完全嵌套, 非缓冲, 自动结束
-	OUT		21H, AL
-	
-	;从8259A
-	;ICW1
-	MOV		AL, 0001_0001B	;边沿触发, 级联, 需要写ICW4
-	OUT		0A0H, AL
-	;ICW2
+	OUT		PICMasterIMR, AL
+	WaitIO
+
+	;从8259A - ICW2
 	MOV		AL, 0111_0000B	;70H
-	OUT		0A1H, AL
-	;ICW3
-	MOV		AL, 0000_0010B	;接主8259A的IRQ2
-	OUT		0A1H, AL
-	;ICW4
-	MOV		AL, 0000_0001B	;特殊完全嵌套, 非缓冲, 非自动结束
-	OUT		0A1H, AL
+	OUT		PICSlaveIMR, AL
+	WaitIO
 	
+	;主8259A - ICW3
+	MOV		AL, 0000_0100B	;主8259A的IRQ2接从8259A的IRQ1
+	OUT		PICMasterIMR, AL
+	WaitIO
+
+	;从8259A - ICW3
+	MOV		AL, 0000_0010B	;接主8259A的IRQ2
+	OUT		PICSlaveIMR, AL
+	WaitIO
+
+	;主8259A - ICW4
+	MOV		AL, 0000_0001B	;特殊完全嵌套, 非缓冲, 非自动结束
+	OUT		PICMasterIMR, AL
+	WaitIO
+
+	;从8259A - ICW4
+	MOV		AL, 0000_0001B	;特殊完全嵌套, 非缓冲, 非自动结束
+	OUT		PICSlaveIMR, AL
+	WaitIO
+
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+	WaitIO
+
+	;启用所有IRQs
+	MOV 	AL, 0
+	OUT 	PICMasterIMR, AL
+	WaitIO
+	MOV 	AL, 0
+	OUT 	PICSlaveIMR, AL
+	WaitIO
+
 	POP		AX
 	POPF
 	RET
@@ -393,3 +493,5 @@ UseVesa:
 
 VESAInfo:
 	TIMES 512 DB 0
+
+KnlldrMsg0		DB 'Kernel loader initializing...', 0

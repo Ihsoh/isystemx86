@@ -58,18 +58,19 @@ init_tasks(void)
 		set_desc_to_gdt(400 + ui * 5 + 1, (uint8 *)&task_gate);
 
 		tasks[ui].opened_file_ptrs = alloc_memory(MAX_TASK_OPENED_FILE_COUNT * sizeof(FILE *));
-		if(tasks[ui].opened_file_ptrs == NULL)
-		{
-			fill_info(info, DC_INIT_TSKMGR, DI_INIT_TSKMGR);
-			die(&info);
-		}
-
 		tasks[ui].memory_block_ptrs = alloc_memory(MAX_TASK_MEMORY_BLOCK_COUNT * sizeof(void *));
-		if(tasks[ui].memory_block_ptrs == NULL)
+		tasks[ui].working_dir = alloc_memory(1024);
+		tasks[ui].name = alloc_memory(1024);
+		tasks[ui].param = alloc_memory(1024);
+		if(	tasks[ui].opened_file_ptrs == NULL
+			|| tasks[ui].memory_block_ptrs == NULL
+			|| tasks[ui].working_dir == NULL
+			|| tasks[ui].name == NULL
+			|| tasks[ui].param == NULL)
 		{
 			fill_info(info, DC_INIT_TSKMGR, DI_INIT_TSKMGR);
 			die(&info);
-		}
+		}		
 	}
 	return TRUE;
 }
@@ -117,6 +118,8 @@ create_task(IN int8 * name,
 	}
 	if(tid != -1)
 	{
+		task->on_exit = NULL;
+		task->retvalue = 0;
 		task->running = 0;
 		strcpy(task->name, name);
 		strcpy(task->param, param);
@@ -225,6 +228,7 @@ create_task(IN int8 * name,
 		task->used = 1;
 		task->running = 0;
 		task->ran = 0;
+		task->ready = FALSE;
 	}
 	return tid;
 }
@@ -266,6 +270,9 @@ kill_task(IN int32 tid)
 		}
 
 	free_memory(tasks[tid].pagedt_addr);
+
+	if(tasks[tid].on_exit != NULL)
+		tasks[tid].on_exit(tasks[tid].retvalue);
 
 	tasks[tid].used = 0;
 	return TRUE;
@@ -357,6 +364,28 @@ get_task_info_ptr(IN int32 tid)
 }
 
 /**
+	@Function:		task_ready
+	@Access:		Public
+	@Description:
+		使任务就绪。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。
+*/
+BOOL
+task_ready(IN int32 tid)
+{
+	struct Task * task = get_task_info_ptr(tid);
+	if(task == NULL)
+		return FALSE;
+	task->ready = TRUE;
+	return TRUE;
+}
+
+/**
 	@Function:		create_task_by_file
 	@Access:		Public
 	@Description:
@@ -430,7 +459,7 @@ get_next_task_id(void)
 	if(running_tid == -1)
 	{
 		for(i = 0; i < MAX_TASK_COUNT; i++)
-			if(tasks[i].used)
+			if(tasks[i].used && tasks[i].ready)
 			{
 				running_tid = i;
 				break;
@@ -442,7 +471,7 @@ get_next_task_id(void)
 		if(tasks[running_tid].ran)
 		{
 			for(i = running_tid + 1; i < MAX_TASK_COUNT; i++)
-				if(tasks[i].used)
+				if(tasks[i].used && tasks[i].ready)
 				{
 					tasks[i].ran = 0;
 					tasks[i].running = 1;
@@ -452,7 +481,7 @@ get_next_task_id(void)
 				}
 			if(new_tid == -1)
 				for(i = 0; i < running_tid; i++)
-					if(tasks[i].used)
+					if(tasks[i].used && tasks[i].ready)
 					{
 						tasks[i].ran = 0;
 						tasks[i].running = 1;

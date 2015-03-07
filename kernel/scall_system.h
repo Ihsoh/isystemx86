@@ -25,6 +25,7 @@
 #define	SCALL_MQUEUE_C_PUSH		10
 #define	SCALL_MQUEUE_C_POP		11
 #define	SCALL_RUN_IN_BG			12
+#define	SCALL_SET_RETVALUE		13
 
 extern
 void

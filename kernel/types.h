@@ -24,7 +24,8 @@ typedef uint64	ullong;
 
 typedef	void *	object;
 
-typedef	int32	bool;
+//typedef	int32	bool;
+#define	bool int32
 
 #define	NULL	((void *)0)
 

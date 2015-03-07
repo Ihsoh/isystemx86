@@ -24,8 +24,9 @@ void mta32main(void)
 			break;
 		argc++;
 	}
-	main(argc, argv);
+	int retvalue = main(argc, argv);
 	for(i = 0; i < argc; i++)
 		freem(argv[i]);
+	__set_retvalue(retvalue);
 	app_exit();
 }

@@ -233,3 +233,10 @@ int run_in_bg(void)
 	system_call(SCALL_SYSTEM, SCALL_RUN_IN_BG, &sparams);
 	return INT32_SPARAM(sparams.param0);
 }
+
+void __set_retvalue(int retvalue)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(retvalue);
+	system_call(SCALL_SYSTEM, SCALL_SET_RETVALUE, &sparams);
+}

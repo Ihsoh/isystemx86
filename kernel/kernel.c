@@ -26,6 +26,7 @@
 #include "log.h"
 #include "acpi.h"
 #include "mqueue.h"
+#include "pci.h"
 
 #include <dslib/dslib.h>
 
@@ -253,6 +254,7 @@ main(void)
 	init_log();
 	mqueue_init();
 	acpi_init();
+	pci_init();
 	sti();
 
 	//在这里启用所有锁
@@ -407,6 +409,7 @@ static
 void
 fpu_error_int(void)
 {
+	//print_str("\n{FPU ERROR}\n");
 	asm volatile ("clts");
 	INT_EXIT();
 }

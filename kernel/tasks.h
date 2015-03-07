@@ -19,6 +19,8 @@
 #define	MAX_TASK_MEMORY_BLOCK_COUNT	(10 * 1024)
 #define	TASK_BASE_ADDR				0x00000000
 
+typedef void (* OnTaskExit)(int32 retvalue);
+
 //结构名:	Task
 //功能:		任务
 struct Task
@@ -26,8 +28,8 @@ struct Task
 	int32				used;				//是否使用该任务槽
 	int32				running;			//是否正在运行
 	int32				ran;				//是否运行
-	int8				name[1024];			//任务名
-	int8				param[1024];		//参数
+	int8 *				name;				//任务名
+	int8 *				param;				//参数
 	uint32				app_len;			//程序的长度
 	uint8 *				addr;				//任务的起始地址
 	struct TSS 			tss;				//任务的TSS
@@ -38,7 +40,10 @@ struct Task
 	FILE **				opened_file_ptrs;	//打开文件指针列表
 	void **				memory_block_ptrs;	//内存块指针列表
 	uint32				used_memory_size;	//任务内存使用量
-	int8				working_dir[1024];	//作业目录
+	int8 *				working_dir;		//作业目录
+	int32				retvalue;			//任务的返回值
+	BOOL				ready;				//是否准备就绪
+	OnTaskExit			on_exit;			//当任务退出时调用
 };
 
 
@@ -75,6 +80,10 @@ set_task_info(	IN int32 tid,
 extern
 struct Task *
 get_task_info_ptr(IN int32 tid);
+
+extern
+BOOL
+task_ready(IN int32 tid);
 
 extern
 int32

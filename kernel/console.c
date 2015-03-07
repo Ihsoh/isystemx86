@@ -1098,6 +1098,8 @@ run(IN int8 * path,
 	}
 	if((r = create_task_by_file(temp, cmd, current_path)) == -1)
 		error("Failed to run application!");
+	else
+		task_ready(r);
 	return r;
 }
 
@@ -1146,7 +1148,7 @@ run_wait(	IN int8 * path,
 	}
 	wait_app_tid = r;
 	unlock();
-
+	task_ready(r);
 	return r;
 }
 
@@ -1915,7 +1917,6 @@ exec(	IN int8 * cmd,
 				}
 			if(!ran)
 				r = run(src_path, cmd) == -1 ? 0 : 1;
-			print_str("\n");
 		}
 		else if(strcmp(name, "clear") == 0)
 		{
@@ -2181,7 +2182,6 @@ exec(	IN int8 * cmd,
 				}
 			if(!ran)
 				r = batch(name);
-			print_str("\n");
 		}
 		else
 		{
@@ -2204,7 +2204,6 @@ exec(	IN int8 * cmd,
 				}
 			if(!ran)
 				r = run_wait(name, cmd) == -1 ? 0 : 1;
-			print_str("\n");
 		}
 	}
 	while(wait_app_tid != -1)

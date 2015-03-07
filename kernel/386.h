@@ -29,6 +29,15 @@ uint16
 inw(IN uint16 port);
 
 extern
+void 
+outl(	IN uint16 port,
+		IN uint32 data);
+
+extern
+uint32
+inl(IN uint16 port);
+
+extern
 void
 set_int(IN uint8 n,
 		IN uint32 addr);

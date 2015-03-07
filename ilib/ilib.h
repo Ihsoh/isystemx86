@@ -6,6 +6,11 @@
 #ifndef	_ILIB_H_
 #define	_ILIB_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include "stdarg.h"
 #include "stdio.h"
 #include "stdlib.h"
@@ -19,5 +24,9 @@
 #include "types.h"
 #include "mouse.h"
 #include "image.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

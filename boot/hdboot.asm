@@ -1,11 +1,11 @@
 ;*------------------------------------------------------*
-;|文件名:		hdboot.asm									|
+;|文件名:		hdboot.asm								|
 ;|作者:		Ihsoh										|
 ;|创建时间:	2014-7-24									|
 ;|														|
 ;|概述:													|
 ;|该程序会被BIOS加载到0000:7C00H的位置并被执行. 该程			|
-;|序会加载内核到1000:0000H并跳转到那里去执行.					|
+;|序会加载内核到1000:0000H并跳转到那里去执行.				|
 ;*------------------------------------------------------*
 
 %INCLUDE	'../common/common.inc'
@@ -27,29 +27,12 @@ KnlOffAddr		EQU 0000H
 
 ORG 	7C00H
 BITS	16
-CPU		8086
-
-%MACRO		Die 1
-	MOV		AX, 0
-	MOV		DS, AX
-	MOV		SI, %1
-	MOV		AX, 0B800H
-	MOV		ES, AX
-	XOR		DI, DI
-	CLD
-	MOV		AH, 7
-%%Loop:
-	LODSB
-	OR		AL, AL
-	JE		$
-	STOSW
-	JMP		%%Loop
-%ENDMACRO
+CPU		386
 
 JMP 	Start
 KernelLdrAddr 	DW KLdrOffAddr, KLdrSegAddr
-ErrorMsg1		DB 'Error: Unknow error', 0
-ErrorMsg2		DB 'Error: Must start with 1.44M floppy', 0
+
+BootMsg0		DB 'Boot initializing...', 0
 
 Start:
 
@@ -58,6 +41,12 @@ MOV		DS, AX
 MOV		ES, AX
 MOV		SS, AX
 MOV		SP, StackTop
+
+PUSHA
+MOV 	SI, BootMsg0
+MOV 	DX, 0
+CALL 	PrintMessage
+POPA
 
 CALL	InitDisk
 
@@ -98,6 +87,35 @@ LOOP	LoadKernel
 
 ;Jump to kernel loader address
 JMP 	FAR [CS:KernelLdrAddr]
+
+;过程名:		PrintMessage
+;功能:		打印消息。
+;参数:		SI=消息地址。
+;			DX=行。
+;返回值:		无
+Procedure	PrintMessage
+	PUSHF
+	PUSH 	ES
+	;PUSHA
+	MOV		AX, 0B800H
+	MOV		ES, AX
+	MOV 	AX, 80 * 2
+	MUL		DX
+	MOV		DI, AX
+	CLD
+	MOV		AH, 7
+PrintMessage_Label0:
+	LODSB
+	OR		AL, AL
+	JE		PrintMessage_Label1
+	STOSW
+	JMP		PrintMessage_Label0
+PrintMessage_Label1:
+	;POPA
+	POP 	ES
+	POPF
+	RET
+EndProc		PrintMessage
 
 FSSConvert_DL	DB ?
 
@@ -203,10 +221,10 @@ FSSReadSectors_Label2:
 	RET
 EndProc		FSSReadSectors
 
-;过程名:	InitDisk
+;过程名:		InitDisk
 ;功能:		初始化硬盘
 ;参数:		无
-;返回值:	无
+;返回值:		无
 Procedure	InitDisk
 	PUSH	ES
 	PUSH	DS

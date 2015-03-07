@@ -10,6 +10,11 @@ char * code = 	"SUB Sum(BYVAL min AS INTEGER)";
 
 int main(int argc, char * argv[])
 {
+	float d0 = 100.0f, d1 = 200.123f;
+	d0 = d0 + d1 * 2.31f;
+	printf("%f\n", d0);
+	return 0;
+
 	DSLEnvironment env;
 	env.dsl_malloc = malloc;
 	env.dsl_calloc = calloc;

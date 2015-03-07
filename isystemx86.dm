@@ -41,6 +41,10 @@ WRITE_FILE	VA:/isystem/bins/test1 apps/test1/bin/test1.bin
 MAKE_FILE	VA:/isystem/bins/ test2
 WRITE_FILE	VA:/isystem/bins/test2 apps/test2/bin/test2.bin
 
+#CppTest
+MAKE_FILE	VA:/isystem/bins/ cpptest
+#WRITE_FILE	VA:/isystem/bins/cpptest apps/cpptest/bin/cpptest.bin
+
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd
 MAKE_FILE	VA:/isystem/wd/ fib.wd

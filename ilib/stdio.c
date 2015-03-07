@@ -69,6 +69,11 @@ int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 					case 'f':
 					{
 						float f = va_arg(va, float);
+
+						print_str("{");
+						
+						print_str("}");
+
 						char temp[100];
 						char * f_s = dtos(temp, (double)f);
 						uint f_s_len = strlen(f_s);

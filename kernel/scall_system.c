@@ -60,7 +60,7 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 		//	Param0=分配内存的起始地址. 0则失败.
 		case SCALL_ALLOC_M:
 		{
-			int tid = sparams->tid;
+			int32 tid = sparams->tid;
 			struct Task * task = get_task_info_ptr(tid);
 			uint32 len = UINT32_SPARAM(sparams->param0);
 			uint32 start;
@@ -97,7 +97,7 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 		//	Param0=1则成功, 0则失败
 		case SCALL_FREE_M:
 		{
-			int tid = sparams->tid;
+			int32 tid = sparams->tid;
 			struct Task * task = get_task_info_ptr(tid);
 			void * ptr = (void *)(sparams->param0);	//线性地址
 			if(ptr == NULL)
@@ -153,7 +153,7 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			void * buffer = (void *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			struct Task task;
 			get_task_info(sparams->tid, &task);
-			memcpy(buffer, task.param, sizeof(task.param));
+			memcpy(buffer, task.param, 1024);
 			break;
 		}
 		//获取当前时间
@@ -303,6 +303,17 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 				r = TRUE;
 			}
 			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//设置任务的返回值。
+		//
+		//参数:
+		//	Param0=返回值。
+		case SCALL_SET_RETVALUE:
+		{
+			int32 tid = sparams->tid;
+			int32 retvalue = INT32_SPARAM(sparams->param0);
+			get_task_info_ptr(tid)->retvalue = retvalue;
 			break;
 		}
 	}
