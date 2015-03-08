@@ -18,7 +18,7 @@ static struct CacheInfo cache_info_list[CACHE_INFO_LIST_LEN];
 static struct CacheInfo * L1 = NULL;
 static struct CacheInfo * L2 = NULL;
 static struct CacheInfo * L3 = NULL;
-uint32 cpu_feature_ecx, cpu_feature_edx;
+uint32 cpu_feature_ecx = 0, cpu_feature_edx = 0;
 
 /**
 	@Function:		fill_cache_info
@@ -67,38 +67,82 @@ init_cache_info_list(void)
 	uint32 ui = 0;
 	for(ui = 0; ui < CACHE_INFO_LIST_LEN; ui++)
 		fill_cache_info(&cache_info_list[ui], 0, 0, 0, 0);
+
 	fill_cache_info(&cache_info_list[0x06], 1, 8, 4, 32);
 	fill_cache_info(&cache_info_list[0x08], 1, 16, 4, 32);
+	fill_cache_info(&cache_info_list[0x09], 1, 32, 4, 64);
 	fill_cache_info(&cache_info_list[0x0a], 1, 8, 2, 32);
 	fill_cache_info(&cache_info_list[0x0c], 1, 16, 4, 32);
+	fill_cache_info(&cache_info_list[0x0d], 1, 16, 4, 64);
+	fill_cache_info(&cache_info_list[0x0e], 1, 24, 6, 64);
+
+	fill_cache_info(&cache_info_list[0x1d], 2, 128, 2, 64);
+
+	fill_cache_info(&cache_info_list[0x21], 2, 256, 8, 64);
+	fill_cache_info(&cache_info_list[0x22], 3, 512, 4, 64);
+	fill_cache_info(&cache_info_list[0x23], 3, 1024, 8, 64);
+	fill_cache_info(&cache_info_list[0x24], 2, 1024, 16, 64);
+	fill_cache_info(&cache_info_list[0x25], 3, 2048, 8, 64);
+	fill_cache_info(&cache_info_list[0x29], 3, 4096, 8, 64);
 	fill_cache_info(&cache_info_list[0x2c], 1, 32, 8, 64);
+
 	fill_cache_info(&cache_info_list[0x30], 1, 32, 8, 64);
-	fill_cache_info(&cache_info_list[0x60], 1, 16, 8, 64);
-	fill_cache_info(&cache_info_list[0x66], 1, 8, 4, 64);
-	fill_cache_info(&cache_info_list[0x67], 1, 16, 4, 64);
-	fill_cache_info(&cache_info_list[0x68], 1, 32, 4, 64);
-	fill_cache_info(&cache_info_list[0x39], 2, 128, 4, 64);
-	fill_cache_info(&cache_info_list[0x3b], 2, 128, 2, 64);
-	fill_cache_info(&cache_info_list[0x3c], 2, 256, 4, 64);
+
 	fill_cache_info(&cache_info_list[0x41], 2, 128, 4, 32);
 	fill_cache_info(&cache_info_list[0x42], 2, 256, 4, 32);
 	fill_cache_info(&cache_info_list[0x43], 2, 512, 4, 32);
 	fill_cache_info(&cache_info_list[0x44], 2, 1024, 4, 32);
 	fill_cache_info(&cache_info_list[0x45], 2, 2048, 4, 32);
-	fill_cache_info(&cache_info_list[0x79], 2, 128, 4, 64);
+	fill_cache_info(&cache_info_list[0x46], 3, 4096, 4, 64);
+	fill_cache_info(&cache_info_list[0x47], 3, 8192, 8, 64);
+	fill_cache_info(&cache_info_list[0x48], 2, 3072, 12, 64);
+	//0x49 - Cache
+	//3rd-level cache: 4MB, 16-way set associative, 64-byte line size (Intel Xeon processor MP, Family 0FH, Model 06H);
+	//2nd-level cache: 4 MByte, 16-way set associative, 64 byte line size
+	fill_cache_info(&cache_info_list[0x4a], 3, 6144, 12, 64);
+	fill_cache_info(&cache_info_list[0x4b], 3, 8192, 16, 64);
+	fill_cache_info(&cache_info_list[0x4c], 3, 12288, 12, 64);
+	fill_cache_info(&cache_info_list[0x4d], 3, 16384, 16, 64);
+	fill_cache_info(&cache_info_list[0x4e], 3, 6144, 24, 64);
+
+	fill_cache_info(&cache_info_list[0x60], 1, 16, 8, 64);
+	fill_cache_info(&cache_info_list[0x66], 1, 8, 4, 64);
+	fill_cache_info(&cache_info_list[0x67], 1, 16, 4, 64);
+	fill_cache_info(&cache_info_list[0x68], 1, 32, 4, 64);
+
+	fill_cache_info(&cache_info_list[0x78], 2, 1024, 4, 64);
+	fill_cache_info(&cache_info_list[0x79], 2, 128, 8, 64);
 	fill_cache_info(&cache_info_list[0x7a], 2, 256, 8, 64);
 	fill_cache_info(&cache_info_list[0x7b], 2, 512, 8, 64);
 	fill_cache_info(&cache_info_list[0x7c], 2, 1024, 8, 64);
+	fill_cache_info(&cache_info_list[0x7d], 2, 2048, 8, 64);
+	fill_cache_info(&cache_info_list[0x7f], 2, 512, 2, 64);
+
+	fill_cache_info(&cache_info_list[0x80], 2, 512, 8, 64);
 	fill_cache_info(&cache_info_list[0x82], 2, 256, 8, 32);
 	fill_cache_info(&cache_info_list[0x83], 2, 512, 8, 32);
 	fill_cache_info(&cache_info_list[0x84], 2, 1024, 8, 32);
 	fill_cache_info(&cache_info_list[0x85], 2, 2048, 8, 32);
 	fill_cache_info(&cache_info_list[0x86], 2, 512, 4, 64);
 	fill_cache_info(&cache_info_list[0x87], 2, 1024, 8, 64);
-	fill_cache_info(&cache_info_list[0x22], 3, 512, 4, 64);
-	fill_cache_info(&cache_info_list[0x23], 3, 1024, 8, 64);
-	fill_cache_info(&cache_info_list[0x25], 3, 2048, 8, 64);
-	fill_cache_info(&cache_info_list[0x29], 3, 4096, 8, 64);
+
+	fill_cache_info(&cache_info_list[0xd0], 3, 512, 4, 64);
+	fill_cache_info(&cache_info_list[0xd1], 3, 1024, 4, 64);
+	fill_cache_info(&cache_info_list[0xd2], 3, 2048, 4, 64);
+	fill_cache_info(&cache_info_list[0xd6], 3, 1024, 8, 64);
+	fill_cache_info(&cache_info_list[0xd7], 3, 2048, 8, 64);
+	fill_cache_info(&cache_info_list[0xd8], 3, 4096, 8, 64);
+	fill_cache_info(&cache_info_list[0xdc], 3, 1536, 12, 64);
+	fill_cache_info(&cache_info_list[0xdd], 3, 3072, 12, 64);
+	fill_cache_info(&cache_info_list[0xde], 3, 6144, 12, 64);
+
+	fill_cache_info(&cache_info_list[0xe2], 3, 2048, 16, 64);
+	fill_cache_info(&cache_info_list[0xe3], 3, 4096, 16, 64);
+	fill_cache_info(&cache_info_list[0xe4], 3, 8192, 16, 64);
+	fill_cache_info(&cache_info_list[0xea], 3, 12288, 24, 64);
+	fill_cache_info(&cache_info_list[0xeb], 3, 18432, 24, 64);
+	fill_cache_info(&cache_info_list[0xec], 3, 24576, 24, 64);
+
 }
 
 /**
@@ -120,9 +164,15 @@ init_cpu(void)
 		"pushal\n\t"
 		"movl	$0, %%eax\n\t"
 		"cpuid\n\t"
-		"movl	%%ebx, %0\n\t"
+		"pushl 	%%ebx\n\t"
+		"pushl 	%%ecx\n\t"
+		"pushl 	%%edx\n\t"
+		"popl 	%2\n\t"
+		"popl 	%1\n\t"
+		"popl 	%0\n\t"
+		/*"movl	%%ebx, %0\n\t"
 		"movl	%%ecx, %1\n\t"
-		"movl	%%edx, %2\n\t"
+		"movl	%%edx, %2\n\t"*/
 		"popal\n\t"
 	:
 	:"m"(ebx), "m"(ecx), "m"(edx));
@@ -139,10 +189,18 @@ init_cpu(void)
 			"pushal\n\t"
 			"movl	%0, %%eax\n\t"
 			"cpuid\n\t"
-			"movl	%%eax, %1\n\t"
+			"pushl 	%%eax\n\t"
+			"pushl 	%%ebx\n\t"
+			"pushl 	%%ecx\n\t"
+			"pushl 	%%edx\n\t"
+			"popl 	%4\n\t"
+			"popl 	%3\n\t"
+			"popl 	%2\n\t"
+			"popl 	%1\n\t"
+			/*"movl	%%eax, %1\n\t"
 			"movl	%%ebx, %2\n\t"
 			"movl	%%ecx, %3\n\t"
-			"movl	%%edx, %4\n\t"
+			"movl	%%edx, %4\n\t"*/
 			"popal\n\t"
 		:
 		:"m"(param), "m"(eax), "m"(ebx), "m"(ecx), "m"(edx));
@@ -157,8 +215,14 @@ init_cpu(void)
 		"pushal\n\t"
 		"movl	$1, %%eax\n\t"
 		"cpuid\n\t"
+		"pushl 	%%ecx\n\t"
+		"pushl 	%%edx\n\t"
+		"popl 	%1\n\t"
+		"popl 	%0\n\t"
+		/*
 		"movl	%%ecx, %0\n\t"
 		"movl	%%edx, %1\n\t"
+		*/
 		"popal\n\t"
 	:
 	:"m"(ecx), "m"(edx));
@@ -171,10 +235,18 @@ init_cpu(void)
 			"pushal\n\t"
 			"movl	$2, %%eax\n\t"
 			"cpuid\n\t"
-			"movl	%%eax, %0\n\t"
+			"pushl 	%%eax\n\t"
+			"pushl 	%%ebx\n\t"
+			"pushl 	%%ecx\n\t"
+			"pushl 	%%edx\n\t"
+			"popl 	%3\n\t"
+			"popl 	%2\n\t"
+			"popl 	%1\n\t"
+			"popl 	%0\n\t"
+			/*"movl	%%eax, %0\n\t"
 			"movl	%%ebx, %1\n\t"
 			"movl	%%ecx, %2\n\t"
-			"movl	%%edx, %3\n\t"
+			"movl	%%edx, %3\n\t"*/
 			"popal\n\t"
 		:
 		:"m"(eax), "m"(ebx), "m"(ecx), "m"(edx));
@@ -183,6 +255,7 @@ init_cpu(void)
 	memcpy(cache_bytes + 4, &ebx, 4);
 	memcpy(cache_bytes + 8, &ecx, 4);
 	memcpy(cache_bytes + 12, &edx, 4);
+
 	for(ui = 1; ui < 16; ui++)
 	{
 		switch(cache_info_list[cache_bytes[ui]].level)
@@ -195,6 +268,9 @@ init_cpu(void)
 				break;
 			case 3:
 				L3 = &cache_info_list[cache_bytes[ui]];
+				break;
+			default:
+				
 				break;
 		}
 	}
