@@ -155,6 +155,60 @@ inl(IN uint16 port)
 }
 
 /**
+	@Function:		get_msr
+	@Access:		Public
+	@Description:
+		读取 MSR 寄存器。
+	@Parameters:
+		msr, uint32, IN
+			MSR Index。
+		lo, uint32 *, OUT
+			低32位。
+		hi, uint32 *, OUT
+			高32位。
+	@Return:
+*/
+void
+get_msr(IN uint32 msr,
+		OUT uint32 * lo,
+		OUT uint32 * hi)
+{
+	asm volatile("pushal");
+	asm volatile(
+		"rdmsr"
+		:"=a"(*lo), "=d"(*hi)
+		:"c"(msr));
+	asm volatile("popal");
+}
+
+/**
+	@Function:		set_msr
+	@Access:		Public
+	@Description:
+		设置 MSR 寄存器。
+	@Parameters:
+		msr, uint32, IN
+			MSR Index。
+		lo, uint32, IN
+			低32位。
+		hi, uint32, IN
+			高32位。
+	@Return:
+*/
+void
+set_msr(IN uint32 msr,
+		IN uint32 lo,
+		IN uint32 hi)
+{
+	asm volatile("pushal");
+	asm volatile(
+		"wrmsr"
+		:
+		:"a"(lo), "d"(hi), "c"(msr));
+	asm volatile("popal");
+}
+
+/**
 	@Function:		set_int
 	@Access:		Public
 	@Description:

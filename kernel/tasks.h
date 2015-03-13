@@ -17,6 +17,7 @@
 #define	MAX_APP_LEN					(16 * 1024 * 1024)
 #define	MAX_TASK_OPENED_FILE_COUNT	1024
 #define	MAX_TASK_MEMORY_BLOCK_COUNT	(10 * 1024)
+#define MAX_TASK_MQUEUE_COUNT		16
 #define	TASK_BASE_ADDR				0x00000000
 
 typedef void (* OnTaskExit)(int32 retvalue);
@@ -39,6 +40,7 @@ struct Task
 	uint32				real_pagedt_addr;	//真正页目录表和页表的地址
 	FILE **				opened_file_ptrs;	//打开文件指针列表
 	void **				memory_block_ptrs;	//内存块指针列表
+	uint32 *			mqueue_ids;			//任务打开的消息队列的ID集合
 	uint32				used_memory_size;	//任务内存使用量
 	int8 *				working_dir;		//作业目录
 	int32				retvalue;			//任务的返回值

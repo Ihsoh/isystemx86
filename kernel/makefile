@@ -16,8 +16,8 @@ bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scal
 bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
-bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj bin/pci.obj	\
-$(StringObj)
+bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj bin/toaruos_pci.obj	\
+bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj $(StringObj)
 Linker=ld -m elf_i386
 Include=-I../ilib -I../
 
@@ -150,8 +150,20 @@ bin/serial.obj: serial.c serial.h
 bin/mqueue.obj: mqueue.c mqueue.h
 	$(CC) $(CFlags) -c mqueue.c -o bin/mqueue.obj $(Include)
 
+bin/toaruos_pci.obj: toaruos_pci.c toaruos_pci.h
+	$(CC) $(CFlags) -c toaruos_pci.c -o bin/toaruos_pci.obj $(Include)
+
 bin/pci.obj: pci.c pci.h
 	$(CC) $(CFlags) -c pci.c -o bin/pci.obj $(Include)
+
+bin/apic.obj: apic.c apic.h
+	$(CC) $(CFlags) -c apic.c -o bin/apic.obj $(Include)
+
+bin/madt.obj: madt.c madt.h
+	$(CC) $(CFlags) -c madt.c -o bin/madt.obj $(Include)
+
+bin/pic.obj: pic.c pic.h
+	$(CC) $(CFlags) -c pic.c -o bin/pic.obj $(Include)
 
 .PHONY:Clear
 

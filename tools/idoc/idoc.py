@@ -62,8 +62,12 @@ def process(path, document_path):
 	funclinkshtml = u'';
 	f = codecs.open(path, 'r', 'utf8')
 	lines = []
-	for line in f:
-		lines.append(line.rstrip())
+	try:
+		for line in f:
+			lines.append(line.rstrip())
+	except Exception, e:
+		process_die(path, len(lines) + 1, "Invalid line");
+		f.close();
 	f.close()
 	ln = 0
 	state = STATE_NONE

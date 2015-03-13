@@ -42,6 +42,10 @@ extern
 BOOL
 get_cpu_L3(OUT struct CacheInfo * cache_info);
 
+extern
+BOOL
+cpu_write_to_file(IN const int8 * path);
+
 
 extern uint32 cpu_feature_ecx, cpu_feature_edx;
 

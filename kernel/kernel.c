@@ -27,10 +27,15 @@
 #include "acpi.h"
 #include "mqueue.h"
 #include "pci.h"
+#include "pic.h"
 
 #include <dslib/dslib.h>
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
+
+static
+void
+disk_va_init(void);
 
 static
 BOOL
@@ -254,7 +259,19 @@ main(void)
 	init_log();
 	mqueue_init();
 	acpi_init();
+
+	//检测 APIC 是否初始化成功。
+	//如果初始化失败则使用 PIC。
+	if(apic_init())
+	{
+		pic_mask_all();
+		apic_enable();
+	}
+	else
+		pic_unmask_all();
+	
 	pci_init();
+	disk_va_init();
 	sti();
 
 	//在这里启用所有锁
@@ -270,6 +287,31 @@ main(void)
 }
 
 DEFINE_LOCK_IMPL(kernel)
+
+/**
+	@Function:		disk_va_init
+	@Access:		Private
+	@Description:
+		初始化虚拟磁盘 VA。
+	@Parameters:
+	@Return:
+*/
+static
+void
+disk_va_init(void)
+{
+	format_disk("VA");
+	create_dir("VA:/", "data");
+	
+	create_file("VA:/data/", "pci.dat");
+	pci_write_to_file("VA:/data/pci.dat");
+	
+	create_file("VA:/data/", "cpu.dat");
+	cpu_write_to_file("VA:/data/cpu.dat");
+
+	create_file("VA:/data/", "madt.dat");
+	madt_write_to_file("VA:/data/madt.dat");
+}
 
 /**
 	@Function:		knl_dsl_malloc
@@ -351,6 +393,30 @@ init_dsl(void)
 }
 
 /**
+	@Function:		irq_ack
+	@Access:		Private
+	@Description:
+		发送 EOI。
+	@Parameters:
+		no, uint32, IN
+			IRQ Number。
+	@Return:	
+*/
+static
+void
+irq_ack(IN uint32 no)
+{
+	if(apic_is_enable())
+		apic_eoi();
+	else
+	{
+		if(no >= 8)
+			outb(0xa0, 0x20);
+		outb(0x20, 0x20);
+	}
+}
+
+/**
 	@Function:		init_interrupt
 	@Access:		Private
 	@Description:
@@ -375,10 +441,12 @@ init_interrupt(void)
 			|| n == 0x0e
 			|| n == 0x21 
 			|| n == 0x22 
-			|| n == 0x40 
-			|| n == 0x41
-			|| n == 0x75
-			|| n == 0x76)
+			|| n == 0x40 	//IRQ 0
+			|| n == 0x41	//IRQ 1
+			|| n == 0x74 	//IRQ 12
+			|| n == 0x75	//IRQ 13
+			|| n == 0x76	//IRQ 14
+			)
 			continue;
 		else if(n == 7)
 		{
@@ -409,7 +477,6 @@ static
 void
 fpu_error_int(void)
 {
-	//print_str("\n{FPU ERROR}\n");
 	asm volatile ("clts");
 	INT_EXIT();
 }
@@ -588,9 +655,10 @@ init_mouse(void)
 	//许可键盘及鼠标接口及中断
 	outb(0x60, 0x47);
 	
-	uint8 mask = inb(0xa1);
-	mask &= 0xef;
-	outb(0xa1, 0xef);
+	//uint8 mask = inb(0xa1);
+	//mask &= 0xef;
+	//!!!!!!!!!!!!!!!!!!!!!outb(0xa1, 0xef);
+	//outb(0xa1, mask);
 }
 
 /**
@@ -787,8 +855,9 @@ timer_int(void)
 				kernel_tss_desc.attr = AT386TSS + DPL0; 
 				set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
 				free_system_call_tss();
-				outb(0x20, 0x20);
-				outb(0xa0, 0x20);
+				//outb(0x20, 0x20);
+				//outb(0xa0, 0x20);
+				irq_ack(0);
 				asm volatile ("ljmp	$56, $0;");
 			}
 			else
@@ -820,15 +889,17 @@ timer_int(void)
 				set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 				set_desc_to_gdt(11, (uint8 *)&task_gate);
 				free_system_call_tss();
-				outb(0x20, 0x20);
-				outb(0xa0, 0x20);
+				//outb(0x20, 0x20);
+				//outb(0xa0, 0x20);
+				irq_ack(0);
 				asm volatile ("ljmp	$88, $0;");	
 			}
 		}
 		else
 		{
-			outb(0x20, 0x20);
-			outb(0xa0, 0x20);
+			//outb(0x20, 0x20);
+			//outb(0xa0, 0x20);
+			irq_ack(0);
 			asm volatile ("iret;");
 		}
 	}
@@ -920,8 +991,9 @@ mouse_int(void)
 				mouse_count = 0;
 				break;
 		}
-		outb(0x20, 0x20);
-		outb(0xa0, 0x20);
+		//outb(0x20, 0x20);
+		//outb(0xa0, 0x20);
+		irq_ack(12);
 		asm volatile ("iret");
 	}
 }
@@ -1011,8 +1083,9 @@ keyboard_int(void)
 		uint8 scan_code = 0;
 		scan_code = inb(0x60);
 		tran_key(scan_code);
-		outb(0x20, 0x20);
-		outb(0xa0, 0x20);
+		//outb(0x20, 0x20);
+		//outb(0xa0, 0x20);
+		irq_ack(1);
 		asm volatile ("iret;");
 	}
 }
@@ -1031,8 +1104,9 @@ ide_int(void)
 {
 	while(1)
 	{
-		outb(0x20, 0x20);
-		outb(0xa0, 0x20);
+		//outb(0x20, 0x20);
+		//outb(0xa0, 0x20);
+		irq_ack(14);
 		asm volatile ("iret;");
 	}
 }
@@ -1052,8 +1126,9 @@ fpu_int(void)
 	while(1)
 	{
 		outb(0xf0, 0x00);
-		outb(0x20, 0x20);
-		outb(0xa0, 0x20);
+		//outb(0x20, 0x20);
+		//outb(0xa0, 0x20);
+		irq_ack(13);
 		asm volatile ("iret;");
 	}
 }

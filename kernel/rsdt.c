@@ -89,7 +89,7 @@ rsdt_find_sdt(IN int8 * sign)
 {
 	if(sign == NULL || rsdt == NULL)
 		return NULL;
-	uint32 count = rsdt->header.length - sizeof(struct ACPISDTHeader);
+	uint32 count = (rsdt->header.length - sizeof(struct ACPISDTHeader)) / 4;
 	uint32 * item = &(rsdt->first_sdt);
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)

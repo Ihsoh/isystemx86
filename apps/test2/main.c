@@ -2,7 +2,6 @@
 
 int main(int argc, char * argv[])
 {
-	uint ui;
 	printf("Test2 - This is client!\n");
 	MQueueMessage message;
 	message.param0.int32_value = 100;

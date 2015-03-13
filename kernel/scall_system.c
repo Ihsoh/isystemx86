@@ -183,9 +183,22 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 		//	Param0=消息队列指针(相对于内核空间的偏移地址)
 		case SCALL_MQUEUE_S_CREATE:
 		{
-			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			MQueuePtr mqueue = mqueue_new(name);
-			sparams->param0 = SPARAM(mqueue);
+			int32 tid = sparams->tid;
+			struct Task * task = get_task_info_ptr(tid);
+			uint32 ui;
+			for(ui = 0; ui < MAX_TASK_MQUEUE_COUNT && task->mqueue_ids[ui] != 0; ui++);
+			if(ui < MAX_TASK_MQUEUE_COUNT)
+			{
+				int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+				MQueuePtr mqueue = mqueue_new(name);
+				task->mqueue_ids[ui] = (uint32)mqueue;
+				sparams->param0 = SPARAM(mqueue);
+			}
+			else
+			{
+				uint32 r = 0;
+				return SPARAM(r);
+			}
 			break;
 		}
 		//服务端，删除消息队列

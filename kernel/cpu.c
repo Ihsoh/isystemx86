@@ -8,9 +8,16 @@
 
 #include "cpu.h"
 #include "types.h"
+#include "ifs1fs.h"
 #include <string.h>
 
 #define	CACHE_INFO_LIST_LEN	0x100
+
+static uint8 cpu_src_model = 0, cpu_src_ext_model = 0;
+static uint8 cpu_src_family = 0, cpu_src_ext_family = 0;
+static uint8 cpu_family = 0, cpu_model = 0, cpu_stepping = 0;
+static uint8 cpu_type = 0;
+static uint8 cpu_brand_id = 0, cpu_chunks = 0, cpu_count = 0; cpu_apic_id = 0;
 
 static int8 vendor_id_string[13];
 static int8 brand_string[49];
@@ -157,7 +164,7 @@ void
 init_cpu(void)
 {
 	uint32 eax, ebx, ecx, edx;
-	uint32 ui;
+	uint32 ui, ui1;
 
 	//获取制造商标识字符串
 	asm volatile (
@@ -170,9 +177,6 @@ init_cpu(void)
 		"popl 	%2\n\t"
 		"popl 	%1\n\t"
 		"popl 	%0\n\t"
-		/*"movl	%%ebx, %0\n\t"
-		"movl	%%ecx, %1\n\t"
-		"movl	%%edx, %2\n\t"*/
 		"popal\n\t"
 	:
 	:"m"(ebx), "m"(ecx), "m"(edx));
@@ -197,10 +201,6 @@ init_cpu(void)
 			"popl 	%3\n\t"
 			"popl 	%2\n\t"
 			"popl 	%1\n\t"
-			/*"movl	%%eax, %1\n\t"
-			"movl	%%ebx, %2\n\t"
-			"movl	%%ecx, %3\n\t"
-			"movl	%%edx, %4\n\t"*/
 			"popal\n\t"
 		:
 		:"m"(param), "m"(eax), "m"(ebx), "m"(ecx), "m"(edx));
@@ -210,26 +210,45 @@ init_cpu(void)
 		memcpy(brand_string + ui * 16 + 12, &edx, 4);
 	}
 
-	//获取CPU支持的特性
+	//获取CPU支持的特性。
+	//通过 CPUID EAX=1。
 	asm volatile (
-		"pushal\n\t"
-		"movl	$1, %%eax\n\t"
-		"cpuid\n\t"
-		"pushl 	%%ecx\n\t"
-		"pushl 	%%edx\n\t"
-		"popl 	%1\n\t"
-		"popl 	%0\n\t"
-		/*
-		"movl	%%ecx, %0\n\t"
-		"movl	%%edx, %1\n\t"
-		*/
-		"popal\n\t"
-	:
-	:"m"(ecx), "m"(edx));
+			"pushal\n\t"
+			"movl	$1, %%eax\n\t"
+			"cpuid\n\t"
+			"pushl 	%%eax\n\t"
+			"pushl 	%%ebx\n\t"
+			"pushl 	%%ecx\n\t"
+			"pushl 	%%edx\n\t"
+			"popl 	%3\n\t"
+			"popl 	%2\n\t"
+			"popl 	%1\n\t"
+			"popl 	%0\n\t"
+			"popal\n\t"
+		:
+		:"m"(eax), "m"(ebx), "m"(ecx), "m"(edx));
+	cpu_stepping = (uint8)(eax & 0x0000000f);
+	cpu_src_model = (uint8)((eax & 0x000000f0) >> 4);
+	cpu_src_family = (uint8)((eax & 0x00000f00) >> 8);
+	cpu_type = (uint8)((eax & 0x00003000) >> 12);
+	cpu_src_ext_model = (uint8)((eax & 0x000f0000) >> 16);
+	cpu_src_ext_family = (uint8)((eax & 0x0ff00000) >> 20);
+	if(cpu_src_family != 0x0f)
+		cpu_family = cpu_src_family;
+	else
+		cpu_family = cpu_src_ext_family + cpu_src_family;
+	if(cpu_src_family == 0x06 || cpu_src_family == 0x0f)
+		cpu_model = (cpu_src_ext_model << 4) + cpu_src_model;
+	else
+		cpu_model = cpu_src_model;
+	cpu_brand_id = (uint8)ebx;
+	cpu_chunks = (uint8)(ebx >> 8);
+	cpu_count = (uint8)(ebx >> 16);
+	cpu_apic_id = (uint8)(ebx >> 24);
 	cpu_feature_ecx = ecx;
 	cpu_feature_edx = edx;
 
-	//获取CPU缓存信息
+	//获取CPU缓存信息，通过 CPUID EAX=2。
 	init_cache_info_list();
 	asm volatile (
 			"pushal\n\t"
@@ -243,10 +262,6 @@ init_cpu(void)
 			"popl 	%2\n\t"
 			"popl 	%1\n\t"
 			"popl 	%0\n\t"
-			/*"movl	%%eax, %0\n\t"
-			"movl	%%ebx, %1\n\t"
-			"movl	%%ecx, %2\n\t"
-			"movl	%%edx, %3\n\t"*/
 			"popal\n\t"
 		:
 		:"m"(eax), "m"(ebx), "m"(ecx), "m"(edx));
@@ -255,7 +270,6 @@ init_cpu(void)
 	memcpy(cache_bytes + 4, &ebx, 4);
 	memcpy(cache_bytes + 8, &ecx, 4);
 	memcpy(cache_bytes + 12, &edx, 4);
-
 	for(ui = 1; ui < 16; ui++)
 	{
 		switch(cache_info_list[cache_bytes[ui]].level)
@@ -274,6 +288,56 @@ init_cpu(void)
 				break;
 		}
 	}
+
+	//获取CPU缓存信息，通过 CPUID EAX=4。
+	for(ui = 0; ui < 10; ui++)
+	{
+		for(ui1 = 0; ui1 < 0x1000; ui1++)
+		{
+			asm volatile (
+				"pushal\n\t"
+				"movl	$4, %%eax\n\t"
+				"cpuid\n\t"
+				"pushl 	%%eax\n\t"
+				"pushl 	%%ebx\n\t"
+				"pushl 	%%ecx\n\t"
+				"pushl 	%%edx\n\t"
+				"popl 	%3\n\t"
+				"popl 	%2\n\t"
+				"popl 	%1\n\t"
+				"popl 	%0\n\t"
+				"popal\n\t"
+			:
+			:"m"(eax), "m"(ebx), "m"(ecx), "m"(edx), "c"(ui));
+			if(eax & 0x1f)
+				break;
+		}
+		if(ui1 != 0x1000)
+		{
+			uint32 size = 	(((ebx & 0xffc00000) >> 22) + 1)
+							* (((ebx & 0x003ff000) >> 12) + 1)
+							* (((ebx & 0x00000fff) >> 0) + 1)
+							* (ecx + 1);
+		}
+	}
+
+	//获取CPU L2信息，通过 CPUID EAX=0x80000006。
+	asm volatile (
+			"pushal\n\t"
+			"movl	$0x80000006, %%eax\n\t"
+			"cpuid\n\t"
+			"pushl 	%%eax\n\t"
+			"pushl 	%%ebx\n\t"
+			"pushl 	%%ecx\n\t"
+			"pushl 	%%edx\n\t"
+			"popl 	%3\n\t"
+			"popl 	%2\n\t"
+			"popl 	%1\n\t"
+			"popl 	%0\n\t"
+			"popal\n\t"
+		:
+		:"m"(eax), "m"(ebx), "m"(ecx), "m"(edx));
+	uint32 L2_size_kb = (ecx & 0xffff0000) >> 16;
 }
 
 /**
@@ -368,5 +432,57 @@ get_cpu_L3(OUT struct CacheInfo * cache_info)
 	if(L3 == NULL)
 		return FALSE;
 	memcpy(cache_info, L3, sizeof(struct CacheInfo));
+	return TRUE;
+}
+
+/**
+	@Function:		cpu_write_to_file
+	@Access:		Public
+	@Description:
+		把 CPU 信息写入文件。
+	@Parameters:
+		path, const int8 *, IN
+			文件路径。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+BOOL
+cpu_write_to_file(IN const int8 * path)
+{
+	FILE * fptr = fopen(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
+	if(fptr == NULL)
+		return FALSE;
+	int8 buffer[64 * 1024];
+	sprintf_s(	buffer,
+				sizeof(buffer),
+				"{\n"
+				"  VendorName:\"%s\",\n"
+				"  BrandName:\"%s\",\n"
+				"  Feature0Hex:\"%X\",\n"
+				"  Feature1Hex:\"%X\",\n"
+				"  Type:\"%X\",\n"
+				"  BrandID:\"%X\",\n"
+				"  Chunks:\"%X\",\n"
+				"  Count:\"%X\",\n"
+				"  APICID:\"%X\",\n"
+				"  Family:\"%X\",\n"
+				"  Model:\"%X\",\n"
+				"  Stepping:\"%X\",\n"
+				"}\n",
+				vendor_id_string,
+				brand_string,
+				cpu_feature_ecx,
+				cpu_feature_edx,
+				cpu_type,
+				cpu_brand_id,
+				cpu_chunks,
+				cpu_count,
+				cpu_apic_id,
+				cpu_family,
+				cpu_model,
+				cpu_stepping);
+	fwrite(fptr, buffer, strlen(buffer));
+	fclose(fptr);
 	return TRUE;
 }

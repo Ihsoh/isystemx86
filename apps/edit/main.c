@@ -208,14 +208,36 @@ void flush(void)
 	{
 		char * line = content_buffer[ui];
 		for(ui1 = 0; ui1 < column; ui1++)
-			screen_buffer[(ui - top_row) * column + ui1] = ((line[top_column + ui1] == '\0' || line[top_column + ui1] == '\t') ? ' ' : line[top_column + ui1]);
+			screen_buffer[(ui - top_row) * column + ui1] 
+				= ((line[top_column + ui1] == '\0' || line[top_column + ui1] == '\t') 
+					? ' ' 
+					: line[top_column + ui1]);
 	}
 	screen_buffer[row * column] = '\0';
 	if(vesa_is_valid())
 		clear_screen();
 	else
 		set_cursor(0, 0);
-	print_str(screen_buffer);
+	
+	for(ui = 0; ui < row; ui++)
+	{
+		char temp[8192];
+		if(column >= sizeof(temp))
+		{
+			memcpy(temp, screen_buffer + ui * column, sizeof(temp) - 1);
+			temp[sizeof(temp) - 1] = '\0';
+		}
+		else
+		{
+			memcpy(temp, screen_buffer + ui * column, column);
+			temp[column] = '\0';
+		}
+		if(cursor_y == ui)
+			print_str_p(temp, CC_GRAYWHITE | CBGC_BROWN);
+		else
+			print_str(temp);
+	}
+
 	char buffer[100];
 	print_str("                                                                      ");
 	set_cursor(0, row);

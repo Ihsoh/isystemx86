@@ -25,6 +25,10 @@ WRITE_FILE	VA:/isystem/bins/basic apps/basic/bin/basic.bin
 MAKE_FILE	VA:/isystem/bins/ edit
 WRITE_FILE	VA:/isystem/bins/edit apps/edit/bin/edit.bin
 
+#Print text with format
+MAKE_FILE	VA:/isystem/bins/ printf
+WRITE_FILE	VA:/isystem/bins/printf apps/printf/bin/printf.bin
+
 #Paint
 MAKE_FILE	VA:/isystem/bins/ paint
 WRITE_FILE	VA:/isystem/bins/paint apps/paint/bin/paint.bin

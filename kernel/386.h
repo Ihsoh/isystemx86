@@ -39,6 +39,18 @@ inl(IN uint16 port);
 
 extern
 void
+get_msr(IN uint32 msr,
+		OUT uint32 * lo,
+		OUT uint32 * hi);
+
+extern
+void
+set_msr(IN uint32 msr,
+		IN uint32 lo,
+		IN uint32 hi);
+
+extern
+void
 set_int(IN uint8 n,
 		IN uint32 addr);
 

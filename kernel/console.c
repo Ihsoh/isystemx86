@@ -22,6 +22,7 @@
 #include "cpu.h"
 #include "kstring.h"
 #include "log.h"
+#include "pci.h"
 
 #include <string.h>
 
@@ -1614,11 +1615,17 @@ static
 int32
 batch(IN int8 * path)
 {
+	int8 temp[MAX_PATH_BUFFER_LEN];
+	if(!fix_path(path, current_path, temp))
+	{
+		error("Invalid path!");
+		return 0;
+	}
 	struct Vars * local_vars_s;
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	if(local_vars_s == NULL)
 		return 0;
-	FILE * fptr = fopen(path, FILE_MODE_READ);
+	FILE * fptr = fopen(temp, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		free_vars(local_vars_s);
@@ -2291,6 +2298,23 @@ call_init_bat(void)
 	batch(SYSTEM_INIT_BAT);
 }
 
+static
+void
+print_file(IN const int8 * path)
+{
+	FILE * fptr = fopen(path, FILE_MODE_READ);
+	if(fptr != NULL)
+	{
+		int8 buffer[64 * 1024];
+		fread(fptr, buffer, flen(fptr));
+		buffer[flen(fptr)] = '\0';
+		print_str(buffer);
+		fclose(fptr);
+	}
+	else
+		print_str_p("ERROR: Cannot open file!\n", CC_RED);
+}
+
 /**
 	@Function:		console
 	@Access:		Public
@@ -2308,6 +2332,13 @@ console(void)
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	call_init_bat();
 	ver();
+	disks();
+	print_str("\n");
+	mm();
+	print_str("\n");
+	cpuid();
+	print_str("\n\n");
+
 	while(1)
 	{
 		if(strcmp(current_path, "") == 0)

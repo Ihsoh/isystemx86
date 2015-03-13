@@ -15,6 +15,7 @@
 #include "paging.h"
 #include "die.h"
 #include "lock.h"
+#include "mqueue.h"
 #include <string.h>
 
 static struct Task tasks[MAX_TASK_COUNT];
@@ -30,7 +31,7 @@ DEFINE_LOCK_IMPL(tasks)
 	@Parameters:
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。		
+			返回TRUE则成功，否则失败。
 */
 BOOL
 init_tasks(void)
@@ -59,11 +60,13 @@ init_tasks(void)
 
 		tasks[ui].opened_file_ptrs = alloc_memory(MAX_TASK_OPENED_FILE_COUNT * sizeof(FILE *));
 		tasks[ui].memory_block_ptrs = alloc_memory(MAX_TASK_MEMORY_BLOCK_COUNT * sizeof(void *));
+		tasks[ui].mqueue_ids = alloc_memory(MAX_TASK_MQUEUE_COUNT * sizeof(uint32));
 		tasks[ui].working_dir = alloc_memory(1024);
 		tasks[ui].name = alloc_memory(1024);
 		tasks[ui].param = alloc_memory(1024);
 		if(	tasks[ui].opened_file_ptrs == NULL
 			|| tasks[ui].memory_block_ptrs == NULL
+			|| tasks[ui].mqueue_ids == NULL
 			|| tasks[ui].working_dir == NULL
 			|| tasks[ui].name == NULL
 			|| tasks[ui].param == NULL)
@@ -93,7 +96,7 @@ init_tasks(void)
 			工作目录。
 	@Return:
 		int32
-			如果失败则返回-1, 否则返回任务的 ID。		
+			如果失败则返回-1, 否则返回任务的 ID。
 */
 int32
 create_task(IN int8 * name,
@@ -138,6 +141,9 @@ create_task(IN int8 * name,
 
 		for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT; ui++)
 			task->memory_block_ptrs[ui] = NULL;
+
+		for(ui = 0; ui < MAX_TASK_MQUEUE_COUNT; ui++)
+			task->mqueue_ids[ui] = 0;
 
 		//task->addr + 0: int32, Task ID
 		//task->addr + 4KB + 0: uint32, System Call Function Number and Sub Function Number
@@ -212,7 +218,6 @@ create_task(IN int8 * name,
 			free_memory(task->addr);
 			return -1;
 		}
-
 		//把程序空间的0x00000000到0x00ffffff映射到物理空间的0x00000000到0x00ffffff
 		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 0x00000000, 0x01000000, 0x00000000, RW_RWE);
 		
@@ -243,7 +248,7 @@ create_task(IN int8 * name,
 			任务的 ID。
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。		
+			返回TRUE则成功，否则失败。
 */
 BOOL
 kill_task(IN int32 tid)
@@ -252,7 +257,6 @@ kill_task(IN int32 tid)
 		return FALSE;
 	free_memory(tasks[tid].addr);
 	
-	//关闭任务未关闭的文件
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
 		if(tasks[tid].opened_file_ptrs[ui] != NULL)
@@ -260,14 +264,23 @@ kill_task(IN int32 tid)
 			fclose(tasks[tid].opened_file_ptrs[ui]);
 			tasks[tid].opened_file_ptrs[ui] = NULL;
 		}
-
-	//释放任务未释放的内存
+		
 	for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT; ui++)
 		if(tasks[tid].memory_block_ptrs[ui] != NULL)
 		{
 			free_memory(tasks[tid].memory_block_ptrs[ui]);
 			tasks[tid].memory_block_ptrs[ui] = NULL;
 		}
+
+	for(ui = 0; ui < MAX_TASK_MQUEUE_COUNT; ui++)
+	{
+		uint32 id = tasks[tid].mqueue_ids[ui];
+		if(id != 0)
+		{
+			mqueue_free((MQueuePtr)id);
+			tasks[tid].mqueue_ids[ui] = 0;
+		}
+	}
 
 	free_memory(tasks[tid].pagedt_addr);
 
@@ -307,7 +320,7 @@ kill_all_tasks(void)
 			指向任务信息结构体的指针。
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。		
+			返回TRUE则成功，否则失败。
 */
 BOOL
 get_task_info(	IN int32 tid,
@@ -331,7 +344,7 @@ get_task_info(	IN int32 tid,
 			指向任务信息结构体的指针。
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。				
+			返回TRUE则成功，否则失败。		
 */
 BOOL
 set_task_info(	IN int32 tid,
@@ -353,7 +366,7 @@ set_task_info(	IN int32 tid,
 			任务的 ID。
 	@Return:
 		struct Task *
-			任务信息结构体的指针。		
+			任务信息结构体的指针。	
 */
 struct Task *
 get_task_info_ptr(IN int32 tid)
@@ -423,7 +436,6 @@ create_task_by_file(IN int8 * filename,
 		return -1;
 	}
 
-	//检查程序是否为MTA32程序
 	char file_symbol[6] = {0, 0, 0, 0, 0, 0};
 	memcpy(file_symbol, app, 5);
 	if(strcmp(file_symbol, "MTA32") != 0)
@@ -450,7 +462,7 @@ create_task_by_file(IN int8 * filename,
 	@Parameters:
 	@Return:
 		int32
-			下一个将要执行的任务的 ID。		
+			下一个将要执行的任务的 ID。	
 */
 int32
 get_next_task_id(void)
@@ -470,7 +482,7 @@ get_next_task_id(void)
 		int32 new_tid = -1;
 		if(tasks[running_tid].ran)
 		{
-			for(i = running_tid + 1; i < MAX_TASK_COUNT; i++)
+			for(i = running_tid + 1; i < MAX_TASK_COUNT; i++)
 				if(tasks[i].used && tasks[i].ready)
 				{
 					tasks[i].ran = 0;
@@ -519,7 +531,7 @@ set_task_ran_state(IN int32 tid)
 	@Parameters:
 	@Return:
 		int32
-			正在运行的任务的 ID。		
+			正在运行的任务的 ID。
 */
 int32
 get_running_tid(void)

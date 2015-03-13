@@ -54,26 +54,26 @@ IN		AL, 92H
 OR		AL, 2
 OUT		92H, AL
 
-MOV 	EDX, CR0
-AND		EDX, (-1) - (1000B + 0100B)
-MOV 	CR0, EDX
-FNINIT
-FNSTSW	[FPUStateWord]
-CMP		WORD [FPUStateWord], 0
-JNE		NoFPU
-JMP 	HasFPU
+;MOV 	EDX, CR0
+;AND		EDX, (-1) - (1000B + 0100B)
+;MOV 	CR0, EDX
+;FNINIT
+;FNSTSW	[FPUStateWord]
+;CMP		WORD [FPUStateWord], 0
+;JNE		NoFPU
+;JMP 	HasFPU
 
-FPUStateWord	DW	55AAH
-NoFPU:
+;FPUStateWord	DW	55AAH
+;NoFPU:
 
-MOV 	EAX, 01234567H
-HLT
+;MOV 	EAX, 01234567H
+;HLT
 
-HasFPU:
+;HasFPU:
 
 MOV		EAX, CR0
 OR 		EAX, 00000001H
-AND		EAX, 00000011H
+;AND		EAX, 00000011H
 MOV		CR0, EAX
 
 Jump16	KernelLdrCDesc, ProtectedMode
@@ -336,11 +336,12 @@ Procedure	Set8259A
 	WaitIO
 	WaitIO
 
-	;启用所有IRQs
-	MOV 	AL, 0
+	;屏蔽所有IRQs，由于加入了对 APIC 的支持，
+	;默认停用PIC。
+	MOV 	AL, 0FFH
 	OUT 	PICMasterIMR, AL
 	WaitIO
-	MOV 	AL, 0
+	MOV 	AL, 0FFH
 	OUT 	PICSlaveIMR, AL
 	WaitIO
 

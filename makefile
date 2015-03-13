@@ -12,6 +12,7 @@ $(Target):	bin ilib/bin/libilib.a dslib/bin/libdslib.a boot/bin/boot.bin kernell
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
 	cd apps/basic && make
 	cd apps/edit && make
+	cd apps/printf && make
 	cd apps/paint && make
 	cd apps/WDVM-ISystemx86 && make
 	cd apps/test1 && make
@@ -51,6 +52,7 @@ Clear:
 
 	cd apps/basic && make Clear
 	cd apps/edit && make Clear
+	cd apps/printf && make Clear
 	cd apps/paint && make Clear
 	cd apps/WDVM-ISystemx86 && make Clear
 	cd apps/test1 && make Clear
