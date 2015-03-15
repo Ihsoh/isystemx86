@@ -13,6 +13,7 @@ $(Target):	bin ilib/bin/libilib.a dslib/bin/libdslib.a boot/bin/boot.bin kernell
 	cd apps/basic && make
 	cd apps/edit && make
 	cd apps/printf && make
+	cd apps/iasm && make
 	cd apps/paint && make
 	cd apps/WDVM-ISystemx86 && make
 	cd apps/test1 && make
@@ -53,6 +54,7 @@ Clear:
 	cd apps/basic && make Clear
 	cd apps/edit && make Clear
 	cd apps/printf && make Clear
+	cd apps/iasm && make Clear
 	cd apps/paint && make Clear
 	cd apps/WDVM-ISystemx86 && make Clear
 	cd apps/test1 && make Clear

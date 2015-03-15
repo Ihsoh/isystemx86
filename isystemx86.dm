@@ -29,6 +29,10 @@ WRITE_FILE	VA:/isystem/bins/edit apps/edit/bin/edit.bin
 MAKE_FILE	VA:/isystem/bins/ printf
 WRITE_FILE	VA:/isystem/bins/printf apps/printf/bin/printf.bin
 
+#IASM
+MAKE_FILE	VA:/isystem/bins/ iasm
+WRITE_FILE	VA:/isystem/bins/iasm apps/iasm/bin/iasm.bin
+
 #Paint
 MAKE_FILE	VA:/isystem/bins/ paint
 WRITE_FILE	VA:/isystem/bins/paint apps/paint/bin/paint.bin
