@@ -45,6 +45,7 @@ void die(char * message)
 	print_str("\n");
 	if(screen_buffer != NULL)
 		freem(screen_buffer);
+	set_clock(1);
 	app_exit();
 }
 
@@ -191,6 +192,7 @@ void edit(void)
 					else if(chr == 27)
 					{
 						clear_screen();
+						set_clock(1);
 						app_exit();
 					}
 					else if(top_column + SBUFFER_X + 1 < MAX_COLUMN)

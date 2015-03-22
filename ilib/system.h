@@ -55,6 +55,8 @@ typedef struct
 #define	SCALL_MQUEUE_C_POP		11
 #define	SCALL_RUN_IN_BG			12
 #define	SCALL_SET_RETVALUE		13
+#define	SCALL_EXEC				14
+#define	SCALL_WAIT				15
 
 extern void app_exit(void);
 #define	il_app_exit()	(app_exit())
@@ -99,5 +101,14 @@ extern int run_in_bg(void);
 #define	il_run_in_bg()	(run_in_bg())
 
 extern void __set_retvalue(int retvalue);
+
+extern int exec(char * path, char * param);
+#define	il_exec(path, param)	(exec((path), (param)))
+
+extern int wait(int tid, int * retvalue);
+#define	il_wait(tid, retvalue)	(wait((tid), (retvalue)))
+
+extern int exec_sync(char * path, char * param);
+#define	il_exec_sync(path, param)	(exec_sync((path), (param)))
 
 #endif

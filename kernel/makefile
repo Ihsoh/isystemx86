@@ -17,7 +17,7 @@ bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
 bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj bin/toaruos_pci.obj	\
-bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj $(StringObj)
+bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj $(StringObj)
 Linker=ld -m elf_i386
 Include=-I../ilib -I../
 
@@ -164,6 +164,9 @@ bin/madt.obj: madt.c madt.h
 
 bin/pic.obj: pic.c pic.h
 	$(CC) $(CFlags) -c pic.c -o bin/pic.obj $(Include)
+
+bin/interrupts.obj: interrupts.c interrupts.h
+	$(CC) $(CFlags) -c interrupts.c -o bin/interrupts.obj $(Include)
 
 .PHONY:Clear
 

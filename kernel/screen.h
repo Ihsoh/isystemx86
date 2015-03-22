@@ -115,6 +115,9 @@ extern struct CommonImage console_screen_buffer;
 #define	WINDOW_STYLE_CLOSE_BUTTON		0x00000002
 
 extern
+void
+switch_window(void);
+extern
 struct Window *
 create_window(	uint32		width,
 				uint32		height,

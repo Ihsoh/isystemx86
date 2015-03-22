@@ -2,6 +2,11 @@
 
 int main(int argc, char * argv[])
 {
+	*((uint *)0x9fffffff) = 0;
+	asm volatile ("int $0xa1;");
+	printf("%s\n", "Here is Test2");
+	return 199648;
+
 	printf("Test2 - This is client!\n");
 	MQueueMessage message;
 	message.param0.int32_value = 100;

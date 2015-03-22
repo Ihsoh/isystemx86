@@ -2,6 +2,12 @@
 
 int main(int argc, char * argv[])
 {
+	run_in_bg();
+	printf("%s\n", "Test1 Start");
+	printf("Test2 returned %d\n", il_exec_sync("DA:/isystem/bins/test2", ""));
+	printf("%s\n", "Test1 End");
+	return 0;
+
 	uint ui;
 	printf("Test1 - This is server!\n");
 	uint32 mqueue_id = create_mqueue("Test1_MQueue");

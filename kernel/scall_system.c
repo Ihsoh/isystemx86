@@ -256,7 +256,7 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 		//客户端，向消息队列里添加消息
 		//
 		//参数:
-		//	Param0=消息队列名称(相对于内核空间的偏移地址)
+		//	Param0=消息队列名称(相对于调用程序空间的偏移地址)
 		//	Param1=消息的指针(相对于调用程序空间的偏移地址)
 		//返回值:
 		//	Param0=返回 TRUE 则成功，否则失败。
@@ -278,7 +278,7 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 		//客户端，从消息队列里获取消息
 		//
 		//参数:
-		//	Param0=消息队列指针(相对于内核空间的偏移地址)
+		//	Param0=消息队列名称(相对于调用程序空间的偏移地址)
 		//	Param1=消息的指针(相对于调用程序空间的偏移地址)
 		//返回值:
 		//	Param0=返回 TRUE 则成功，否则失败。
@@ -307,6 +307,8 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 		}
 		//设置程序后台运行。
 		//
+		//返回值：
+		//	返回 TRUE 则成功，否则失败。
 		case SCALL_RUN_IN_BG:
 		{
 			BOOL r = FALSE;
@@ -327,6 +329,69 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			int32 tid = sparams->tid;
 			int32 retvalue = INT32_SPARAM(sparams->param0);
 			get_task_info_ptr(tid)->retvalue = retvalue;
+			break;
+		}
+		//执行一个程序。
+		//
+		//参数:
+		//	Param0=程序的路径(相对于调用程序空间的偏移地址)。
+		//	Param1=调用程序的参数(相对于调用程序空间的偏移地址)。
+		//
+		//返回值:
+		//	Param0=返回新建的任务的TID。
+		case SCALL_EXEC:
+		{
+			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * param = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 buffer[1024];
+			if(strlen(path) < sizeof(buffer))
+				strcpy(buffer, path);
+			if(strlen(param) != 0)
+				if(strlen(buffer) + 1 + strlen(param) < sizeof(buffer))
+				{
+					strcat(buffer, " ");
+					strcat(buffer, param);
+				}
+				else
+				{
+					BOOL r = FALSE;
+					sparams->param0 = SPARAM(r);
+					break;
+				}
+			int8 cpath[1024];
+			get_current_path(cpath);
+			int32 new_task_tid = create_task_by_file(path, buffer, cpath);
+			if(new_task_tid != -1)
+			{
+				struct Task * new_task = get_task_info_ptr(new_task_tid);
+				new_task->allocable = FALSE;
+				task_ready(new_task_tid);
+			}
+			sparams->param0 = SPARAM(new_task_tid);
+			break;
+		}
+		//等待一个任务执行结束。
+		//
+		//参数:
+		//	Param0=要等待的任务的ID。
+		//
+		//返回值:
+		//	Param0=返回 TRUE 则任务未结束，否则结束。
+		//	Param1=任务的返回值。
+		case SCALL_WAIT:
+		{
+			int32 tid = INT32_SPARAM(sparams->param0);
+			struct Task * task = get_task_info_ptr_unsafe(tid);
+			BOOL r = TRUE;
+			int32 retvalue = -1;
+			if(task != NULL && !task->used)
+			{
+				task->allocable = TRUE;
+				r = FALSE;
+				retvalue = task->retvalue;
+			}
+			sparams->param0 = SPARAM(r);
+			sparams->param1 = SPARAM(retvalue);
 			break;
 		}
 	}

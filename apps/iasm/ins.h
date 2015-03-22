@@ -286,4 +286,62 @@
 #define	SIB_SINDEX_ESI8			(SIB1(3, 6))
 #define	SIB_SINDEX_EDI8			(SIB1(3, 7))
 
+#define	EXTERN_INS_PREFIX_XX(xx, XX)	\
+	extern	\
+	uint32	\
+	ins_prefix_##xx(OUT uint8 * buffer,	\
+					IN uint32 size);
+
+// CS
+EXTERN_INS_PREFIX_XX(cs, CS)
+
+// SS
+EXTERN_INS_PREFIX_XX(ss, SS)
+
+// DS
+EXTERN_INS_PREFIX_XX(ds, DS)
+
+// ES
+EXTERN_INS_PREFIX_XX(es, ES)
+
+// FS
+EXTERN_INS_PREFIX_XX(fs, FS)
+
+// GS
+EXTERN_INS_PREFIX_XX(gs, GS)
+
+// LOCK
+EXTERN_INS_PREFIX_XX(lock, LOCK)
+
+// REP
+EXTERN_INS_PREFIX_XX(rep, REP)
+
+// REPE
+EXTERN_INS_PREFIX_XX(repe, REPE)
+
+// REPZ
+EXTERN_INS_PREFIX_XX(repz, REPZ)
+
+// REPNE
+EXTERN_INS_PREFIX_XX(repne, REPNE)
+
+// REPNZ
+EXTERN_INS_PREFIX_XX(repnz, REPNZ)
+
+// BITS16
+extern
+void
+ins_bits16(void);
+
+// BITS32
+extern
+void
+ins_bits32(void);
+
+// AAA
+
+
+
+
+
 #endif

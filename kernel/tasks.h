@@ -20,13 +20,14 @@
 #define MAX_TASK_MQUEUE_COUNT		16
 #define	TASK_BASE_ADDR				0x00000000
 
-typedef void (* OnTaskExit)(int32 retvalue);
+typedef void (* OnTaskExit)(int32 tid, int32 retvalue);
 
 //结构名:	Task
 //功能:		任务
 struct Task
 {
 	int32				used;				//是否使用该任务槽
+	BOOL				allocable;			//该任务槽是否可分配。
 	int32				running;			//是否正在运行
 	int32				ran;				//是否运行
 	int8 *				name;				//任务名
@@ -44,7 +45,9 @@ struct Task
 	uint32				used_memory_size;	//任务内存使用量
 	int8 *				working_dir;		//作业目录
 	int32				retvalue;			//任务的返回值
-	BOOL				ready;				//是否准备就绪
+	BOOL				ready;				//是否准备就绪，任务创建时为 False，
+											//直到为 True 时，才会开始运行。
+	BOOL				is_system_call;		//是否在进行系统调用。
 	OnTaskExit			on_exit;			//当任务退出时调用
 };
 
@@ -84,6 +87,10 @@ struct Task *
 get_task_info_ptr(IN int32 tid);
 
 extern
+struct Task *
+get_task_info_ptr_unsafe(IN int32 tid);
+
+extern
 BOOL
 task_ready(IN int32 tid);
 
@@ -92,6 +99,13 @@ int32
 create_task_by_file(IN int8 * filename,
 					IN int8 * param,
 					IN int8 * working_dir);
+
+extern
+BOOL
+create_task_by_file_wait(	IN int8 * filename,
+							IN int8 * param,
+							IN int8 * working_dir,
+							OUT int32 * retvalue);
 
 extern
 int32

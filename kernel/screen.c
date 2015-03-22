@@ -257,6 +257,26 @@ free_window(OUT struct Window * window)
 }
 
 /**
+	@Function:		switch_window
+	@Access:		Public
+	@Description:
+		切换窗体。
+	@Parameters:
+	@Return:
+*/
+void
+switch_window(void)
+{
+	if(window_count < 2)
+		return;
+	uint32 ui;
+	struct Window * temp = windows[0];
+	for(ui = 0; ui < window_count - 1; ui++)
+		windows[ui] = windows[ui + 1];
+	windows[window_count - 1] = temp;
+}
+
+/**
 	@Function:		create_window
 	@Access:		Public
 	@Description:

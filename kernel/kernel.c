@@ -28,6 +28,7 @@
 #include "mqueue.h"
 #include "pci.h"
 #include "pic.h"
+#include "interrupts.h"
 
 #include <dslib/dslib.h>
 
@@ -238,6 +239,7 @@ main(void)
 	init_invalid_tss();
 	init_invalid_seg();
 	init_invalid_stack();
+	interrupts_init();
 	init_interrupt();
 	init_disk("VA");
 	init_disk("VB");
@@ -459,7 +461,7 @@ init_interrupt(void)
 			set_int(n, system_call_int_addr);
 		}
 		else
-			set_noimpl(n);
+			;//set_noimpl(n);
 		if(n == 255)
 			break;
 	}
@@ -551,14 +553,22 @@ init_noimpl(void)
 		die(&info);
 	}
 	struct Desc tss_desc;	
+	struct Gate task_gate;	
 
 	uint32 temp = (uint32)tss;
 	tss_desc.limitl = sizeof(struct TSS) - 1;
 	tss_desc.basel = (uint16)(temp & 0xFFFF);
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
-	tss_desc.attr = AT386TSS + DPL0;
+	tss_desc.attr = AT386TSS + DPL3;
 	set_desc_to_gdt(17, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (17 << 3) | RPL3;
+	task_gate.attr = ATTASKGATE | DPL3;
+	set_desc_to_gdt(27, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)noimpl_int, (uint32)stack);
 }
@@ -808,12 +818,206 @@ static int32 is_system_call = 0;
 static int32 is_enable_flush_screen = 1;
 static int32 flush_counter = 0;
 
+// #define NEW_TIMER_INT
+
+#ifdef NEW_TIMER_INT
+static
+void
+timer_int_jump_scall_tss(IN int32 task_id)
+{
+	#define SYSTEM_CALL(tid_s)	\
+		irq_ack(0);	\
+		asm volatile (	".set TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
+						"ljmp	$TARGET"tid_s", $0\n\t");
+
+	#define SYSTEM_CALL_CASE(tid, tid_s)	\
+		case tid:	\
+			SYSTEM_CALL(tid_s);	\
+			break;
+
+	switch(task_id)
+	{
+		SYSTEM_CALL_CASE(0, "0")
+		SYSTEM_CALL_CASE(1, "1")
+		SYSTEM_CALL_CASE(2, "2")
+		SYSTEM_CALL_CASE(3, "3")
+		SYSTEM_CALL_CASE(4, "4")
+		SYSTEM_CALL_CASE(5, "5")
+		SYSTEM_CALL_CASE(6, "6")
+		SYSTEM_CALL_CASE(7, "7")
+		SYSTEM_CALL_CASE(8, "8")
+		SYSTEM_CALL_CASE(9, "9")
+		SYSTEM_CALL_CASE(10, "10")
+		SYSTEM_CALL_CASE(11, "11")
+		SYSTEM_CALL_CASE(12, "12")
+		SYSTEM_CALL_CASE(13, "13")
+		SYSTEM_CALL_CASE(14, "14")
+		SYSTEM_CALL_CASE(15, "15")
+		SYSTEM_CALL_CASE(16, "16")
+		SYSTEM_CALL_CASE(17, "17")
+		SYSTEM_CALL_CASE(18, "18")
+		SYSTEM_CALL_CASE(19, "19")
+		SYSTEM_CALL_CASE(20, "20")
+		SYSTEM_CALL_CASE(21, "21")
+		SYSTEM_CALL_CASE(22, "22")
+		SYSTEM_CALL_CASE(23, "23")
+		SYSTEM_CALL_CASE(24, "24")
+		SYSTEM_CALL_CASE(25, "25")
+		SYSTEM_CALL_CASE(26, "26")
+		SYSTEM_CALL_CASE(27, "27")
+		SYSTEM_CALL_CASE(28, "28")
+		SYSTEM_CALL_CASE(29, "29")
+		SYSTEM_CALL_CASE(30, "30")
+		SYSTEM_CALL_CASE(31, "31")
+		SYSTEM_CALL_CASE(32, "32")
+		SYSTEM_CALL_CASE(33, "33")
+		SYSTEM_CALL_CASE(34, "34")
+		SYSTEM_CALL_CASE(35, "35")
+		SYSTEM_CALL_CASE(36, "36")
+		SYSTEM_CALL_CASE(37, "37")
+		SYSTEM_CALL_CASE(38, "38")
+		SYSTEM_CALL_CASE(39, "39")
+		SYSTEM_CALL_CASE(40, "40")
+		SYSTEM_CALL_CASE(41, "41")
+		SYSTEM_CALL_CASE(42, "42")
+		SYSTEM_CALL_CASE(43, "43")
+		SYSTEM_CALL_CASE(44, "44")
+		SYSTEM_CALL_CASE(45, "45")
+		SYSTEM_CALL_CASE(46, "46")
+		SYSTEM_CALL_CASE(47, "47")
+		SYSTEM_CALL_CASE(48, "48")
+		SYSTEM_CALL_CASE(49, "49")
+		SYSTEM_CALL_CASE(50, "50")
+		SYSTEM_CALL_CASE(51, "51")
+		SYSTEM_CALL_CASE(52, "52")
+		SYSTEM_CALL_CASE(53, "53")
+		SYSTEM_CALL_CASE(54, "54")
+		SYSTEM_CALL_CASE(55, "55")
+		SYSTEM_CALL_CASE(56, "56")
+		SYSTEM_CALL_CASE(57, "57")
+		SYSTEM_CALL_CASE(58, "58")
+		SYSTEM_CALL_CASE(59, "59")
+		SYSTEM_CALL_CASE(60, "60")
+		SYSTEM_CALL_CASE(61, "61")
+		SYSTEM_CALL_CASE(62, "62")
+		SYSTEM_CALL_CASE(63, "63")
+	}
+}
 
 /**
 	@Function:		timer_int
 	@Access:		Private
 	@Description:
-		定时器的中断程序。
+		定时器的中断程序。新版本。
+		该版本的任务调度允许在有任务进行系统调用时，
+		进行任务切换。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+timer_int(void)
+{	
+	while(1)
+	{
+		if(is_enable_flush_screen && vesa_is_valid())
+			if(++flush_counter == 2)
+			{
+				flush_screen();
+				flush_counter = 0;
+			}
+		if(TRUE)
+		{
+			if(--clock_counter == 0)
+			{
+				console_clock();
+				clock_counter = 100;
+			}
+			uint32 running_tid = get_running_tid();
+			uint32 tid = get_next_task_id();
+			current_tid = tid;
+			if(counter == 1 || tid == -1)
+			{
+				counter = 0;
+				is_kernel_task = TRUE;
+				struct Task task;
+				if(running_tid != -1)
+				{
+					get_task_info(running_tid, &task);
+					asm volatile ("fnsave %0"::"m"(task.i387_state));
+					set_task_info(running_tid, &task);
+				}
+				struct Desc kernel_tss_desc;
+				get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
+				kernel_tss_desc.attr = AT386TSS + DPL0; 
+				set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
+				free_system_call_tss();
+				//outb(0x20, 0x20);
+				//outb(0xa0, 0x20);
+				irq_ack(0);
+				asm volatile ("ljmp	$56, $0;");
+			}
+			else
+			{
+				counter++;
+				is_kernel_task = FALSE;
+				struct Task * task_ptr = get_task_info_ptr(running_tid);
+				if(!task_ptr->is_system_call)
+				{
+					struct Task task;
+					if(running_tid != -1)
+					{
+						get_task_info(running_tid, &task);
+						asm volatile ("fnsave %0"::"m"(task.i387_state));
+						set_task_info(running_tid, &task);
+					}
+					get_task_info(tid, &task);
+					if(task.init_i387)
+						asm volatile ("frstor %0"::"m"(task.i387_state));
+					else
+					{
+						asm volatile ("fninit");
+						task.init_i387 = 1;
+						set_task_info(tid, &task);
+					}
+					set_task_ran_state(tid);
+					struct Desc tss_desc;
+					struct Gate task_gate;
+					get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+					get_desc_from_gdt(400 + tid * 5 + 1, (uint8 *)&task_gate);
+					tss_desc.attr = AT386TSS + DPL3;
+					set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+					set_desc_to_gdt(11, (uint8 *)&task_gate);
+					free_system_call_tss();
+					//outb(0x20, 0x20);
+					//outb(0xa0, 0x20);
+					irq_ack(0);
+					asm volatile ("ljmp	$88, $0;");	
+				}
+				else
+				{
+					irq_ack(0);
+					asm volatile ("iret;");
+				}
+			}
+		}
+		else
+		{
+			//outb(0x20, 0x20);
+			//outb(0xa0, 0x20);
+			irq_ack(0);
+			asm volatile ("iret;");
+		}
+	}
+}
+#else // #ifdef NEW_TIMER_INT
+/**
+	@Function:		timer_int
+	@Access:		Private
+	@Description:
+		定时器的中断程序。旧版本。
+		该版本的任务调度无法在有任务进行系统调用时，
+		进行任务切换。
 	@Parameters:
 	@Return:	
 */
@@ -904,6 +1108,7 @@ timer_int(void)
 		}
 	}
 }
+#endif // #ifdef NEW_TIMER_INT
 
 /**
 	@Function:		enable_flush_screen
@@ -1180,9 +1385,10 @@ init_system_call(void)
 		set_desc_to_gdt(30 + ui * 2 + 1, (uint8 *)&task_gate);
 
 		fill_tss(tss, (uint32)system_call, (uint32)stack);
+
 		//System Call的任务开中断的原因是如果关闭中断且用户程序调用SCALL_GET_CHAR, SCALL_GET_STR_N等
 		//功能时会导致等待按键队列有数据, 由于关闭了中断, 键盘驱动程序永远不会被启动, 所以导致无限等待.
-		tss->flags = 0x200;
+		//tss->flags = 0x200;
 	}
 }
 
@@ -1198,6 +1404,7 @@ static
 void
 system_call(void)
 {
+	// 该区域处于关中断状态 {
 	uint32 eax, ecx, edx;
 
 	asm volatile (
@@ -1210,10 +1417,18 @@ system_call(void)
 		:
 		:"m"(edx), "m"(ecx), "m"(eax));
 
+	struct Task * task = get_task_info_ptr(ecx);
+	task->is_system_call = TRUE;
+
 	is_system_call++;
 
 	uint32 base = (uint32)get_physical_address(ecx, 0x01300000); 
 	struct SParams * sparams = get_physical_address(ecx, edx); 
+	// }
+
+	UNLOCK_TASK();
+
+	// 该区域处于开中断状态 {
 	switch(eax >> 16)
 	{
 		case SCALL_SCREEN:
@@ -1232,10 +1447,17 @@ system_call(void)
 			system_call_mouse(eax & 0xffff, base, sparams);
 			break;
 	}
+	// }
 
+	LOCK_TASK();
+
+	// 该区域处于关中断状态 {
 	is_system_call--;
 
+	task->is_system_call = FALSE;
+
 	asm volatile ("iret");
+	// }
 }
 
 /**
@@ -1279,7 +1501,7 @@ system_call_int(void)
 	system_call_tss->eip = (uint32)system_call;
 	system_call_tss->esp0 = (uint32)(system_call_stack + 0xffffe);
 	system_call_tss->esp = (uint32)(system_call_stack + 0xffffe);
-	system_call_tss->flags = 0x200;
+	//system_call_tss->flags = 0x200;
 	system_call_tss->edx = edx;
 	system_call_tss->ecx = ecx;
 	system_call_tss->eax = eax;
@@ -1408,6 +1630,8 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 	kernel_tss_desc.attr = AT386TSS + DPL0; 
 	set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
 	free_system_call_tss();
+	counter = 0;
+	is_kernel_task = TRUE;
 	asm volatile ("ljmp	$56, $0;");
 }
 
@@ -2150,8 +2374,9 @@ noimpl_int(void)
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"A task causes a error of calling not implement interrupt procedure"
+						"A task causes a error of calling not implement interrupt(%d) procedure"
 						", the id is %d, the name is '%s'\n",
+						get_unimpl_intn(),
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);

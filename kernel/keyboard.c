@@ -428,7 +428,10 @@ tran_key(IN uint8 scan_code)
 				keydown(KEY_TAB);
 				break;
 			case KEY_TAB | KEY_KEYUP:
-				keyup(KEY_TAB);
+				if(alt)
+					switch_window();	// ALT + TAB切换当前窗体。
+				else
+					keyup(KEY_TAB);
 				break;
 			case KEY_BACKSPACE | KEY_KEYDOWN:
 				add_key(8);

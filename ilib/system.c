@@ -240,3 +240,32 @@ void __set_retvalue(int retvalue)
 	sparams.param0 = SPARAM(retvalue);
 	system_call(SCALL_SYSTEM, SCALL_SET_RETVALUE, &sparams);
 }
+
+int exec(char * path, char * param)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(path);
+	sparams.param1 = SPARAM(param);
+	system_call(SCALL_SYSTEM, SCALL_EXEC, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int wait(int tid, int * retvalue)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(tid);
+	system_call(SCALL_SYSTEM, SCALL_WAIT, &sparams);
+	*retvalue = INT32_SPARAM(sparams.param1);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int exec_sync(char * path, char * param)
+{
+	int tid = exec(path, param);
+	if(tid == -1)
+		return -1;
+	int retvalue = -1;
+	while(wait(tid, &retvalue))
+		asm volatile ("pause");
+	return retvalue;
+}

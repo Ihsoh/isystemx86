@@ -41,6 +41,7 @@ init_tasks(void)
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
 	{
 		tasks[ui].used = 0;
+		tasks[ui].allocable = TRUE;
 		struct Desc tss_desc;
 		struct Gate task_gate;
 		uint32 temp = (uint32)&tasks[ui].tss;
@@ -113,7 +114,7 @@ create_task(IN int8 * name,
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
 	{
 		task = tasks + ui;
-		if(!task->used)
+		if(!task->used && task->allocable)
 		{
 			tid = ui;
 			break;
@@ -124,6 +125,7 @@ create_task(IN int8 * name,
 		task->on_exit = NULL;
 		task->retvalue = 0;
 		task->running = 0;
+		tasks->is_system_call = FALSE;
 		strcpy(task->name, name);
 		strcpy(task->param, param);
 		strcpy(task->working_dir, working_dir);
@@ -285,8 +287,10 @@ kill_task(IN int32 tid)
 	free_memory(tasks[tid].pagedt_addr);
 
 	if(tasks[tid].on_exit != NULL)
-		tasks[tid].on_exit(tasks[tid].retvalue);
+		tasks[tid].on_exit(tid, tasks[tid].retvalue);
 
+	if(tid == running_tid)
+		running_tid = -1;
 	tasks[tid].used = 0;
 	return TRUE;
 }
@@ -377,6 +381,26 @@ get_task_info_ptr(IN int32 tid)
 }
 
 /**
+	@Function:		get_task_info_ptr_unsafe
+	@Access:		Public
+	@Description:
+		获取任务信息结构体的指针。非安全版本。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+	@Return:
+		struct Task *
+			任务信息结构体的指针。	
+*/
+struct Task *
+get_task_info_ptr_unsafe(IN int32 tid)
+{
+	if(tid < 0 || tid >= MAX_TASK_COUNT)
+		return NULL;
+	return tasks + tid;
+}
+
+/**
 	@Function:		task_ready
 	@Access:		Public
 	@Description:
@@ -419,6 +443,10 @@ create_task_by_file(IN int8 * filename,
 					IN int8 * param,
 					IN int8 * working_dir)
 {
+	if(	filename == NULL 
+		|| param == NULL 
+		|| working_dir == NULL)
+		return -1;
 	uint8 * app;
 	FILE * fptr = fopen(filename, FILE_MODE_READ);
 	if(fptr == NULL)
@@ -455,6 +483,48 @@ create_task_by_file(IN int8 * filename,
 }
 
 /**
+	@Function:		create_task_by_file_wait
+	@Access:		Public
+	@Description:
+		通过程序文件创建一个任务。并且等待该任务结束，
+		可以获取创建的任务的返回值。
+	@Parameters:
+		filename, int8 *, IN
+			程序文件路径。
+		param, int8 *, IN
+			运行这个任务所提供的参数。
+		working_dir, int8 *, IN
+			工作目录。
+		retvalue, int32 *, OUT
+			用于保存被调用的程序的返回值。
+	@Return:
+		int32
+			如果失败则返回 FALSE，否则返回 TRUE。
+*/
+BOOL
+create_task_by_file_wait(	IN int8 * filename,
+							IN int8 * param,
+							IN int8 * working_dir,
+							OUT int32 * retvalue)
+{
+	if(	filename == NULL
+		|| param == NULL
+		|| working_dir == NULL
+		|| retvalue == NULL)
+		return FALSE;
+	int32 tid = create_task_by_file(filename, param, working_dir);
+	if(tid == -1)
+		return FALSE;
+	tasks[tid].allocable = FALSE;
+	task_ready(tid);
+	while(tasks[tid].used)
+		asm volatile ("pause");
+	*retvalue = tasks[tid].retvalue;
+	tasks[tid].allocable = TRUE;
+	return TRUE;
+}
+
+/**
 	@Function:		get_next_task_id
 	@Access:		Public
 	@Description:
@@ -482,7 +552,7 @@ get_next_task_id(void)
 		int32 new_tid = -1;
 		if(tasks[running_tid].ran)
 		{
-			for(i = running_tid + 1; i < MAX_TASK_COUNT; i++)
+			for(i = running_tid + 1; i < MAX_TASK_COUNT; i++)
 				if(tasks[i].used && tasks[i].ready)
 				{
 					tasks[i].ran = 0;
