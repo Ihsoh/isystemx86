@@ -390,7 +390,8 @@ EndProc		Set8259A
 ;25 		处理段不存在故障的任务的TSS描述符
 ;26 		处理堆栈段故障的任务的TSS描述符
 ;27			处理未实现中断的任务的任务门
-;28~29		*未使用*
+;28			处理双重故障的任务的TSS描述符
+;29 		*未使用*
 ;30~157		系统调用的TSS描述符和系统调用的任务门描述符集合
 ;158~399	*未使用*
 ;400~1679	256个任务的TSS描述符, 任务门描述符, 代码段描述符和数据段描述符
@@ -451,16 +452,16 @@ VGDTR:	VDesc	(GDTLength - 1), GDT + (KernelLoaderSeg << 4)
 ;中断描述符表
 IDT:
 	%REP	(6H - 0H) + 1
-	Gate	0, KernelC3Desc, 0, AT386TGate + DPL3
+	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%ENDREP
 	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%REP	(0CH - 8H) + 1
-	Gate	0, KernelC3Desc, 0, AT386TGate + DPL3
+	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%ENDREP
 	;INT 0DH
 	GlobalProtectedGate:	Gate	0, KernelCDesc, 0, AT386TGate
 	%REP	(20H - 0EH) + 1
-		Gate	0, KernelC3Desc, 0, AT386TGate + DPL3
+		Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%ENDREP
 	;INT 21H
 	INT21HAddr:
@@ -468,11 +469,11 @@ IDT:
 	INT22HAddr:
 	Gate	?, KernelLdrCDesc, 0, AT386TGate
 	%REP	(8FH - 23H) + 1
-		Gate	0, KernelC3Desc, 0, AT386TGate + DPL3
+		Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%ENDREP
-	Gate	0, KernelC3Desc, 0, AT386TGate + DPL3
+	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%REP	(0FFH - 091H) + 1
-		Gate	0, KernelC3Desc, 0, AT386TGate + DPL3
+		Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%ENDREP
 	IDTLength		EQU $ - IDT
 

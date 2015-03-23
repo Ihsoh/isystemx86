@@ -28,7 +28,7 @@ die(IN struct die_info * info);
 									}
 
 	#define	DC_NOIMPLEMENT_INT		0x00000001
-	#define	DI_NOIMPLEMENT_INT		"No implement interrupt"
+	#define	DI_NOIMPLEMENT_INT		"Not implemented interrupt(%d, 0x%X)"
 	
 	#define	DC_GP_INT				0x00000002
 	#define	DI_GP_INT				"Global protected exception"
@@ -102,7 +102,16 @@ die(IN struct die_info * info);
 	#define	DC_INIT_INVALID_STACK	0x00000019
 	#define	DI_INIT_INVALID_STACK	"Failed to init procedure to process exception of invalid stack"
 
-	#define	DC_INVALID_STACK 		0x00000020
+	#define	DC_INVALID_STACK 		0x0000001a
 	#define	DI_INVALID_STACK 		"Kernel causes a exception of invalid stack"
+
+	#define	DC_INIT_DOUBLE_FAULT	0x0000001b
+	#define	DI_INIT_DOUBLE_FAULT	"Failed to init procedure to process exception of double fault"
+
+	#define	DC_DOUBLE_FAULT_KNL		0x0000001c
+	#define	DI_DOUBLE_FAULT_KNL		"Kernel causes a exception of double fault"
+
+	#define	DC_DOUBLE_FAULT_TSK		0x0000001d
+	#define	DI_DOUBLE_FAULT_TSK		"A task causes a exception of double fault, the id is %d, the name is '%s'"
 
 #endif

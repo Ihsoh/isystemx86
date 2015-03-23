@@ -54,6 +54,33 @@
 	</div>
 </div>
 <div>
+	<a id="reset_all_exceptions" name="reset_all_exceptions" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">reset_all_exceptions</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				重置所有异常处理程序。<br />		把所有异常处理程序的 TSS 的描述符的 ATTR 字段设为<br />		AT386TSS + DPL0，就是去掉 BUSY 状态。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
 	<a id="disk_va_init" name="disk_va_init" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Private</div>
@@ -346,33 +373,6 @@
 </p>
 </div>
 
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;"></span>
-		<p style="padding-left: 40px;"></p>
-	</div>
-</div>
-<div>
-	<a id="init_noimpl" name="init_noimpl" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Private</div>
-		<div style="float:left; margin-left:20px;">init_noimpl</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				初始化未被使用的中断的 TSS 结构体。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		
 	</div>
 
 	<h4>返回值描述</h4>
@@ -949,7 +949,7 @@
 	<h4>函数描述</h4>
 	<hr />
 	<p style="padding-left:40px;">
-				杀死任务后跳转到内核任务。<br />
+				杀死任务后等待任务调度器执行，<br />		并且任务调度器将执行内核任务。<br />
 	</p>
 
 	<h4>参数描述</h4>
@@ -1119,6 +1119,60 @@
 	<hr />
 	<p style="padding-left:40px;">
 				处理检测到错误的操作码引发的异常的中断过程。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_double_fault" name="init_double_fault" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_double_fault</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置检测到双重故障时引发的异常处理程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="double_fault_int" name="double_fault_int" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">double_fault_int</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				处理检测到双重故障引发的异常的中断过程。<br />
 	</p>
 
 	<h4>参数描述</h4>
@@ -1389,6 +1443,33 @@
 	<hr />
 	<p style="padding-left:40px;">
 				页失败的中断程序。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="init_noimpl" name="init_noimpl" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">init_noimpl</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化未被使用的中断的 TSS 结构体。<br />
 	</p>
 
 	<h4>参数描述</h4>

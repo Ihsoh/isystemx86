@@ -2029,6 +2029,12 @@ exec(	IN int8 * cmd,
 			r = slink(path);
 			print_str("\n");
 		}
+
+		else if(strcmp(name, "test") == 0)
+		{
+			asm volatile ("movw $0, %ax; divb %ax;");
+		}
+
 		//Batch
 		else if(strcmp(name, "goto") == 0)
 		{

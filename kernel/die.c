@@ -12,6 +12,8 @@
 #include "die.h"
 #include "kernel.h"
 #include "log.h"
+#include "apic.h"
+#include "pic.h"
 
 /**
 	@Function:		die
@@ -28,6 +30,8 @@ die(IN struct die_info * info)
 {
 	enable_flush_screen();
 	asm volatile ("cli");
+	apic_stop_timer();
+	pic_mask_all();
 	write_log_to_disk();
 	uint16 us;
 	set_cursor(0, 0);

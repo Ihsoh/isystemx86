@@ -2,8 +2,11 @@
 
 int main(int argc, char * argv[])
 {
-	*((uint *)0x9fffffff) = 0;
-	asm volatile ("int $0xa1;");
+	//asm volatile ("movb $0, %ax; divb %ax");
+	//while(1);
+	//*((uint *)0x9fffffff) = 0;
+	//asm volatile ("int $0xa1;");
+	//asm volatile ("movw $0, %ax; divb %ax;");
 	printf("%s\n", "Here is Test2");
 	return 199648;
 

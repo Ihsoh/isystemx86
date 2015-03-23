@@ -294,6 +294,16 @@ apic_enable(void)
 	return TRUE;
 }
 
+
+BOOL
+apic_stop_timer(void)
+{
+	if(!apic_ok)
+		return FALSE;
+	lapic_write_register(LAPIC_LVT_TIMER, 0);
+	return TRUE;
+}
+
 /**
 	@Function:		apic_is_enable
 	@Access:		Public

@@ -36,6 +36,10 @@
 
 static
 void
+reset_all_exceptions(void);
+
+static
+void
 disk_va_init(void);
 
 static
@@ -162,6 +166,14 @@ bound_check_int(void);
 
 static
 void
+init_double_fault(void);
+
+static
+void
+double_fault_int(void);
+
+static
+void
 init_invalid_opcode(void);
 
 static
@@ -192,20 +204,28 @@ static
 void
 invalid_stack_int(void);
 
-static uint32 gdt_addr = NULL;
-static uint32 current_tid;
-static BOOL is_kernel_task = TRUE;
+static uint32 gdt_addr = 0;			//GDT的物理地址
+static uint32 current_tid;			//当前正在运行的任务的TID。
+static BOOL is_kernel_task = TRUE;	//当前的任务是否是内核任务。
 
 //内核各个任务的TSS
-static struct TSS noimpl_tss;
-static struct TSS gp_tss;
-static struct TSS timer_tss;
-static struct TSS mouse_tss;
-static struct TSS keyboard_tss;
-static struct TSS ide_tss;
-static struct TSS fpu_tss;
-static struct TSS scall_tss[MAX_TASK_COUNT];
-static struct TSS pf_tss;
+static struct TSS divby0_tss;		//处理除以0引发的异常的任务的TSS。
+static struct TSS bndchk_tss;		//处理边界检查指令引发的异常的任务的TSS。
+static struct TSS invalidopc_tss;	//处理执行了错误的指令码引发的异常的任务的TSS。
+static struct TSS df_tss;			//处理双重故障的任务的TSS。
+static struct TSS invalidtss_tss;	//处理由于错误的TSS所引发的异常的任务的TSS。
+static struct TSS invalidseg_tss;	//处理段不存在异常的任务的TSS。
+static struct TSS invalidstck_tss;	//处理堆栈故障的任务的TSS。
+static struct TSS noimpl_tss;		//处理调用了未实现的中断的情况的任务的TSS。
+static struct TSS gp_tss;			//处理通用保护异常的任务的TSS。
+static struct TSS pf_tss;			//处理页故障的任务的TSS。
+
+static struct TSS timer_tss;					//定时器的任务的TSS。
+static struct TSS mouse_tss;					//鼠标的任务的TSS。
+static struct TSS keyboard_tss;					//键盘的任务的TSS。
+static struct TSS ide_tss;						//IDE的任务的TSS。
+static struct TSS fpu_tss;						//FPU的任务的TSS。
+static struct TSS scall_tss[MAX_TASK_COUNT];	//各个系统调用的任务的TSS。
 
 /**
 	@Function:		main
@@ -230,17 +250,20 @@ main(void)
 
 	init_vesa();
 	init_paging();
+
+	interrupts_init();
 	init_noimpl();
 	init_gp();
 	init_pf();
 	init_dividing_by_zero();
 	init_bound_check();
 	init_invalid_opcode();
+	init_double_fault();
 	init_invalid_tss();
 	init_invalid_seg();
 	init_invalid_stack();
-	interrupts_init();
 	init_interrupt();
+
 	init_disk("VA");
 	init_disk("VB");
 	init_disk("HD");
@@ -289,6 +312,39 @@ main(void)
 }
 
 DEFINE_LOCK_IMPL(kernel)
+
+/**
+	@Function:		reset_all_exceptions
+	@Access:		Private
+	@Description:
+		重置所有异常处理程序。
+		把所有异常处理程序的 TSS 的描述符的 ATTR 字段设为
+		AT386TSS + DPL0，就是去掉 BUSY 状态。
+	@Parameters:
+	@Return:
+*/
+static
+void
+reset_all_exceptions(void)
+{
+	struct Desc tss_desc;
+
+	#define RESET_EXCEPTION(gdt_index)	\
+		get_desc_from_gdt(gdt_index, &tss_desc);	\
+		tss_desc.attr = AT386TSS + DPL0;	\
+		set_desc_to_gdt(gdt_index, &tss_desc);
+
+	RESET_EXCEPTION(21);	//除以0。
+	RESET_EXCEPTION(22);	//边界检查。
+	RESET_EXCEPTION(23);	//错误的操作码。
+	RESET_EXCEPTION(28);	//双重故障。
+	RESET_EXCEPTION(24);	//错误的 TSS。
+	RESET_EXCEPTION(25);	//段不存在故障。
+	RESET_EXCEPTION(26);	//堆栈段故障。
+	RESET_EXCEPTION(27);	//未实现中断。
+	RESET_EXCEPTION(18);	//通用保护异常。
+	RESET_EXCEPTION(20);	//页故障。
+}
 
 /**
 	@Function:		disk_va_init
@@ -430,41 +486,10 @@ static
 void
 init_interrupt(void)
 {
-	uint8 n;
-	for(n = 0; n <= 255; n++)
-	{
-		if(	n == 0x00
-			|| n == 0x05
-			|| n == 0x06
-			|| n == 0x0a
-			|| n == 0x0b
-			|| n == 0x0c
-			|| n == 0x0d
-			|| n == 0x0e
-			|| n == 0x21 
-			|| n == 0x22 
-			|| n == 0x40 	//IRQ 0
-			|| n == 0x41	//IRQ 1
-			|| n == 0x74 	//IRQ 12
-			|| n == 0x75	//IRQ 13
-			|| n == 0x76	//IRQ 14
-			)
-			continue;
-		else if(n == 7)
-		{
-			uint32 fpu_error_int_addr = (uint32)&fpu_error_int;
-			set_int(n, fpu_error_int_addr);
-		}
-		else if(n == 0x90)
-		{
-			uint32 system_call_int_addr = (uint32)&system_call_int;
-			set_int(n, system_call_int_addr);
-		}
-		else
-			;//set_noimpl(n);
-		if(n == 255)
-			break;
-	}
+	uint32 fpu_error_int_addr = (uint32)&fpu_error_int;
+	set_int(0x07, fpu_error_int_addr);
+	uint32 system_call_int_addr = (uint32)&system_call_int;
+	set_int(0x90, system_call_int_addr);
 }
 
 /**
@@ -530,47 +555,6 @@ fill_tss(	OUT struct TSS * tss,
 	tss->ldt = 0;
 	tss->trap = 0;
 	tss->iobase = sizeof(struct TSS);
-}
-
-/**
-	@Function:		init_noimpl
-	@Access:		Private
-	@Description:
-		初始化未被使用的中断的 TSS 结构体。
-	@Parameters:
-	@Return:	
-*/
-static
-void
-init_noimpl(void)
-{
-	struct die_info info;
-	struct TSS * tss = &noimpl_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
-	if(tss == NULL)
-	{
-		fill_info(info, DC_INIT_NOIMPL, DI_INIT_NOIMPL);
-		die(&info);
-	}
-	struct Desc tss_desc;	
-	struct Gate task_gate;	
-
-	uint32 temp = (uint32)tss;
-	tss_desc.limitl = sizeof(struct TSS) - 1;
-	tss_desc.basel = (uint16)(temp & 0xFFFF);
-	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
-	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
-	tss_desc.attr = AT386TSS + DPL3;
-	set_desc_to_gdt(17, (uint8 *)&tss_desc);
-
-	task_gate.offsetl = 0;
-	task_gate.offseth = 0;
-	task_gate.dcount = 0;
-	task_gate.selector = (17 << 3) | RPL3;
-	task_gate.attr = ATTASKGATE | DPL3;
-	set_desc_to_gdt(27, (uint8 *)&task_gate);
-
-	fill_tss(tss, (uint32)noimpl_int, (uint32)stack);
 }
 
 /**
@@ -817,6 +801,9 @@ static int32 clock_counter = 100;
 static int32 is_system_call = 0;
 static int32 is_enable_flush_screen = 1;
 static int32 flush_counter = 0;
+static BOOL switch_to_kernel = FALSE;
+static BOOL kt_jk_lock = TRUE;
+static BOOL will_reset_all_exceptions = FALSE;
 
 // #define NEW_TIMER_INT
 
@@ -1027,6 +1014,12 @@ timer_int(void)
 {	
 	while(1)
 	{
+		kt_jk_lock = FALSE;
+		if(will_reset_all_exceptions)
+		{
+			reset_all_exceptions();
+			will_reset_all_exceptions = FALSE;
+		}
 		if(is_enable_flush_screen && vesa_is_valid())
 			if(++flush_counter == 2)
 			{
@@ -1043,8 +1036,9 @@ timer_int(void)
 			uint32 running_tid = get_running_tid();
 			uint32 tid = get_next_task_id();
 			current_tid = tid;
-			if(counter == 1 || tid == -1)
+			if(counter == 1 || tid == -1 || switch_to_kernel)
 			{
+				switch_to_kernel = FALSE;
 				counter = 0;
 				is_kernel_task = TRUE;
 				struct Task task;
@@ -1607,7 +1601,8 @@ system_call_int(void)
 	@Function:		kill_task_and_jump_to_kernel
 	@Access:		Private
 	@Description:
-		杀死任务后跳转到内核任务。
+		杀死任务后等待任务调度器执行，
+		并且任务调度器将执行内核任务。
 	@Parameters:
 		tid, uint32, IN
 			要杀死的任务任务ID。
@@ -1617,22 +1612,17 @@ static
 void
 kill_task_and_jump_to_kernel(IN uint32 tid)
 {
+	lock();
 	kill_task(tid);
-
 	enable_flush_screen();
-
 	int32 wait_app_tid = get_wait_app_tid();
 	if(tid == wait_app_tid)
 		set_wait_app_tid(-1);
-
-	struct Desc kernel_tss_desc;
-	get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
-	kernel_tss_desc.attr = AT386TSS + DPL0; 
-	set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
-	free_system_call_tss();
-	counter = 0;
-	is_kernel_task = TRUE;
-	asm volatile ("ljmp	$56, $0;");
+	switch_to_kernel = TRUE;			//强制让任务调度器执行内核任务。
+	kt_jk_lock = TRUE;					//unlock()之后等待任务调度器的执行。
+	will_reset_all_exceptions = TRUE;	//需要重设所有异常处理程序的状态。
+	unlock();
+	while(kt_jk_lock);					//任务调度器会把kt_jk_lock设置为FALSE。
 }
 
 /*================================================================================
@@ -1652,11 +1642,11 @@ void
 init_dividing_by_zero(void)
 {
 	struct die_info info;
-	struct TSS * tss = &pf_tss;
+	struct TSS * tss = &divby0_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
-		fill_info(info, DC_INIT_PF, DI_INIT_PF);
+		fill_info(info, DC_INIT_DIV_BY_0, DI_INIT_DIV_BY_0);
 		die(&info);
 	}
 	struct Desc tss_desc;	
@@ -1698,6 +1688,7 @@ dividing_by_zero_int(void)
 		{
 			struct die_info info;
 			fill_info(info, DC_DIV_BY_0, DI_DIV_BY_0);
+			log(LOG_ERROR, DI_DIV_BY_0);
 			die(&info);
 		}
 		else
@@ -1738,7 +1729,7 @@ void
 init_bound_check(void)
 {
 	struct die_info info;
-	struct TSS * tss = &pf_tss;
+	struct TSS * tss = &bndchk_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
@@ -1824,7 +1815,7 @@ void
 init_invalid_opcode(void)
 {
 	struct die_info info;
-	struct TSS * tss = &pf_tss;
+	struct TSS * tss = &invalidopc_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
@@ -1894,6 +1885,84 @@ invalid_opcode_int(void)
 }
 
 /*================================================================================
+							处理双重故障, 0x08
+================================================================================*/
+
+/**
+	@Function:		init_double_fault
+	@Access:		Private
+	@Description:
+		设置检测到双重故障时引发的异常处理程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+init_double_fault(void)
+{
+	struct die_info info;
+	struct TSS * tss = &df_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_DOUBLE_FAULT, DI_INIT_DOUBLE_FAULT);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(28, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (28 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x08, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)double_fault_int, (uint32)stack);
+}
+
+/**
+	@Function:		double_fault_int
+	@Access:		Private
+	@Description:
+		处理检测到双重故障引发的异常的中断过程。
+	@Parameters:
+	@Return:
+*/
+static
+void
+double_fault_int(void)
+{
+	if(is_kernel_task)
+	{
+		struct die_info info;
+		fill_info(info, DC_DOUBLE_FAULT_KNL, DI_DOUBLE_FAULT_KNL);
+		die(&info);
+	}
+	else
+	{
+		struct Task * task = get_task_info_ptr(current_tid);
+		int8 buffer[1024];
+		sprintf_s(	buffer,
+					1024,
+					DI_DOUBLE_FAULT_TSK,
+					current_tid,
+					task->name);
+		struct die_info info;
+		fill_info(info, DC_DOUBLE_FAULT_TSK, buffer);
+		die(&info);
+	}
+}
+
+/*================================================================================
 							处理非法的TSS的中断程序, 0x0a
 ================================================================================*/
 
@@ -1910,7 +1979,7 @@ void
 init_invalid_tss(void)
 {
 	struct die_info info;
-	struct TSS * tss = &pf_tss;
+	struct TSS * tss = &invalidtss_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
@@ -1995,7 +2064,7 @@ void
 init_invalid_seg(void)
 {
 	struct die_info info;
-	struct TSS * tss = &pf_tss;
+	struct TSS * tss = &invalidseg_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
@@ -2080,7 +2149,7 @@ void
 init_invalid_stack(void)
 {
 	struct die_info info;
-	struct TSS * tss = &pf_tss;
+	struct TSS * tss = &invalidstck_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
@@ -2323,6 +2392,47 @@ pf_int(void)
 ================================================================================*/
 
 /**
+	@Function:		init_noimpl
+	@Access:		Private
+	@Description:
+		初始化未被使用的中断的 TSS 结构体。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+init_noimpl(void)
+{
+	struct die_info info;
+	struct TSS * tss = &noimpl_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_NOIMPL, DI_INIT_NOIMPL);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL3;
+	set_desc_to_gdt(17, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (17 << 3) | RPL3;
+	task_gate.attr = ATTASKGATE | DPL3;
+	set_desc_to_gdt(27, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)noimpl_int, (uint32)stack);
+}
+
+/**
 	@Function:		set_noimpl
 	@Access:		Private
 	@Description:
@@ -2364,19 +2474,30 @@ noimpl_int(void)
 		if(is_kernel_task)
 		{
 			struct die_info info;
-			fill_info(info, DC_NOIMPLEMENT_INT, DI_NOIMPLEMENT_INT);
+
+			int32 intn = get_unimpl_intn();
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						DI_NOIMPLEMENT_INT,
+						intn,
+						intn);
+
+			fill_info(info, DC_NOIMPLEMENT_INT, buffer);
 			die(&info);
 		}
 		else
 		{
 			struct Task * task = get_task_info_ptr(current_tid);
+			int32 intn = get_unimpl_intn();
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"A task causes a error of calling not implement interrupt(%d) procedure"
+						"A task causes a error of calling not implement interrupt(%d, 0x%X) procedure"
 						", the id is %d, the name is '%s'\n",
-						get_unimpl_intn(),
+						intn,
+						intn,
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);

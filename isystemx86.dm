@@ -112,6 +112,10 @@ WRITE_FILE	VA:/isystem/flags/cfs.flg isystem/flags/cfs.flg
 MAKE_FILE	VA:/isystem/ init.bat
 WRITE_FILE	VA:/isystem/init.bat isystem/init.bat
 
+#System test file
+MAKE_FILE	VA:/isystem/ test.bat
+WRITE_FILE	VA:/isystem/test.bat isystem/test.bat
+
 #System help file
 MAKE_FILE	VA:/isystem/ help.txt
 WRITE_FILE	VA:/isystem/help.txt isystem/help.txt

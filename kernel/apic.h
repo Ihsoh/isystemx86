@@ -21,6 +21,9 @@ BOOL
 apic_is_enable(void);
 
 BOOL
+apic_stop_timer(void);
+
+BOOL
 apic_eoi(void);
 
 #endif
