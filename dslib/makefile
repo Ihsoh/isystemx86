@@ -3,7 +3,8 @@ Out=libdslib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -I. -m32 -march=i386 -mtune=i386
-Objs=bin/dslib.obj bin/value.obj bin/linked_list.obj bin/list.obj bin/lib.obj
+Objs=bin/dslib.obj bin/value.obj bin/linked_list.obj bin/list.obj bin/lib.obj 	\
+bin/hashtable.obj
 AR=ar
 
 $(Target): bin $(Objs)
@@ -26,6 +27,9 @@ bin/list.obj: list.c list.h
 
 bin/lib.obj: lib.c lib.h
 	$(CC) $(CFlags) -c lib.c -o bin/lib.obj
+
+bin/hashtable.obj: hashtable.c hashtable.h
+	$(CC) $(CFlags) -c hashtable.c -o bin/hashtable.obj
 
 .PHONY:Clear
 

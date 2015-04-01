@@ -208,3 +208,79 @@ dsl_lnklst_count(IN DSLLinkedList * list)
 		return -1;
 	return list->count;	
 }
+
+DSLLinkedListNodePtr
+dsl_lnklst_shift_node(IN OUT DSLLinkedListPtr list)
+{
+	if(list == NULL || list->count == 0)
+		return NULL;
+	DSLLinkedListNodePtr node = list->head;
+	if(!dsl_lnklst_remove_node(list, node))
+		return NULL;
+	return node;
+}
+
+BOOL
+dsl_lnklst_unshift_node(IN OUT DSLLinkedListPtr list,
+						IN OUT DSLLinkedListNodePtr node)
+{
+	if(list == NULL || node == NULL)
+		return FALSE;
+	if(list->head == NULL && list->foot == NULL)
+	{
+		list->head = node;
+		list->foot = node;
+		node->prev = NULL;
+		node->next = NULL;
+		list->count++;
+	}
+	else if(list->head != NULL && list->foot != NULL)
+	{
+		node->next = list->head;
+		list->head->prev = node->next;
+		node->prev = NULL;
+		list->head = node;
+		list->count++;
+	}
+	else
+		return FALSE;
+	return TRUE;
+}
+
+DSLLinkedListNodePtr
+dsl_lnklst_pop_node(IN OUT DSLLinkedListPtr list)
+{
+	if(list == NULL || list->count == 0)
+		return NULL;
+	DSLLinkedListNodePtr node = list->foot;
+	if(!dsl_lnklst_remove_node(list, node))
+		return NULL;
+	return node;
+}
+
+BOOL
+dsl_lnklst_insert_node(	IN OUT DSLLinkedListPtr list,
+						IN OUT DSLLinkedListNodePtr pos,
+						IN OUT DSLLinkedListNodePtr node)
+{
+	if(list == NULL || node == NULL)
+		return FALSE;
+	if(list->count == 0 && pos == NULL)
+		// 处理链表为空的插入。
+		return dsl_lnklst_add_node(list, node);
+	else if(list->count != 0 && pos != NULL && list->head == pos)
+		// 处理在链表头的插入。
+		return dsl_lnklst_unshift_node(list, node);
+	else if(list->count != 0 && pos != NULL && list->head != pos)
+	{
+		// 处理不在链表头的插入。
+		DSLLinkedListNodePtr prev = pos->prev;
+		node->next = pos;
+		pos->prev = node;
+		node->prev = prev;
+		prev->next = node;
+		return TRUE;
+	}
+	else
+		return FALSE;
+}

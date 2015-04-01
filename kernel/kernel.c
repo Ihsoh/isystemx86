@@ -296,6 +296,9 @@ main(void)
 		pic_unmask_all();
 	
 	pci_init();
+
+	ifs1blks_init();
+
 	disk_va_init();
 	sti();
 

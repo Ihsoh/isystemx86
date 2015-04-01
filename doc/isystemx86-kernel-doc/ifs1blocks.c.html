@@ -27,6 +27,41 @@
 			<h2>函数</h2>
 			<div>
 				<div>
+	<a id="get_bat" name="get_bat" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">get_bat</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取指定磁盘的块分配表。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			盘符。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		DSLLinkedListPtr</span>
+		<p style="padding-left: 40px;">			块分配表的指针。
+</p>
+	</div>
+</div>
+<div>
 	<a id="max_block_count" name="max_block_count" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Private</div>
@@ -45,7 +80,7 @@
 	<div>
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
-	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
 	<span style="color:#e85266; font-weight:blod;"> IN</span>
 	<p style="padding-left: 40px;">			盘符。
 </p>
@@ -58,6 +93,125 @@
 	<div style="padding-left: 40px;">
 		<span style="color:#428cc7; font-weight:blod;">		uint32</span>
 		<p style="padding-left: 40px;">			指定的磁盘的最大块数。
+</p>
+	</div>
+</div>
+<div>
+	<a id="fill_bat" name="fill_bat" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">fill_bat</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				扫描磁盘，填充块分配表。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		bat</span>,
+	<span style="color:#428cc7; font-weight:blod;"> DSLLinkedListPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			块分配表。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			盘符。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		max</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			获取到该数量的块后停止扫描和填充。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="new_block_from_bat" name="new_block_from_bat" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">new_block_from_bat</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				从块分配表获取一个可用块。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			盘符。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		block_id</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			块ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="ifs1blks_init" name="ifs1blks_init" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">ifs1blks_init</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化硬盘块处理模块。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
 </p>
 	</div>
 </div>
@@ -80,7 +234,7 @@
 	<div>
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
-	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
 	<span style="color:#e85266; font-weight:blod;"> IN</span>
 	<p style="padding-left: 40px;">			盘符。
 </p>
@@ -129,7 +283,7 @@
 	<div>
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
-	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
 	<span style="color:#e85266; font-weight:blod;"> IN</span>
 	<p style="padding-left: 40px;">			盘符。
 </p>
@@ -178,7 +332,7 @@
 	<div>
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
-	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
 	<span style="color:#e85266; font-weight:blod;"> IN</span>
 	<p style="padding-left: 40px;">			盘符。
 </p>
@@ -220,7 +374,7 @@
 	<div>
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
-	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
 	<span style="color:#e85266; font-weight:blod;"> IN</span>
 	<p style="padding-left: 40px;">			盘符。
 </p>
@@ -255,7 +409,7 @@
 	<div>
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		symbol</span>,
-	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
 	<span style="color:#e85266; font-weight:blod;"> IN</span>
 	<p style="padding-left: 40px;">			盘符。
 </p>
@@ -274,7 +428,7 @@
 	<hr />
 	<div style="padding-left: 40px;">
 		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
-		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+		<p style="padding-left: 40px;">			返回INVALID_BLOCK_ID则失败，否则成功。
 </p>
 	</div>
 </div>

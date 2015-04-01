@@ -2,9 +2,10 @@
 #include "die.h"
 #include "ilib.h"
 
-static char * keywords[] = {"DIM", "AS", "SHORT", "LONG", "STRING", "BOOLEAN", "FUNCTION",
-							"BYVAL", "BYREF", "IF", "THEN", "RETURN", "ELSE", "END",
-							"SUB", "CALL", NULL};
+static char * keywords[] = {"DIM", "AS", "SHORT", "LONG", "STRING", "BOOLEAN", 
+							"SINGLE", "DOUBLE", "FUNCTION", "BYVAL", "BYREF", 
+							"IF", "THEN", "RETURN", "ELSE", "END", "SUB", "CALL",
+							NULL};
 
 static
 int

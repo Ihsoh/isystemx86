@@ -2032,7 +2032,34 @@ exec(	IN int8 * cmd,
 
 		else if(strcmp(name, "test") == 0)
 		{
-			asm volatile ("movw $0, %ax; divb %ax;");
+			#include <dslib/hashtable.h>
+			DSLHashTablePtr ht = dsl_hashtable_new();
+			dsl_hashtable_set_uint32(ht, "KeyA", 1996);
+			dsl_hashtable_unset(ht, "KeyC");
+			dsl_hashtable_set_object(ht, "KeyC", "Hello, World!");
+			uint32 uint32_value;
+			int8 * object_value;
+			if(dsl_hashtable_get_uint32(ht, "KeyA", &uint32_value))
+			{
+				printn(uint32_value);
+				print_str("\n");
+			}
+			if(dsl_hashtable_get_uint32(ht, "KeyB", &uint32_value))
+			{
+				printn(uint32_value);
+				print_str("\n");
+			}
+			if(dsl_hashtable_get_object(ht, "KeyC", &object_value))
+			{
+				print_str(object_value);
+				print_str("\n");
+			}
+			if(dsl_hashtable_get_uint32(ht, "KeyC", &uint32_value))
+			{
+				printn(uint32_value);
+				print_str("\n");
+			}
+
 		}
 
 		//Batch

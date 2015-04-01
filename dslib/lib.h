@@ -9,4 +9,13 @@ dsl_lib_memcpy(	OUT void * dst,
 				IN const void * src,
 				IN uint32 count);
 
+extern
+uint32
+dsl_lib_strlen(IN const int8 * str);
+
+extern
+int8 * 
+dsl_lib_strcpy(	OUT int8 * dst, 
+				IN const int8 * src);
+
 #endif

@@ -104,28 +104,32 @@ struct SLinkBlock
 
 extern
 BOOL
-get_block(	IN int8 * symbol, 
+ifs1blks_init(void);
+
+extern
+BOOL
+get_block(	IN const int8 * symbol, 
 			IN uint32 id, 
 			OUT struct RawBlock * block);
 
 extern
 BOOL
-set_block(	IN int8 * symbol, 
+set_block(	IN const int8 * symbol, 
 			IN uint32 id, 
 			IN struct RawBlock * block);
 
 extern
 BOOL
-del_block(	IN int8 * symbol, 
+del_block(	IN const int8 * symbol, 
 			IN uint32 id);
 
 extern
 BOOL
-del_all_blocks(IN int8 * symbol);
+del_all_blocks(IN const int8 * symbol);
 
 extern
 uint32
-add_block(	IN int8 * symbol, 
+add_block(	IN const int8 * symbol, 
 			IN struct RawBlock * block);
 
 extern

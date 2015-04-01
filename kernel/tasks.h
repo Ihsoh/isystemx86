@@ -26,29 +26,29 @@ typedef void (* OnTaskExit)(int32 tid, int32 retvalue);
 //功能:		任务
 struct Task
 {
-	int32				used;				//是否使用该任务槽
+	int32				used;				//是否使用该任务槽。
 	BOOL				allocable;			//该任务槽是否可分配。
-	int32				running;			//是否正在运行
-	int32				ran;				//是否运行
-	int8 *				name;				//任务名
-	int8 *				param;				//参数
-	uint32				app_len;			//程序的长度
-	uint8 *				addr;				//任务的起始地址
-	struct TSS 			tss;				//任务的TSS
-	struct I387State	i387_state;			//Intel 80387状态
-	int32				init_i387;			//该任务是否初始化了Intel 80387
-	uint32 * 			pagedt_addr;		//页目录表和页表的地址
-	uint32				real_pagedt_addr;	//真正页目录表和页表的地址
-	FILE **				opened_file_ptrs;	//打开文件指针列表
-	void **				memory_block_ptrs;	//内存块指针列表
-	uint32 *			mqueue_ids;			//任务打开的消息队列的ID集合
-	uint32				used_memory_size;	//任务内存使用量
-	int8 *				working_dir;		//作业目录
-	int32				retvalue;			//任务的返回值
+	int32				running;			//是否正在运行。
+	int32				ran;				//是否运行。
+	int8 *				name;				//任务名。
+	int8 *				param;				//参数。
+	uint32				app_len;			//程序的长度。
+	uint8 *				addr;				//任务的起始地址。
+	struct TSS 			tss;				//任务的TSS。
+	struct I387State	i387_state;			//Intel 80387状态。
+	int32				init_i387;			//该任务是否初始化了Intel 80387。
+	uint32 * 			pagedt_addr;		//页目录表和页表的地址。
+	uint32				real_pagedt_addr;	//真正页目录表和页表的地址。
+	FILE **				opened_file_ptrs;	//打开文件指针列表。
+	void **				memory_block_ptrs;	//内存块指针列表。
+	uint32 *			mqueue_ids;			//任务打开的消息队列的ID集合。
+	uint32				used_memory_size;	//任务内存使用量。
+	int8 *				working_dir;		//作业目录。
+	int32				retvalue;			//任务的返回值。
 	BOOL				ready;				//是否准备就绪，任务创建时为 False，
 											//直到为 True 时，才会开始运行。
 	BOOL				is_system_call;		//是否在进行系统调用。
-	OnTaskExit			on_exit;			//当任务退出时调用
+	OnTaskExit			on_exit;			//当任务退出时调用。
 };
 
 

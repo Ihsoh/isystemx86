@@ -91,4 +91,23 @@ extern
 int32
 dsl_lnklst_count(IN DSLLinkedList * list);
 
+extern
+DSLLinkedListNodePtr
+dsl_lnklst_shift_node(IN OUT DSLLinkedListPtr list);
+
+extern
+BOOL
+dsl_lnklst_unshift_node(IN OUT DSLLinkedListPtr list,
+						IN OUT DSLLinkedListNodePtr node);
+
+extern
+DSLLinkedListNodePtr
+dsl_lnklst_pop_node(IN OUT DSLLinkedListPtr list);
+
+extern
+BOOL
+dsl_lnklst_insert_node(	IN OUT DSLLinkedListPtr list,
+						IN OUT DSLLinkedListNodePtr pos,
+						IN OUT DSLLinkedListNodePtr node);
+
 #endif
