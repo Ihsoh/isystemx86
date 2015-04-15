@@ -22,7 +22,8 @@ Linker=ld -m elf_i386
 Include=-I../ilib -I../
 
 $(Target): bin $(Objs)
-	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) -L../dslib/bin -ldslib
+	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
+-L../jsonlib/bin -ljsonlib -L../dslib/bin -ldslib
 
 bin:
 	-mkdir bin

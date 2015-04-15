@@ -1,51 +1,7 @@
-DIM sh AS SHORT, i AS INTEGER, l AS LONG, str AS STRING, b AS BOOLEAN, f AS SINGLE, d AS DOUBLE
-DIM iarr(10)(2) AS INTEGER
-
-TYPE User
-	Name AS STRING
-	Password AS STRING
-END TYPE
-
-FUNCTION Max(BYVAL a AS INTEGER, BYVAL b AS INTEGER) AS INTEGER
-	IF a > b THEN
-		RETURN a
-	ELSE
-		RETURN b
-	END IF
-END FUNCTION
-
-SUB Sum100(BYREF ref AS INTEGER)
-	DIM i
-	FOR i IN 1 TO 100 STEP 1
-		i = i + 1
-	NEXT
-END SUB
-
-Print("a: ")
-Input(a)
-Print("b: ")
-Input(b)
-Print("Max: " + Max(a, b))
-DIM Temp AS INTEGER
-CALL Sum100(Temp)
-Print("Sum: " + Temp)
-
-BASIC_TYPE ::= 	"BYTE" | "SHORT" | "LONG" 
-				| "UBYTE" | "USHORT" | "ULONG"
-				| "CHAR" | "STRING"
-				| "BOOLEAN"
-				| "SINGLE" | "DOUBLE"
-
-TYPE_STATEMENT ::= 
-	"TYPE" type_name
-		member_name "AS" <BASIC_TYPE | user_type>
-		{member_name "AS" <BASIC_TYPE | user_type>}
-	"END" "TYPE"
-
-DIM_STATEMENT ::=
-	"DIM" variable_name "AS" <BASIC_TYPE | user_type> {"," variable_name "AS" <BASIC_TYPE | user_type>}
-
-ARRAY_STATEMENT ::=
-	"DIM" variable_name "(" n ")" {"(" n ")"} "AS" <BASIC_TYPE | user_type> {variable_name "(" n ")" {"(" n ")"} "AS" <BASIC_TYPE | user_type>}
-
+DIM a, b$, s%, r
+LET a = 1.0
+LET b = "123"
+LET s = 1
+LET r = a + b + s
+PRINT r
 

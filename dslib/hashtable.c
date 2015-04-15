@@ -23,7 +23,7 @@ hash(IN const int8 * name)
 	uint32 len = dsl_lib_strlen(name);
 	uint32 ui;
 	for(ui = 0; ui < len; ui++)
-		key += name[ui];
+		key += name[ui] * 31;
 	return key % DSLHASHTABLE_SIZE;
 }
 
@@ -174,4 +174,60 @@ dsl_hashtable_free(IN OUT DSLHashTablePtr hashtable)
 	if(!dsl_hashtable_unset_all(hashtable))
 		return FALSE;
 	return TRUE;
+}
+
+BOOL
+dsl_hashtable_has_key(	IN DSLHashTablePtr hashtable,
+						IN const int8 * name)
+{
+	return find_pair(hashtable, name) != NULL;
+}
+
+BOOL
+dsl_hashtable_keys_list(IN DSLHashTablePtr hashtable,
+						IN OUT DSLLinkedListPtr keys_list)
+{
+	if(hashtable == NULL || keys_list == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < DSLHASHTABLE_SIZE; ui++)
+	{
+		DSLLinkedListPtr list = hashtable->table[ui];
+		if(list != NULL)
+		{
+			DSLLinkedListNodePtr node = list->head;
+			while(node != NULL)
+			{
+				DSLHashTablePairPtr pair 
+					= (DSLHashTablePairPtr)(node->value.value.object_value);
+				if(node->value.type != DSLVALUE_OBJECT || pair == NULL)
+					return FALSE;
+				int8 * buffer = (int8 *)alloc_memory(DSLHASHTABLE_MAX_NAME_LEN + 1);
+				if(buffer == NULL)
+				{
+					dsl_lnklst_delete_all_object_node(keys_list);
+					return FALSE;
+				}
+				dsl_lib_strcpy(buffer, pair->name);
+				DSLLinkedListNodePtr key_node = dsl_lnklst_new_object_node(buffer);
+				if(key_node == NULL)
+				{
+					free_memory(buffer);
+					dsl_lnklst_delete_all_object_node(keys_list);
+					return FALSE;
+				}
+				dsl_lnklst_add_node(keys_list, key_node);
+				node = node->next;
+			}
+		}
+	}
+	return TRUE;
+}
+
+BOOL
+dsl_hashtable_free_keys_list_items(IN OUT DSLLinkedListPtr keys_list)
+{
+	if(keys_list == NULL)
+		return FALSE;
+	return dsl_lnklst_delete_all_object_node(keys_list);
 }

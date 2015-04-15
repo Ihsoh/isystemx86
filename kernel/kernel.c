@@ -31,6 +31,7 @@
 #include "interrupts.h"
 
 #include <dslib/dslib.h>
+#include <jsonlib/jsonlib.h>
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
 
@@ -45,6 +46,10 @@ disk_va_init(void);
 static
 BOOL
 init_dsl(void);
+
+static
+BOOL
+init_jsonl(void);
 
 static
 void
@@ -281,6 +286,7 @@ main(void)
 	init_cpu();
 	enable_paging();
 	init_dsl();
+	init_jsonl();
 	init_log();
 	mqueue_init();
 	acpi_init();
@@ -375,10 +381,10 @@ disk_va_init(void)
 }
 
 /**
-	@Function:		knl_dsl_malloc
+	@Function:		knl_lib_malloc
 	@Access:		Private
 	@Description:
-		为 DSL 库准备的释放 malloc 函数。
+		为库准备的释放 malloc 函数。
 	@Parameters:
 		num_bytes, uint32, IN
 			分配大小。
@@ -388,16 +394,16 @@ disk_va_init(void)
 */
 static
 void *
-knl_dsl_malloc(IN uint32 num_bytes)
+knl_lib_malloc(IN uint32 num_bytes)
 {
 	return alloc_memory(num_bytes);
 }
 
 /**
-	@Function:		knl_dsl_calloc
+	@Function:		knl_lib_calloc
 	@Access:		Private
 	@Description:
-		为 DSL 库准备的释放 calloc 函数。
+		为库准备的释放 calloc 函数。
 	@Parameters:
 		n, uint32, IN
 			分配数量。
@@ -409,14 +415,14 @@ knl_dsl_malloc(IN uint32 num_bytes)
 */
 static
 void *
-knl_dsl_calloc(	IN uint32 n, 
+knl_lib_calloc(	IN uint32 n, 
 			IN uint32 size)
 {
 	return alloc_memory(n * size);
 }
 
 /**
-	@Function:		knl_dsl_free
+	@Function:		knl_lib_free
 	@Access:		Private
 	@Description:
 		为 DSL 库准备的释放 free 函数。
@@ -427,7 +433,7 @@ knl_dsl_calloc(	IN uint32 n,
 */
 static
 void
-knl_dsl_free(IN void * ptr)
+knl_lib_free(IN void * ptr)
 {
 	free_memory(ptr);
 }
@@ -447,10 +453,31 @@ BOOL
 init_dsl(void)
 {
 	DSLEnvironment env;
-	env.dsl_malloc = knl_dsl_malloc;
-	env.dsl_calloc = knl_dsl_calloc;
-	env.dsl_free = knl_dsl_free;
+	env.dsl_malloc = knl_lib_malloc;
+	env.dsl_calloc = knl_lib_calloc;
+	env.dsl_free = knl_lib_free;
 	return dsl_init(&env);
+}
+
+/**
+	@Function:		init_jsonl
+	@Access:		Private
+	@Description:
+		初始化 JSON 库。
+	@Parameters:
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。
+*/
+static
+BOOL
+init_jsonl(void)
+{
+	JSONLEnvironment env;
+	env.jsonl_malloc = knl_lib_malloc;
+	env.jsonl_calloc = knl_lib_calloc;
+	env.jsonl_free = knl_lib_free;
+	return jsonl_init(&env);
 }
 
 /**

@@ -16,13 +16,31 @@ def is_comment_end(text):
 	return text.strip() == u'*/'
 
 def is_block1(text):
-	return (len(text) == 1 and text[0] == u'\t') or (len(text) >= 2 and text[0] == u'\t' and text[1] != u'\t')
+	return 	(len(text) == 1 		\
+			and text[0] == u'\t')	\
+			or (len(text) >= 2		\
+			and text[0] == u'\t'	\
+			and text[1] != u'\t')
 
 def is_block2(text):
-	return (len(text) == 2 and text[0] == u'\t' and text[1] == u'\t') or (len(text) >= 3 and text[0] == u'\t' and text[1] == u'\t' and text[2] != u'\t')
+	return 	(len(text) == 2 		\
+			and text[0] == u'\t'	\
+			and text[1] == u'\t')	\
+			or (len(text) >= 3		\
+			and text[0] == u'\t'	\
+			and text[1] == u'\t'	\
+			and text[2] != u'\t')
 
 def is_block3(text):
-	return (len(text) == 3 and text[0] == u'\t' and text[1] == u'\t' and text[2] == u'\t') or (len(text) >= 4 and text[0] == u'\t' and text[1] == u'\t' and text[2] == u'\t' and text[3] != u'\t')
+	return 	(len(text) == 3 		\
+			and text[0] == u'\t' 	\
+			and text[1] == u'\t'	\
+			and text[2] == u'\t')	\
+			or (len(text) >= 4		\
+			and text[0] == u'\t'	\
+			and text[1] == u'\t'	\
+			and text[2] == u'\t' 	\
+			and text[3] != u'\t')
 
 def get_node_name(text):
 	name = u''
@@ -50,7 +68,11 @@ def get_node_value(text):
 	return value
 
 def process_die(path, ln, message):
-	raise Exception(u'[Error]: %s: %d: %s' % (path, ln + 1, message))
+	raise Exception(u'[Error]: %s: %d: %s' 
+						% (path, ln + 1, message))
+
+global total_line
+total_line = 0
 
 def process(path, document_path):
 	STATE_NONE = 0
@@ -66,7 +88,7 @@ def process(path, document_path):
 		for line in f:
 			lines.append(line.rstrip())
 	except Exception, e:
-		process_die(path, len(lines) + 1, "Invalid line");
+		process_die(path, len(lines) + 1, "Invalid line")
 		f.close();
 	f.close()
 	ln = 0
@@ -87,6 +109,10 @@ def process(path, document_path):
 	# 文件注释对象。
 	file_doc = None
 	func_doc = None
+	
+	global total_line
+	total_line = total_line + len(lines)
+
 	while ln < len(lines):
 		line = lines[ln]
 		# 处理 /*。
@@ -277,6 +303,9 @@ def main():
 	project_path = sys.argv[1]
 	document_path = sys.argv[2]
 	build(project_path, document_path, True)
+
+	global total_line
+	print total_line
 
 if __name__ == '__main__':
 	main()

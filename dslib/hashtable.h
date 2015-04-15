@@ -76,4 +76,18 @@ extern
 BOOL
 dsl_hashtable_free(IN OUT DSLHashTablePtr hashtable);
 
+extern
+BOOL
+dsl_hashtable_has_key(	IN DSLHashTablePtr hashtable,
+						IN const int8 * name);
+
+extern
+BOOL
+dsl_hashtable_keys_list(IN DSLHashTablePtr hashtable,
+						IN OUT DSLLinkedListPtr keys_list);
+
+extern
+BOOL
+dsl_hashtable_free_keys_list_items(IN OUT DSLLinkedListPtr keys_list);
+
 #endif

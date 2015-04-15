@@ -2032,34 +2032,58 @@ exec(	IN int8 * cmd,
 
 		else if(strcmp(name, "test") == 0)
 		{
-			#include <dslib/hashtable.h>
-			DSLHashTablePtr ht = dsl_hashtable_new();
-			dsl_hashtable_set_uint32(ht, "KeyA", 1996);
-			dsl_hashtable_unset(ht, "KeyC");
-			dsl_hashtable_set_object(ht, "KeyC", "Hello, World!");
-			uint32 uint32_value;
-			int8 * object_value;
-			if(dsl_hashtable_get_uint32(ht, "KeyA", &uint32_value))
+			#include <dslib/dslib.h>
+			#include <jsonlib/jsonlib.h>
+			JSONLRawPtr raw = jsonl_parse("[\"ABC DEF\", \"Ihsoh\", [\"AAA\", \"CCC\"], {A:\"AB\" , A1 : \"Wahaha!!!\"}]", NULL);
+			if(raw != NULL)
 			{
-				printn(uint32_value);
-				print_str("\n");
-			}
-			if(dsl_hashtable_get_uint32(ht, "KeyB", &uint32_value))
-			{
-				printn(uint32_value);
-				print_str("\n");
-			}
-			if(dsl_hashtable_get_object(ht, "KeyC", &object_value))
-			{
-				print_str(object_value);
-				print_str("\n");
-			}
-			if(dsl_hashtable_get_uint32(ht, "KeyC", &uint32_value))
-			{
-				printn(uint32_value);
-				print_str("\n");
-			}
+				JSONLArrayPtr array = (JSONLArrayPtr)raw;
+				uint32 ui;
+				for(ui = 0; ui < JSONL_ARRAY_COUNT(array); ui++)
+				{
+					JSONLRawPtr v = JSONL_ARRAY_GET(array, ui);
+					if(JSONL_TYPE(v) == JSONL_TYPE_VALUE)
+					{
+						print_str(JSONL_VALUE(v));
+						print_str("\n");
+					}
+					else if(JSONL_TYPE(v) == JSONL_TYPE_ARRAY)
+					{
+						uint32 ui1;
+						JSONLArrayPtr array1 = JSONL_ARRAY(v);
+						for(ui1 = 0; ui1 < JSONL_ARRAY_COUNT(array1); ui1++)
+						{
+							print_str("    ");
+							print_str(JSONL_VALUE(JSONL_ARRAY_GET(array1, ui1)));
+							print_str("\n");
+						}
+					}
+					else if(JSONL_TYPE(v) == JSONL_TYPE_OBJECT)
+					{
+						JSONLObjectPtr obj = JSONL_OBJECT(v);
+						JSONLRawPtr value = NULL;
+						if(JSONL_OBJECT_GET(obj, "A", &value))
+						{
+							print_str("    ");
+							print_str(JSONL_VALUE(value));
+							print_str("\n");
+						}
+						else
+							print_str("ERROR!\n");
 
+						if(JSONL_OBJECT_GET(obj, "A1", &value))
+						{
+							print_str("    ");
+							print_str(JSONL_VALUE(value));
+							print_str("\n");
+						}
+						else
+							print_str("ERROR!\n");
+					}
+				}
+			}
+			else
+				print_str("ERROR!!!\n");
 		}
 
 		//Batch
