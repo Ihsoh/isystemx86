@@ -244,6 +244,8 @@ static struct TSS scall_tss[MAX_TASK_COUNT];	//各个系统调用的任务的TSS
 void
 main(void)
 {
+	gdt_addr = get_gdt_addr();
+	
 	init_memory();
 	
 	//必须在这里禁用所有锁
@@ -289,7 +291,7 @@ main(void)
 	init_fpu();
 	init_tasks();
 	init_system_call();
-	gdt_addr = get_gdt_addr();
+	
 	init_keyboard_driver();
 	init_cpu();
 	enable_paging();
@@ -299,7 +301,9 @@ main(void)
 
 	//检测 APIC 是否初始化成功。
 	//如果初始化失败则使用 PIC。
-	if(apic_init())
+	BOOL enable_apic = TRUE;
+	config_system_get_bool("EnableAPIC", &enable_apic);
+	if(enable_apic && apic_init())
 	{
 		pic_mask_all();
 		apic_enable();
