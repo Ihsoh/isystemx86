@@ -35,5 +35,6 @@
 #define	SYSTEM_FLAGS_CHECK_FS		SYSTEM_FLAGS_PATH"cfs.flg"
 
 #define	SYSTEM_LOG_FILE				SYSTEM_PATH"data/log/system.log"
+#define	SYSTEM_CONFIG_FILE			SYSTEM_PATH"data/config/system.json"
 
 #endif

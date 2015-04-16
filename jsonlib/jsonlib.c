@@ -45,6 +45,73 @@ _jsonl_object_get(	IN JSONLObjectPtr obj,
 	return TRUE;
 }
 
+int32
+jsonl_value_type(IN JSONLRawPtr raw)
+{
+	if(raw == NULL)
+		return JSONL_VALUE_TYPE_ERROR;
+	if(	JSONL_TYPE(raw) == JSONL_TYPE_TRUE
+		|| JSONL_TYPE(raw) == JSONL_TYPE_FALSE)
+		return JSONL_VALUE_TYPE_BOOL;
+	else if(JSONL_TYPE(raw) == JSONL_TYPE_NULL)
+		return JSONL_VALUE_TYPE_NULL;
+	else if(JSONL_VALUE(raw)[0] == '"')
+		return JSONL_VALUE_TYPE_STRING;
+	else if(JSONL_TYPE(raw) == JSONL_TYPE_NUMBER)
+		return JSONL_VALUE_TYPE_NUMBER;
+	else
+		return JSONL_VALUE_TYPE_ERROR;
+}
+
+BOOL
+jsonl_number_value(	IN JSONLRawPtr raw,
+					OUT double * v)
+{
+	if(	raw == NULL 
+		|| v == NULL 
+		|| jsonl_value_type(raw) != JSONL_VALUE_TYPE_NUMBER)
+		return FALSE;
+	*v = ((JSONLNumberPtr)raw)->number;
+	return TRUE;
+}
+
+BOOL
+jsonl_bool_value(	IN JSONLRawPtr raw,
+					OUT BOOL * v)
+{
+	if(	raw == NULL 
+		|| v == NULL 
+		|| jsonl_value_type(raw) != JSONL_VALUE_TYPE_BOOL)
+		return FALSE;
+	if(JSONL_TYPE(raw) == JSONL_TYPE_TRUE)
+		*v = TRUE;
+	else if(JSONL_TYPE(raw) == JSONL_TYPE_FALSE)
+		*v = FALSE;
+	else
+		return FALSE;
+	return TRUE;
+}
+
+BOOL
+jsonl_string_value(	IN JSONLRawPtr raw,
+					OUT int8 * v,
+					IN uint32 max)
+{
+	if(	raw == NULL 
+		|| v == NULL
+		|| max == 0
+		|| jsonl_value_type(raw) != JSONL_TYPE_VALUE
+		|| JSONL_VALUE(raw)[0] != '"')
+		return FALSE;
+	max--;
+	uint32 index = 0;
+	uint32 len = jsonl_lib_strlen(JSONL_VALUE(raw)) - 2;
+	while(max-- != 0 && len-- != 0)
+		*(v++) = (JSONL_VALUE(raw) + 1)[index++];
+	*v = '\0';
+	return TRUE;
+}
+
 JSONLRawPtr
 jsonl_parse(IN int8 * json_text,
 			OUT int8 ** next)
@@ -189,6 +256,151 @@ jsonl_parse(IN int8 * json_text,
 						return NULL;
 					}
 					raw_value = object_value;
+				}
+				else if(*json_text == 'n')
+				{
+					BOOL is_null = TRUE;
+					json_text++;
+					if(*json_text != 'u')
+						is_null = FALSE;
+					if(is_null)
+					{
+						json_text++;
+						if(*json_text != 'l')
+							is_null = FALSE;
+					}
+					if(is_null)
+					{
+						json_text++;
+						if(*json_text != 'l')
+							is_null = FALSE;
+					}
+					if(!is_null)
+					{
+						dsl_lst_delete_all_object_value(array->array);
+						dsl_lst_free(array->array);
+						jsonl_free(array);
+						return NULL;
+					}
+					json_text++;
+					JSONLNullPtr jsonnull = (JSONLNullPtr)jsonl_malloc(sizeof(JSONLNull));
+					if(jsonnull == NULL)
+					{
+						dsl_lst_delete_all_object_value(array->array);
+						dsl_lst_free(array->array);
+						jsonl_free(array);
+						return NULL;
+					}
+					jsonnull->type = JSONL_TYPE_NULL;
+					raw_value = jsonnull;
+				}
+				else if(*json_text == 't')
+				{
+					BOOL is_true = TRUE;
+					json_text++;
+					if(*json_text != 'r')
+						is_true = FALSE;
+					if(is_true)
+					{
+						json_text++;
+						if(*json_text != 'u')
+							is_true = FALSE;
+					}
+					if(is_true)
+					{
+						json_text++;
+						if(*json_text != 'e')
+							is_true = FALSE;
+					}
+					if(!is_true)
+					{
+						dsl_lst_delete_all_object_value(array->array);
+						dsl_lst_free(array->array);
+						jsonl_free(array);
+						return NULL;
+					}
+					json_text++;
+					JSONLTruePtr jsontrue = (JSONLTruePtr)jsonl_malloc(sizeof(JSONLTrue));
+					if(jsontrue == NULL)
+					{
+						dsl_lst_delete_all_object_value(array->array);
+						dsl_lst_free(array->array);
+						jsonl_free(array);
+						return NULL;
+					}
+					jsontrue->type = JSONL_TYPE_TRUE;
+					raw_value = jsontrue;
+				}
+				else if(*json_text == 'f')
+				{
+					BOOL is_false = TRUE;
+					json_text++;
+					if(*json_text != 'a')
+						is_false = FALSE;
+					if(is_false)
+					{
+						json_text++;
+						if(*json_text != 'l')
+							is_false = FALSE;
+					}
+					if(is_false)
+					{
+						json_text++;
+						if(*json_text != 's')
+							is_false = FALSE;
+					}
+					if(is_false)
+					{
+						json_text++;
+						if(*json_text != 'e')
+							is_false = FALSE;
+					}
+					if(!is_false)
+					{
+						dsl_lst_delete_all_object_value(array->array);
+						dsl_lst_free(array->array);
+						jsonl_free(array);
+						return NULL;
+					}
+					json_text++;
+					JSONLFalsePtr jsonfalse = (JSONLFalsePtr)jsonl_malloc(sizeof(JSONLFalse));
+					if(jsonfalse == NULL)
+					{
+						dsl_lst_delete_all_object_value(array->array);
+						dsl_lst_free(array->array);
+						jsonl_free(array);
+						return NULL;
+					}
+					jsonfalse->type = JSONL_TYPE_FALSE;
+					raw_value = jsonfalse;
+				}
+				else if(*json_text >= '0' && *json_text <= '9')
+				{
+					int8 buffer[KB(1)];
+					int32 len = 0;
+					while(	(*json_text >= '0' && *json_text <= '9')
+							|| *json_text == '.')
+						buffer[len++] = *(json_text++);
+					buffer[len] = '\0';
+					double number = jsonl_lib_stod(buffer);
+					JSONLNumberPtr jsonnum = (JSONLNumberPtr)jsonl_malloc(sizeof(JSONLNumber));
+					if(jsonnum == NULL)
+					{
+						dsl_lst_delete_all_object_value(array->array);
+						dsl_lst_free(array->array);
+						jsonl_free(array);
+						return NULL;
+					}
+					jsonnum->type = JSONL_TYPE_NUMBER;
+					jsonnum->number = number;
+					raw_value = jsonnum;
+				}
+				else
+				{
+					dsl_lst_delete_all_object_value(array->array);
+					dsl_lst_free(array->array);
+					jsonl_free(array);
+					return NULL;
 				}
 				DSLValuePtr v = (DSLValuePtr)dsl_val_object(raw_value);
 				if(v == NULL)
@@ -384,6 +596,151 @@ jsonl_parse(IN int8 * json_text,
 					}
 					raw_value = object_value;
 				}
+				else if(*json_text == 'n')
+				{
+					BOOL is_null = TRUE;
+					json_text++;
+					if(*json_text != 'u')
+						is_null = FALSE;
+					if(is_null)
+					{
+						json_text++;
+						if(*json_text != 'l')
+							is_null = FALSE;
+					}
+					if(is_null)
+					{
+						json_text++;
+						if(*json_text != 'l')
+							is_null = FALSE;
+					}
+					if(!is_null)
+					{
+						dsl_hashtable_unset_all(obj->obj);
+						dsl_hashtable_free(obj->obj);
+						jsonl_free(obj);
+						return NULL;
+					}
+					json_text++;
+					JSONLNullPtr jsonnull = (JSONLNullPtr)jsonl_malloc(sizeof(JSONLNull));
+					if(jsonnull == NULL)
+					{
+						dsl_hashtable_unset_all(obj->obj);
+						dsl_hashtable_free(obj->obj);
+						jsonl_free(obj);
+						return NULL;
+					}
+					jsonnull->type = JSONL_TYPE_NULL;
+					raw_value = jsonnull;
+				}
+				else if(*json_text == 't')
+				{
+					BOOL is_true = TRUE;
+					json_text++;
+					if(*json_text != 'r')
+						is_true = FALSE;
+					if(is_true)
+					{
+						json_text++;
+						if(*json_text != 'u')
+							is_true = FALSE;
+					}
+					if(is_true)
+					{
+						json_text++;
+						if(*json_text != 'e')
+							is_true = FALSE;
+					}
+					if(!is_true)
+					{
+						dsl_hashtable_unset_all(obj->obj);
+						dsl_hashtable_free(obj->obj);
+						jsonl_free(obj);
+						return NULL;
+					}
+					json_text++;
+					JSONLTruePtr jsontrue = (JSONLTruePtr)jsonl_malloc(sizeof(JSONLTrue));
+					if(jsontrue == NULL)
+					{
+						dsl_hashtable_unset_all(obj->obj);
+						dsl_hashtable_free(obj->obj);
+						jsonl_free(obj);
+						return NULL;
+					}
+					jsontrue->type = JSONL_TYPE_TRUE;
+					raw_value = jsontrue;
+				}
+				else if(*json_text == 'f')
+				{
+					BOOL is_false = TRUE;
+					json_text++;
+					if(*json_text != 'a')
+						is_false = FALSE;
+					if(is_false)
+					{
+						json_text++;
+						if(*json_text != 'l')
+							is_false = FALSE;
+					}
+					if(is_false)
+					{
+						json_text++;
+						if(*json_text != 's')
+							is_false = FALSE;
+					}
+					if(is_false)
+					{
+						json_text++;
+						if(*json_text != 'e')
+							is_false = FALSE;
+					}
+					if(!is_false)
+					{
+						dsl_hashtable_unset_all(obj->obj);
+						dsl_hashtable_free(obj->obj);
+						jsonl_free(obj);
+						return NULL;
+					}
+					json_text++;
+					JSONLFalsePtr jsonfalse = (JSONLFalsePtr)jsonl_malloc(sizeof(JSONLFalse));
+					if(jsonfalse == NULL)
+					{
+						dsl_hashtable_unset_all(obj->obj);
+						dsl_hashtable_free(obj->obj);
+						jsonl_free(obj);
+						return NULL;
+					}
+					jsonfalse->type = JSONL_TYPE_FALSE;
+					raw_value = jsonfalse;
+				}
+				else if(*json_text >= '0' && *json_text <= '9')
+				{
+					int8 buffer[KB(1)];
+					int32 len = 0;
+					while(	(*json_text >= '0' && *json_text <= '9')
+							|| *json_text == '.')
+						buffer[len++] = *(json_text++);
+					buffer[len] = '\0';
+					double number = jsonl_lib_stod(buffer);
+					JSONLNumberPtr jsonnum = (JSONLNumberPtr)jsonl_malloc(sizeof(JSONLNumber));
+					if(jsonnum == NULL)
+					{
+						dsl_hashtable_unset_all(obj->obj);
+						dsl_hashtable_free(obj->obj);
+						jsonl_free(obj);
+						return NULL;
+					}
+					jsonnum->type = JSONL_TYPE_NUMBER;
+					jsonnum->number = number;
+					raw_value = jsonnum;
+				}
+				else
+				{
+					dsl_hashtable_unset_all(obj->obj);
+					dsl_hashtable_free(obj->obj);
+					jsonl_free(obj);
+					return NULL;
+				}
 				DSLValuePtr v = (DSLValuePtr)dsl_val_object(raw_value);
 				if(v == NULL)
 				{
@@ -414,4 +771,10 @@ jsonl_parse(IN int8 * json_text,
 	}
 	else
 		return NULL;
+}
+
+JSONLRawPtr
+jsonl_parse_json(IN int8 * json_text)
+{
+	return jsonl_parse(json_text, NULL);
 }

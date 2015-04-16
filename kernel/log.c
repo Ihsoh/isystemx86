@@ -12,8 +12,10 @@
 #include "cmos.h"
 #include "memory.h"
 #include "system.h"
+#include "config.h"
 
-static int8 * log_buffer = NULL;
+static int8 * log_buffer 	= NULL;
+static BOOL write_in_rt		= FALSE;
 
 void
 init_log(void)
@@ -21,9 +23,10 @@ init_log(void)
 	log_buffer = alloc_memory(LOG_BUFFER_SIZE);
 	if(log_buffer == NULL)
 		return;
-	if(!exists_file("DA:/isystem/data/log/", "system.log"))
-		create_file("DA:/isystem/data/log/", "system.log");
+	if(!exists_file(SYSTEM_PATH"data/log/", "system.log"))
+		create_file(SYSTEM_PATH"data/log/", "system.log");
 	log_buffer[0] = '\0';
+	config_system_get_bool("WriteLogToDiskInRealTime", &write_in_rt);
 }
 
 void
@@ -76,7 +79,14 @@ log(IN const int8 * type,
 		strcpy(log_buffer, buffer);
 	}
 	else
+	{
 		strcat(log_buffer, buffer);
+		if(write_in_rt)
+		{
+			write_log_to_disk();
+			clear_log();
+		}
+	}
 }
 
 int8 *

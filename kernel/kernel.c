@@ -29,6 +29,7 @@
 #include "pci.h"
 #include "pic.h"
 #include "interrupts.h"
+#include "config.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
@@ -273,6 +274,13 @@ main(void)
 	init_disk("VB");
 	init_disk("HD");
 	init_ide();
+
+	init_dsl();
+	init_jsonl();
+	config_init();
+
+	console_init();
+
 	init_screen();
 	init_enfont();
 	init_timer();
@@ -285,8 +293,6 @@ main(void)
 	init_keyboard_driver();
 	init_cpu();
 	enable_paging();
-	init_dsl();
-	init_jsonl();
 	init_log();
 	mqueue_init();
 	acpi_init();
@@ -306,6 +312,7 @@ main(void)
 	ifs1blks_init();
 
 	disk_va_init();
+	
 	sti();
 
 	//在这里启用所有锁
@@ -835,6 +842,10 @@ static BOOL switch_to_kernel = FALSE;
 static BOOL kt_jk_lock = TRUE;
 static BOOL will_reset_all_exceptions = FALSE;
 
+static BOOL kernel_init_i387 = FALSE;
+static struct I387State kernel_i387_state;
+static BOOL kernel_task_ran = FALSE;
+
 // #define NEW_TIMER_INT
 
 #ifdef NEW_TIMER_INT
@@ -958,12 +969,27 @@ timer_int(void)
 				counter = 0;
 				is_kernel_task = TRUE;
 				struct Task task;
+
+				//如果在执行内核任务之前有其他任务，
+				//则保存任务的I387的状态。
 				if(running_tid != -1)
 				{
 					get_task_info(running_tid, &task);
 					asm volatile ("fnsave %0"::"m"(task.i387_state));
 					set_task_info(running_tid, &task);
 				}
+
+				//加载内核的I387的状态，如果未初始化则先初始化。
+				if(kernel_init_i387)
+					asm volatile ("frstor %0"::"m"(kernel_i387_state));
+				else
+				{
+					asm volatile ("fninit");
+					kernel_init_i387 = TRUE;
+				}
+
+				kernel_task_ran = TRUE;
+
 				struct Desc kernel_tss_desc;
 				get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
 				kernel_tss_desc.attr = AT386TSS + DPL0; 
@@ -1072,12 +1098,30 @@ timer_int(void)
 				counter = 0;
 				is_kernel_task = TRUE;
 				struct Task task;
+
+				//如果在执行内核任务之前有其他任务，
+				//则保存任务的I387的状态。
 				if(running_tid != -1)
 				{
 					get_task_info(running_tid, &task);
 					asm volatile ("fnsave %0"::"m"(task.i387_state));
 					set_task_info(running_tid, &task);
 				}
+
+				//加载内核的I387的状态，如果未初始化则先初始化。
+				if(kernel_init_i387)
+				{
+					if(!kernel_task_ran)
+						asm volatile ("frstor %0"::"m"(kernel_i387_state));
+				}
+				else
+				{
+					asm volatile ("fninit");
+					kernel_init_i387 = TRUE;
+				}
+
+				kernel_task_ran = TRUE;
+
 				struct Desc kernel_tss_desc;
 				get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
 				kernel_tss_desc.attr = AT386TSS + DPL0; 
@@ -1093,12 +1137,22 @@ timer_int(void)
 				counter++;
 				is_kernel_task = FALSE;
 				struct Task task;
-				if(running_tid != -1)
+
+				if(kernel_task_ran)
 				{
-					get_task_info(running_tid, &task);
-					asm volatile ("fnsave %0"::"m"(task.i387_state));
-					set_task_info(running_tid, &task);
+					//刚才执行的是内核任务，所以保存内核的I387状态。
+					asm volatile ("fnsave %0"::"m"(kernel_i387_state));
+					kernel_task_ran = FALSE;
 				}
+				else
+					if(running_tid != -1)
+					{
+						//刚才执行的不是内核任务，保存上一个任务的I387状态。
+						get_task_info(running_tid, &task);
+						asm volatile ("fnsave %0"::"m"(task.i387_state));
+						set_task_info(running_tid, &task);
+					}
+
 				get_task_info(tid, &task);
 				if(task.init_i387)
 					asm volatile ("frstor %0"::"m"(task.i387_state));

@@ -9,6 +9,7 @@
 #define	_DIE_H_
 
 #include "types.h"
+#include "system.h"
 
 #define	MAX_INFO_LENGTH 200
 
@@ -113,5 +114,8 @@ die(IN struct die_info * info);
 
 	#define	DC_DOUBLE_FAULT_TSK		0x0000001d
 	#define	DI_DOUBLE_FAULT_TSK		"A task causes a exception of double fault, the id is %d, the name is '%s'"
+
+	#define	DC_INIT_CONFIG			0x0000001e
+	#define	DI_INIT_CONFIG			"Failed to initialize system configuration. Please check "SYSTEM_CONFIG_FILE
 
 #endif

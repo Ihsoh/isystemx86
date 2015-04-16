@@ -216,8 +216,8 @@ double stod(char * str)
 	if(comma < len)
 	{
 		temp[comma] = '\0';
-		i = (unsigned int)stoul(temp);
-		d = (unsigned int)stoul(temp + comma + 1);
+		i = (double)stol(temp);
+		d = (double)stoul(temp + comma + 1);
 		dp = strlen(temp + comma + 1);
 		while(dp--)
 			d /= 10.0;

@@ -23,6 +23,7 @@
 #include "kstring.h"
 #include "log.h"
 #include "pci.h"
+#include "config.h"
 
 #include <string.h>
 
@@ -36,10 +37,14 @@ DEFINE_LOCK_IMPL(console)
 
 #define	FORMAT(message)	"Foramt:\n\t"message
 
-static int32 enable_clock = 1;
-static int8 current_path[MAX_PATH_BUFFER_LEN] = "";
-static int32 wait_app_tid = -1;
-static struct Vars * global_vars_s = NULL;
+static int32 enable_clock 						= 1;
+static int8 current_path[MAX_PATH_BUFFER_LEN] 	= "";
+static int32 wait_app_tid 						= -1;
+static struct Vars * global_vars_s 				= NULL;
+static int8 promptns[32]						= "#";
+static int8 prompts[32]							= "%s";
+static uint8 promptns_color						= 7;
+static uint8 prompts_color 						= 7;
 
 #define	parse_cmd(cmd, word, n) (_parse_cmd(cmd, word, n, 1, local_vars_s))
 #define	parse_cmd_nv(cmd, word, n) (_parse_cmd(cmd, word, n, 0, NULL))
@@ -179,7 +184,23 @@ static
 void
 ver(void)
 {
-	print_str("ISystem II(x86) Console\nIhsoh Software 2014\n\n");
+	int8 name[KB(1)]		= "ISystem";
+	int8 platform[KB(1)]	= "Unknow platform";
+	int8 version[KB(1)]		= "Unknow version";
+	int8 group[KB(1)]		= "Unknow group";
+	config_system_get_string("Name", name, sizeof(name));
+	config_system_get_string("Platform", platform, sizeof(platform));
+	config_system_get_string("Version", version, sizeof(version));
+	config_system_get_string("Group", group, sizeof(group));
+	int8 info[KB(5)];
+	sprintf_s(	info,
+				sizeof(info),
+				"%s Platform %s Version %s\n%s\n\n",
+				name,
+				platform,
+				version,
+				group);
+	print_str(info);
 }
 
 /**
@@ -2032,58 +2053,7 @@ exec(	IN int8 * cmd,
 
 		else if(strcmp(name, "test") == 0)
 		{
-			#include <dslib/dslib.h>
-			#include <jsonlib/jsonlib.h>
-			JSONLRawPtr raw = jsonl_parse("[\"ABC DEF\", \"Ihsoh\", [\"AAA\", \"CCC\"], {A:\"AB\" , A1 : \"Wahaha!!!\"}]", NULL);
-			if(raw != NULL)
-			{
-				JSONLArrayPtr array = (JSONLArrayPtr)raw;
-				uint32 ui;
-				for(ui = 0; ui < JSONL_ARRAY_COUNT(array); ui++)
-				{
-					JSONLRawPtr v = JSONL_ARRAY_GET(array, ui);
-					if(JSONL_TYPE(v) == JSONL_TYPE_VALUE)
-					{
-						print_str(JSONL_VALUE(v));
-						print_str("\n");
-					}
-					else if(JSONL_TYPE(v) == JSONL_TYPE_ARRAY)
-					{
-						uint32 ui1;
-						JSONLArrayPtr array1 = JSONL_ARRAY(v);
-						for(ui1 = 0; ui1 < JSONL_ARRAY_COUNT(array1); ui1++)
-						{
-							print_str("    ");
-							print_str(JSONL_VALUE(JSONL_ARRAY_GET(array1, ui1)));
-							print_str("\n");
-						}
-					}
-					else if(JSONL_TYPE(v) == JSONL_TYPE_OBJECT)
-					{
-						JSONLObjectPtr obj = JSONL_OBJECT(v);
-						JSONLRawPtr value = NULL;
-						if(JSONL_OBJECT_GET(obj, "A", &value))
-						{
-							print_str("    ");
-							print_str(JSONL_VALUE(value));
-							print_str("\n");
-						}
-						else
-							print_str("ERROR!\n");
-
-						if(JSONL_OBJECT_GET(obj, "A1", &value))
-						{
-							print_str("    ");
-							print_str(JSONL_VALUE(value));
-							print_str("\n");
-						}
-						else
-							print_str("ERROR!\n");
-					}
-				}
-			}
-			else
-				print_str("ERROR!!!\n");
+			
 		}
 
 		//Batch
@@ -2388,21 +2358,38 @@ console(void)
 	struct Vars * local_vars_s;
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	call_init_bat();
-	ver();
-	disks();
+	BOOL bvalue = FALSE;
+	if(config_system_console_get_bool("ShowVerInfoWhenBoot", &bvalue) && bvalue)
+		ver();
+	if(config_system_console_get_bool("ShowDiskInfoWhenBoot", &bvalue) && bvalue)
+	{
+		disks();
+		print_str("\n");
+	}
+	if(config_system_console_get_bool("ShowMemoryInfoWhenBoot", &bvalue) && bvalue)
+	{
+		mm();
+		print_str("\n");
+	}
+	if(config_system_console_get_bool("ShowCPUInfoWhenBoot", &bvalue) && bvalue)
+	{
+		cpuid();
+		print_str("\n");
+	}
 	print_str("\n");
-	mm();
-	print_str("\n");
-	cpuid();
-	print_str("\n\n");
-
 	while(1)
 	{
+		int8 prompt[KB(1)];
 		if(strcmp(current_path, "") == 0)
-			print_str("#");
+		{
+			strcpy(prompt, promptns);
+			print_str_p(prompt, promptns_color);
+		}
 		else
-			print_str(current_path);
-		print_str("> ");
+		{
+			sprintf_s(prompt, sizeof(prompt), prompts, current_path);
+			print_str_p(prompt, prompts_color);
+		}
 		get_strn(command, 1023);
 		exec(command, NULL, 0, 0, local_vars_s);
 	}
@@ -2502,4 +2489,30 @@ void
 get_current_path(OUT int8 * path)
 {
 	strcpy(path, current_path);
+}
+
+/**
+	@Function:		console_init
+	@Access:		Public
+	@Description:
+		初始化控制台。
+	@Parameters:
+	@Return:	
+*/
+BOOL
+console_init(void)
+{
+	config_system_console_get_bool("ShowClock", &enable_clock);
+	config_system_console_get_string(	"PromptWhenDirIsNotSelected", 
+										promptns,
+										sizeof(promptns));
+	config_system_console_get_string(	"PromptWhenDirIsSelected",
+										prompts,
+										sizeof(prompts));
+	double dv = 0.0;
+	config_system_console_get_number("PromptColorWhenDirIsNotSelected", &dv);
+	promptns_color = (uint8)dv;
+	config_system_console_get_number("PromptColorWhenDirIsSelected", &dv);
+	prompts_color = (uint8)dv;
+	return TRUE;
 }

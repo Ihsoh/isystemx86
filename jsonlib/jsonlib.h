@@ -10,6 +10,16 @@
 #define	JSONL_TYPE_OBJECT		1
 #define	JSONL_TYPE_ARRAY		2
 #define	JSONL_TYPE_VALUE		3
+#define	JSONL_TYPE_NULL			4
+#define	JSONL_TYPE_TRUE			5
+#define	JSONL_TYPE_FALSE		6
+#define	JSONL_TYPE_NUMBER		7
+
+#define	JSONL_VALUE_TYPE_ERROR	-1
+#define	JSONL_VALUE_TYPE_BOOL	1
+#define	JSONL_VALUE_TYPE_NULL	2
+#define	JSONL_VALUE_TYPE_STRING	3
+#define	JSONL_VALUE_TYPE_NUMBER	4
 
 #define	JSONL_MAX_VALUE_LEN		1023
 
@@ -46,6 +56,27 @@ typedef struct _JSONLValue
 	DSLValue	value;
 } JSONLValue, * JSONLValuePtr;
 
+typedef struct _JSONLNull
+{
+	int32		type;
+} JSONLNull, * JSONLNullPtr;
+
+typedef struct _JSONLTrue
+{
+	int32		type;
+} JSONLTrue, * JSONLTruePtr;
+
+typedef struct _JSONLFalse
+{
+	int32		type;
+} JSONLFalse, * JSONLFalsePtr;
+
+typedef struct _JSONLNumber
+{
+	int32		type;
+	double		number;
+} JSONLNumber, * JSONLNumberPtr;
+
 typedef struct _JSONLRaw
 {
 	int32		type;
@@ -67,13 +98,38 @@ BOOL
 jsonl_init(IN JSONLEnvironmentPtr env);
 
 extern
+BOOL
 _jsonl_object_get(	IN JSONLObjectPtr obj,
 					IN int8 * name,
 					OUT JSONLRawPtr * rawptr);
 
 extern
+int32
+jsonl_value_type(IN JSONLRawPtr raw);
+
+extern
+BOOL
+jsonl_number_value(	IN JSONLRawPtr raw,
+					OUT double * v);
+
+extern
+BOOL
+jsonl_bool_value(	IN JSONLRawPtr raw,
+					OUT BOOL * v);
+
+extern
+BOOL
+jsonl_string_value(	IN JSONLRawPtr raw,
+					OUT int8 * v,
+					IN uint32 max);
+
+extern
 JSONLRawPtr
 jsonl_parse(IN int8 * json_text,
 			OUT int8 ** next);
+
+extern
+JSONLRawPtr
+jsonl_parse_json(IN int8 * json_text);
 
 #endif

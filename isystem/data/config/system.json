@@ -1,0 +1,18 @@
+{
+  Name:"ISystem II",
+  Platform:"x86",
+  Version:"1.0",
+  Group:"Ihsoh Software",
+  WriteLogToDiskInRealTime:true,
+  Console:{
+    ShowVerInfoWhenBoot:true,
+    ShowDiskInfoWhenBoot:true,
+    ShowMemoryInfoWhenBoot:true,
+    ShowCPUInfoWhenBoot:true,
+    ShowClock:false,
+    PromptWhenDirIsNotSelected:"#NO DIR> ",
+    PromptColorWhenDirIsNotSelected:4,
+    PromptWhenDirIsSelected:"$%s> ",
+    PromptColorWhenDirIsSelected:2
+  }
+}

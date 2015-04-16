@@ -74,6 +74,13 @@ MAKE_DIR	VA:/isystem/data/ log
 #System log file
 MAKE_FILE	VA:/isystem/data/log/ system.log
 
+#Config directory
+MAKE_DIR	VA:/isystem/data/ config
+
+#System config file
+MAKE_FILE	VA:/isystem/data/config/ system.json
+WRITE_FILE	VA:/isystem/data/config/system.json isystem/data/config/system.json
+
 #System resource directory
 MAKE_DIR	VA:/isystem/ resources
 MAKE_DIR	VA:/isystem/resources/ images

@@ -23,4 +23,16 @@ int8 *
 jsonl_lib_strcpy(	OUT int8 * dst, 
 					IN const int8 * src);
 
+extern
+uint32
+jsonl_lib_stoul(IN int8 * str);
+
+extern
+int32
+jsonl_lib_stol(IN int8 * str);
+
+extern
+double
+jsonl_lib_stod(IN int8 * str);
+
 #endif

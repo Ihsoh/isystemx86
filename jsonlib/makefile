@@ -3,7 +3,7 @@ Out=libjsonlib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -I. -m32 -march=i386 -mtune=i386
-Objs=bin/jsonlib.obj
+Objs=bin/lib.obj bin/jsonlib.obj
 AR=ar
 Include=-I../
 
@@ -15,6 +15,9 @@ bin:
 
 bin/jsonlib.obj: jsonlib.c jsonlib.h
 	$(CC) $(CFlags) -c jsonlib.c -o bin/jsonlib.obj $(Include)
+
+bin/lib.obj: lib.c lib.h
+	$(CC) $(CFlags) -c lib.c -o bin/lib.obj $(Include)
 
 .PHONY:Clear
 

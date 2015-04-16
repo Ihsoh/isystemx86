@@ -35,6 +35,10 @@ extern
 void
 get_current_path(OUT int8 * path);
 
+extern
+BOOL
+console_init(void);
+
 DEFINE_LOCK_EXTERN(console)
 
 #endif

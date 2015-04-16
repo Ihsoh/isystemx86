@@ -2,6 +2,9 @@
 
 int main(int argc, char * argv[])
 {
+	printd(stod("1996.48"));
+	return 0;
+
 	run_in_bg();
 	printf("%s\n", "Test1 Start");
 	printf("Test2 returned %d\n", il_exec_sync("DA:/isystem/bins/test2", ""));
