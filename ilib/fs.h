@@ -166,8 +166,8 @@ extern void fchange_dt(FILE * fptr, struct CMOSDateTime * dt);
 extern int df_count(char * path);
 #define	il_df_count(path)	(df_count((path))
 
-extern int df(char * path, struct RawBlock * raw_blocks);
-#define	il_df(path, raw_blocks)	(df((path), (raw_blocks)))
+extern int df(char * path, struct RawBlock * raw_blocks, uint max);
+#define	il_df(path, raw_blocks, max)	(df((path), (raw_blocks), (max)))
 
 extern int fix_path(char * path, char * new_path);
 #define	il_fix_path(path, new_path) (fix_path((path), (new_path)))

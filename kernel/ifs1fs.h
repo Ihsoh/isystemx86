@@ -72,8 +72,9 @@ df_count(IN int8 * path);
 
 extern
 int32
-df(	IN int8 * path,
-	OUT struct RawBlock * blocks);
+df(	IN int8 * path, 
+	OUT struct RawBlock * blocks,
+	IN uint32 max);
 
 extern
 int32

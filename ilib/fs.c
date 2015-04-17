@@ -340,21 +340,22 @@ int df_count(char * path)
 	return retvalue;
 }
 
-static int _df(char * path, struct RawBlock * raw_blocks)
+static int _df(char * path, struct RawBlock * raw_blocks, uint max)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
 	sparams.param1 = SPARAM(raw_blocks);
+	sparams.param2 = SPARAM(max);
 	system_call(SCALL_FS, SCALL_DF, &sparams);
 	return INT32_SPARAM(sparams.param0);
 }
 
-int df(char * path, struct RawBlock * raw_blocks)
+int df(char * path, struct RawBlock * raw_blocks, uint max)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
 	int retvalue = 0;
-	retvalue = _df(path, raw_blocks);
+	retvalue = _df(path, raw_blocks, max);
 	_unlock_fs();
 	return retvalue;
 }

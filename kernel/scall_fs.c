@@ -470,6 +470,7 @@ system_call_fs(	IN uint32 func,
 		//参数:
 		//	Param0=路径字符串地址(相对于调用程序空间的偏移地址)
 		//	Param1=用于保存所有Blocks的缓冲区地址(相对于调用程序空间的偏移地址)
+		//	Param2=储存块集合的缓冲区最大能储存块的个数。
 		//返回值:
 		//	Param0=指定目录下的文件以及文件夹的总数
 		case SCALL_DF:
@@ -480,7 +481,9 @@ system_call_fs(	IN uint32 func,
 			struct RawBlock * raw_blocks = NULL;
 			raw_blocks = (struct RawBlock *)get_physical_address(	sparams->tid,
 																	VOID_PTR_SPARAM(sparams->param1));
-			int32 count = df(path, raw_blocks);
+			uint32 max = 0;
+			max = UINT32_SPARAM(sparams->param2);
+			int32 count = df(path, raw_blocks, max);
 			sparams->param0 = SPARAM(count);
 			break;
 		}

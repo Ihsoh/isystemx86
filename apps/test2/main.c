@@ -2,27 +2,21 @@
 
 int main(int argc, char * argv[])
 {
-	run_in_bg();
-	create_file("DA:/", "test2.txt");
-	FILE * fptr = NULL;
-	while((fptr = fopen("DA:/test2.txt", FILE_MODE_APPEND)) == NULL);
-	/*if(fptr == NULL)
-	{
-		print_str("The applicaton failed to open DA:/test2.txt!\n");
-		return -1;
-	}*/
-	uint idx;
-	char buffer[KB(1)];
-	for(idx = 0; idx < KB(1); idx++)
-		buffer[idx] = 'B';
-	for(idx = 0; idx < 1000; idx++)
-	{
-		while(!fappend(fptr, buffer, sizeof(buffer)));
-		print_str("test2: ");
-		printn(idx);
-		print_str("\n");
-	}
-	fclose(fptr);
+	uint count = df_count("DA:/isystem/");
+	struct RawBlock * subs = (struct RawBlock *)malloc(count * sizeof(struct RawBlock));
+	df("DA:/isystem/", subs, count);
+	uint index;
+	for(index = 0; index < count; index++)
+		if(subs[index].type == BLOCK_TYPE_FILE)
+		{
+			struct FileBlock * fblk = (struct FileBlock *)(subs + index);
+			printf("<FILE> %s\n", fblk->filename);
+		}
+		else if(subs[index].type == BLOCK_TYPE_DIR)
+		{
+			struct DirBlock * dblk = (struct DirBlock *)(subs + index);
+			printf("<DIR > %s\n", dblk->dirname);
+		}
 	return 0;
 
 	//asm volatile ("movb $0, %ax; divb %ax");

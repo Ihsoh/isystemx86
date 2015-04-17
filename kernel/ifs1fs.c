@@ -512,6 +512,8 @@ _df_count(	IN int8 * symbol,
 			目录的块ID。
 		blocks, struct RawBlock *, OUT
 			指向用于储存块集合的缓冲区。
+		max, uint32, IN
+			储存块集合的缓冲区最大能储存块的个数。
 	@Return:
 		int32
 			失败则返回-1，否则返回目录下的文件和文件夹数量的总和。
@@ -520,7 +522,8 @@ static
 int32
 _df(IN int8 * symbol, 
 	IN uint32 id, 
-	OUT struct RawBlock * blocks)
+	OUT struct RawBlock * blocks,
+	IN uint32 max)
 {
 	int32 count = 0; 
 	struct DirBlock dir;
@@ -532,7 +535,7 @@ _df(IN int8 * symbol,
 		|| dir.type != BLOCK_TYPE_DIR)
 		return -1;
 	uint32 ui;
-	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32); ui++)
+	for(ui = 0; ui < sizeof(dir.blockids) / sizeof(uint32) && ui < max; ui++)
 	{
 		uint32 sub_blockid = dir.blockids[ui];
 		struct RawBlock raw_block;
@@ -987,20 +990,23 @@ df_count(IN int8 * path)
 			路径。
 		blocks, struct RawBlock *, OUT
 			指向用于储存块集合的缓冲区。
+		max, uint32, IN
+			储存块集合的缓冲区最大能储存块的个数。
 	@Return:
 		int32
 			失败则返回-1，否则返回目录下的文件和文件夹数量的总和。
 */
 int32
 df(	IN int8 * path, 
-	OUT struct RawBlock * blocks)
+	OUT struct RawBlock * blocks,
+	IN uint32 max)
 {
 	int32 type;
 	int8 symbol[3];
 	uint32 id = parse_path(path, symbol, &type);
 	if(type != BLOCK_TYPE_DIR)
 		return -1;
-	return _df(symbol, id, blocks);
+	return _df(symbol, id, blocks, max);
 }
 
 /**
@@ -1203,7 +1209,7 @@ del_dirs(IN int8 * path)
 		struct RawBlock * subs = (struct RawBlock *)alloc_memory(count * sizeof(struct RawBlock));
 		if(subs == NULL)
 			return FALSE;
-		df(path, subs);
+		df(path, subs, count);
 		uint32 ui;		
 		for(ui = 0; ui < count; ui++)
 		{
