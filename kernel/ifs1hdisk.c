@@ -65,6 +65,43 @@ static struct HardDiskArguments hdisk1;
 #define	MAX_TIMEOUT	0x0fffffff
 #define	MAX_RETRY	0x100
 
+static volatile BOOL lock = FALSE;
+
+/**
+	@Function:		lock_hdisk
+	@Access:		Public
+	@Description:
+		锁住硬盘。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则获取锁成功，否则获取锁失败。
+*/
+static
+BOOL
+lock_hdisk(void)
+{
+	if(lock)
+		return FALSE;
+	lock = TRUE;
+	return TRUE;
+}
+
+/**
+	@Function:		lock_hdisk
+	@Access:		Public
+	@Description:
+		解锁硬盘。
+	@Parameters:
+	@Return:
+*/
+static
+void
+unlock_hdisk(void)
+{
+	lock = FALSE;
+}
+
 /**
 	@Function:		init_hdisk
 	@Access:		Public
@@ -219,16 +256,16 @@ wait_ready(void)
 		uint8 state = inb(HD_STATUS);
 		if((state & STAT_ERR) || (state & STAT_ECC) || (state & STAT_WRERR))
 		{
-			log(LOG_ERROR,
-				"ATA Driver causes a error when the driver is waiting ready state.");
+			/*log(LOG_ERROR,
+				"ATA Driver causes a error when the driver is waiting ready state.");*/
 			return FALSE;
 		}
 		if(state & STAT_READY)
 			break;
 		if(++timeout_counter == MAX_TIMEOUT)
 		{
-			log(LOG_WARNING,
-				"ATA Driver causes a timeout when the driver is waiting ready state.");
+			/*log(LOG_WARNING,
+				"ATA Driver causes a timeout when the driver is waiting ready state.");*/
 			return FALSE;
 		}
 	}
@@ -256,16 +293,16 @@ wait_data(void)
 		uint8 state = inb(HD_STATUS);
 		if((state & STAT_ERR) || (state & STAT_ECC) || (state & STAT_WRERR))
 		{
-			log(LOG_ERROR,
-				"ATA Driver causes a error when the driver is waiting data.");
+			/*log(LOG_ERROR,
+				"ATA Driver causes a error when the driver is waiting data.");*/
 			return FALSE;
 		}
 		if(state & STAT_DRQ)
 			break;
 		if(++timeout_counter == MAX_TIMEOUT)
 		{
-			log(LOG_WARNING,
-				"ATA Driver causes a timeout when the driver is waiting data.");
+			/*log(LOG_WARNING,
+				"ATA Driver causes a timeout when the driver is waiting data.");*/
 			return FALSE;
 		}
 	}
@@ -346,10 +383,16 @@ read_sector_h(	IN int8 * symbol,
 				IN uint32 pos, 
 				OUT uint8 * buffer)
 {
+	if(!lock_hdisk())
+		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
 		if(_read_sector_h(symbol, pos, buffer))
+		{
+			unlock_hdisk();
 			return TRUE;
+		}
+	unlock_hdisk();
 	return FALSE;
 }
 
@@ -427,10 +470,16 @@ write_sector_h(	IN int8 * symbol,
 				IN uint32 pos, 
 				IN uint8 * buffer)
 {
+	if(!lock_hdisk())
+		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
 		if(_write_sector_h(symbol, pos, buffer))
+		{
+			unlock_hdisk();
 			return TRUE;
+		}
+	unlock_hdisk();
 	return FALSE;
 }
 
@@ -520,10 +569,16 @@ read_sectors_h(	IN int8 * symbol,
 				IN uint8 count,
 				OUT uint8 * buffer)
 {
+	if(!lock_hdisk())
+		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
 		if(_read_sectors_h(symbol, pos, count, buffer))
+		{
+			unlock_hdisk();
 			return TRUE;
+		}
+	unlock_hdisk();
 	return FALSE;
 }
 
@@ -613,9 +668,15 @@ write_sectors_h(IN int8 * symbol,
 				IN uint8 count, 
 				IN uint8 * buffer)
 {
+	if(!lock_hdisk())
+		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
 		if(_write_sectors_h(symbol, pos, count, buffer))
+		{
+			unlock_hdisk();
 			return TRUE;
+		}
+	unlock_hdisk();
 	return FALSE;
 }

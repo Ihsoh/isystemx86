@@ -1086,7 +1086,7 @@ timer_int(void)
 				flush_screen();
 				flush_counter = 0;
 			}
-		if(!is_system_call)
+		if(is_system_call == 0)
 		{
 			if(--clock_counter == 0)
 			{

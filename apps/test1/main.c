@@ -2,7 +2,27 @@
 
 int main(int argc, char * argv[])
 {
-	printd(stod("1996.48"));
+	run_in_bg();
+	while(!create_file("DA:/", argv[1]));
+	FILE * fptr = NULL;
+	while((fptr = fopen(argv[2], FILE_MODE_APPEND)) == NULL);
+	/*if(fptr == NULL)
+	{
+		print_str("The applicaton failed to open DA:/test1.txt!\n");
+		return -1;
+	}*/
+	uint idx;
+	char buffer[KB(1)];
+	for(idx = 0; idx < KB(1); idx++)
+		buffer[idx] = 'A';
+	for(idx = 0; idx < 100; idx++)
+	{
+		while(!fappend(fptr, buffer, sizeof(buffer)));
+		print_str(argv[3]);
+		printn(idx);
+		print_str("\n");
+	}
+	fclose(fptr);
 	return 0;
 
 	run_in_bg();

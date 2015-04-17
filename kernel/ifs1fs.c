@@ -1773,7 +1773,8 @@ _fopen_unsafe(	IN int8 * path,
 	fptr->file_block_id = id;
 	fptr->next_block_index = 0;
 	fptr->next_block_pos = 0;
-	struct FileBlock * file_block = (struct FileBlock *)alloc_memory(sizeof(struct FileBlock));	
+	struct FileBlock * file_block = NULL;
+	file_block = (struct FileBlock *)alloc_memory(sizeof(struct FileBlock));	
 	if(file_block == NULL)
 	{
 		free_memory(fptr);

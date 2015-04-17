@@ -31,11 +31,18 @@
 #define	SCALL_DF_COUNT		17
 #define	SCALL_DF			18
 #define	SCALL_FIX_PATH		19
+#define	SCALL_LOCK_FS		20
+#define	SCALL_UNLOCK_FS		21
+#define	SCALL_FS_LOCK_STATE	22
 
 extern
 void
 system_call_fs(	IN uint32 func,
 				IN uint32 base,
 				IN OUT struct SParams * sparams);
+
+extern
+void
+system_call_fs_unlock_fs(void);
 
 #endif

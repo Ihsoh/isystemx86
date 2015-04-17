@@ -16,6 +16,7 @@
 #include "die.h"
 #include "lock.h"
 #include "mqueue.h"
+#include "scall_fs.h"
 #include <string.h>
 
 static struct Task tasks[MAX_TASK_COUNT];
@@ -126,6 +127,7 @@ create_task(IN int8 * name,
 		task->retvalue = 0;
 		task->running = 0;
 		tasks->is_system_call = FALSE;
+		tasks->fs_lock = FALSE;
 		strcpy(task->name, name);
 		strcpy(task->param, param);
 		strcpy(task->working_dir, working_dir);
@@ -288,6 +290,9 @@ kill_task(IN int32 tid)
 
 	if(tasks[tid].on_exit != NULL)
 		tasks[tid].on_exit(tid, tasks[tid].retvalue);
+
+	if(tasks[tid].fs_lock)
+		system_call_fs_unlock_fs();
 
 	if(tid == running_tid)
 		running_tid = -1;

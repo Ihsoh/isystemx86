@@ -18,6 +18,16 @@
 static JSONLObjectPtr system_json 				= NULL;
 static JSONLObjectPtr system_console_json 		= NULL;
 
+/**
+	@Function:		config_init
+	@Access:		Public
+	@Description:
+		加载系统配置文件system.json。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 config_init(void)
 {
@@ -57,6 +67,24 @@ config_init(void)
 	return TRUE;
 }
 
+/**
+	@Function:		config_get_string
+	@Access:		Private
+	@Description:
+		获取一个JSON对象的字符串类型的键值。
+	@Parameters:
+		obj, JSONLObjectPtr, IN
+			JSON对象。
+		name, int8 *, IN
+			键名。
+		v, int8 *, OUT
+			指向用于储存键值的缓冲区。
+		max, uint32, IN
+			缓冲区长度的最大值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
 static
 BOOL
 config_get_string(	IN JSONLObjectPtr obj,
@@ -76,6 +104,22 @@ config_get_string(	IN JSONLObjectPtr obj,
 	return jsonl_string_value(value_raw, v, max);
 }
 
+/**
+	@Function:		config_get_bool
+	@Access:		Private
+	@Description:
+		获取一个JSON对象的布尔类型的键值。
+	@Parameters:
+		obj, JSONLObjectPtr, IN
+			JSON对象。
+		name, int8 *, IN
+			键名。
+		v, BOOL *, OUT
+			指向用于储存键值的缓冲区。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
 static
 BOOL
 config_get_bool(IN JSONLObjectPtr obj,
@@ -93,6 +137,22 @@ config_get_bool(IN JSONLObjectPtr obj,
 	return jsonl_bool_value(value_raw, v);
 }
 
+/**
+	@Function:		config_get_number
+	@Access:		Private
+	@Description:
+		获取一个JSON对象的数值类型的键值。
+	@Parameters:
+		obj, JSONLObjectPtr, IN
+			JSON对象。
+		name, int8 *, IN
+			键名。
+		v, double *, OUT
+			指向用于储存键值的缓冲区。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
 static
 BOOL
 config_get_number(	IN JSONLObjectPtr obj,
@@ -110,100 +170,53 @@ config_get_number(	IN JSONLObjectPtr obj,
 	return jsonl_number_value(value_raw, v);
 }
 
-BOOL
-config_system_get_string(	IN int8 * name,
-							OUT int8 * v,
-							IN uint32 max)
-{
-	BOOL r = config_get_string(system_json, name, v, max);
-	if(!r)
-	{
-		int8 buffer[1024];
-		strcpy(buffer, "System configuration object doesn't contain key '");
-		strcat(buffer, name);
-		strcat(buffer, "'(STRING) or other some unknow errors.");
-		log(LOG_ERROR, buffer);
-	}
-	return r;
+#define	CONFIG_XXX_GET_STH(xxx, fullname)	\
+BOOL 	\
+config_##xxx##_get_string(	IN int8 * name,	\
+							OUT int8 * v,	\
+							IN uint32 max)	\
+{	\
+	BOOL r = config_get_string(xxx##_json, name, v, max);	\
+	if(!r)	\
+	{	\
+		int8 buffer[1024];	\
+		strcpy(buffer, fullname" configuration object doesn't contain key '");	\
+		strcat(buffer, name);	\
+		strcat(buffer, "'(STRING) or other some unknow errors.");	\
+		log(LOG_ERROR, buffer);	\
+	}	\
+	return r;	\
+}	\
+BOOL	\
+config_##xxx##_get_bool(IN int8 * name,	\
+						OUT BOOL * v)	\
+{	\
+	BOOL r = config_get_bool(xxx##_json, name, v);	\
+	if(!r)	\
+	{	\
+		int8 buffer[1024];	\
+		strcpy(buffer, fullname" configuration object doesn't contain key '");	\
+		strcat(buffer, name);	\
+		strcat(buffer, "'(BOOL) or other some unknow errors.");	\
+		log(LOG_ERROR, buffer);	\
+	}	\
+	return r;	\
+}	\
+BOOL	\
+config_##xxx##_get_number(	IN int8 * name,	\
+							OUT double * v)	\
+{	\
+	BOOL r = config_get_number(xxx##_json, name, v);	\
+	if(!r)	\
+	{	\
+		int8 buffer[1024];	\
+		strcpy(buffer, fullname" configuration object doesn't contain key '");	\
+		strcat(buffer, name);	\
+		strcat(buffer, "'(NUMBER) or other some unknow errors.");	\
+		log(LOG_ERROR, buffer);	\
+	}	\
+	return r;	\
 }
 
-BOOL
-config_system_get_bool(	IN int8 * name,
-						OUT BOOL * v)
-{
-	BOOL r = config_get_bool(system_json, name, v);
-	if(!r)
-	{
-		int8 buffer[1024];
-		strcpy(buffer, "System configuration object doesn't contain key '");
-		strcat(buffer, name);
-		strcat(buffer, "'(BOOL) or other some unknow errors.");
-		log(LOG_ERROR, buffer);
-	}
-	return r;
-}
-
-BOOL
-config_system_get_number(	IN int8 * name,
-							OUT double * v)
-{
-	BOOL r = config_get_number(system_json, name, v);
-	if(!r)
-	{
-		int8 buffer[1024];
-		strcpy(buffer, "System configuration object doesn't contain key '");
-		strcat(buffer, name);
-		strcat(buffer, "'(NUMBER) or other some unknow errors.");
-		log(LOG_ERROR, buffer);
-	}
-	return r;
-}
-
-BOOL
-config_system_console_get_string(	IN int8 * name,
-									OUT int8 * v,
-									IN uint32 max)
-{
-	BOOL r = config_get_string(system_console_json, name, v, max);
-	if(!r)
-	{
-		int8 buffer[1024];
-		strcpy(buffer, "System-Console configuration object doesn't contain key '");
-		strcat(buffer, name);
-		strcat(buffer, "'(STRING) or other some unknow errors.");
-		log(LOG_ERROR, buffer);
-	}
-	return r;
-}
-
-BOOL
-config_system_console_get_bool(	IN int8 * name,
-								OUT BOOL * v)
-{
-	BOOL r = config_get_bool(system_console_json, name, v);
-	if(!r)
-	{
-		int8 buffer[1024];
-		strcpy(buffer, "System-Console configuration object doesn't contain key '");
-		strcat(buffer, name);
-		strcat(buffer, "'(BOOL) or other some unknow errors.");
-		log(LOG_ERROR, buffer);
-	}
-	return r;
-}
-
-BOOL
-config_system_console_get_number(	IN int8 * name,
-									OUT double * v)
-{
-	BOOL r = config_get_number(system_console_json, name, v);
-	if(!r)
-	{
-		int8 buffer[1024];
-		strcpy(buffer, "System-Console configuration object doesn't contain key '");
-		strcat(buffer, name);
-		strcat(buffer, "'(NUMBER) or other some unknow errors.");
-		log(LOG_ERROR, buffer);
-	}
-	return r;
-}
+CONFIG_XXX_GET_STH(system, "System")
+CONFIG_XXX_GET_STH(system_console, "System-Console")

@@ -48,6 +48,7 @@ struct Task
 	BOOL				ready;				//是否准备就绪，任务创建时为 False，
 											//直到为 True 时，才会开始运行。
 	BOOL				is_system_call;		//是否在进行系统调用。
+	BOOL				fs_lock;			//是否获得了文件系统锁。
 	OnTaskExit			on_exit;			//当任务退出时调用。
 };
 

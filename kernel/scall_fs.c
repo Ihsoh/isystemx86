@@ -16,6 +16,24 @@
 #include "console.h"
 #include <string.h>
 
+static BOOL lock = FALSE;
+
+static
+BOOL
+lock_fs(void)
+{
+	if(lock)
+		return FALSE;
+	lock = TRUE;
+	return TRUE;
+}
+
+void
+system_call_fs_unlock_fs(void)
+{
+	lock = FALSE;
+}
+
 /**
 	@Function:		check_priviledge
 	@Access:		Private
@@ -39,7 +57,9 @@ check_priviledge(	IN int32 tid,
 	if(task != NULL)
 	{
 		uint32 ui;
-		for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT && task->opened_file_ptrs[ui] != fptr; ui++);
+		for(ui = 0; 
+				ui < MAX_TASK_OPENED_FILE_COUNT && task->opened_file_ptrs[ui] != fptr;
+				ui++);
 		if(ui < MAX_TASK_OPENED_FILE_COUNT)
 			return TRUE;
 	}
@@ -81,10 +101,14 @@ system_call_fs(	IN uint32 func,
 			if(task != NULL) 
 			{
 				uint32 ui;
-				for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT && task->opened_file_ptrs[ui] != NULL; ui++);
+				for(ui = 0;
+						ui < MAX_TASK_OPENED_FILE_COUNT && task->opened_file_ptrs[ui] != NULL;
+						ui++);
 				if(ui < MAX_TASK_OPENED_FILE_COUNT)
 				{
-					int8 * filename = (int8 *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param0));
+					int8 * filename = NULL;
+					filename = (int8 *)get_physical_address(tid, 
+															VOID_PTR_SPARAM(sparams->param0));
 					int32 mode = INT32_SPARAM(sparams->param1);
 					FILE * fptr = fopen(filename, mode);
 					task->opened_file_ptrs[ui] = fptr;
@@ -117,7 +141,9 @@ system_call_fs(	IN uint32 func,
 			if(task != NULL && fptr != NULL) 
 			{
 				uint32 ui;
-				for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT && task->opened_file_ptrs[ui] != fptr; ui++);
+				for(ui = 0;
+						ui < MAX_TASK_OPENED_FILE_COUNT && task->opened_file_ptrs[ui] != fptr;
+						ui++);
 				if(ui < MAX_TASK_OPENED_FILE_COUNT)
 				{
 					task->opened_file_ptrs[ui] = NULL;
@@ -151,7 +177,9 @@ system_call_fs(	IN uint32 func,
 			FILE * fptr = (FILE *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
-				uint8 * buffer = (uint8 *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
+				uint8 * buffer = NULL;
+				buffer = (uint8 *)get_physical_address(	tid, 
+														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
 				BOOL r = fwrite(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
@@ -177,7 +205,9 @@ system_call_fs(	IN uint32 func,
 			FILE * fptr = (FILE *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
-				uint8 * buffer = (uint8 *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
+				uint8 * buffer = NULL;
+				buffer = (uint8 *)get_physical_address(	tid, 
+														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
 				uint32 real_len = fread(fptr, buffer, len);
 				sparams->param0 = SPARAM(real_len);
@@ -203,7 +233,9 @@ system_call_fs(	IN uint32 func,
 			FILE * fptr = (FILE *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
-				uint8 * buffer = (uint8 *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
+				uint8 * buffer = NULL;
+				buffer = (uint8 *)get_physical_address(	tid, 
+														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
 				BOOL r = fappend(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
@@ -235,7 +267,9 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则存在, 0则不存在
 		case SCALL_EXISTS_DF:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = exists_df(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -249,8 +283,12 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_CREATE_DIR:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
+			int8 * name = NULL;
+			name = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = create_dir(path, name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -264,8 +302,12 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_CREATE_FILE:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
+			int8 * name = NULL;
+			name = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = create_file(path, name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -278,7 +320,9 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_DEL_DIR:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = del_dir(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -291,7 +335,9 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_DEL_FILE:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = del_file(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -304,7 +350,9 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_DEL_DIRS:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = del_dirs(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -318,8 +366,12 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_RENAME_DIR:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			int8 * new_name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
+			int8 * new_name = NULL;
+			new_name = (int8 *)get_physical_address(sparams->tid,
+													VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = rename_dir(path, new_name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -333,8 +385,12 @@ system_call_fs(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_RENAME_FILE:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			int8 * new_name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
+			int8 * new_name = NULL;
+			new_name = (int8 *)get_physical_address(sparams->tid,
+													VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = rename_file(path, new_name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -369,7 +425,9 @@ system_call_fs(	IN uint32 func,
 			FILE * fptr = (FILE *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
-				struct CMOSDateTime * dt = (struct CMOSDateTime *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
+				struct CMOSDateTime * dt = NULL;
+				dt = (struct CMOSDateTime *)get_physical_address(	tid, 
+																	VOID_PTR_SPARAM(sparams->param1));
 				memcpy(dt, &(fptr->file_block->create), sizeof(struct CMOSDateTime));
 			}
 			break;
@@ -385,7 +443,9 @@ system_call_fs(	IN uint32 func,
 			FILE * fptr = (FILE *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
-				struct CMOSDateTime * dt = (struct CMOSDateTime *)get_physical_address(tid, VOID_PTR_SPARAM(sparams->param1));
+				struct CMOSDateTime * dt = NULL;
+				dt = (struct CMOSDateTime *)get_physical_address(	tid, 
+																	VOID_PTR_SPARAM(sparams->param1));
 				memcpy(dt, &(fptr->file_block->change), sizeof(struct CMOSDateTime));
 			}
 			break;
@@ -398,7 +458,9 @@ system_call_fs(	IN uint32 func,
 		//	Param0=指定目录下的文件以及文件夹的总数
 		case SCALL_DF_COUNT:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
 			int32 count = df_count(path);
 			sparams->param0 = SPARAM(count);
 			break;
@@ -412,8 +474,12 @@ system_call_fs(	IN uint32 func,
 		//	Param0=指定目录下的文件以及文件夹的总数
 		case SCALL_DF:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			struct RawBlock * raw_blocks = (struct RawBlock *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
+			struct RawBlock * raw_blocks = NULL;
+			raw_blocks = (struct RawBlock *)get_physical_address(	sparams->tid,
+																	VOID_PTR_SPARAM(sparams->param1));
 			int32 count = df(path, raw_blocks);
 			sparams->param0 = SPARAM(count);
 			break;
@@ -428,10 +494,52 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FIX_PATH:
 		{
 			struct Task * task = get_task_info_ptr(sparams->tid);
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			int8 * new_path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 * path = NULL;
+			path = (int8 *)get_physical_address(sparams->tid,
+												VOID_PTR_SPARAM(sparams->param0));
+			int8 * new_path = NULL;
+			new_path = (int8 *)get_physical_address(sparams->tid,
+													VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = fix_path(path, task->working_dir, new_path);
 			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//锁住文件系统。
+		//
+		//返回值:
+		//	Param0=如果成功锁住文件系统则返回TRUE，否则返回FALSE。
+		case SCALL_LOCK_FS:
+		{
+			int32 tid = sparams->tid;
+			BOOL r = lock_fs();
+			if(r)
+			{
+				struct Task * task = get_task_info_ptr(tid);
+				if(task == NULL)
+				{
+					system_call_fs_unlock_fs();
+					r = FALSE;
+				}
+				else
+					task->fs_lock = TRUE;
+			}
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//解锁文件系统。
+		//
+		case SCALL_UNLOCK_FS:
+		{
+			system_call_fs_unlock_fs();
+			break;
+		}
+		//获取文件系统的锁的状态。
+		//
+		//返回值:
+		//	Param0=返回TRUE则文件系统被锁住，否则没有被锁住。
+		case SCALL_FS_LOCK_STATE:
+		{
+			sparams->param0 = SPARAM(lock);
 			break;
 		}
 	}

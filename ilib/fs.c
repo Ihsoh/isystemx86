@@ -8,7 +8,29 @@
 #include <sparams.h>
 #include <system.h>
 
-FILE * fopen(char * path, int mode)
+#define	MAX_RETRY_COUNT	0x10000
+
+static int _lock_fs(void)
+{
+	struct SParams sparams;
+	system_call(SCALL_FS, SCALL_LOCK_FS, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+static void _unlock_fs(void)
+{
+	struct SParams sparams;
+	system_call(SCALL_FS, SCALL_UNLOCK_FS, &sparams);
+}
+
+static int _fs_lock_state(void)
+{
+	struct SParams sparams;
+	system_call(SCALL_FS, SCALL_FS_LOCK_STATE, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+static FILE * _fopen(char * path, int mode)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -17,7 +39,17 @@ FILE * fopen(char * path, int mode)
 	return (FILE *)UINT32_PTR_SPARAM(sparams.param0);
 }
 
-int fclose(FILE * fptr)
+FILE * fopen(char * path, int mode)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	FILE * fptr = NULL;
+	fptr = _fopen(path, mode);
+	_unlock_fs();
+	return fptr;
+}
+
+static int _fclose(FILE * fptr)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -25,7 +57,17 @@ int fclose(FILE * fptr)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int fwrite(FILE * fptr, uchar * buffer, uint len)
+int fclose(FILE * fptr)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _fclose(fptr);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _fwrite(FILE * fptr, uchar * buffer, uint len)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -35,7 +77,17 @@ int fwrite(FILE * fptr, uchar * buffer, uint len)
 	return INT32_SPARAM(sparams.param0);
 }
 
-uint fread(FILE * fptr, uchar * buffer, uint len)
+int fwrite(FILE * fptr, uchar * buffer, uint len)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _fwrite(fptr, buffer, len);
+	_unlock_fs();
+	return retvalue;
+}
+
+static uint _fread(FILE * fptr, uchar * buffer, uint len)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -45,7 +97,17 @@ uint fread(FILE * fptr, uchar * buffer, uint len)
 	return UINT32_SPARAM(sparams.param0);
 }
 
-int fappend(FILE * fptr, uchar * buffer, uint len)
+uint fread(FILE * fptr, uchar * buffer, uint len)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _fread(fptr, buffer, len);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _fappend(FILE * fptr, uchar * buffer, uint len)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -55,6 +117,16 @@ int fappend(FILE * fptr, uchar * buffer, uint len)
 	return INT32_SPARAM(sparams.param0);
 }
 
+int fappend(FILE * fptr, uchar * buffer, uint len)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _fappend(fptr, buffer, len);
+	_unlock_fs();
+	return retvalue;
+}
+
 void freset(FILE * fptr)
 {
 	struct SParams sparams;
@@ -62,7 +134,7 @@ void freset(FILE * fptr)
 	system_call(SCALL_FS, SCALL_FRESET, &sparams);
 }
 
-int exists_df(char * path)
+static int _exists_df(char * path)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -70,7 +142,17 @@ int exists_df(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int create_dir(char * path, char * name)
+int exists_df(char * path)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _exists_df(path);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _create_dir(char * path, char * name)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -79,7 +161,17 @@ int create_dir(char * path, char * name)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int create_file(char * path, char * name)
+int create_dir(char * path, char * name)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _create_dir(path, name);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _create_file(char * path, char * name)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -88,7 +180,17 @@ int create_file(char * path, char * name)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int del_dir(char * path)
+int create_file(char * path, char * name)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _create_file(path, name);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _del_dir(char * path)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -96,7 +198,17 @@ int del_dir(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int del_file(char * path)
+int del_dir(char * path)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _del_dir(path);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _del_file(char * path)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -104,7 +216,17 @@ int del_file(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int del_dirs(char * path)
+int del_file(char * path)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _del_file(path);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _del_dirs(char * path)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -112,7 +234,17 @@ int del_dirs(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int rename_dir(char * path, char * new_name)
+int del_dirs(char * path)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _del_dirs(path);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _rename_dir(char * path, char * new_name)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -121,13 +253,33 @@ int rename_dir(char * path, char * new_name)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int rename_file(char * path, char * new_name)
+int rename_dir(char * path, char * new_name)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _rename_dir(path, new_name);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _rename_file(char * path, char * new_name)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
 	sparams.param1 = SPARAM(new_name);
 	system_call(SCALL_FS, SCALL_RENAME_FILE, &sparams);
 	return INT32_SPARAM(sparams.param0);
+}
+
+int rename_file(char * path, char * new_name)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _rename_file(path, new_name);
+	_unlock_fs();
+	return retvalue;
 }
 
 uint flen(FILE * fptr)
@@ -138,7 +290,7 @@ uint flen(FILE * fptr)
 	return INT32_SPARAM(sparams.param0);
 }
 
-void fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
+static void _fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -146,7 +298,15 @@ void fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
 	system_call(SCALL_FS, SCALL_FCREATE_DT, &sparams);
 }
 
-void fchange_dt(FILE * fptr, struct CMOSDateTime * dt)
+void fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	_fcreate_dt(fptr, dt);
+	_unlock_fs();
+}
+
+static void _fchange_dt(FILE * fptr, struct CMOSDateTime * dt)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -154,7 +314,15 @@ void fchange_dt(FILE * fptr, struct CMOSDateTime * dt)
 	system_call(SCALL_FS, SCALL_FCHANGE_DT, &sparams);
 }
 
-int df_count(char * path)
+void fchange_dt(FILE * fptr, struct CMOSDateTime * dt)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	_fchange_dt(fptr, dt);
+	_unlock_fs();
+}
+
+static int _df_count(char * path)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
@@ -162,13 +330,33 @@ int df_count(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int df(char * path, struct RawBlock * raw_blocks)
+int df_count(char * path)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _df_count(path);
+	_unlock_fs();
+	return retvalue;
+}
+
+static int _df(char * path, struct RawBlock * raw_blocks)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
 	sparams.param1 = SPARAM(raw_blocks);
 	system_call(SCALL_FS, SCALL_DF, &sparams);
 	return INT32_SPARAM(sparams.param0);
+}
+
+int df(char * path, struct RawBlock * raw_blocks)
+{
+	while(!_lock_fs())
+		asm volatile ("pause");
+	int retvalue = 0;
+	retvalue = _df(path, raw_blocks);
+	_unlock_fs();
+	return retvalue;
 }
 
 int fix_path(char * path, char * new_path)
