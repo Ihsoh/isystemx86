@@ -1,0 +1,22 @@
+# 过滤在编译 C语言 程序时产生的文件。
+*.obj
+*.bin
+*.a
+
+# 过滤 python 生成的二进制文件。
+*.pyc
+
+# 过滤 Tools 文件夹内的编译后产生的文件。
+tools/*/bin/*
+
+# 过滤 Apps 文件夹内的编译后产生的文件。
+apps/*/bin/*
+
+# 过滤生成的 VHD 文件。
+*.vhd
+
+# 过滤系统文件。
+.*
+
+# 不忽略.gitignore。
+!.gitignore
