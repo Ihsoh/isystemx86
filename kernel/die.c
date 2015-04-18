@@ -14,6 +14,7 @@
 #include "log.h"
 #include "apic.h"
 #include "pic.h"
+#include "lock.h"
 
 /**
 	@Function:		die
@@ -30,6 +31,7 @@ die(IN struct die_info * info)
 {
 	enable_flush_screen();
 	asm volatile ("cli");
+	lock_level = 0x7fffffff;
 	apic_stop_timer();
 	pic_mask_all();
 	write_log_to_disk();

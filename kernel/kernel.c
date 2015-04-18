@@ -233,6 +233,15 @@ static struct TSS ide_tss;						//IDE的任务的TSS。
 static struct TSS fpu_tss;						//FPU的任务的TSS。
 static struct TSS scall_tss[MAX_TASK_COUNT];	//各个系统调用的任务的TSS。
 
+static BOOL mouse_loop_was_enabled = FALSE;	//!!!警告!!!
+											//在使用APIC模式时，不知道为什么
+											//在执行enter_system()附近的代码
+											//时会引发一次鼠标中断，导致鼠标驱动
+											//程序错误的递增了mouse_count。所以
+											//在调用完毕enter_system()之后才将
+											//mouse_loop_was_enabled设为TRUE。
+
+
 /**
 	@Function:		main
 	@Access:		Public
@@ -328,6 +337,9 @@ main(void)
 	enable_ifs1_lock();
 
 	enter_system();
+
+	mouse_loop_was_enabled = TRUE;
+
 	console();
 }
 
@@ -837,18 +849,18 @@ free_system_call_tss(void)
 	set_desc_to_gdt(14, (uint8 *)&system_call_tss_desc);
 }
 
-static int32 counter = 1;
-static int32 clock_counter = 100;
-static int32 is_system_call = 0;
-static int32 is_enable_flush_screen = 1;
-static int32 flush_counter = 0;
-static BOOL switch_to_kernel = FALSE;
-static BOOL kt_jk_lock = TRUE;
-static BOOL will_reset_all_exceptions = FALSE;
+static volatile int32 counter = 1;
+static volatile int32 clock_counter = 100;
+static volatile int32 is_system_call = 0;
+static volatile int32 is_enable_flush_screen = 1;
+static volatile int32 flush_counter = 0;
+static volatile BOOL switch_to_kernel = FALSE;
+static volatile BOOL kt_jk_lock = TRUE;
+static volatile BOOL will_reset_all_exceptions = FALSE;
 
-static BOOL kernel_init_i387 = FALSE;
-static struct I387State kernel_i387_state;
-static BOOL kernel_task_ran = FALSE;
+static volatile BOOL kernel_init_i387 = FALSE;
+static volatile struct I387State kernel_i387_state;
+static volatile BOOL kernel_task_ran = FALSE;
 
 // #define NEW_TIMER_INT
 
@@ -999,8 +1011,6 @@ timer_int(void)
 				kernel_tss_desc.attr = AT386TSS + DPL0; 
 				set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
 				free_system_call_tss();
-				//outb(0x20, 0x20);
-				//outb(0xa0, 0x20);
 				irq_ack(0);
 				asm volatile ("ljmp	$56, $0;");
 			}
@@ -1036,8 +1046,6 @@ timer_int(void)
 					set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 					set_desc_to_gdt(11, (uint8 *)&task_gate);
 					free_system_call_tss();
-					//outb(0x20, 0x20);
-					//outb(0xa0, 0x20);
 					irq_ack(0);
 					asm volatile ("ljmp	$88, $0;");	
 				}
@@ -1050,8 +1058,6 @@ timer_int(void)
 		}
 		else
 		{
-			//outb(0x20, 0x20);
-			//outb(0xa0, 0x20);
 			irq_ack(0);
 			asm volatile ("iret;");
 		}
@@ -1074,6 +1080,8 @@ timer_int(void)
 {	
 	while(1)
 	{
+		if(apic_is_enable())
+			apic_stop_timer();
 		kt_jk_lock = FALSE;
 		if(will_reset_all_exceptions)
 		{
@@ -1131,8 +1139,8 @@ timer_int(void)
 				kernel_tss_desc.attr = AT386TSS + DPL0; 
 				set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
 				free_system_call_tss();
-				//outb(0x20, 0x20);
-				//outb(0xa0, 0x20);
+				if(apic_is_enable())
+					apic_start_timer();
 				irq_ack(0);
 				asm volatile ("ljmp	$56, $0;");
 			}
@@ -1175,16 +1183,16 @@ timer_int(void)
 				set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 				set_desc_to_gdt(11, (uint8 *)&task_gate);
 				free_system_call_tss();
-				//outb(0x20, 0x20);
-				//outb(0xa0, 0x20);
+				if(apic_is_enable())
+					apic_start_timer();
 				irq_ack(0);
 				asm volatile ("ljmp	$88, $0;");	
 			}
 		}
 		else
 		{
-			//outb(0x20, 0x20);
-			//outb(0xa0, 0x20);
+			if(apic_is_enable())
+				apic_start_timer();
 			irq_ack(0);
 			asm volatile ("iret;");
 		}
@@ -1244,42 +1252,46 @@ mouse_int(void)
 {
 	while(1)
 	{
+		/*if(apic_is_enable())
+			apic_stop_timer();*/
 		int32 max_screen_width = vesa_get_width();
 		int32 max_screen_height = vesa_get_height();
 		uint8 data = inb(0x60);
-	
-		switch(++mouse_count)
-		{
-			case 1:
-				if(data & 0x01)
-					mouse_left_button_down = TRUE;
-				else
-					mouse_left_button_down = FALSE;
-				if(data & 0x02)
-					mouse_right_button_down = TRUE;
-				else
-					mouse_right_button_down = FALSE;
-				x_sign = data & 0x10 ? 0xffffff00 : 0;
-				y_sign = data & 0x20 ? 0xffffff00 : 0;
-				break;
-			case 2:
-				mouse_x += (x_sign | data);
-				if(mouse_x < 0)
-					mouse_x = 0;
-				else if(mouse_x >= max_screen_width)
-					mouse_x = max_screen_width - 1;
-				break;
-			case 3:
-				mouse_y += -(y_sign | data);
-				if(mouse_y < 0)
-					mouse_y = 0;
-				else if(mouse_y >= max_screen_height)
-					mouse_y = max_screen_height - 1;
-				mouse_count = 0;
-				break;
-		}
-		//outb(0x20, 0x20);
-		//outb(0xa0, 0x20);
+
+		if(mouse_loop_was_enabled)
+			switch(++mouse_count)
+			{
+				case 1:
+					if(data & 0x01)
+						mouse_left_button_down = TRUE;
+					else
+						mouse_left_button_down = FALSE;
+					if(data & 0x02)
+						mouse_right_button_down = TRUE;
+					else
+						mouse_right_button_down = FALSE;
+					x_sign = data & 0x10 ? 0xffffff00 : 0;
+					y_sign = data & 0x20 ? 0xffffff00 : 0;
+					break;
+				case 2:
+					mouse_x += (x_sign | data);
+					if(mouse_x < 0)
+						mouse_x = 0;
+					else if(mouse_x >= max_screen_width)
+						mouse_x = max_screen_width - 1;
+					break;
+				case 3:
+					mouse_y += -(y_sign | data);
+					if(mouse_y < 0)
+						mouse_y = 0;
+					else if(mouse_y >= max_screen_height)
+						mouse_y = max_screen_height - 1;
+					mouse_count = 0;
+					break;
+			}
+		
+		/*if(apic_is_enable())
+			apic_start_timer();*/
 		irq_ack(12);
 		asm volatile ("iret");
 	}
@@ -1367,11 +1379,13 @@ keyboard_int(void)
 {
 	while(1)
 	{
+		/*if(apic_is_enable())
+			apic_stop_timer();*/
 		uint8 scan_code = 0;
 		scan_code = inb(0x60);
 		tran_key(scan_code);
-		//outb(0x20, 0x20);
-		//outb(0xa0, 0x20);
+		/*if(apic_is_enable())
+			apic_start_timer();*/
 		irq_ack(1);
 		asm volatile ("iret;");
 	}
@@ -1391,8 +1405,11 @@ ide_int(void)
 {
 	while(1)
 	{
-		//outb(0x20, 0x20);
-		//outb(0xa0, 0x20);
+		if(apic_is_enable())
+			apic_stop_timer();
+		// 在这里插入代码。。。
+		if(apic_is_enable())
+			apic_start_timer();
 		irq_ack(14);
 		asm volatile ("iret;");
 	}
@@ -1412,9 +1429,11 @@ fpu_int(void)
 {
 	while(1)
 	{
+		if(apic_is_enable())
+			apic_stop_timer();
 		outb(0xf0, 0x00);
-		//outb(0x20, 0x20);
-		//outb(0xa0, 0x20);
+		if(apic_is_enable())
+			apic_start_timer();
 		irq_ack(13);
 		asm volatile ("iret;");
 	}
@@ -1574,7 +1593,7 @@ system_call_int(void)
 		"popl	%2\n\t"
 		:
 		:"m"(edx), "m"(ecx), "m"(eax));
-	
+
 	//获取指定的TSS和Stack。
 	struct TSS * system_call_tss = scall_tsses[ecx];
 	uint8 * system_call_stack = scall_stacks[ecx];
@@ -1700,7 +1719,6 @@ static
 void
 kill_task_and_jump_to_kernel(IN uint32 tid)
 {
-	lock();
 	kill_task(tid);
 	enable_flush_screen();
 	int32 wait_app_tid = get_wait_app_tid();
@@ -1710,7 +1728,9 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 	kt_jk_lock = TRUE;					//unlock()之后等待任务调度器的执行。
 	will_reset_all_exceptions = TRUE;	//需要重设所有异常处理程序的状态。
 	unlock();
+	apic_start_timer();
 	while(kt_jk_lock);					//任务调度器会把kt_jk_lock设置为FALSE。
+	asm volatile ("cli");
 }
 
 /*================================================================================
@@ -1781,6 +1801,8 @@ dividing_by_zero_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -1867,6 +1889,8 @@ bound_check_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -1953,6 +1977,8 @@ invalid_opcode_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2117,6 +2143,8 @@ invalid_tss_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2202,6 +2230,8 @@ invalid_seg_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2287,6 +2317,8 @@ invalid_stack_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2372,6 +2404,8 @@ gp_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2457,6 +2491,8 @@ pf_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2469,7 +2505,6 @@ pf_int(void)
 
 			print_str_p(buffer, CC_RED);
 			print_str("\n");
-
 			kill_task_and_jump_to_kernel(current_tid);
 		}
 	}
@@ -2576,6 +2611,8 @@ noimpl_int(void)
 		}
 		else
 		{
+			lock();
+			apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 			int32 intn = get_unimpl_intn();
 

@@ -222,22 +222,37 @@ create_task(IN int8 * name,
 			free_memory(task->addr);
 			return -1;
 		}
-		//把程序空间的0x00000000到0x00ffffff映射到物理空间的0x00000000到0x00ffffff
-		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 0x00000000, 0x01000000, 0x00000000, RW_RWE);
+		// 把程序空间的0x00000000到0x00ffffff映射到物理空间的0x00000000到0x00ffffff。
+		// 权限为读和执行。0x00000000到0x00ffffff为内核空间。
+		// 在执行系统调用时会执行包含对内核空间写操作的代码，但是由于这个操作是在0x90中断
+		// 程序中进行，并且执行0x90中断程序时CPL为Ring0，所以写操作为合法。
+		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 
+								0x00000000,
+								0x01000000,
+								0x00000000, 
+								RW_RE);
 		
-		//把程序空间的0x01000000到(0x01000000 + task_real_len - 1)映射到物理空间的(task->addr)~(task->addr + task_real_len - 1)
-		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 0x01000000, real_task_len, task->addr, RW_RWE);
+		// 把程序空间的0x01000000到(0x01000000 + task_real_len - 1)映射到
+		// 物理空间的(task->addr)~(task->addr + task_real_len - 1)。
+		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
+								0x01000000,
+								real_task_len,
+								task->addr,
+								RW_RWE);
 
 		//保护程序空间0x01000000到0x010000000 + 4KB - 1
-		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 0x01000000, KB(4), task->addr, RW_RE);
+		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
+								0x01000000,
+								KB(4),
+								task->addr,
+								RW_RE);
 
 		task->tss.cr3 = task->real_pagedt_addr;
 		
 		task->init_i387 = 0;
-		task->used = 1;
-		task->running = 0;
 		task->ran = 0;
 		task->ready = FALSE;
+		task->used = 1;
 	}
 	return tid;
 }

@@ -294,13 +294,43 @@ apic_enable(void)
 	return TRUE;
 }
 
-
+/**
+	@Function:		apic_stop_timer
+	@Access:		Public
+	@Description:
+		停止计时器。
+	@Parameters:
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。
+*/
 BOOL
 apic_stop_timer(void)
 {
 	if(!apic_ok)
 		return FALSE;
 	lapic_write_register(LAPIC_LVT_TIMER, 0);
+	return TRUE;
+}
+
+/**
+	@Function:		apic_start_timer
+	@Access:		Public
+	@Description:
+		开始计时器。
+	@Parameters:
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。
+*/
+BOOL
+apic_start_timer(void)
+{
+	if(!apic_ok)
+		return FALSE;
+	lapic_write_register(LAPIC_INIT_COUNT, LTIMER_DEFAULT_COUNT);
+	lapic_write_register(LAPIC_DIVIDE_CONFIG, LTIMER_DIVIDE_BY_16);
+	lapic_write_register(LAPIC_LVT_TIMER, LTIMER_PERIODIC | 0x40);
 	return TRUE;
 }
 

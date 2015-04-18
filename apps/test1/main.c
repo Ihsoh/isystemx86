@@ -3,6 +3,8 @@
 int main(int argc, char * argv[])
 {
 	run_in_bg();
+	print_str("test1 running!\n");
+	*(uint *)(0x00020000) = 100;
 	while(!create_file("DA:/", argv[1]));
 	FILE * fptr = NULL;
 	while((fptr = fopen(argv[2], FILE_MODE_APPEND)) == NULL);

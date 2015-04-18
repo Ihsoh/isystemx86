@@ -52,10 +52,32 @@
 				asm volatile ("sti");	\
 			}	\
 		}	\
+	}	\
+	static void _unlock_without_sti(const int8 * file, uint32 line)	\
+	{	\
+		if(name##_lock_state)	\
+		{	\
+			if(lock_level == 0)	\
+			{	\
+				int8 buffer[1024];	\
+				sprintf_s(	buffer,	\
+							1024,	\
+							"Invalid unlock() calling, because lock_level already is 0. File: %s, Line: %d.\n",	\
+							file,	\
+							line);	\
+				print_str_p(buffer, CC_RED);	\
+				log(LOG_ERROR, buffer);	\
+			}	\
+			else if(--lock_level == 0)	\
+			{	\
+				;	\
+			}	\
+		}	\
 	}
 
-#define lock()		_lock();
-#define unlock()	_unlock(__FILE__, __LINE__);
+#define lock()					_lock();
+#define unlock()				_unlock(__FILE__, __LINE__);
+#define unlock_without_sti()	_unlock_without_sti(__FILE__, __LINE__);
 
 //在*.h文件里定义锁的相关内容
 #define	DEFINE_LOCK_EXTERN(name)	\
