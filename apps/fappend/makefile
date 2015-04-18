@@ -1,5 +1,5 @@
 TargetDir=bin
-Out=test1.bin
+Out=fappend.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -I../ilib -m32 -march=i386 -mtune=i386

@@ -4,7 +4,7 @@ int main(int argc, char * argv[])
 {
 	if(argc < 2)
 	{
-		il_print_str_p("printf Error: Invalid arguments!\n", CC_RED);
+		printf("%s\n", "printf Error: Invalid arguments!");
 		return -1;
 	}
 	char * format = argv[1];

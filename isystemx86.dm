@@ -14,8 +14,20 @@ WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1024_768.bin kernelldr/bin/kernell
 MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1280_1024.bin
 WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1280_1024.bin kernelldr/bin/kernelldrgm_1280_1024.bin
 
-#System command directory
+#System commands directory
 MAKE_DIR	VA:/isystem/ bins
+
+#Command 'printf'
+MAKE_FILE	VA:/isystem/bins/ printf
+WRITE_FILE	VA:/isystem/bins/printf apps/printf/bin/printf.bin
+
+#Command 'fwrite'
+MAKE_FILE	VA:/isystem/bins/ fwrite
+WRITE_FILE	VA:/isystem/bins/fwrite apps/fwrite/bin/fwrite.bin
+
+#Command 'fappend'
+MAKE_FILE	VA:/isystem/bins/ fappend
+WRITE_FILE	VA:/isystem/bins/fappend apps/fappend/bin/fappend.bin
 
 #Basic
 MAKE_FILE	VA:/isystem/bins/ basic
@@ -24,10 +36,6 @@ WRITE_FILE	VA:/isystem/bins/basic apps/basic/bin/basic.bin
 #Edit
 MAKE_FILE	VA:/isystem/bins/ edit
 WRITE_FILE	VA:/isystem/bins/edit apps/edit/bin/edit.bin
-
-#Print text with format
-MAKE_FILE	VA:/isystem/bins/ printf
-WRITE_FILE	VA:/isystem/bins/printf apps/printf/bin/printf.bin
 
 #IASM
 MAKE_FILE	VA:/isystem/bins/ iasm
