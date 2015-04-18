@@ -29,6 +29,10 @@
 
 #define	MAX_OPENED_FILE_COUNT	(10 * 1024)
 
+#define IFS1_STDIN		((FILE *)0x00000000)
+#define IFS1_STDOUT		((FILE *)0x00000001)
+#define IFS1_STDERR		((FILE *)0x00000002)
+
 typedef struct File
 {
 	int8				symbol[3];

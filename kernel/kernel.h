@@ -17,6 +17,14 @@
 #define	SCALL_MOUSE			4
 
 extern
+BOOL
+kernel_is_knltask(void);
+
+extern
+int32
+kernel_get_current_tid(void);
+
+extern
 void
 get_mouse_position(	OUT int32 * x,
 					OUT int32 * y);

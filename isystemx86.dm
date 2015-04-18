@@ -41,25 +41,9 @@ WRITE_FILE	VA:/isystem/bins/edit apps/edit/bin/edit.bin
 MAKE_FILE	VA:/isystem/bins/ iasm
 WRITE_FILE	VA:/isystem/bins/iasm apps/iasm/bin/iasm.bin
 
-#Paint
-MAKE_FILE	VA:/isystem/bins/ paint
-WRITE_FILE	VA:/isystem/bins/paint apps/paint/bin/paint.bin
-
 #WDVM
 MAKE_FILE	VA:/isystem/bins/ wdvm
 WRITE_FILE	VA:/isystem/bins/wdvm apps/WDVM-ISystemx86/bin/wdvm.bin
-
-#Test1
-MAKE_FILE	VA:/isystem/bins/ test1
-WRITE_FILE	VA:/isystem/bins/test1 apps/test1/bin/test1.bin
-
-#Test2
-MAKE_FILE	VA:/isystem/bins/ test2
-WRITE_FILE	VA:/isystem/bins/test2 apps/test2/bin/test2.bin
-
-#CppTest
-MAKE_FILE	VA:/isystem/bins/ cpptest
-#WRITE_FILE	VA:/isystem/bins/cpptest apps/cpptest/bin/cpptest.bin
 
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd

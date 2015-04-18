@@ -1142,7 +1142,10 @@ run(IN int8 * path,
 static
 int32
 run_wait(	IN int8 * path, 
-			IN int8 * cmd)
+			IN int8 * cmd,
+			IN int8 * stdin,
+			IN int8 * stdout,
+			IN int8 * stderr)
 {
 	if(strcmp(path, "") == 0)
 	{
@@ -1168,6 +1171,9 @@ run_wait(	IN int8 * path,
 		error("Failed to run application!");
 		return -1;
 	}
+	tasks_redirect_stdin(r, stdin);
+	tasks_redirect_stdout(r, stdout);
+	tasks_redirect_stderr(r, stderr);
 	wait_app_tid = r;
 	unlock();
 	task_ready(r);
@@ -2231,6 +2237,37 @@ exec(	IN int8 * cmd,
 			}
 			r = 1;
 		}
+		else if(strcmp(name, "%") == 0)
+		{
+			int8 stdin[1024];
+			int8 stdout[1024];
+			int8 stderr[1024];
+			int8 app[1024];
+			parse_cmd(NULL, stdin, 1023);
+			parse_cmd(NULL, stdout, 1023);
+			int32 remainedlen = parse_cmd(NULL, stderr, 1023);
+			int32 len = strlen(cmd) - remainedlen;
+			parse_cmd(NULL, app, 1023);
+			BOOL ran = FALSE;
+			int8 buffer[10 * 1024];
+			int8 path[1024];
+			get_var_value_with_size(global_vars_s,
+									"__path__",
+									buffer,
+									10 * 1024);
+			split_string(NULL, NULL, 0, 0);
+			while(split_string(path, buffer, ';', 1024) != NULL)
+				if(exists_file(path, app))
+				{
+					int8 temp[1024];
+					strcpy(temp, path);
+					strcat(temp, app);
+					r = run_wait(temp, cmd + len, stdin, stdout, stderr) == -1 ? 0 : 1;
+					ran = TRUE;
+				}
+			if(!ran)
+				r = run_wait(app, cmd + len, stdin, stdout, stderr) == -1 ? 0 : 1;
+		}
 		else if(strlen(name) >= 4 && strcmp(name + strlen(name) - 4, ".bat") == 0)
 		{
 			BOOL ran = FALSE;
@@ -2270,11 +2307,11 @@ exec(	IN int8 * cmd,
 					int8 temp[1024];
 					strcpy(temp, path);
 					strcat(temp, name);
-					r = run_wait(temp, cmd) == -1 ? 0 : 1;
+					r = run_wait(temp, cmd, NULL, NULL, NULL) == -1 ? 0 : 1;
 					ran = TRUE;
 				}
 			if(!ran)
-				r = run_wait(name, cmd) == -1 ? 0 : 1;
+				r = run_wait(name, cmd, NULL, NULL, NULL) == -1 ? 0 : 1;
 		}
 	}
 	while(wait_app_tid != -1)

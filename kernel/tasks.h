@@ -49,6 +49,9 @@ struct Task
 											//直到为 True 时，才会开始运行。
 	BOOL				is_system_call;		//是否在进行系统调用。
 	BOOL				fs_lock;			//是否获得了文件系统锁。
+	FILE * 				stdin;				//任务的标准输入。如果为NULL则为键盘，否则为文件。
+	FILE *				stdout;				//任务的标准输出。如果为NULL则为屏幕，否则为文件。
+	FILE *				stderr;				//任务的标准错误。如果为NULL则为屏幕，否则为文件。
 	OnTaskExit			on_exit;			//当任务退出时调用。
 };
 
@@ -124,6 +127,21 @@ extern
 void *
 get_physical_address(	IN int32 tid, 
 						IN void * line_address);
+
+extern
+BOOL
+tasks_redirect_stdin(	IN int32 tid,
+						IN int8 * path);
+
+extern
+BOOL
+tasks_redirect_stdout(	IN int32 tid,
+						IN int8 * path);
+
+extern
+BOOL
+tasks_redirect_stderr(	IN int32 tid,
+						IN int8 * path);
 
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()

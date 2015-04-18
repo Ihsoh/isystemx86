@@ -711,10 +711,10 @@ screen_up(void)
 }
 
 /**
-	@Function:		print_char_p
-	@Access:		Public
+	@Function:		print_char_p_screen
+	@Access:		Private
 	@Description:
-		打印一个字符。
+		打印一个字符到屏幕。
 	@Parameters:
 		chr, int8, IN
 			字符。
@@ -722,9 +722,10 @@ screen_up(void)
 			字符颜色属性。
 	@Return:	
 */
+static
 void
-print_char_p(	IN int8 chr,
-				IN uint8 p)
+print_char_p_screen(IN int8 chr,
+					IN uint8 p)
 {
 	uint8 * off;
 	if(chr == '\n')
@@ -766,6 +767,38 @@ print_char_p(	IN int8 chr,
 }
 
 /**
+	@Function:		print_char_p
+	@Access:		Public
+	@Description:
+		打印一个字符到标准输出。
+		内核任务的标准输出永远是屏幕。
+		用户任务的标准输出则根据struct Task结构体的stdout字段指定。
+	@Parameters:
+		chr, int8, IN
+			字符。
+		p, uint8, IN
+			字符颜色属性。
+	@Return:	
+*/
+void
+print_char_p(	IN int8 chr,
+				IN uint8 p)
+{
+	if(kernel_is_knltask())
+		print_char_p_screen(chr, p);
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stdout == NULL)
+				print_char_p_screen(chr, p);
+			else
+				fappend(task->stdout, &chr, 1);
+	}
+}
+
+/**
 	@Function:		print_char
 	@Access:		Public
 	@Description:
@@ -794,8 +827,20 @@ print_char(IN int8 chr)
 void
 print_str(IN const int8 * str)
 {
-	while(*str != '\0')
-		print_char(*(str++));
+	if(kernel_is_knltask())
+		while(*str != '\0')
+			print_char(*(str++));
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stdout == NULL)
+				while(*str != '\0')
+					print_char(*(str++));
+			else
+				fappend(task->stdout, str, strlen(str));
+	}
 }
 
 /**
@@ -814,8 +859,20 @@ void
 print_str_p(IN const int8 * str,
 			IN uint8 p)
 {
-	while(*str != '\0')
-		print_char_p(*(str++), p);
+	if(kernel_is_knltask())
+		while(*str != '\0')
+			print_char_p(*(str++), p);
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stdout == NULL)
+				while(*str != '\0')
+					print_char_p(*(str++), p);
+			else
+				fappend(task->stdout, str, strlen(str));
+	}
 }
 
 /**
@@ -829,11 +886,14 @@ print_str_p(IN const int8 * str,
 void
 clear_screen(void)
 {
-	int32 i;
-	set_cursor(0, 0);
-	for(i = 0; i < COLUMN * ROW; i++)
-		print_char(' ');
-	set_cursor(0, 0);
+	if(kernel_is_knltask())
+	{
+		int32 i;
+		set_cursor(0, 0);
+		for(i = 0; i < COLUMN * ROW; i++)
+			print_char(' ');
+		set_cursor(0, 0);
+	}
 }
 
 /**

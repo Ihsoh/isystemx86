@@ -211,7 +211,7 @@ void
 invalid_stack_int(void);
 
 static uint32 gdt_addr = 0;			//GDT的物理地址
-static uint32 current_tid;			//当前正在运行的任务的TID。
+static int32 current_tid;			//当前正在运行的任务的TID。
 static BOOL is_kernel_task = TRUE;	//当前的任务是否是内核任务。
 
 //内核各个任务的TSS
@@ -344,6 +344,38 @@ main(void)
 }
 
 DEFINE_LOCK_IMPL(kernel)
+
+/**
+	@Function:		kernel_is_knltask
+	@Access:		Public
+	@Description:
+		获取当前任务是否为内核任务。
+	@Parameters:
+	@Return:
+		BOOL
+			如果是内核任务则返回TRUE，否则返回FALSE。
+*/
+BOOL
+kernel_is_knltask(void)
+{
+	return is_kernel_task;
+}
+
+/**
+	@Function:		kernel_get_current_tid
+	@Access:		Public
+	@Description:
+		获取当前的用户任务的TID。
+	@Parameters:
+	@Return:
+		int32
+			任务的TID。
+*/
+int32
+kernel_get_current_tid(void)
+{
+	return current_tid;
+}
 
 /**
 	@Function:		reset_all_exceptions
@@ -1101,8 +1133,8 @@ timer_int(void)
 				console_clock();
 				clock_counter = 100;
 			}
-			uint32 running_tid = get_running_tid();
-			uint32 tid = get_next_task_id();
+			int32 running_tid = get_running_tid();
+			int32 tid = get_next_task_id();
 			current_tid = tid;
 			if(counter == 1 || tid == -1 || switch_to_kernel)
 			{

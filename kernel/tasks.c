@@ -128,6 +128,9 @@ create_task(IN int8 * name,
 		task->running = 0;
 		tasks->is_system_call = FALSE;
 		tasks->fs_lock = FALSE;
+		tasks->stdin = NULL;
+		tasks->stdout = NULL;
+		tasks->stderr = NULL;
 		strcpy(task->name, name);
 		strcpy(task->param, param);
 		strcpy(task->working_dir, working_dir);
@@ -274,44 +277,52 @@ kill_task(IN int32 tid)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
-	free_memory(tasks[tid].addr);
+	struct Task * task = tasks + tid;
+	free_memory(task->addr);
 	
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
-		if(tasks[tid].opened_file_ptrs[ui] != NULL)
+		if(task->opened_file_ptrs[ui] != NULL)
 		{
-			fclose(tasks[tid].opened_file_ptrs[ui]);
-			tasks[tid].opened_file_ptrs[ui] = NULL;
+			fclose(task->opened_file_ptrs[ui]);
+			task->opened_file_ptrs[ui] = NULL;
 		}
 		
 	for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT; ui++)
-		if(tasks[tid].memory_block_ptrs[ui] != NULL)
+		if(task->memory_block_ptrs[ui] != NULL)
 		{
-			free_memory(tasks[tid].memory_block_ptrs[ui]);
-			tasks[tid].memory_block_ptrs[ui] = NULL;
+			free_memory(task->memory_block_ptrs[ui]);
+			task->memory_block_ptrs[ui] = NULL;
 		}
 
 	for(ui = 0; ui < MAX_TASK_MQUEUE_COUNT; ui++)
 	{
-		uint32 id = tasks[tid].mqueue_ids[ui];
+		uint32 id = task->mqueue_ids[ui];
 		if(id != 0)
 		{
 			mqueue_free((MQueuePtr)id);
-			tasks[tid].mqueue_ids[ui] = 0;
+			task->mqueue_ids[ui] = 0;
 		}
 	}
 
-	free_memory(tasks[tid].pagedt_addr);
+	free_memory(task->pagedt_addr);
 
-	if(tasks[tid].on_exit != NULL)
-		tasks[tid].on_exit(tid, tasks[tid].retvalue);
+	if(task->on_exit != NULL)
+		task->on_exit(tid, task->retvalue);
 
-	if(tasks[tid].fs_lock)
+	if(task->fs_lock)
 		system_call_fs_unlock_fs();
+
+	if(task->stdin != NULL)
+		fclose(task->stdin);
+	if(task->stdout != NULL)
+		fclose(task->stdout);
+	if(task->stderr != NULL)
+		fclose(task->stderr);
 
 	if(tid == running_tid)
 		running_tid = -1;
-	tasks[tid].used = 0;
+	task->used = 0;
 	return TRUE;
 }
 
@@ -661,4 +672,115 @@ get_physical_address(	IN int32 tid,
 				& 0xfffff000) 
 				| laddress_low_12bits;
 	return (void *)paddress;
+}
+
+/**
+	@Function:		_tasks_redirect_io
+	@Access:		Private
+	@Description:
+		重定向任务的IO。
+	@Parameters:
+		v, FILE **, IN OUT
+			指向struct Task结构体中的stdin或stdout或stderr的指针。
+		path, int8 *, IN
+			重定向到文件的文件路径。
+		mode, int32, IN
+			打开文件的模式。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+static
+BOOL
+_tasks_redirect_io(	IN OUT FILE ** v,
+					IN int8 * path,
+					IN int32 mode)
+{
+	if(v == NULL || path == NULL)
+		return FALSE;
+	FILE * new = fopen(path, mode);
+	if(new == NULL)
+		return FALSE;
+	if(*v != NULL)
+		fclose(*v);
+	*v = new;
+	return TRUE;
+}
+
+/**
+	@Function:		tasks_redirect_stdin
+	@Access:		Public
+	@Description:
+		重定向任务的stdin。
+	@Parameters:
+		tid, int32, IN
+			任务的TID。
+		path, int8 *, IN
+			重定向到文件的文件路径。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+tasks_redirect_stdin(	IN int32 tid,
+						IN int8 * path)
+{
+	struct Task * task = get_task_info_ptr(tid);
+	if(task == NULL)
+		return FALSE;
+	return _tasks_redirect_io(	&(task->stdin), 
+								path,
+								FILE_MODE_READ);
+}
+
+/**
+	@Function:		tasks_redirect_stdout
+	@Access:		Public
+	@Description:
+		重定向任务的stdout。
+	@Parameters:
+		tid, int32, IN
+			任务的TID。
+		path, int8 *, IN
+			重定向到文件的文件路径。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+tasks_redirect_stdout(	IN int32 tid,
+						IN int8 * path)
+{
+	struct Task * task = get_task_info_ptr(tid);
+	if(task == NULL)
+		return FALSE;
+	return _tasks_redirect_io(	&(task->stdout), 
+								path,
+								FILE_MODE_APPEND);
+}
+
+/**
+	@Function:		tasks_redirect_stderr
+	@Access:		Public
+	@Description:
+		重定向任务的stderr。
+	@Parameters:
+		tid, int32, IN
+			任务的TID。
+		path, int8 *, IN
+			重定向到文件的文件路径。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+tasks_redirect_stderr(	IN int32 tid,
+						IN int8 * path)
+{
+	struct Task * task = get_task_info_ptr(tid);
+	if(task == NULL)
+		return FALSE;
+	return _tasks_redirect_io(	&(task->stderr), 
+								path,
+								FILE_MODE_APPEND);
 }
