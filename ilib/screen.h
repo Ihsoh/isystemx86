@@ -38,6 +38,11 @@
 #define	SCALL_WINDOW_GET_KEY		22
 #define	SCALL_DRAW_WINDOW			23
 
+#define	SCALL_PRINT_ERR_CHAR		24
+#define	SCALL_PRINT_ERR_CHAR_P		25
+#define	SCALL_PRINT_ERR_STR			26
+#define	SCALL_PRINT_ERR_STR_P		27
+
 
 #define	CC_BLACK		0
 #define	CC_BLUE			1
@@ -126,6 +131,18 @@ extern void disable_flush_screen(void);
 
 extern void set_target_screen(struct CommonImage * ts);
 #define	il_set_target_screen(ts)	(set_target_screen((ts)))
+
+extern void print_err_char(char chr);
+#define	il_print_err_char(chr)	(print_char((chr)))
+
+extern void print_err_char_p(char chr, uchar p);
+#define	il_print_err_char_p(chr, p)	(print_char_p((chr), (p)))
+
+extern void print_err_str(char * str);
+#define	il_print_err_str(str)	(print_str(str))
+
+extern void print_err_str_p(char * str, uchar p);
+#define	il_print_err_str_p(str, p)	(print_str_p((str), (p)))
 
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\

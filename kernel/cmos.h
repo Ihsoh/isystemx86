@@ -22,7 +22,43 @@ struct CMOSDateTime
 } __attribute__((packed));
 
 extern 
-void
+BOOL
 get_cmos_date_time(OUT struct CMOSDateTime * dt);
+
+extern
+BOOL
+set_cmos_date_time(IN struct CMOSDateTime * dt);
+
+extern
+BOOL
+set_cmos_date(	IN uint16 year,
+				IN uint8 month,
+				IN uint8 day);
+
+extern
+BOOL
+set_cmos_time(	IN uint8 hour,
+				IN uint8 minute,
+				IN uint8 second);
+
+extern
+BOOL
+get_rtc_state(void);
+
+extern
+BOOL
+enable_rtc(void);
+
+extern
+BOOL
+disable_rtc(void);
+
+extern
+BOOL
+set_rtc_rate(uint8 rate);
+
+extern
+void
+end_of_rtc(void);
 
 #endif

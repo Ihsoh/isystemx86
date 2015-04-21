@@ -62,7 +62,7 @@
 				int8 buffer[1024];	\
 				sprintf_s(	buffer,	\
 							1024,	\
-							"Invalid unlock() calling, because lock_level already is 0. File: %s, Line: %d.\n",	\
+							"Invalid unlock_without_sti() calling, because lock_level already is 0. File: %s, Line: %d.\n",	\
 							file,	\
 							line);	\
 				print_str_p(buffer, CC_RED);	\

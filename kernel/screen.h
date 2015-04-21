@@ -45,32 +45,124 @@
 #define	CBGC_BROWN		(CC_BROWN << 4)
 #define	CBGC_GRAYWHITE	(CC_GRAYWHITE << 4)
 
-extern void flush_char_buffer(void);
-extern void no_flush_char_buffer(void);
-extern void set_char_color(uint8 cc);
-extern uint8 get_char_color(void);
-extern void set_cursor_color(uint8 cc);
-extern uint8 get_cursor_color(void);
+extern
+void
+flush_char_buffer(void);
 
-extern void flush_screen(void);
+extern
+void
+no_flush_char_buffer(void);
 
-extern void lock_cursor(void);
-extern void unlock_cursor(void);
-extern void set_cursor(uint16 x, uint16 y);
-extern void set_cursor_pos(uint16 x, uint16 y);
-extern void get_cursor(uint16 * x, uint16 * y);
-extern void screen_up(void);
-extern void print_char_p(int8 chr, uint8 p);
-extern void print_char(int8 chr);
-extern void print_str(const int8 * str);
-extern void print_str_p(const int8 * str, uint8 p);
-extern void clear_screen(void);
-extern void set_char_color(uint8 cc);
-extern void init_screen(void);
-extern void print_date(struct CMOSDateTime * date);
-extern void print_time(struct CMOSDateTime * time);
-extern void print_datetime(struct CMOSDateTime * dt);
-extern void set_target_screen(struct CommonImage * ts);
+extern
+void
+set_char_color(IN uint8 cc);
+
+extern
+uint8
+get_char_color(void);
+
+extern
+void
+set_cursor_color(IN uint8 cc);
+
+extern
+uint8
+get_cursor_color(void);
+
+extern
+void
+flush_screen(void);
+
+extern
+void
+lock_cursor(void);
+
+extern
+void
+unlock_cursor(void);
+
+extern
+void
+set_cursor(	IN uint16 x,
+			IN uint16 y);
+
+extern
+void
+set_cursor_pos(	IN uint16 x,
+				IN uint16 y);
+
+extern
+void
+get_cursor(	OUT uint16 * x,
+			OUT uint16 * y);
+
+extern
+void
+screen_up(void);
+
+extern
+void
+print_char_p(	IN int8 chr,
+				IN uint8 p);
+
+extern
+void
+print_char(IN int8 chr);
+
+extern
+void
+print_str(IN const int8 * str);
+
+extern
+void
+print_str_p(IN const int8 * str,
+			IN uint8 p);
+
+extern 
+void
+print_err_char_p(	IN int8 chr,
+					IN uint8 p);
+
+extern
+void
+print_err_char(IN int8 chr);
+
+extern
+void
+print_err_str(IN const int8 * str);
+
+extern
+void
+print_err_str_p(IN const int8 * str,
+				IN uint8 p);
+
+extern
+void
+clear_screen(void);
+
+extern
+void
+set_char_color(IN uint8 cc);
+
+extern
+void
+init_screen(void);
+
+extern
+void
+print_date(IN struct CMOSDateTime * date);
+
+extern
+void
+print_time(IN struct CMOSDateTime * time);
+
+extern
+void
+print_datetime(IN struct CMOSDateTime * dt);
+
+extern
+void
+set_target_screen(IN struct CommonImage * ts);
 
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\
@@ -117,15 +209,22 @@ extern struct CommonImage console_screen_buffer;
 extern
 void
 switch_window(void);
+
 extern
 struct Window *
-create_window(	uint32		width,
-				uint32		height,
-				uint32		bgcolor,
-				uint32		style,
-				int8 *		title,
-				WindowEvent	event);
-extern BOOL destroy_window(struct Window * window);
-extern struct Window * get_top_window(void);
+create_window(	IN uint32		width,
+				IN uint32		height,
+				IN uint32		bgcolor,
+				IN uint32		style,
+				IN int8 *		title,
+				IN WindowEvent	event);
+
+extern
+BOOL
+destroy_window(IN struct Window * window);
+
+extern
+struct Window *
+get_top_window(void);
 
 #endif

@@ -19,4 +19,9 @@ point_in_rect(	IN int32 point_x,
 				IN uint32 rect_w,
 				IN uint32 rect_h);
 
+extern
+uint8
+get_days_of_month(	IN uint16 year,
+					IN uint8 month);
+
 #endif

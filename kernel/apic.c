@@ -203,6 +203,7 @@ apic_init(void)
 	for(irq = 0; irq < apic_irq_count; irq++)
 		if(	irq == 0
 			|| irq == 1
+			|| irq == 8
 			|| irq == 12
 			|| irq == 13
 			|| irq == 14)

@@ -234,8 +234,8 @@ static
 void
 error(IN int8 * text)
 {
-	print_str_p(text, CC_RED);
-	print_str("\n");
+	print_err_str_p(text, CC_RED);
+	print_err_str("\n");
 }
 
 /**
@@ -393,6 +393,161 @@ datetime(void)
 	print_str("\n");
 	time(1);
 	return 1;
+}
+
+/**
+	@Function:		_set_date
+	@Access:		Private
+	@Description:
+		设置日期。这个版本的函数不会输出错误信息。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+static
+BOOL
+_set_date(IN const int8 * str)
+{
+	if(str == NULL)
+		return FALSE;
+	uint8 y0, y1, y2, y3;
+	uint8 m0, m1;
+	uint8 d0, d1;
+	y0 = *(str++);
+	if(y0 < '0' || y0 > '9')
+		return FALSE;
+	y1 = *(str++);
+	if(y1 < '0' || y1 > '9')
+		return FALSE;
+	y2 = *(str++);
+	if(y2 < '0' || y2 > '9')
+		return FALSE;
+	y3 = *(str++);
+	if(y3 < '0' || y3 > '9')
+		return FALSE;
+	if(*(str++) != '-')
+		return FALSE;
+	m0 = *(str++);
+	if(m0 < '0' || m0 > '9')
+		return FALSE;
+	m1 = *(str++);
+	if(m1 < '0' || m1 > '9')
+		return FALSE;
+	if(*(str++) != '-')
+		return FALSE;
+	d0 = *(str++);
+	if(d0 < '0' || d0 > '9')
+		return FALSE;
+	d1 = *(str++);
+	if(d1 < '0' || d1 > '9')
+		return FALSE;
+	uint16 year;
+	uint8 month;
+	uint8 day;
+	year = 	(y0 - '0') * 1000
+			+ (y1 - '0') * 100
+			+ (y2 - '0') * 10
+			+ (y3 - '0');
+	month =	(m0 - '0') * 10 + (m1 - '0');
+	day = (d0 - '0') * 10 + (d1 - '0');
+	BOOL r = set_cmos_date(year, month, day);
+	return r;
+}
+
+/**
+	@Function:		set_date
+	@Access:		Private
+	@Description:
+		设置日期。这个版本的函数会输出错误信息。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+static
+BOOL
+set_date(IN const int8 * str)
+{
+	BOOL r = _set_date(str);
+	if(r)
+		print("OK!");
+	else
+		error("A error was occured when setting date. The date format is YYYY-MM-DD.");
+	return r;
+}
+
+/**
+	@Function:		_set_time
+	@Access:		Private
+	@Description:
+		设置时间。这个版本的函数不会输出错误信息。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+static
+BOOL
+_set_time(IN const int8 * str)
+{
+	if(str == NULL)
+		return FALSE;
+	uint8 h0, h1;
+	uint8 m0, m1;
+	uint8 s0, s1;
+	h0 = *(str++);
+	if(h0 < '0' || h0 > '9')
+		return FALSE;
+	h1 = *(str++);
+	if(h1 < '0' || h1 > '9')
+		return FALSE;
+	if(*(str++) != ':')
+		return FALSE;
+	m0 = *(str++);
+	if(m0 < '0' || m0 > '9')
+		return FALSE;
+	m1 = *(str++);
+	if(m1 < '0' || m1 > '9')
+		return FALSE;
+	if(*(str++) != ':')
+		return FALSE;
+	s0 = *(str++);
+	if(s0 < '0' || s0 > '9')
+		return FALSE;
+	s1 = *(str++);
+	if(s1 < '0' || s1 > '9')
+		return FALSE;
+	uint8 hour;
+	uint8 minute;
+	uint8 second;
+	hour = (h0 - '0') * 10 + (h1 - '0');
+	minute = (m0 - '0') * 10 + (m1 - '0');
+	second = (s0 - '0') * 10 + (s1 - '0');
+	BOOL r = set_cmos_time(hour, minute, second);
+	return r;
+}
+
+/**
+	@Function:		set_time
+	@Access:		Private
+	@Description:
+		设置时间。这个版本的函数会输出错误信息。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+static
+BOOL
+set_time(IN const int8 * str)
+{
+	BOOL r = _set_time(str);
+	if(r)
+		print("OK!");
+	else
+		error("A error was occured when setting time. The date format is HH-MM-SS.");
+	return r;
 }
 
 /**
@@ -1796,6 +1951,18 @@ exec(	IN int8 * cmd,
 			r = datetime();
 			print_str("\n");
 		}
+		else if(strcmp(name, "setdate") == 0)
+		{
+			parse_cmd(NULL, word, 1023);
+			r = set_date(word);
+			print_str("\n");
+		}
+		else if(strcmp(name, "settime") == 0)
+		{
+			parse_cmd(NULL, word, 1023);
+			r = set_time(word);
+			print_str("\n");
+		}
 		else if(strcmp(name, "clock") == 0)
 		{
 			parse_cmd(NULL, word, 1023);
@@ -2059,7 +2226,15 @@ exec(	IN int8 * cmd,
 
 		else if(strcmp(name, "test") == 0)
 		{
-			
+			struct CMOSDateTime dt;
+			dt.year = 1969;
+			dt.month = 7;
+			dt.day = 25;
+			dt.hour = 1;
+			dt.minute = 2;
+			dt.second = 3;
+
+			set_cmos_date_time(&dt);
 		}
 
 		//Batch
@@ -2414,6 +2589,7 @@ console(void)
 		print_str("\n");
 	}
 	print_str("\n");
+
 	while(1)
 	{
 		int8 prompt[KB(1)];

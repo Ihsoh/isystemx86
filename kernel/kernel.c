@@ -30,6 +30,7 @@
 #include "pic.h"
 #include "interrupts.h"
 #include "config.h"
+#include "cmlock.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
@@ -258,6 +259,7 @@ main(void)
 	init_memory();
 	
 	//必须在这里禁用所有锁
+	disable_common_lock();
 	disable_memory_lock();
 	disable_paging_lock();
 	disable_kernel_lock();
@@ -329,6 +331,7 @@ main(void)
 	sti();
 
 	//在这里启用所有锁
+	enable_common_lock();
 	enable_memory_lock();	
 	enable_paging_lock();
 	enable_kernel_lock();

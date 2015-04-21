@@ -239,3 +239,33 @@ draw_window(uint32 id, struct CommonImage * image)
 	system_call(SCALL_SCREEN, SCALL_DRAW_WINDOW, &sparams);
 	return INT32_SPARAM(sparams.param0);
 }
+
+void print_err_char(char chr)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(chr);
+	system_call(SCALL_SCREEN, SCALL_PRINT_ERR_CHAR, &sparams);
+}
+
+void print_err_char_p(char chr, uchar p)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(chr);
+	sparams.param1 = SPARAM(p);
+	system_call(SCALL_SCREEN, SCALL_PRINT_ERR_CHAR_P, &sparams);
+}
+
+void print_err_str(char * str)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(str);
+	system_call(SCALL_SCREEN, SCALL_PRINT_ERR_STR, &sparams);
+}
+
+void print_err_str_p(char * str, uchar p)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(str);
+	sparams.param1 = SPARAM(p);
+	system_call(SCALL_SCREEN, SCALL_PRINT_ERR_STR_P, &sparams);
+}

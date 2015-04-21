@@ -697,7 +697,7 @@
 	<h4>函数描述</h4>
 	<hr />
 	<p style="padding-left:40px;">
-				打印一个字符到屏幕。<br />
+				打印一个字符到屏幕，并且附带字符属性。<br />
 	</p>
 
 	<h4>参数描述</h4>
@@ -738,7 +738,7 @@
 	<h4>函数描述</h4>
 	<hr />
 	<p style="padding-left:40px;">
-				打印一个字符到标准输出。<br />		内核任务的标准输出永远是屏幕。<br />		用户任务的标准输出则根据struct Task结构体的stdout字段指定。<br />
+				打印一个字符到标准输出，并且附带字符属性。<br />		内核任务的标准输出永远是屏幕。<br />		用户任务的标准输出则根据struct Task结构体的stdout字段指定。<br />
 	</p>
 
 	<h4>参数描述</h4>
@@ -779,7 +779,7 @@
 	<h4>函数描述</h4>
 	<hr />
 	<p style="padding-left:40px;">
-				打印一个字符。<br />
+				打印一个字符到标准输出。<br />		内核任务的标准输出永远是屏幕。<br />		用户任务的标准输出则根据struct Task结构体的stdout字段指定。<br />
 	</p>
 
 	<h4>参数描述</h4>
@@ -813,7 +813,7 @@
 	<h4>函数描述</h4>
 	<hr />
 	<p style="padding-left:40px;">
-				打印字符串。<br />
+				打印字符串到标准输出。<br />		内核任务的标准输出永远是屏幕。<br />		用户任务的标准输出则根据struct Task结构体的stdout字段指定。<br />
 	</p>
 
 	<h4>参数描述</h4>
@@ -847,7 +847,157 @@
 	<h4>函数描述</h4>
 	<hr />
 	<p style="padding-left:40px;">
-				打印字符串。<br />
+				打印字符串到标准输出，并且附带字符属性。<br />		内核任务的标准输出永远是屏幕。<br />		用户任务的标准输出则根据struct Task结构体的stdout字段指定。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		str</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			字符串。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		p</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			字符颜色属性。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="print_err_char_p" name="print_err_char_p" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">print_err_char_p</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				打印一个字符到标准错误，并且附带字符属性。<br />		内核任务的标准错误永远是屏幕。<br />		用户任务的标准错误则根据struct Task结构体的stderr字段指定。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		chr</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int8</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			字符。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		p</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			字符颜色属性。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="print_err_char" name="print_err_char" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">print_err_char</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				打印一个字符到标准错误。<br />		内核任务的标准错误永远是屏幕。<br />		用户任务的标准错误则根据struct Task结构体的stderr字段指定。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		chr</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int8</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			字符。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="print_err_str" name="print_err_str" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">print_err_str</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				打印字符串到标准错误。<br />		内核任务的标准错误永远是屏幕。<br />		用户任务的标准错误则根据struct Task结构体的stderr字段指定。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		str</span>,
+	<span style="color:#428cc7; font-weight:blod;"> const int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			字符串。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="print_err_str_p" name="print_err_str_p" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">print_err_str_p</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				打印字符串到标准错误，并且附带字符属性。<br />		内核任务的标准错误永远是屏幕。<br />		用户任务的标准错误则根据struct Task结构体的stderr字段指定。<br />
 	</p>
 
 	<h4>参数描述</h4>

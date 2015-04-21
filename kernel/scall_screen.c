@@ -299,5 +299,45 @@ system_call_screen(	IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+		//打印一个字符到标准错误。
+		//
+		//参数:
+		//	Param0=字符。
+		case SCALL_PRINT_ERR_CHAR:
+		{
+			print_err_char(INT8_SPARAM(sparams->param0));
+			break;
+		}
+		//打印一个字符到标准错误。并指定属性。
+		//
+		//参数:
+		//	Param0=字符。
+		//	Param1=属性。
+		case SCALL_PRINT_ERR_CHAR_P:
+		{		
+			print_err_char_p(INT8_SPARAM(sparams->param0), UINT8_SPARAM(sparams->param1));
+			break;
+		}		
+		//打印字符串到标准错误。
+		//
+		//参数:
+		//	Param0=缓冲区地址(相对于调用程序空间的偏移地址)。
+		case SCALL_PRINT_ERR_STR:
+		{
+			const int8 * str = (const int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			print_err_str(str);
+			break;
+		}		
+		//打印字符串到标准错误。并指定属性。
+		//
+		//参数:
+		//	Param0=缓冲区地址(相对于调用程序空间的偏移地址)。
+		//	Param1=属性。
+		case SCALL_PRINT_ERR_STR_P:
+		{
+			const int8 * str = (const int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			print_err_str_p(str, UINT8_SPARAM(sparams->param1));
+			break;
+		}
 	}
 }

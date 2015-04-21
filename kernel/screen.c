@@ -714,7 +714,7 @@ screen_up(void)
 	@Function:		print_char_p_screen
 	@Access:		Private
 	@Description:
-		打印一个字符到屏幕。
+		打印一个字符到屏幕，并且附带字符属性。
 	@Parameters:
 		chr, int8, IN
 			字符。
@@ -770,7 +770,7 @@ print_char_p_screen(IN int8 chr,
 	@Function:		print_char_p
 	@Access:		Public
 	@Description:
-		打印一个字符到标准输出。
+		打印一个字符到标准输出，并且附带字符属性。
 		内核任务的标准输出永远是屏幕。
 		用户任务的标准输出则根据struct Task结构体的stdout字段指定。
 	@Parameters:
@@ -802,7 +802,9 @@ print_char_p(	IN int8 chr,
 	@Function:		print_char
 	@Access:		Public
 	@Description:
-		打印一个字符。
+		打印一个字符到标准输出。
+		内核任务的标准输出永远是屏幕。
+		用户任务的标准输出则根据struct Task结构体的stdout字段指定。
 	@Parameters:
 		chr, int8, IN
 			字符。
@@ -818,7 +820,9 @@ print_char(IN int8 chr)
 	@Function:		print_str
 	@Access:		Public
 	@Description:
-		打印字符串。
+		打印字符串到标准输出。
+		内核任务的标准输出永远是屏幕。
+		用户任务的标准输出则根据struct Task结构体的stdout字段指定。
 	@Parameters:
 		str, const int8 *, IN
 			字符串。
@@ -847,7 +851,9 @@ print_str(IN const int8 * str)
 	@Function:		print_str_p
 	@Access:		Public
 	@Description:
-		打印字符串。
+		打印字符串到标准输出，并且附带字符属性。
+		内核任务的标准输出永远是屏幕。
+		用户任务的标准输出则根据struct Task结构体的stdout字段指定。
 	@Parameters:
 		str, const int8 *, IN
 			字符串。
@@ -872,6 +878,120 @@ print_str_p(IN const int8 * str,
 					print_char_p(*(str++), p);
 			else
 				fappend(task->stdout, str, strlen(str));
+	}
+}
+
+/**
+	@Function:		print_err_char_p
+	@Access:		Public
+	@Description:
+		打印一个字符到标准错误，并且附带字符属性。
+		内核任务的标准错误永远是屏幕。
+		用户任务的标准错误则根据struct Task结构体的stderr字段指定。
+	@Parameters:
+		chr, int8, IN
+			字符。
+		p, uint8, IN
+			字符颜色属性。
+	@Return:	
+*/
+print_err_char_p(	IN int8 chr,
+					IN uint8 p)
+{
+	if(kernel_is_knltask())
+		print_char_p_screen(chr, p);
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stderr == NULL)
+				print_char_p_screen(chr, p);
+			else
+				fappend(task->stderr, &chr, 1);
+	}
+}
+
+/**
+	@Function:		print_err_char
+	@Access:		Public
+	@Description:
+		打印一个字符到标准错误。
+		内核任务的标准错误永远是屏幕。
+		用户任务的标准错误则根据struct Task结构体的stderr字段指定。
+	@Parameters:
+		chr, int8, IN
+			字符。
+	@Return:	
+*/
+void
+print_err_char(IN int8 chr)
+{
+	print_err_char_p(chr, char_color);
+}
+
+/**
+	@Function:		print_err_str
+	@Access:		Public
+	@Description:
+		打印字符串到标准错误。
+		内核任务的标准错误永远是屏幕。
+		用户任务的标准错误则根据struct Task结构体的stderr字段指定。
+	@Parameters:
+		str, const int8 *, IN
+			字符串。
+	@Return:
+*/
+void
+print_err_str(IN const int8 * str)
+{
+	if(kernel_is_knltask())
+		while(*str != '\0')
+			print_err_char(*(str++));
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stderr == NULL)
+				while(*str != '\0')
+					print_char(*(str++));
+			else
+				fappend(task->stderr, str, strlen(str));
+	}
+}
+
+/**
+	@Function:		print_err_str_p
+	@Access:		Public
+	@Description:
+		打印字符串到标准错误，并且附带字符属性。
+		内核任务的标准错误永远是屏幕。
+		用户任务的标准错误则根据struct Task结构体的stderr字段指定。
+	@Parameters:
+		str, const int8 *, IN
+			字符串。
+		p, uint8, IN
+			字符颜色属性。
+	@Return:
+*/
+void
+print_err_str_p(IN const int8 * str,
+				IN uint8 p)
+{
+	if(kernel_is_knltask())
+		while(*str != '\0')
+			print_err_char_p(*(str++), p);
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stderr == NULL)
+				while(*str != '\0')
+					print_char_p(*(str++), p);
+			else
+				fappend(task->stderr, str, strlen(str));
 	}
 }
 
