@@ -91,6 +91,7 @@ static uint8 apic_irq_count = 0;
 static BOOL apic_ok = FALSE;
 static uint32 lapic_address = 0;
 static uint32 ioapic_address = 0;
+static BOOL apic_timer_disabled = FALSE;
 
 /**
 	@Function:		ioapic_write_register
@@ -288,9 +289,6 @@ apic_enable(void)
 	apic_set_base(apic_get_base());
 	lapic_write_register(	LAPIC_REG_SPRS_INT_VEC, 
 							lapic_read_register(LAPIC_REG_SPRS_INT_VEC) | 0x100);
-	lapic_write_register(LAPIC_INIT_COUNT, LTIMER_DEFAULT_COUNT);
-	lapic_write_register(LAPIC_DIVIDE_CONFIG, LTIMER_DIVIDE_BY_16);
-	lapic_write_register(LAPIC_LVT_TIMER, LTIMER_PERIODIC | 0x40);
 	apic_ok = TRUE;
 	return TRUE;
 }

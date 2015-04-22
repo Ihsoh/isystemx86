@@ -211,6 +211,38 @@ static
 void
 invalid_stack_int(void);
 
+static
+void
+init_mf(void);
+
+static
+void
+mf_int(void);
+
+static
+void
+init_ac(void);
+
+static
+void
+ac_int(void);
+
+static
+void
+init_mc(void);
+
+static
+void
+mc_int(void);
+
+static
+void
+init_xf(void);
+
+static
+void
+xf_int(void);
+
 static uint32 gdt_addr = 0;			//GDT的物理地址
 static int32 current_tid;			//当前正在运行的任务的TID。
 static BOOL is_kernel_task = TRUE;	//当前的任务是否是内核任务。
@@ -226,6 +258,10 @@ static struct TSS invalidstck_tss;	//处理堆栈故障的任务的TSS。
 static struct TSS noimpl_tss;		//处理调用了未实现的中断的情况的任务的TSS。
 static struct TSS gp_tss;			//处理通用保护异常的任务的TSS。
 static struct TSS pf_tss;			//处理页故障的任务的TSS。
+static struct TSS mf_tss;			//处理x87 FPU浮点错误（数学错误）的故障的任务的TSS。
+static struct TSS ac_tss;			//处理对齐检查故障的任务的TSS。
+static struct TSS mc_tss;			//处理机器检查故障的任务的TSS。
+static struct TSS xf_tss;			//处理SIMD浮点异常的任务的TSS。
 
 static struct TSS timer_tss;					//定时器的任务的TSS。
 static struct TSS mouse_tss;					//鼠标的任务的TSS。
@@ -241,6 +277,9 @@ static BOOL mouse_loop_was_enabled = FALSE;	//!!!警告!!!
 											//程序错误的递增了mouse_count。所以
 											//在调用完毕enter_system()之后才将
 											//mouse_loop_was_enabled设为TRUE。
+static BOOL keyboard_loop_was_enabled = FALSE;
+static BOOL use_rtc_for_task_scheduler = FALSE;
+static uint8 rtc_rate = 15;
 
 
 /**
@@ -281,6 +320,10 @@ main(void)
 	init_invalid_tss();
 	init_invalid_seg();
 	init_invalid_stack();
+	init_mf();
+	init_ac();
+	init_mc();
+	init_xf();
 	init_interrupt();
 
 	init_disk("VA");
@@ -341,7 +384,21 @@ main(void)
 
 	enter_system();
 
+	config_system_get_bool(	"UseRTCForTaskScheduler", 
+							&use_rtc_for_task_scheduler);
+	if(enable_apic && apic_is_enable())
+		if(use_rtc_for_task_scheduler)
+		{
+			double temp;
+			if(config_system_get_number("RTCRate", &temp))
+				rtc_rate = (uint8)temp;
+			set_rtc_rate(rtc_rate);
+			enable_rtc();
+		}
+		else
+			apic_start_timer();
 	mouse_loop_was_enabled = TRUE;
+	keyboard_loop_was_enabled = TRUE;
 
 	console();
 }
@@ -681,7 +738,10 @@ init_timer(void)
 	task_gate.dcount = 0;
 	task_gate.selector = (10 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
+	//IRQ 0
 	set_gate_to_idt(0x40, (uint8 *)&task_gate);
+	//IRQ 8
+	set_gate_to_idt(0x70, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)timer_int, (uint32)stack);
 }
@@ -1115,7 +1175,8 @@ timer_int(void)
 {	
 	while(1)
 	{
-		if(apic_is_enable())
+		lock();
+		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
 		kt_jk_lock = FALSE;
 		if(will_reset_all_exceptions)
@@ -1174,9 +1235,14 @@ timer_int(void)
 				kernel_tss_desc.attr = AT386TSS + DPL0; 
 				set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
 				free_system_call_tss();
-				if(apic_is_enable())
+				if(!use_rtc_for_task_scheduler && apic_is_enable())
 					apic_start_timer();
-				irq_ack(0);
+				end_of_rtc();
+				unlock_without_sti();
+				if(use_rtc_for_task_scheduler)
+					irq_ack(8);
+				else
+					irq_ack(0);
 				asm volatile ("ljmp	$56, $0;");
 			}
 			else
@@ -1218,17 +1284,27 @@ timer_int(void)
 				set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 				set_desc_to_gdt(11, (uint8 *)&task_gate);
 				free_system_call_tss();
-				if(apic_is_enable())
+				if(!use_rtc_for_task_scheduler && apic_is_enable())
 					apic_start_timer();
-				irq_ack(0);
+				end_of_rtc();
+				unlock_without_sti();
+				if(use_rtc_for_task_scheduler)
+					irq_ack(8);
+				else
+					irq_ack(0);
 				asm volatile ("ljmp	$88, $0;");	
 			}
 		}
 		else
 		{
-			if(apic_is_enable())
+			if(!use_rtc_for_task_scheduler && apic_is_enable())
 				apic_start_timer();
-			irq_ack(0);
+			end_of_rtc();
+			unlock_without_sti();
+			if(use_rtc_for_task_scheduler)
+				irq_ack(8);
+			else
+				irq_ack(0);
 			asm volatile ("iret;");
 		}
 	}
@@ -1287,8 +1363,6 @@ mouse_int(void)
 {
 	while(1)
 	{
-		/*if(apic_is_enable())
-			apic_stop_timer();*/
 		int32 max_screen_width = vesa_get_width();
 		int32 max_screen_height = vesa_get_height();
 		uint8 data = inb(0x60);
@@ -1324,9 +1398,6 @@ mouse_int(void)
 					mouse_count = 0;
 					break;
 			}
-		
-		/*if(apic_is_enable())
-			apic_start_timer();*/
 		irq_ack(12);
 		asm volatile ("iret");
 	}
@@ -1414,13 +1485,10 @@ keyboard_int(void)
 {
 	while(1)
 	{
-		/*if(apic_is_enable())
-			apic_stop_timer();*/
 		uint8 scan_code = 0;
 		scan_code = inb(0x60);
-		tran_key(scan_code);
-		/*if(apic_is_enable())
-			apic_start_timer();*/
+		if(keyboard_loop_was_enabled)
+			tran_key(scan_code);
 		irq_ack(1);
 		asm volatile ("iret;");
 	}
@@ -1440,10 +1508,10 @@ ide_int(void)
 {
 	while(1)
 	{
-		if(apic_is_enable())
+		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
 		// 在这里插入代码。。。
-		if(apic_is_enable())
+		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
 		irq_ack(14);
 		asm volatile ("iret;");
@@ -1464,10 +1532,10 @@ fpu_int(void)
 {
 	while(1)
 	{
-		if(apic_is_enable())
+		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
 		outb(0xf0, 0x00);
-		if(apic_is_enable())
+		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
 		irq_ack(13);
 		asm volatile ("iret;");
@@ -1763,7 +1831,8 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 	kt_jk_lock = TRUE;					//unlock()之后等待任务调度器的执行。
 	will_reset_all_exceptions = TRUE;	//需要重设所有异常处理程序的状态。
 	unlock();
-	apic_start_timer();
+	if(!use_rtc_for_task_scheduler)
+		apic_start_timer();
 	while(kt_jk_lock);					//任务调度器会把kt_jk_lock设置为FALSE。
 	asm volatile ("cli");
 }
@@ -1837,7 +1906,8 @@ dividing_by_zero_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -1925,7 +1995,8 @@ bound_check_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2013,7 +2084,8 @@ invalid_opcode_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2179,7 +2251,8 @@ invalid_tss_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2266,7 +2339,8 @@ invalid_seg_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2353,7 +2427,8 @@ invalid_stack_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2440,7 +2515,8 @@ gp_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2527,13 +2603,353 @@ pf_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
 						"A task causes a error of page fault, the id is %d, the name is '%s'\n",
+						current_tid,
+						task->name);
+			log(LOG_ERROR, buffer);
+
+			print_str_p(buffer, CC_RED);
+			print_str("\n");
+			kill_task_and_jump_to_kernel(current_tid);
+		}
+	}
+}
+
+/*================================================================================
+					x87 FPU浮点错误（数学错误）故障, 0x10
+================================================================================*/
+
+/**
+	@Function:		init_mf
+	@Access:		Private
+	@Description:
+		初始化处理x87 FPU浮点错误（数学错误）故障的中断处理程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+init_mf(void)
+{
+	struct die_info info;
+	struct TSS * tss = &mf_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_MF, DI_INIT_MF);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(29, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (29 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x10, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)mf_int, (uint32)stack);
+}
+
+/**
+	@Function:		mf_int
+	@Access:		Private
+	@Description:
+		处理x87 FPU浮点错误（数学错误）故障的中断处理程序。
+	@Parameters:
+	@Return:		
+*/
+static
+void
+mf_int(void)
+{
+	while(1)
+	{
+		if(is_kernel_task)
+		{
+			struct die_info info;
+			fill_info(info, DC_MF, DI_MF);
+			die(&info);
+		}
+		else
+		{
+			lock();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
+			struct Task * task = get_task_info_ptr(current_tid);
+
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						"A task causes a exception of FPU float point error, the id is %d, the name is '%s'\n",
+						current_tid,
+						task->name);
+			log(LOG_ERROR, buffer);
+
+			print_str_p(buffer, CC_RED);
+			print_str("\n");
+			kill_task_and_jump_to_kernel(current_tid);
+		}
+	}
+}
+
+/*================================================================================
+								对齐检查故障, 0x11
+================================================================================*/
+
+/**
+	@Function:		init_ac
+	@Access:		Private
+	@Description:
+		初始化处理对齐检查故障的中断处理程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+init_ac(void)
+{
+	struct die_info info;
+	struct TSS * tss = &ac_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_AC, DI_INIT_AC);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(158, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (158 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x11, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)ac_int, (uint32)stack);
+}
+
+/**
+	@Function:		ac_int
+	@Access:		Private
+	@Description:
+		处理对齐检查故障的中断处理程序。
+	@Parameters:
+	@Return:		
+*/
+static
+void
+ac_int(void)
+{
+	while(1)
+	{
+		if(is_kernel_task)
+		{
+			struct die_info info;
+			fill_info(info, DC_AC, DI_AC);
+			die(&info);
+		}
+		else
+		{
+			lock();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
+			struct Task * task = get_task_info_ptr(current_tid);
+
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						"A task causes a exception of alignment check, the id is %d, the name is '%s'\n",
+						current_tid,
+						task->name);
+			log(LOG_ERROR, buffer);
+
+			print_str_p(buffer, CC_RED);
+			print_str("\n");
+			kill_task_and_jump_to_kernel(current_tid);
+		}
+	}
+}
+
+/*================================================================================
+							处理机器检查故障, 0x12
+================================================================================*/
+
+/**
+	@Function:		init_mc
+	@Access:		Private
+	@Description:
+		初始化处理机器检查故障的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+init_mc(void)
+{
+	struct die_info info;
+	struct TSS * tss = &mc_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_MC, DI_INIT_MC);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(159, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (159 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x12, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)mc_int, (uint32)stack);
+}
+
+/**
+	@Function:		mc_int
+	@Access:		Private
+	@Description:
+		处理机器检查故障的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+mc_int(void)
+{
+	if(is_kernel_task)
+	{
+		struct die_info info;
+		fill_info(info, DC_MC_KNL, DI_MC_KNL);
+		die(&info);
+	}
+	else
+	{
+		struct Task * task = get_task_info_ptr(current_tid);
+		int8 buffer[1024];
+		sprintf_s(	buffer,
+					1024,
+					DI_MC_TSK,
+					current_tid,
+					task->name);
+		struct die_info info;
+		fill_info(info, DC_MC_TSK, buffer);
+		die(&info);
+	}
+}
+
+/*================================================================================
+								SIMD浮点异常故障, 0x13
+================================================================================*/
+
+/**
+	@Function:		init_xf
+	@Access:		Private
+	@Description:
+		初始化处理SIMD浮点异常故障的中断处理程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+init_xf(void)
+{
+	struct die_info info;
+	struct TSS * tss = &xf_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_XF, DI_INIT_XF);
+		die(&info);
+	}
+	struct Desc tss_desc;	
+	struct Gate task_gate;	
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(160, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (160 << 3) | RPL0;
+	task_gate.attr = ATTASKGATE | DPL0;
+	set_gate_to_idt(0x13, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)xf_int, (uint32)stack);
+}
+
+/**
+	@Function:		xf_int
+	@Access:		Private
+	@Description:
+		处理SIMD浮点异常故障的中断处理程序。
+	@Parameters:
+	@Return:		
+*/
+static
+void
+xf_int(void)
+{
+	while(1)
+	{
+		if(is_kernel_task)
+		{
+			struct die_info info;
+			fill_info(info, DC_XF, DI_XF);
+			die(&info);
+		}
+		else
+		{
+			lock();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
+			struct Task * task = get_task_info_ptr(current_tid);
+
+			int8 buffer[1024];
+			sprintf_s(	buffer,
+						1024,
+						"A task causes a exception of SIMD float point, the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
@@ -2647,7 +3063,8 @@ noimpl_int(void)
 		else
 		{
 			lock();
-			apic_stop_timer();
+			if(!use_rtc_for_task_scheduler)
+				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 			int32 intn = get_unimpl_intn();
 

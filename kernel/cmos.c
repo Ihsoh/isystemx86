@@ -319,8 +319,39 @@ set_rtc_rate(uint8 rate)
 void
 end_of_rtc(void)
 {
-	common_lock();
-	outb(0x70, 0x0c);
-	inb(0x71);
-	common_unlock();
+	if(rtc_state)
+	{
+		common_lock();
+		outb(0x70, 0x0c);
+		inb(0x71);
+		common_unlock();
+	}
+}
+
+/**
+	@Function:		enable_nmi
+	@Access:		Public
+	@Description:
+		启用NMI。
+	@Parameters:
+	@Return:
+*/
+void
+enable_nmi(void)
+{
+	outb(0x70, inb(0x70) & 0x7f);
+}
+
+/**
+	@Function:		disable_nmi
+	@Access:		Public
+	@Description:
+		禁用NMI。
+	@Parameters:
+	@Return:
+*/
+void
+disable_nmi(void)
+{
+	outb(0x70, inb(0x70) | 0x80);
 }

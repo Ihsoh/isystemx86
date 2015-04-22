@@ -118,4 +118,31 @@ die(IN struct die_info * info);
 	#define	DC_INIT_CONFIG			0x0000001e
 	#define	DI_INIT_CONFIG			"Failed to initialize system configuration. Please check "SYSTEM_CONFIG_FILE
 
+	#define	DC_INIT_MF				0x0000001f
+	#define	DI_INIT_MF				"Failed to initialize procedure to process exception of FPU float point error"
+
+	#define	DC_MF 					0x00000020
+	#define	DI_MF 					"Kernel causes a exception of FPU float point error"
+
+	#define	DC_INIT_AC 				0x00000021
+	#define	DI_INIT_AC 				"Failed to initialize procedure to process exception of alignment check"
+
+	#define	DC_AC 					0x00000022
+	#define	DI_AC 					"Kernel causes a exception of alignment check"
+
+	#define	DC_INIT_MC				0x00000023
+	#define	DI_INIT_MC				"Failed to initialize procedure to process exception of machine check"
+
+	#define	DC_MC_KNL				0x00000024
+	#define	DI_MC_KNL				"Kernel causes a exception of machine check"
+
+	#define	DC_MC_TSK				0x00000025
+	#define	DI_MC_TSK				"A task causes a exception of machine check, the id is %d, the name is '%s'"
+
+	#define	DC_INIT_XF 				0x00000026
+	#define	DI_INIT_XF 				"Failed to initialize procedure to process exception of SIMD float point"
+
+	#define	DC_XF 					0x00000027
+	#define	DI_XF 					"Kernel causes a exception of SIMD float point"
+
 #endif

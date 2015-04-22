@@ -61,4 +61,12 @@ extern
 void
 end_of_rtc(void);
 
+extern
+void
+enable_nmi(void);
+
+extern
+void
+disable_nmi(void);
+
 #endif

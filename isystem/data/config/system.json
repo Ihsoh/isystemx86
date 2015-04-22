@@ -5,6 +5,8 @@
   Group:"Ihsoh Software",
   WriteLogToDiskInRealTime:true,
   EnableAPIC:true,
+  UseRTCForTaskScheduler:true,
+  RTCRate:15,
   Console:{
     ShowVerInfoWhenBoot:true,
     ShowDiskInfoWhenBoot:true,

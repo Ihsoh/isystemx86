@@ -1006,14 +1006,11 @@ print_err_str_p(IN const int8 * str,
 void
 clear_screen(void)
 {
-	if(kernel_is_knltask())
-	{
-		int32 i;
-		set_cursor(0, 0);
-		for(i = 0; i < COLUMN * ROW; i++)
-			print_char(' ');
-		set_cursor(0, 0);
-	}
+	int32 i;
+	set_cursor(0, 0);
+	for(i = 0; i < COLUMN * ROW; i++)
+		print_char(' ');
+	set_cursor(0, 0);
 }
 
 /**
