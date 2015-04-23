@@ -81,8 +81,8 @@ init_tasks(void)
 }
 
 /**
-	@Function:		create_task
-	@Access:		Public
+	@Function:		_create_task
+	@Access:		Private
 	@Description:
 		创建一个任务。
 	@Parameters:
@@ -96,22 +96,28 @@ init_tasks(void)
 			程序的长度。
 		working_dir, int8 *, IN
 			工作目录。
+		task_type, TaskType, IN
+			任务类型。
 	@Return:
 		int32
 			如果失败则返回-1, 否则返回任务的 ID。
 */
+static
 int32
-create_task(IN int8 * name,
-			IN int8 * param,
-			IN uint8 * app,
-			IN uint32 app_len,
-			IN int8 * working_dir)
+_create_task(	IN int8 * name,
+				IN int8 * param,
+				IN uint8 * app,
+				IN uint32 app_len,
+				IN int8 * working_dir,
+				IN TaskType task_type)
 {
+	if(task_type != TASK_TYPE_USER && task_type != TASK_TYPE_SYSTEM)
+		return -1;
 	if(app_len > MAX_APP_LEN)
 		return -1;
 	int32 tid = -1;
 	struct Task * task;
-	uint32 ui;	
+	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
 	{
 		task = tasks + ui;
@@ -123,14 +129,17 @@ create_task(IN int8 * name,
 	}
 	if(tid != -1)
 	{
+		task->used = 1;
 		task->on_exit = NULL;
 		task->retvalue = 0;
 		task->running = 0;
-		tasks->is_system_call = FALSE;
-		tasks->fs_lock = FALSE;
-		tasks->stdin = NULL;
-		tasks->stdout = NULL;
-		tasks->stderr = NULL;
+		task->is_system_call = FALSE;
+		task->fs_lock = FALSE;
+		task->stdin = NULL;
+		task->stdout = NULL;
+		task->stderr = NULL;
+		task->type = task_type;
+
 		strcpy(task->name, name);
 		strcpy(task->param, param);
 		strcpy(task->working_dir, working_dir);
@@ -173,13 +182,23 @@ create_task(IN int8 * name,
 		code_seg_desc.basel = (uint16)(base_addr & 0xFFFF);
 		code_seg_desc.basem = (uint8)((base_addr >> 16) & 0xFF);
 		code_seg_desc.baseh = (uint8)((base_addr >> 24) & 0xFF);
-		code_seg_desc.attr = ATCE | DPL3 | D32 | G | 0x0F00;
+		if(task_type == TASK_TYPE_USER)
+			code_seg_desc.attr 						// 如果任务类型是用户任务，
+				= ATCE | DPL3 | D32 | G | 0x0F00;	// 则DPL为3表示运行在Ring3。
+		else if(task_type == TASK_TYPE_SYSTEM)
+			code_seg_desc.attr 						// 如果任务类型是系统任务，
+				= ATCE | DPL0 | D32 | G | 0x0F00;	// 则DPL为0表示运行在Ring0。
 		
 		data_seg_desc.limitl = 0xFFFF;
 		data_seg_desc.basel = (uint16)(base_addr & 0xFFFF);
 		data_seg_desc.basem = (uint8)((base_addr >> 16) & 0xFF);
 		data_seg_desc.baseh = (uint8)((base_addr >> 24) & 0xFF);
-		data_seg_desc.attr = ATDW | DPL3 | D32 | G | 0x0F00;
+		if(task_type == TASK_TYPE_USER)
+			data_seg_desc.attr						// 如果任务类型是用户任务，
+				= ATDW | DPL3 | D32 | G | 0x0F00;	// 则DPL为3表示读写数据需要Ring3。
+		else if(task_type == TASK_TYPE_SYSTEM)
+			data_seg_desc.attr						// 如果任务类型是用户任务，
+				= ATDW | DPL0 | D32 | G | 0x0F00;	// 则DPL为0表示读写数据需要Ring0。
 		
 		data_seg_ring0_desc.limitl = 0xFFFF;
 		data_seg_ring0_desc.basel = (uint16)(base_addr & 0xFFFF);
@@ -209,12 +228,26 @@ create_task(IN int8 * name,
 		task->tss.ebp = 0;
 		task->tss.esi = 0;
 		task->tss.edi = 0;
-		task->tss.es = data_seg_desc_index << 3 | RPL3;
-		task->tss.cs = code_seg_desc_index << 3 | RPL3;
-		task->tss.ss = data_seg_desc_index << 3 | RPL3;
-		task->tss.ds = data_seg_desc_index << 3 | RPL3;
-		task->tss.fs = data_seg_desc_index << 3 | RPL3;
-		task->tss.gs = data_seg_desc_index << 3 | RPL3;
+		if(task_type == TASK_TYPE_USER)
+		{
+			task->tss.es = data_seg_desc_index << 3 | RPL3;
+			task->tss.cs = code_seg_desc_index << 3 | RPL3;
+			task->tss.ss = data_seg_desc_index << 3 | RPL3;
+			task->tss.ds = data_seg_desc_index << 3 | RPL3;
+			task->tss.fs = data_seg_desc_index << 3 | RPL3;
+			task->tss.gs = data_seg_desc_index << 3 | RPL3;
+		}
+		else if(task_type == TASK_TYPE_SYSTEM)
+		{
+			task->tss.es = data_seg_desc_index << 3 | RPL0;
+			task->tss.cs = code_seg_desc_index << 3 | RPL0;
+			task->tss.ss = data_seg_desc_index << 3 | RPL0;
+			task->tss.ds = data_seg_desc_index << 3 | RPL0;
+			task->tss.fs = data_seg_desc_index << 3 | RPL0;
+			task->tss.gs = data_seg_desc_index << 3 | RPL0;
+		}
+
+
 		task->tss.ldt = 0;
 		task->tss.trap = 0;
 		task->tss.iobase = sizeof(struct TSS);
@@ -255,10 +288,80 @@ create_task(IN int8 * name,
 		task->init_i387 = 0;
 		task->ran = 0;
 		task->ready = FALSE;
-		task->used = 1;
 	}
 	return tid;
 }
+
+/**
+	@Function:		create_task
+	@Access:		Public
+	@Description:
+		创建一个用户任务。
+	@Parameters:
+		name, int8 *, IN
+			任务名。
+		param, int8 *, IN
+			运行这个任务所提供的参数。
+		app, uint8, IN
+			程序。
+		app_len, uint32, IN
+			程序的长度。
+		working_dir, int8 *, IN
+			工作目录。
+	@Return:
+		int32
+			如果失败则返回-1, 否则返回任务的 ID。
+*/
+int32
+create_task(IN int8 * name,
+			IN int8 * param,
+			IN uint8 * app,
+			IN uint32 app_len,
+			IN int8 * working_dir)
+{
+	return _create_task(name, 
+						param, 
+						app, 
+						app_len, 
+						working_dir, 
+						TASK_TYPE_USER);
+}
+
+/**
+	@Function:		create_sys_task
+	@Access:		Public
+	@Description:
+		创建一个系统任务。
+	@Parameters:
+		name, int8 *, IN
+			任务名。
+		param, int8 *, IN
+			运行这个任务所提供的参数。
+		app, uint8, IN
+			程序。
+		app_len, uint32, IN
+			程序的长度。
+		working_dir, int8 *, IN
+			工作目录。
+	@Return:
+		int32
+			如果失败则返回-1, 否则返回任务的 ID。
+*/
+int32
+create_sys_task(IN int8 * name,
+				IN int8 * param,
+				IN uint8 * app,
+				IN uint32 app_len,
+				IN int8 * working_dir)
+{
+	return _create_task(name, 
+						param, 
+						app, 
+						app_len, 
+						working_dir, 
+						TASK_TYPE_SYSTEM);
+}
+
 
 /**
 	@Function:		kill_task
@@ -454,8 +557,8 @@ task_ready(IN int32 tid)
 }
 
 /**
-	@Function:		create_task_by_file
-	@Access:		Public
+	@Function:		_create_task_by_file
+	@Access:		Private
 	@Description:
 		通过程序文件创建一个任务。
 	@Parameters:
@@ -465,14 +568,18 @@ task_ready(IN int32 tid)
 			运行这个任务所提供的参数。
 		working_dir, int8 *, IN
 			工作目录。
+		task_type, TaskType, IN
+			任务类型。
 	@Return:
 		int32
 			如果失败则返回-1, 否则返回任务的 ID。
 */
+static
 int32
-create_task_by_file(IN int8 * filename,
-					IN int8 * param,
-					IN int8 * working_dir)
+_create_task_by_file(	IN int8 * filename,
+						IN int8 * param,
+						IN int8 * working_dir,
+						IN TaskType task_type)
 {
 	if(	filename == NULL 
 		|| param == NULL 
@@ -504,13 +611,68 @@ create_task_by_file(IN int8 * filename,
 		return -1;
 	}
 
-	int32 tid = create_task(filename,
-							param, app + 256,
-							flen(fptr) - 256,
-							working_dir);
+	int32 tid = _create_task(	filename,
+								param, app + 256,
+								flen(fptr) - 256,
+								working_dir,
+								task_type);
 	free_memory(app);
 	fclose(fptr);
 	return tid;
+}
+
+/**
+	@Function:		create_task_by_file
+	@Access:		Private
+	@Description:
+		通过程序文件创建一个用户任务。
+	@Parameters:
+		filename, int8 *, IN
+			程序文件路径。
+		param, int8 *, IN
+			运行这个任务所提供的参数。
+		working_dir, int8 *, IN
+			工作目录。
+	@Return:
+		int32
+			如果失败则返回-1, 否则返回任务的 ID。
+*/
+int32
+create_task_by_file(	IN int8 * filename,
+						IN int8 * param,
+						IN int8 * working_dir)
+{
+	return _create_task_by_file(filename,
+								param,
+								working_dir,
+								TASK_TYPE_USER);
+}
+
+/**
+	@Function:		create_sys_task_by_file
+	@Access:		Private
+	@Description:
+		通过程序文件创建一个系统任务。
+	@Parameters:
+		filename, int8 *, IN
+			程序文件路径。
+		param, int8 *, IN
+			运行这个任务所提供的参数。
+		working_dir, int8 *, IN
+			工作目录。
+	@Return:
+		int32
+			如果失败则返回-1, 否则返回任务的 ID。
+*/
+int32
+create_sys_task_by_file(IN int8 * filename,
+						IN int8 * param,
+						IN int8 * working_dir)
+{
+	return _create_task_by_file(filename,
+								param,
+								working_dir,
+								TASK_TYPE_SYSTEM);
 }
 
 /**

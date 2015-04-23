@@ -2224,17 +2224,56 @@ exec(	IN int8 * cmd,
 			print_str("\n");
 		}
 
-		else if(strcmp(name, "test") == 0)
+		else if(strcmp(name, "hash") == 0)
 		{
-			struct CMOSDateTime dt;
-			dt.year = 1969;
-			dt.month = 7;
-			dt.day = 25;
-			dt.hour = 1;
-			dt.minute = 2;
-			dt.second = 3;
+			#include <encryptionlib/md5.h>
+			#include <encryptionlib/sha1.h>
+			#include <encryptionlib/sha256.h>
+			#include <encryptionlib/sha512.h>
 
-			set_cmos_date_time(&dt);
+			int8 text[1024];
+			parse_cmd(NULL, text, 1023);
+
+			print_str_p("MD5:    ", CC_GREEN);
+			Md5Context md5_context;
+			MD5_HASH md5_hash;
+			Md5Initialise(&md5_context);
+			Md5Update(&md5_context, text, strlen(text));
+			Md5Finalise(&md5_context, &md5_hash);
+			uint32 ui;
+			for(ui = 0; ui < MD5_HASH_SIZE; ui++)
+				printuchex(md5_hash.bytes[ui]);
+			print_str("\n");
+
+			print_str_p("SHA1:   ", CC_GREEN);
+			Sha1Context sha1_context;
+			SHA1_HASH sha1_hash;
+			Sha1Initialise(&sha1_context);
+			Sha1Update(&sha1_context, text, strlen(text));
+			Sha1Finalise(&sha1_context, &sha1_hash);
+			for(ui = 0; ui < SHA1_HASH_SIZE; ui++)
+				printuchex(sha1_hash.bytes[ui]);
+			print_str("\n");
+
+			print_str_p("SHA256: ", CC_GREEN);
+			Sha256Context sha256_context;
+			SHA256_HASH sha256_hash;
+			Sha256Initialise(&sha256_context);
+			Sha256Update(&sha256_context, text, strlen(text));
+			Sha256Finalise(&sha256_context, &sha256_hash);
+			for(ui = 0; ui < SHA256_HASH_SIZE; ui++)
+				printuchex(sha256_hash.bytes[ui]);
+			print_str("\n");
+
+			print_str_p("SHA512: ", CC_GREEN);
+			Sha512Context sha512_context;
+			SHA512_HASH sha512_hash;
+			Sha512Initialise(&sha512_context);
+			Sha512Update(&sha512_context, text, strlen(text));
+			Sha512Finalise(&sha512_context, &sha512_hash);
+			for(ui = 0; ui < SHA512_HASH_SIZE; ui++)
+				printuchex(sha512_hash.bytes[ui]);
+			print_str("\n");
 		}
 
 		//Batch

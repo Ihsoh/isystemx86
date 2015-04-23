@@ -17,13 +17,14 @@ bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
 bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj bin/toaruos_pci.obj	\
-bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj $(StringObj)
+bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
+$(StringObj)
 Linker=ld -m elf_i386
 Include=-I../ilib -I../
 
 $(Target): bin $(Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
--L../jsonlib/bin -ljsonlib -L../dslib/bin -ldslib
+-L../jsonlib/bin -ljsonlib -L../dslib/bin -ldslib -L../encryptionlib/bin -lencryptionlib
 
 bin:
 	-mkdir bin
@@ -171,6 +172,9 @@ bin/interrupts.obj: interrupts.c interrupts.h
 
 bin/config.obj: config.c config.h
 	$(CC) $(CFlags) -c config.c -o bin/config.obj $(Include)
+
+bin/md5.obj: md5.c md5.h
+	$(CC) $(CFlags) -c md5.c -o bin/md5.obj $(Include)
 
 .PHONY:Clear
 

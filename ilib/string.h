@@ -13,6 +13,8 @@ extern unsigned int _strlen(const char * str);
 #define strncpy(dst, src, count) (_memcpy((dst), (src), (count)))
 #define memcpy(dst, src, count) (_memcpy((dst), (src), (count)))
 extern void * _memcpy(void * dst, const void * src, unsigned int count);
+#define	memset(s, ch, n) _memset((s), (ch), (n))
+void * _memset(void * s, int ch, unsigned int n);
 #define	strcpy(dst, src) (_strcpy((dst), (src)))
 extern char * _strcpy(char * dst, const char * src);
 #define	strcat(dst, src) (_strcat((dst), (src)))

@@ -26,6 +26,15 @@ void * _memcpy(void * dst, const void * src, unsigned int count)
 	return r;
 }
 
+void * _memset(void * s, int ch, unsigned int n)
+{
+	unsigned char * carr = (unsigned char *)s;
+	unsigned int ui;
+	for(ui = 0; ui < n; ui++)
+		carr[ui] = ch;
+	return s;
+}
+
 char * _strcpy(char * dst, const char * src)
 {
 	char * r = dst;

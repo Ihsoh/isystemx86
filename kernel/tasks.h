@@ -20,6 +20,12 @@
 #define MAX_TASK_MQUEUE_COUNT		16
 #define	TASK_BASE_ADDR				0x00000000
 
+typedef enum
+{
+	TASK_TYPE_USER		= 1,
+	TASK_TYPE_SYSTEM	= 2
+} TaskType;
+
 typedef void (* OnTaskExit)(int32 tid, int32 retvalue);
 
 //结构名:	Task
@@ -52,6 +58,9 @@ struct Task
 	FILE * 				stdin;				//任务的标准输入。如果为NULL则为键盘，否则为文件。
 	FILE *				stdout;				//任务的标准输出。如果为NULL则为屏幕，否则为文件。
 	FILE *				stderr;				//任务的标准错误。如果为NULL则为屏幕，否则为文件。
+	TaskType 			type;				//任务的类型。
+											//如果为TASK_TYPE_USER，则表示该任务为用户任务，运行于Ring3。
+											//如果为TASK_TYPE_SYSTEM，则表示该任务为系统任务，运行于Ring0。
 	OnTaskExit			on_exit;			//当任务退出时调用。
 };
 
@@ -67,6 +76,14 @@ create_task(IN int8 * name,
 			IN uint8 * app,
 			IN uint32 app_len,
 			IN int8 * working_dir);
+
+extern
+int32
+create_sys_task(IN int8 * name,
+				IN int8 * param,
+				IN uint8 * app,
+				IN uint32 app_len,
+				IN int8 * working_dir);
 
 extern
 BOOL
@@ -103,6 +120,12 @@ int32
 create_task_by_file(IN int8 * filename,
 					IN int8 * param,
 					IN int8 * working_dir);
+
+extern
+int32
+create_sys_task_by_file(IN int8 * filename,
+						IN int8 * param,
+						IN int8 * working_dir);
 
 extern
 BOOL
