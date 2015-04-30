@@ -31,6 +31,7 @@
 #include "interrupts.h"
 #include "config.h"
 #include "cmlock.h"
+#include "ahci.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
@@ -331,6 +332,9 @@ main(void)
 	init_disk("HD");
 	init_ide();
 
+
+	ahci_init();
+
 	init_dsl();
 	init_jsonl();
 	config_init();
@@ -364,12 +368,8 @@ main(void)
 	}
 	else
 		pic_unmask_all();
-	
-	pci_init();
 
 	ifs1blks_init();
-
-	disk_va_init();
 	
 	sti();
 
@@ -381,6 +381,9 @@ main(void)
 	enable_tasks_lock();
 	enable_console_lock();
 	enable_ifs1_lock();
+
+	pci_init();
+	disk_va_init();
 
 	enter_system();
 

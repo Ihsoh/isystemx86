@@ -60,7 +60,8 @@ mqueue_validate_name(IN int8 * name)
 		if(!(	(chr >= 'A' && chr <= 'Z') 
 				|| (chr >= 'a' && chr <= 'z') 
 				|| (chr >= '0' && chr <= '9') 
-				|| chr == '_'))
+				|| chr == '_'
+				|| chr == '-'))
 			return FALSE;
 	}
 	return TRUE;

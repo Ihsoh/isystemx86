@@ -54,6 +54,12 @@ WRITE_FILE	VA:/isystem/wd/helloworld.wd isystem/wd/helloworld.wd
 MAKE_FILE	VA:/isystem/wd/ a.wd
 WRITE_FILE	VA:/isystem/wd/a.wd isystem/wd/a.wd
 
+#System files directory
+MAKE_DIR	VA:/isystem/ sys
+
+MAKE_FILE	VA:/isystem/sys/ pci.sys
+WRITE_FILE	VA:/isystem/sys/pci.sys sys/pci/bin/pci.bin
+
 #System dump directory
 MAKE_DIR	VA:/isystem/ dump
 

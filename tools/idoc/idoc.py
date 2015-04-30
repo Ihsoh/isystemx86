@@ -305,7 +305,7 @@ def main():
 	build(project_path, document_path, True)
 
 	global total_line
-	print total_line
+	print "Total line:", total_line
 
 if __name__ == '__main__':
 	main()

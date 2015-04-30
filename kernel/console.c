@@ -2276,6 +2276,10 @@ exec(	IN int8 * cmd,
 			print_str("\n");
 		}
 
+		else if(strcmp(name, "test") == 0)
+		{
+		}
+
 		//Batch
 		else if(strcmp(name, "goto") == 0)
 		{
@@ -2574,23 +2578,6 @@ call_init_bat(void)
 	set_var_value(global_vars_s, "__slave_ver__", SLAVE_VER);
 
 	batch(SYSTEM_INIT_BAT);
-}
-
-static
-void
-print_file(IN const int8 * path)
-{
-	FILE * fptr = fopen(path, FILE_MODE_READ);
-	if(fptr != NULL)
-	{
-		int8 buffer[64 * 1024];
-		fread(fptr, buffer, flen(fptr));
-		buffer[flen(fptr)] = '\0';
-		print_str(buffer);
-		fclose(fptr);
-	}
-	else
-		print_str_p("ERROR: Cannot open file!\n", CC_RED);
 }
 
 /**

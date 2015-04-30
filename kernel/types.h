@@ -29,7 +29,6 @@ typedef	void *	object;
 
 #define	NULL	((void *)0)
 
-#define	BYTE(n)	(n)
 #define	KB(n)	((n) * 1024)
 #define	MB(n)	((n) * 1024 * 1024)
 #define	GB(n)	((n) * 1024 * 1024 * 1024)
@@ -37,6 +36,11 @@ typedef	void *	object;
 #define	BOOL	bool
 #define	TRUE	1
 #define	FALSE	0
+
+#define	BYTE	uint8
+#define	WORD	uint16
+#define	DWORD	uint32
+#define	QWORD	uint64
 
 //修饰函数的参数，参数作为输入。
 //应用场合：

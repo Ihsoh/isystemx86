@@ -20,6 +20,9 @@ $(Target):	bin ilib/bin/libilib.a dslib/bin/libdslib.a jsonlib/bin/libjsonlib.a	
 	cd apps/edit && make
 	cd apps/iasm && make
 	cd apps/WDVM-ISystemx86 && make
+
+	cd sys/pci && make
+
 #tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
 	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
 	cd tools/idoc/ && python idoc.py ../../kernel ../../doc/isystemx86-kernel-doc
@@ -70,3 +73,5 @@ Clear:
 	cd apps/edit && make Clear
 	cd apps/iasm && make Clear
 	cd apps/WDVM-ISystemx86 && make Clear
+
+	cd sys/pci && make Clear

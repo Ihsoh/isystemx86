@@ -162,12 +162,13 @@ _create_task(	IN int8 * name,
 			task->mqueue_ids[ui] = 0;
 
 		//task->addr + 0: int32, Task ID
-		//task->addr + 4KB + 0: uint32, System Call Function Number and Sub Function Number
-		//task->addr + 4KB + 4: uint32, SParams Structure address
 		memcpy(task->addr + 0, (uint8 *)&tid, sizeof(int32));
-		*(uint32 *)(task->addr + KB(4) + 0) = 0;
-		*(uint32 *)(task->addr + KB(4) + 4) = 0;
-		*(uint32 *)(task->addr + KB(4) + 8) = 0;
+
+		//task->addr + 4: uint32, Object address
+		//该值域保存了一个32位的无符号整数，该无符号整数为一个地址。
+		//该地址指向一个由内核扩展文件(*.sys)提供的对象。
+		//如果该值为0，则代表内核扩展文件未初始化完毕。
+		*(uint32 *)(task->addr + 4) = 0;
 	
 		uint32 code_seg_desc_index = 400 + tid * 5 + 2;
 		uint32 data_seg_desc_index = 400 + tid * 5 + 3;
@@ -604,15 +605,28 @@ _create_task_by_file(	IN int8 * filename,
 
 	char file_symbol[6] = {0, 0, 0, 0, 0, 0};
 	memcpy(file_symbol, app, 5);
-	if(strcmp(file_symbol, "MTA32") != 0)
+	if(task_type == TASK_TYPE_USER)
 	{
-		free_memory(app);
-		fclose(fptr);
-		return -1;
+		if(strcmp(file_symbol, "MTA32") != 0)
+		{
+			free_memory(app);
+			fclose(fptr);
+			return -1;
+		}
+	}
+	else if(task_type == TASK_TYPE_SYSTEM)
+	{
+		if(strcmp(file_symbol, "SYS32") != 0)
+		{
+			free_memory(app);
+			fclose(fptr);
+			return -1;
+		}
 	}
 
 	int32 tid = _create_task(	filename,
-								param, app + 256,
+								param,
+								app + 256,
 								flen(fptr) - 256,
 								working_dir,
 								task_type);

@@ -45,8 +45,7 @@ struct FileBlock
 	uint blockids[16128];			//数据块ID集合. 如果为0xFFFFFFFF, 则未指向任何数据块.
 } __attribute__((packed));
 
-#define	DATA_BLOCK_DATA_LEN	65024
-
+#define	DATA_BLOCK_DATA_LEN	65492
 //结构名:	DataBlock
 //说明:		数据块
 struct DataBlock
@@ -56,11 +55,11 @@ struct DataBlock
 	int type;						//2
 	uint length;					//长度
 	
-	//500
-	uchar reserve[500];				//保留
+	//32
+	uchar reserve[32];				//保留
 
-	//65024
-	uchar data[65024];				//数据
+	//65492
+	uchar data[DATA_BLOCK_DATA_LEN];//数据
 } __attribute__((packed));
 
 //结构名:	DirBlock

@@ -7,20 +7,23 @@ TargetDir=bin
 Out=kernel.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
+AS=as
 CFlags=-O0 -fno-stack-protector -nostdinc -I../ilib -m32 -march=i386 -mtune=i386
 StringObj=../ilib/bin/string.obj
-Objs=bin/kernel.obj bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
+Objs=bin/kernel.obj	\
+bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
 bin/console.obj bin/ifs1disk.obj bin/ifs1vdisk.obj bin/ifs1blocks.obj bin/memory.obj \
 bin/kfuncs.obj bin/ifs1hdisk.obj bin/cmos.obj bin/ifs1fs.obj bin/tasks.obj \
 bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scall_fs.obj \
 bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
-bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj bin/toaruos_pci.obj	\
+bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
+bin/ahci.obj 	\
 $(StringObj)
 Linker=ld -m elf_i386
-Include=-I../ilib -I../
+Include=-I../ilib -I../ -I../sys
 
 $(Target): bin $(Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
@@ -29,7 +32,7 @@ $(Target): bin $(Objs)
 bin:
 	-mkdir bin
 
-bin/kernel.obj: kernel.c
+bin/kernel.obj: kernel.c kernel.h
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include)
 
 bin/386.obj: 386.c 386.h types.h
@@ -173,8 +176,8 @@ bin/interrupts.obj: interrupts.c interrupts.h
 bin/config.obj: config.c config.h
 	$(CC) $(CFlags) -c config.c -o bin/config.obj $(Include)
 
-bin/md5.obj: md5.c md5.h
-	$(CC) $(CFlags) -c md5.c -o bin/md5.obj $(Include)
+bin/ahci.obj: ahci.c ahci.h
+	$(CC) $(CFlags) -c ahci.c -o bin/ahci.obj $(Include)
 
 .PHONY:Clear
 

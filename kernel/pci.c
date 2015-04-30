@@ -7,84 +7,166 @@
 */
 
 #include "pci.h"
-#include "toaruos_pci.h"
-#include "ifs1fs.h"
+#include "mqueue.h"
+#include "system.h"
 #include <string.h>
 
-uint32 pci_devices_count = 0;
-PCIDevice pci_devices[MAX_PCI_DEVICES_COUNT];
+#define	RETRY_COUNT				0xffffffff
 
-static
-void
-_pci_find_device(	IN uint32 device,
-					IN uint16 vendorid,
-					IN uint16 deviceid,
-					OUT void * extra)
-{
-	if(pci_devices_count == MAX_PCI_DEVICES_COUNT)
-		return;
-	PCIDevicePtr pci_device = pci_devices + pci_devices_count;
-	pci_device->device = device;
-	pci_device->vendorid = vendorid;
-	pci_device->deviceid = deviceid;
-	pci_device->vendor_name = pci_vendor_lookup(vendorid);
-	pci_device->device_name = pci_device_lookup(vendorid, deviceid);
-	pci_devices_count++;
-	*((uint32 *)extra) = device;
-}
+#define	FUNC_INIT				1
+#define	FUNC_UPDATE				2
+#define	FUNC_GET_DEV			3
+#define	FUNC_WRITE_TO_FILE		4
 
+#define	MESSAGE_TID 			-1000
+
+static int32 tid = -1;
+static MQueuePtr mqueue = NULL;
+static PCIDevice pci_devices[MAX_PCI_DEVICES_COUNT];
+
+/**
+	@Function:		pci_init
+	@Access:		Public
+	@Description:
+		初始化PCI。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则初始化成功，否则失败。		
+*/
 BOOL
 pci_init(void)
 {
-	pci_update();
-	return TRUE;
+	tid = create_sys_task_by_file(	SYSTEM_PATH"sys/pci.sys", 
+									SYSTEM_PATH"sys/pci.sys", 
+									SYSTEM_PATH"sys/");
+	if(tid == -1)
+		return FALSE;
+	if(!task_ready(tid))
+		return FALSE;
+	uint32 retry = RETRY_COUNT;
+	while(	(mqueue = mqueue_get_ptr_by_name("System-PCI")) == NULL 
+			&& --retry != 0);
+	if(mqueue == NULL)
+		return FALSE;
+	MQueueMessage message;
+	message.tid = MESSAGE_TID;
+	message.message = FUNC_INIT;
+	if(!mqueue_add_message(mqueue, MQUEUE_OUT, &message))
+		return FALSE;
+	MQueueMessagePtr messageptr = NULL;
+	retry = RETRY_COUNT;
+	while(	(messageptr = mqueue_pop_message(mqueue, MQUEUE_IN)) == NULL
+			&& --retry != 0);
+	BOOL r = FALSE;
+	if(messageptr != NULL)
+	{
+		r = messageptr->param0.bool_value;
+		free_memory(messageptr);
+	}
+	return r;
 }
 
+/**
+	@Function:		pci_update
+	@Access:		Public
+	@Description:
+		更新PCI信息。
+	@Parameters:
+	@Return:		
+*/
 void
 pci_update(void)
 {
-	pci_devices_count = 0;
-	uint32 extra = 0;
-	pci_scan(&_pci_find_device, -1, &extra);
+	if(mqueue == NULL)
+		return;
+	MQueueMessage message;
+	message.tid = MESSAGE_TID;
+	message.message = FUNC_UPDATE;
+	mqueue_add_message(mqueue, MQUEUE_OUT, &message);
 }
 
+/**
+	@Function:		pci_get_device
+	@Access:		Public
+	@Description:
+		获取PCI设备的信息。
+	@Parameters:
+		index, uint32, IN
+			PCI设备的索引(0 ~ 63)。
+	@Return:
+		PCIDevicePtr
+			返回NULL则失败，否则返回PCI设备的信息。
+*/
 PCIDevicePtr
 pci_get_device(IN uint32 index)
 {
-	if(index >= pci_devices_count)
+	if(mqueue == NULL)
 		return NULL;
+	MQueueMessage message;
+	message.tid = MESSAGE_TID;
+	message.message = FUNC_GET_DEV;
+	message.param0.uint32_value = index;
+	if(!mqueue_add_message(mqueue, MQUEUE_OUT, &message))
+		return NULL;
+	MQueueMessagePtr messageptr = NULL;
+	uint32 retry = RETRY_COUNT;
+	while(	(messageptr = mqueue_pop_message(mqueue, MQUEUE_IN)) == NULL
+			&& --retry != 0);
+	if(messageptr == NULL)
+		return NULL;
+	PCIDevicePtr p = (PCIDevicePtr)messageptr->param0.uint32_value;
+	free_memory(messageptr);
+	p = (PCIDevicePtr)get_physical_address(tid, p);
+	if(p == NULL)
+		return NULL;
+	if(index >= 64)
+		return NULL;
+	pci_devices[index].device = p->device;
+	pci_devices[index].vendorid = p->vendorid;
+	pci_devices[index].deviceid = p->deviceid;
+	pci_devices[index].vendor_name
+		= (const int8 *)get_physical_address(tid, p->vendor_name);
+	pci_devices[index].device_name
+		= (const int8 *)get_physical_address(tid, p->device_name);
 	return pci_devices + index;
 }
 
+/**
+	@Function:		pci_write_to_file
+	@Access:		Public
+	@Description:
+		把所有PCI信息写到文件中。
+		PCI信息以JSON的方式组织。
+	@Parameters:
+		path, const int8 *, IN
+			文件路径。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 pci_write_to_file(IN const int8 * path)
 {
-	FILE * fptr = fopen(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
-	if(fptr == NULL)
+	if(path == NULL || mqueue == NULL)
 		return FALSE;
-	fwrite(fptr, "{\n", 2);
-	uint32 ui;
-	for(ui = 0; ui < pci_devices_count; ui++)
+	MQueueMessage message;
+	message.tid = MESSAGE_TID;
+	message.message = FUNC_WRITE_TO_FILE;
+	if(strlen(path) >= sizeof(message.bsparam0))
+		return FALSE;
+	strcpy(message.bsparam0, path);
+	if(!mqueue_add_message(mqueue, MQUEUE_OUT, &message))
+		return FALSE;
+	MQueueMessagePtr messageptr = NULL;
+	uint32 retry = RETRY_COUNT;
+	while(	(messageptr = mqueue_pop_message(mqueue, MQUEUE_IN)) == NULL
+			&& --retry != 0);
+	BOOL r = FALSE;
+	if(messageptr != NULL)
 	{
-		PCIDevicePtr pci_device = pci_devices + ui;
-		int8 buffer[64 * 1024];
-		sprintf_s(	buffer, 
-					sizeof(buffer), 
-					"  {\n"
-					"    Device:\"%X\",\n"
-					"    VendorID:\"%X\",\n"
-					"    DeviceID:\"%X\",\n"
-					"    VendorName:\"%s\",\n"
-					"    DeviceName:\"%s\",\n"
-					"  },\n", 
-					pci_device->device,
-					pci_device->vendorid,
-					pci_device->deviceid,
-					pci_device->vendor_name,
-					pci_device->device_name);
-		fappend(fptr, buffer, strlen(buffer));
+		r = messageptr->param0.bool_value;
+		free_memory(messageptr);
 	}
-	fappend(fptr, "}\n", 2);
-	fclose(fptr);
-	return TRUE;
+	return r;
 }

@@ -6,7 +6,7 @@ static
 void
 die(const char * message)
 {
-	printf("\nApplication maker error: %s!\n", message);
+	printf("\nSystem application maker error: %s!\n", message);
 	exit(-1);
 }
 
@@ -41,7 +41,7 @@ main(int argc, char * argv[])
 		die("Cannot open file");
 	fread(app + 256, sizeof(unsigned char), file_size, fptr);
 	fclose(fptr);
-	memcpy(app + 0, "MTA32", 5);
+	memcpy(app + 0, "SYS32", 5);
 	memset(app + 5, 0, 256 - 5);
 	fptr = fopen(filename, "wb");
 	if(fptr == NULL)
