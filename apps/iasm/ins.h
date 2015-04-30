@@ -1,7 +1,7 @@
 #ifndef	_INS_H_
 #define	_INS_H_
 
-#include <ilib.h>
+#include <ilib/ilib.h>
 
 //
 // *------ 1 Byte -------*- 1-/2-/3- Byte -*- 1 Byte -*- 1 Byte -*- 0/1/2/4 Bytes-*- 0/1/2/4 Bytes -*

@@ -11,7 +11,7 @@
 #include "types.h"
 #include "memory.h"
 #include "screen.h"
-#include <string.h>
+#include <ilib/string.h>
 
 static uint8 * vdiska = NULL;
 static uint8 * vdiskb = NULL;

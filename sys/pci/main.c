@@ -1,4 +1,4 @@
-#include <ilib.h>
+#include <ilib/ilib.h>
 #include "pci.h"
 
 #define	FUNC_INIT				1

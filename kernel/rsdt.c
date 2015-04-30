@@ -11,7 +11,7 @@
 #include "rsdp.h"
 #include "memory.h"
 
-#include <string.h>
+#include <ilib/string.h>
 
 static struct RSDT * rsdt = NULL;
 

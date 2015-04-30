@@ -9,7 +9,7 @@
 #include "pci.h"
 #include "mqueue.h"
 #include "system.h"
-#include <string.h>
+#include <ilib/string.h>
 
 #define	RETRY_COUNT				0xffffffff
 

@@ -8,8 +8,8 @@ Out=kernel.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
 AS=as
-CFlags=-O0 -fno-stack-protector -nostdinc -I../ilib -m32 -march=i386 -mtune=i386
-StringObj=../ilib/bin/string.obj
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
+StringObj=../libs/ilib/bin/string.obj
 Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
 bin/console.obj bin/ifs1disk.obj bin/ifs1vdisk.obj bin/ifs1blocks.obj bin/memory.obj \
@@ -20,14 +20,15 @@ bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_wind
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
 bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
-bin/ahci.obj 	\
-$(StringObj)
+bin/ahci.obj
 Linker=ld -m elf_i386
-Include=-I../ilib -I../ -I../sys
+Include=-I../libs -I../sys
 
 $(Target): bin $(Objs)
-	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
--L../jsonlib/bin -ljsonlib -L../dslib/bin -ldslib -L../encryptionlib/bin -lencryptionlib
+	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) $(StringObj)	\
+-L../libs/jsonlib/bin -ljsonlib 	\
+-L../libs/dslib/bin -ldslib 	\
+-L../libs/encryptionlib/bin -lencryptionlib
 
 bin:
 	-mkdir bin

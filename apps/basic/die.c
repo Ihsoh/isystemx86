@@ -1,5 +1,5 @@
 #include "die.h"
-#include "ilib.h"
+#include <ilib/ilib.h>
 
 void die(const char * message)
 {

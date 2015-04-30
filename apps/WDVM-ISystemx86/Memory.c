@@ -1,6 +1,5 @@
-#include "ilib.h"
-#include "dslib/linked_list.h"
-#include "string.h"
+#include <ilib/ilib.h>
+#include <dslib/linked_list.h>
 #include "Memory.h"
 #include "type.h"
 

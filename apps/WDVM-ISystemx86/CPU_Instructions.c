@@ -1,5 +1,5 @@
 #include "CPU.h"
-#include "dslib/linked_list.h"
+#include <dslib/linked_list.h>
 
 #define CPU_Ins_nop 0
 #define CPU_Ins_hlt 1

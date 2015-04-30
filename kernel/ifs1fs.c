@@ -12,7 +12,7 @@
 #include "cmos.h"
 #include "screen.h"
 #include "lock.h"
-#include <string.h>
+#include <ilib/string.h>
 
 #include <dslib/linked_list.h>
 

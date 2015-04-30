@@ -9,7 +9,7 @@
 #include "rsdp.h"
 #include "types.h"
 
-#include <string.h>
+#include <ilib/string.h>
 
 static struct RSDPDescriptor2_0 rsdp;
 static BOOL is_inited = FALSE;

@@ -10,7 +10,7 @@
 #include "types.h"
 #include "ifs1vdisk.h"
 #include "ifs1hdisk.h"
-#include "string.h"
+#include <ilib/string.h>
 
 static int8 disk_list[MAX_DISK_COUNT][3] = {{0, 0, 0},
 											{0, 0, 0},

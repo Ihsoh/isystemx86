@@ -1,8 +1,8 @@
 #ifndef _INSTRUCTIONINFO_H_
 #define _INSTRUCTIONINFO_H_
 
-#include "ilib.h"
-#include "dslib/linked_list.h"
+#include <ilib/ilib.h>
+#include <dslib/linked_list.h>
 #include "type.h"
 #include "BinaryHelper.h"
 #include "ParameterInfo.h"

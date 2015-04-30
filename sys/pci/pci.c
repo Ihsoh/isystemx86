@@ -1,6 +1,6 @@
 #include "pci.h"
 #include "toaruos_pci.h"
-#include <ilib.h>
+#include <ilib/ilib.h>
 
 uint32 pci_devices_count = 0;
 PCIDevice pci_devices[MAX_PCI_DEVICES_COUNT];

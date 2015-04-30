@@ -1,7 +1,7 @@
 #ifndef _BINARYHELPER_H_
 #define _BINARYHELPER_H_
 
-#include "ilib.h"
+#include <ilib/ilib.h>
 
 extern void bh_saferead(unsigned char *, int, int, FILE *);
 extern unsigned char bh_readbyte(FILE *);

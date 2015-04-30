@@ -1,7 +1,7 @@
 #ifndef _CPU_H_
 #define _CPU_H_
 
-#include "ilib.h"
+#include <ilib/ilib.h>
 #include "type.h"
 #include "Memory.h"
 #include "InterruptInfo.h"

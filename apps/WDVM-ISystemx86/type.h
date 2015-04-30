@@ -1,7 +1,7 @@
 #ifndef _TYPE_H_
 #define _TYPE_H_
 
-#include "ilib.h"
+#include <ilib/ilib.h>
 
 typedef uint64 cpubasetype;
 

@@ -11,7 +11,7 @@
 #include "386.h"
 #include "log.h"
 
-#include <string.h>
+#include <ilib/string.h>
 
 struct HardDiskArguments
 {

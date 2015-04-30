@@ -1,7 +1,7 @@
 #ifndef	_LEXER_H_
 #define	_LEXER_H_
 
-#include "ilib.h"
+#include <ilib/ilib.h>
 
 #define	MAX_LEXWORD_LEN		63
 

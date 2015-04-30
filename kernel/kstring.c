@@ -9,7 +9,7 @@
 #include "kstring.h"
 #include "types.h"
 
-#include <string.h>
+#include <ilib/string.h>
 
 /**
 	@Function:		split_string

@@ -1,4 +1,4 @@
-#include "ilib.h"
+#include <ilib/ilib.h>
 #include "CPU.h"
 
 CPU * CPU_New(Memory * memory)

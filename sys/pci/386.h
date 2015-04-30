@@ -1,7 +1,7 @@
 #ifndef	_386_H_
 #define	_386_H_
 
-#include <ilib.h>
+#include <ilib/ilib.h>
 
 extern
 uint8

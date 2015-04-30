@@ -13,6 +13,7 @@
 #include "memory.h"
 #include "system.h"
 #include "config.h"
+#include <ilib/string.h>
 
 static int8 * log_buffer 	= NULL;
 static BOOL write_in_rt		= FALSE;

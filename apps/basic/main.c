@@ -1,10 +1,10 @@
-#include "ilib.h"
 #include "lexer.h"
 #include "die.h"
 
-#include "dslib/dslib.h"
-#include "dslib/list.h"
-#include "dslib/value.h"
+#include <ilib/ilib.h>
+#include <dslib/dslib.h>
+#include <dslib/list.h>
+#include <dslib/value.h>
 
 int main(int argc, char * argv[])
 {

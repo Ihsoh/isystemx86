@@ -1,7 +1,7 @@
 #ifndef _MACHINE_H_
 #define _MACHINE_H_
 
-#include "ilib.h"
+#include <ilib/ilib.h>
 #include "type.h"
 #include "CPU.h"
 #include "Memory.h"

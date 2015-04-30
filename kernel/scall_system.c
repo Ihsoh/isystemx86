@@ -17,7 +17,7 @@
 #include "paging.h"
 #include "lock.h"
 #include "mqueue.h"
-#include <string.h>
+#include <ilib/string.h>
 
 #include "screen.h"
 

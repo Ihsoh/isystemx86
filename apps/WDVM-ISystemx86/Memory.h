@@ -1,8 +1,8 @@
 #ifndef _MEMORY_H_
 #define _MEMORY_H_
 
-#include "ilib.h"
-#include "dslib/linked_list.h"
+#include <ilib/ilib.h>
+#include <dslib/linked_list.h>
 #include "type.h"
 #include "InstructionInfo.h"
 

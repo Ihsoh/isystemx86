@@ -25,7 +25,7 @@
 #include "pci.h"
 #include "config.h"
 
-#include <string.h>
+#include <ilib/string.h>
 
 #include "386.h"
 #include "vesa.h"

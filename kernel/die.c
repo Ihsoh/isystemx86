@@ -6,7 +6,7 @@
 		提供系统停机功能。
 */
 
-#include <string.h>
+#include <ilib/string.h>
 #include "types.h"
 #include "screen.h"
 #include "die.h"

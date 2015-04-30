@@ -1,5 +1,5 @@
-#include "ilib.h"
-#include "dslib/dslib.h"
+#include <ilib/ilib.h>
+#include <dslib/dslib.h>
 
 #include "Machine.h"
 #include "BinaryHelper.h"

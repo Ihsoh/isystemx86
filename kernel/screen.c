@@ -23,7 +23,7 @@
 #include "console_window.h"
 #include "sfunc_window.h"
 #include "klib.h"
-#include <string.h>
+#include <ilib/string.h>
 
 #define	VIDEO_MEM	0xb8000
 #define	BUFFER_SIZE	100

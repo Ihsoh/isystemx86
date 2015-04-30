@@ -9,7 +9,7 @@
 #include "cpu.h"
 #include "types.h"
 #include "ifs1fs.h"
-#include <string.h>
+#include <ilib/string.h>
 
 #define	CACHE_INFO_LIST_LEN	0x100
 

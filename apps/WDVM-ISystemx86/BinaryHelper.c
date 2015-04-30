@@ -1,5 +1,5 @@
 #include "BinaryHelper.h"
-#include "ilib.h"
+#include <ilib/ilib.h>
 
 void bh_saferead(unsigned char * buf, int block, int count, FILE * fd)
 {

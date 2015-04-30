@@ -10,7 +10,7 @@
 #ifndef	_TOARUOS_PCI_H_
 #define	_TOARUOS_PCI_H_
 
-#include "types.h"
+#include <ilib/ilib.h>
 
 #define PCI_VENDOR_ID            0x00 // 2
 #define PCI_DEVICE_ID            0x02 // 2

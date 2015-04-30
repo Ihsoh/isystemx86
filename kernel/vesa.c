@@ -10,7 +10,7 @@
 #include "memory.h"
 #include "kfuncs.h"
 #include "types.h"
-#include <string.h>
+#include <ilib/string.h>
 
 static BOOL use_vesa = FALSE;
 static uint8 vesa_info[512];

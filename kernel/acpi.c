@@ -9,7 +9,7 @@
 #include "acpi.h"
 #include "types.h"
 #include "fadt.h"
-#include "string.h"
+#include <ilib/string.h>
 
 #define	SLP_EN		(1 << 13)
 #define	SCI_EN		1

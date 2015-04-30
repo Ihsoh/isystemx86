@@ -14,7 +14,7 @@
 #include "ifs1blocks.h"
 #include "tasks.h"
 #include "console.h"
-#include <string.h>
+#include <ilib/string.h>
 
 static BOOL lock = FALSE;
 

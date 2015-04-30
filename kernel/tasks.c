@@ -17,7 +17,7 @@
 #include "lock.h"
 #include "mqueue.h"
 #include "scall_fs.h"
-#include <string.h>
+#include <ilib/string.h>
 
 static struct Task tasks[MAX_TASK_COUNT];
 static int32 running_tid = -1;
@@ -363,12 +363,11 @@ create_sys_task(IN int8 * name,
 						TASK_TYPE_SYSTEM);
 }
 
-
 /**
-	@Function:		kill_task
+	@Function:		_kill_task
 	@Access:		Public
 	@Description:
-		杀死一个任务。
+		可以杀死一个用户任务或系统任务。
 	@Parameters:
 		tid, int32, IN
 			任务的 ID。
@@ -376,8 +375,9 @@ create_sys_task(IN int8 * name,
 		BOOL
 			返回TRUE则成功，否则失败。
 */
+static
 BOOL
-kill_task(IN int32 tid)
+_kill_task(IN int32 tid)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
@@ -428,6 +428,29 @@ kill_task(IN int32 tid)
 		running_tid = -1;
 	task->used = 0;
 	return TRUE;
+}
+
+/**
+	@Function:		kill_task
+	@Access:		Public
+	@Description:
+		可以杀死一个用户任务，但不能杀死系统任务。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+kill_task(IN int32 tid)
+{
+	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
+		return FALSE;
+	struct Task * task = tasks + tid;
+	if(task->type != TASK_TYPE_USER)
+		return FALSE;
+	return _kill_task(tid);
 }
 
 /**

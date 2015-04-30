@@ -9,8 +9,8 @@
 
 #include "toaruos_pci.h"
 #include "pci_list.h"
-#include "types.h"
 #include "386.h"
+#include <ilib/ilib.h>
 
 void pci_write_field(uint32 device, int32 field, int32 size, uint32 value) {
 	outl(PCI_ADDRESS_PORT, pci_get_addr(device, field));

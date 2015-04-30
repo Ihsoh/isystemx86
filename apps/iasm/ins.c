@@ -1,4 +1,4 @@
-#include <ilib.h>
+#include <ilib/ilib.h>
 #include "ins.h"
 
 #define	INS_MODE_16BITS		0

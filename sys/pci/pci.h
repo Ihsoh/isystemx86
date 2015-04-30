@@ -1,7 +1,7 @@
 #ifndef	_PCI_H_
 #define	_PCI_H_
 
-#include <ilib.h>
+#include <ilib/ilib.h>
 
 #define	MAX_PCI_DEVICES_COUNT	64
 

@@ -11,7 +11,7 @@
 #include "memory.h"
 #include "ifs1disk.h"
 #include "cmos.h"
-#include <string.h>
+#include <ilib/string.h>
 
 #include <dslib/linked_list.h>
 #include <dslib/value.h>

@@ -2,15 +2,15 @@ TargetDir=bin
 Out=pci.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -I../ilib -m32 -march=i386 -mtune=i386
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 Objs=bin/main.obj bin/toaruos_pci.obj bin/386.obj bin/pci.obj
 Linker=ld -m elf_i386
-Include=-I../../ilib -I../../
+Include=-I../../libs/
 SysMaker=../../tools/sysmaker/bin/sysmaker
-MTA32Obj=../../ilib/bin/mta32.obj
+MTA32Obj=../../libs/ilib/bin/mta32.obj
 
 $(Target): bin $(Objs)
-	$(Linker) -Tsegs.lds -e mta32main --oformat binary -o $(Target) $(MTA32Obj) $(Objs) -L../../ilib/bin -lilib
+	$(Linker) -Tsegs.lds -e mta32main --oformat binary -o $(Target) $(MTA32Obj) $(Objs) -L../../libs/ilib/bin -lilib
 	$(SysMaker) $(Target)
 
 bin:

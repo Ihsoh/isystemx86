@@ -13,7 +13,7 @@
 #include "enfont.h"
 #include "image.h"
 #include "window.h"
-#include <string.h>
+#include <ilib/string.h>
 
 #define	COLUMN		80
 #define	ROW			25

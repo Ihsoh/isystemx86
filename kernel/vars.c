@@ -9,7 +9,7 @@
 #include "vars.h"
 #include "types.h"
 #include "memory.h"
-#include <string.h>
+#include <ilib/string.h>
 
 /**
 	@Function:		alloc_vars

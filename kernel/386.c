@@ -8,7 +8,7 @@
 
 #include "386.h"
 #include "types.h"
-#include <string.h>
+#include <ilib/string.h>
 
 /**
 	@Function:		outb

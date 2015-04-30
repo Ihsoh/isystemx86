@@ -12,11 +12,11 @@
 #ifdef	_KERNEL_MODEL_
 	#include "memory.h"
 	#include "ifs1fs.h"
-	#include <string.h>
+	#include <ilib/string.h>
 	#define	ALLOCM(n)	(alloc_memory((n)))
 	#define	FREEM(ptr)	(free_memory((ptr)))
 #else
-	#include <ilib.h>
+	#include <ilib/ilib.h>
 	#define	ALLOCM(n)	(allocm((n)))
 	#define	FREEM(ptr)	(freem((ptr)))
 #endif

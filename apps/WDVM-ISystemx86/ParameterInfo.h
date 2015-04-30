@@ -1,7 +1,7 @@
 #ifndef _PARAMETERINFO_H_
 #define _PARAMETERINFO_H_
 
-#include "ilib.h"
+#include <ilib/ilib.h>
 #include "type.h"
 #include "BinaryHelper.h"
 
