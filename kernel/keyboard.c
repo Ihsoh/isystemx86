@@ -16,6 +16,7 @@
 #include "vesa.h"
 #include "console_window.h"
 #include "window.h"
+#include "kernel.h"
 
 #define	IBUFFER_SIZE	16
 #define	KEY_MAP_SIZE	256	
@@ -567,6 +568,44 @@ get_char(void)
 }
 
 /**
+	@Function:		get_char_utask
+	@Access:		Public
+	@Description:
+		用户任务获取一个字符。
+	@Parameters:
+	@Return:
+		uint8
+			字符。		
+*/
+uint8
+get_char_utask(void)
+{
+	if(kernel_is_knltask())
+		return get_char();
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stdin == NULL)
+				return get_char();
+			else
+			{
+				uint8 chr = 0;
+				while(fread(task->stdin, &chr, 1) == 0)
+					asm volatile ("pause");
+				task->read_count++;
+				if(flen(task->stdin) == task->read_count)
+				{
+					fclose(task->stdin);
+					task->stdin = NULL;
+				}
+				return chr;
+			}
+	}
+}
+
+/**
 	@Function:		move_cursor_left
 	@Access:		Private
 	@Description:
@@ -762,6 +801,48 @@ get_strn(	OUT int8 * input_buffer,
 	input_buffer[count] = '\0';
 	UNLOCK_TASK();
 	return count;
+}
+
+/**
+	@Function:		get_strn_utask
+	@Access:		Public
+	@Description:
+		用户任务获取一个字符串。
+	@Parameters:
+		input_buffer, int8 *, OUT
+			指向用于储存输入的缓冲区的指针。
+		n, uint32, OUT
+			最大获取字符个数。
+	@Return:
+		uint32
+			字符个数。不包括结尾的'\0'。	
+*/
+uint32
+get_strn_utask(	OUT int8 * input_buffer,
+				IN uint32 n)
+{
+	if(kernel_is_knltask())
+		return get_strn(input_buffer, n);
+	else
+	{
+		int32 tid = kernel_get_current_tid();
+		struct Task * task = get_task_info_ptr(tid);
+		if(task != NULL)
+			if(task->stdin == NULL)
+				return get_strn(input_buffer, n);
+			else
+			{
+				uint32 read_count = 0;
+				while(read_count < n && !feof(task->stdin))
+					read_count += fread(task->stdin,
+										input_buffer,
+										n - read_count);
+				fclose(task->stdin);
+				task->stdin = NULL;
+				input_buffer[read_count] = '\0';
+				return read_count;
+			}
+	}
 }
 
 /**

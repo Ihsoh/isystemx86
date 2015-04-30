@@ -19,9 +19,18 @@ uint8
 get_char(void);
 
 extern
+uint8
+get_char_utask(void);
+
+extern
 uint32
 get_strn(	OUT int8 * input_buffer,
 			IN uint32 n);
+
+extern
+uint32
+get_strn_utask(	OUT int8 * input_buffer,
+				IN uint32 n);
 
 extern
 BOOL

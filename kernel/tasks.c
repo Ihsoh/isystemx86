@@ -139,6 +139,7 @@ _create_task(	IN int8 * name,
 		task->stdout = NULL;
 		task->stderr = NULL;
 		task->type = task_type;
+		task->read_count = 0;
 
 		strcpy(task->name, name);
 		strcpy(task->param, param);

@@ -637,7 +637,7 @@ init_interrupt(void)
 	uint32 fpu_error_int_addr = (uint32)&fpu_error_int;
 	set_int(0x07, fpu_error_int_addr);
 	uint32 system_call_int_addr = (uint32)&system_call_int;
-	set_int(0x90, system_call_int_addr);
+	set_int(0xa0, system_call_int_addr);
 }
 
 /**

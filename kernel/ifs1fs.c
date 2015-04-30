@@ -2056,6 +2056,27 @@ freset(IN FILE * fptr)
 }
 
 /**
+	@Function:		feof
+	@Access:		Public
+	@Description:
+		检查文件指针是否已到达文件尾。
+	@Parameters:
+		fptr, FILE *, IN
+			文件指针。
+	@Return:
+		BOOL
+			返回TRUE则到达文件尾，否则未到达。
+*/
+BOOL
+feof(IN FILE * fptr)
+{
+	uint32 next = 	fptr->next_block_index
+					* DATA_BLOCK_DATA_LEN
+					+ fptr->next_block_pos;
+	return next == flen(fptr);
+}
+
+/**
 	@Function:		_fappend_unsafe
 	@Access:		Private
 	@Description:

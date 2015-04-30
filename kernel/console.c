@@ -1326,9 +1326,12 @@ run_wait(	IN int8 * path,
 		error("Failed to run application!");
 		return -1;
 	}
-	tasks_redirect_stdin(r, stdin);
-	tasks_redirect_stdout(r, stdout);
-	tasks_redirect_stderr(r, stderr);
+	if(strcmp(stdin, "%") != 0)
+		tasks_redirect_stdin(r, stdin);
+	if(strcmp(stdout, "%") != 0)
+		tasks_redirect_stdout(r, stdout);
+	if(strcmp(stderr, "%") != 0)
+		tasks_redirect_stderr(r, stderr);
 	wait_app_tid = r;
 	unlock();
 	task_ready(r);
@@ -2465,6 +2468,12 @@ exec(	IN int8 * cmd,
 			parse_cmd(NULL, stdout, 1023);
 			int32 remainedlen = parse_cmd(NULL, stderr, 1023);
 			int32 len = strlen(cmd) - remainedlen;
+			if(strcmp(stdin, "%") != 0)
+				fix_path(stdin, current_path, stdin);
+			if(strcmp(stdout, "%") != 0)
+				fix_path(stdout, current_path, stdout);
+			if(strcmp(stderr, "%") != 0)
+				fix_path(stderr, current_path, stderr);
 			parse_cmd(NULL, app, 1023);
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];

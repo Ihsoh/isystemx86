@@ -16,7 +16,7 @@ void system_call(uint func, uint sub_func, struct SParams * sparams)
 		"movl	%0, %%eax\n\t"
 		"movl	%1, %%ecx\n\t"
 		"movl	%2, %%edx\n\t"
-		"int	$0x90\n\t"
+		"int	$0xa0\n\t"
 		:
 		:"r"(eax), "r"(tid), "r"(addr)
 		:"eax", "ecx", "edx"

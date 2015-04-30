@@ -200,6 +200,10 @@ freset(IN FILE * fptr);
 
 extern
 BOOL
+feof(IN FILE * fptr);
+
+extern
+BOOL
 fappend(IN FILE * fptr,
 		IN uint8 * buffer,
 		IN uint32 len);

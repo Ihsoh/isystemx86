@@ -58,6 +58,7 @@ struct Task
 	FILE * 				stdin;				//任务的标准输入。如果为NULL则为键盘，否则为文件。
 	FILE *				stdout;				//任务的标准输出。如果为NULL则为屏幕，否则为文件。
 	FILE *				stderr;				//任务的标准错误。如果为NULL则为屏幕，否则为文件。
+	uint32				read_count;			//已从标准输入读取了的字符数。
 	TaskType 			type;				//任务的类型。
 											//如果为TASK_TYPE_USER，则表示该任务为用户任务，运行于Ring3。
 											//如果为TASK_TYPE_SYSTEM，则表示该任务为系统任务，运行于Ring0。

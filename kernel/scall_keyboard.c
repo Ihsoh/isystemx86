@@ -38,7 +38,7 @@ void system_call_keyboard(	IN uint32 func,
 		//	Param0=读入的字符
 		case SCALL_GET_CHAR:
 		{
-			uint8 chr = get_char();
+			uint8 chr = get_char_utask();
 			sparams->param0 = SPARAM(chr);
 			break;
 		}
@@ -52,7 +52,7 @@ void system_call_keyboard(	IN uint32 func,
 		case SCALL_GET_STR_N:
 		{
 			int8 * buffer = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			uint32 count = get_strn(buffer, UINT32_SPARAM(sparams->param1));
+			uint32 count = get_strn_utask(buffer, UINT32_SPARAM(sparams->param1));
 			sparams->param0 = SPARAM(count);
 			break;
 		}

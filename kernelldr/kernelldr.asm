@@ -471,11 +471,7 @@ IDT:
 	Gate	?, KernelLdrCDesc, 0, AT386TGate	
 	INT22HAddr:
 	Gate	?, KernelLdrCDesc, 0, AT386TGate
-	%REP	(8FH - 23H) + 1
-		Gate	0, KernelCDesc, 0, AT386TGate + DPL3
-	%ENDREP
-	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
-	%REP	(0FFH - 091H) + 1
+	%REP	(0FFH - 23H) + 1
 		Gate	0, KernelCDesc, 0, AT386TGate + DPL3
 	%ENDREP
 	IDTLength		EQU $ - IDT
