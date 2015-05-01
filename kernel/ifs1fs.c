@@ -790,11 +790,15 @@ parse_path_ex(	IN int8 * path,
 	while((chr = *(s++)) != '\0')
 		if(state == 0)
 		{
+			if(chr == '\0')
+				break;
 			disk[0] = chr;
 			state = 1;
 		}
 		else if(state == 1)
 		{
+			if(chr == '\0')
+				break;
 			disk[1] = chr;
 			state = 2;
 		}

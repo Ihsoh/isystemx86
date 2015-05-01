@@ -2279,7 +2279,7 @@ exec(	IN int8 * cmd,
 			print_str("\n");
 		}
 
-		else if(strcmp(name, "test") == 0)
+		else if(strcmp(name, "serial") == 0)
 		{
 			#include "serial.h"
 			
@@ -2295,7 +2295,6 @@ exec(	IN int8 * cmd,
 				}
 
 			print_str("\n");
-			
 		}
 
 		//Batch

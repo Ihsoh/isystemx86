@@ -66,6 +66,22 @@ int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 						}
 						break;
 					}
+					case 'u':
+					{
+						unsigned int u = va_arg(va, unsigned int);
+						char temp[100];
+						char * u_s = uitos(temp, u);
+						uint u_s_len = strlen(u_s);
+						if(buf_len + u_s_len >= size)
+							end = 1;
+						else
+						{
+							strncpy(buffer, u_s, u_s_len);
+							buffer += u_s_len;
+							buf_len += u_s_len;
+						}
+						break;
+					}
 					case 'f':
 					{
 						float f = va_arg(va, float);

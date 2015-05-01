@@ -19,6 +19,7 @@ $(Target):	bin	\
 	cd apps/printf && make
 	cd apps/fwrite && make
 	cd apps/fappend && make
+	cd apps/test && make
 
 	cd apps/basic && make
 	cd apps/edit && make
@@ -76,6 +77,7 @@ Clear:
 	cd apps/printf && make Clear
 	cd apps/fwrite && make Clear
 	cd apps/fappend && make Clear
+	cd apps/test && make Clear
 
 	cd apps/basic && make Clear
 	cd apps/edit && make Clear

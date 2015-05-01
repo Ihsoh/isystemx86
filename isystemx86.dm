@@ -29,6 +29,10 @@ WRITE_FILE	VA:/isystem/bins/fwrite apps/fwrite/bin/fwrite.bin
 MAKE_FILE	VA:/isystem/bins/ fappend
 WRITE_FILE	VA:/isystem/bins/fappend apps/fappend/bin/fappend.bin
 
+#Command 'test'
+MAKE_FILE	VA:/isystem/bins/ test
+WRITE_FILE	VA:/isystem/bins/test apps/test/bin/test.bin
+
 #Basic
 MAKE_FILE	VA:/isystem/bins/ basic
 WRITE_FILE	VA:/isystem/bins/basic apps/basic/bin/basic.bin
