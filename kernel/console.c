@@ -2281,6 +2281,21 @@ exec(	IN int8 * cmd,
 
 		else if(strcmp(name, "test") == 0)
 		{
+			#include "serial.h"
+			
+			int8 * text = "ISystem II x86\0";
+			serial_write_buffer(PORT_COM1, text, strlen(text) + 1);
+			
+			while(TRUE)
+				if(serial_has_data(PORT_COM1))
+				{
+					int8 c;
+					serial_read(PORT_COM1, &c);
+					print_char(c);
+				}
+
+			print_str("\n");
+			
 		}
 
 		//Batch

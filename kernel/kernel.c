@@ -32,9 +32,11 @@
 #include "config.h"
 #include "cmlock.h"
 #include "ahci.h"
+#include "serial.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
+#include <pathlib/pathlib.h>
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
 
@@ -53,6 +55,10 @@ init_dsl(void);
 static
 BOOL
 init_jsonl(void);
+
+static
+BOOL
+init_pathl(void);
 
 static
 void
@@ -335,8 +341,11 @@ main(void)
 
 	ahci_init();
 
+	// 初始化外部库。DSLIB，JSONLIB，PATHLIB。 
 	init_dsl();
 	init_jsonl();
+	init_pathl();
+
 	config_init();
 
 	console_init();
@@ -356,6 +365,7 @@ main(void)
 	init_log();
 	mqueue_init();
 	acpi_init();
+	serial_init();
 
 	//检测 APIC 是否初始化成功。
 	//如果初始化失败则使用 PIC。
@@ -596,6 +606,27 @@ init_jsonl(void)
 	env.jsonl_calloc = knl_lib_calloc;
 	env.jsonl_free = knl_lib_free;
 	return jsonl_init(&env);
+}
+
+/**
+	@Function:		init_pathl
+	@Access:		Private
+	@Description:
+		初始化 PATH 库。
+	@Parameters:
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。
+*/
+static
+BOOL
+init_pathl(void)
+{
+	PATHLEnvironment env;
+	env.pathl_malloc = knl_lib_malloc;
+	env.pathl_calloc = knl_lib_calloc;
+	env.pathl_free = knl_lib_free;
+	return pathl_init(&env);
 }
 
 /**

@@ -1,9 +1,9 @@
 TargetDir=bin
-Out=libjsonlib.a
+Out=libpathlib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
-Objs=bin/lib.obj bin/jsonlib.obj
+Objs=bin/pathlib.obj
 AR=ar
 Include=-I../
 
@@ -13,11 +13,8 @@ $(Target): bin $(Objs)
 bin:
 	-mkdir bin
 
-bin/jsonlib.obj: jsonlib.c jsonlib.h
-	$(CC) $(CFlags) -c jsonlib.c -o bin/jsonlib.obj $(Include)
-
-bin/lib.obj: lib.c lib.h
-	$(CC) $(CFlags) -c lib.c -o bin/lib.obj $(Include)
+bin/pathlib.obj: pathlib.c pathlib.h
+	$(CC) $(CFlags) -c pathlib.c -o bin/pathlib.obj $(Include)
 
 .PHONY:Clear
 

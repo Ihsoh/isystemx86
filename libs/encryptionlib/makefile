@@ -2,7 +2,7 @@ TargetDir=bin
 Out=libencryptionlib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -I. -m32 -march=i386 -mtune=i386
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 Objs=bin/lib.obj bin/md5.obj bin/sha1.obj bin/sha256.obj bin/sha512.obj
 AR=ar
 Include=-I../

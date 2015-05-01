@@ -2,7 +2,7 @@ TargetDir=bin
 Out=libdslib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -I. -m32 -march=i386 -mtune=i386
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 Objs=bin/dslib.obj bin/value.obj bin/linked_list.obj bin/list.obj bin/lib.obj 	\
 bin/hashtable.obj
 AR=ar

@@ -7,7 +7,7 @@ TargetDir=bin
 Out=libilib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -I. -m32 -march=i386 -mtune=i386
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
 bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj
 AR=ar

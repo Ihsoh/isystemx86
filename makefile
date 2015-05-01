@@ -12,6 +12,7 @@ $(Target):	bin	\
 			libs/dslib/bin/libdslib.a 	\
 			libs/jsonlib/bin/libjsonlib.a	\
 			libs/encryptionlib/bin/libencryptionlib.a	\
+			libs/pathlib/bin/libpathlib.a 	\
 			boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
@@ -45,6 +46,9 @@ libs/jsonlib/bin/libjsonlib.a:
 libs/encryptionlib/bin/libencryptionlib.a:
 	cd libs/encryptionlib && make
 
+libs/pathlib/bin/libpathlib.a:
+	cd libs/pathlib && make
+
 boot/bin/boot.bin:
 	cd boot && make
 
@@ -63,6 +67,7 @@ Clear:
 	cd libs/dslib && make Clear
 	cd libs/jsonlib && make Clear
 	cd libs/encryptionlib && make Clear
+	cd libs/pathlib && make Clear
 
 	cd boot && make Clear
 	cd kernelldr && make Clear

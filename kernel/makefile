@@ -28,7 +28,8 @@ $(Target): bin $(Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) $(StringObj)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
--L../libs/encryptionlib/bin -lencryptionlib
+-L../libs/encryptionlib/bin -lencryptionlib	\
+-L../libs/pathlib/bin -lpathlib
 
 bin:
 	-mkdir bin
