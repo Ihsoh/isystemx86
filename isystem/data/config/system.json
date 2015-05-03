@@ -8,7 +8,8 @@
   UseRTCForTaskScheduler:true,
   RTCRate:15,
   IFS1:{
-    EnableReadBuffer:true
+    EnableReadBuffer:true,
+    EnableAppendBuffer:true
   }
   Console:{
     ShowVerInfoWhenBoot:true,

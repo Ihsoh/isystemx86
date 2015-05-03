@@ -20,6 +20,7 @@
 DEFINE_LOCK_IMPL(ifs1)
 
 static BOOL read_buffer_was_enabled		= FALSE;
+static BOOL append_buffer_was_enabled	= FALSE;
 
 /**
 	@Function:		ifs1fs_init
@@ -36,6 +37,8 @@ ifs1fs_init(void)
 {
 	config_system_ifs1_get_bool("EnableReadBuffer", 
 								&read_buffer_was_enabled);
+	config_system_ifs1_get_bool("EnableAppendBuffer",
+								&append_buffer_was_enabled);
 }
 
 /**
@@ -1827,6 +1830,8 @@ _fopen_unsafe(	IN int8 * path,
 	fptr->read_buffer_was_enabled = read_buffer_was_enabled;
 	fptr->read_buffer_is_valid = FALSE;
 	fptr->read_buffer_block_index = 0;
+	fptr->append_buffer_was_enabled = append_buffer_was_enabled;
+	fptr->append_buffer_byte_count = 0;
 	return fptr;
 }
 
@@ -1854,6 +1859,12 @@ fopen(	IN int8 * path,
 	return fptr;
 }
 
+static
+BOOL
+_fappend_without_buffer_unsafe(	IN FILE * fptr, 
+								IN uint8 * buffer, 
+								IN uint32 len);
+
 /**
 	@Function:		_fclose_unsafe
 	@Access:		Private
@@ -1874,6 +1885,18 @@ _fclose_unsafe(IN FILE * fptr)
 		return FALSE;
 	int32 r = TRUE;
 	fptr->file_block->lock = 0;
+	
+	if(	append_buffer_was_enabled
+		&& fptr->append_buffer_was_enabled 
+		&& fptr->append_buffer_byte_count != 0)
+	{
+		if(	!_fappend_without_buffer_unsafe(fptr, 
+											fptr->append_buffer_bytes, 
+											fptr->append_buffer_byte_count))
+			return FALSE;
+		fptr->append_buffer_byte_count = 0;
+	}
+
 	if(!set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block)))
 		r = FALSE;
 	free_memory(fptr->file_block);
@@ -2195,10 +2218,11 @@ feof(IN FILE * fptr)
 }
 
 /**
-	@Function:		_fappend_unsafe
+	@Function:		_fappend_without_buffer_unsafe
 	@Access:		Private
 	@Description:
 		追加文件。非安全版本。
+		该版本不包含追加缓冲区的功能。
 	@Parameters:
 		fptr, FILE *, IN
 			文件指针。
@@ -2212,11 +2236,15 @@ feof(IN FILE * fptr)
 */
 static
 BOOL
-_fappend_unsafe(IN FILE * fptr, 
-				IN uint8 * buffer, 
-				IN uint32 len)
+_fappend_without_buffer_unsafe(	IN FILE * fptr, 
+								IN uint8 * buffer, 
+								IN uint32 len)
 {
-	if((fptr->mode & FILE_MODE_APPEND) == 0 || fptr->file_block->length + len > MAX_FILE_LEN)
+	if(	fptr == NULL
+		|| buffer == NULL
+		|| len == 0
+		|| (fptr->mode & FILE_MODE_APPEND) == 0 
+		|| fptr->file_block->length + len > MAX_FILE_LEN)
 		return FALSE;
 	uint32 append_len = len;	
 	uint32 block_index = fptr->file_block->length / DATA_BLOCK_DATA_LEN;
@@ -2275,10 +2303,10 @@ _fappend_unsafe(IN FILE * fptr,
 		is_save = 0;
 		is_next = 0;
 		//检查一个Data Block是否已写满
-		if(block_pos == DATA_BLOCK_DATA_LEN)
+		if(data_block.length == DATA_BLOCK_DATA_LEN)
 		{
 			cblock_index++;
-			is_next == 1;
+			is_next = 1;
 		}
 	}
 	//检查是否未保存Data Block.
@@ -2316,6 +2344,64 @@ _fappend_unsafe(IN FILE * fptr,
 }
 
 /**
+	@Function:		_fappend_unsafe
+	@Access:		Private
+	@Description:
+		追加文件。非安全版本。
+		该版本包含追加缓冲区的功能。
+	@Parameters:
+		fptr, FILE *, IN
+			文件指针。
+		buffer, uint8 *, IN
+			数据缓冲区。
+		len, uint32, IN
+			追加的数据的长度。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+static
+BOOL
+_fappend_unsafe(IN FILE * fptr, 
+				IN uint8 * buffer, 
+				IN uint32 len)
+{
+	if(	fptr == NULL
+		|| buffer == NULL
+		|| len == 0
+		|| (fptr->mode & FILE_MODE_APPEND) == 0 
+		|| fptr->file_block->length + len > MAX_FILE_LEN)
+		return FALSE;
+	if(fptr->append_buffer_byte_count + len > sizeof(fptr->append_buffer_bytes))
+	{
+		if(fptr->append_buffer_byte_count != 0)
+			if(!_fappend_without_buffer_unsafe(	fptr, 
+												fptr->append_buffer_bytes, 
+												fptr->append_buffer_byte_count))
+				return FALSE;
+		if(len > sizeof(fptr->append_buffer_bytes))
+		{
+			if(!_fappend_without_buffer_unsafe(fptr, buffer, len))
+				return FALSE;
+			fptr->append_buffer_byte_count = 0;
+		}
+		else
+		{
+			memcpy(fptr->append_buffer_bytes, buffer, len);
+			fptr->append_buffer_byte_count = len;
+		}
+	}
+	else
+	{
+		memcpy(	fptr->append_buffer_bytes + fptr->append_buffer_byte_count,
+				buffer,
+				len);
+		fptr->append_buffer_byte_count += len;
+	}
+	return TRUE;
+}
+
+/**
 	@Function:		fappend
 	@Access:		Public
 	@Description:
@@ -2337,7 +2423,11 @@ fappend(IN FILE * fptr,
 		IN uint32 len)
 {
 	lock();
-	BOOL r = _fappend_unsafe(fptr, buffer, len);
+	BOOL r = FALSE;
+	if(append_buffer_was_enabled)
+		r = _fappend_unsafe(fptr, buffer, len);
+	else
+		r = _fappend_without_buffer_unsafe(fptr, buffer, len);
 	unlock();
 	return r;
 }
