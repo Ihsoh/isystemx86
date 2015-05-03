@@ -348,6 +348,7 @@ main(void)
 
 	config_init();
 
+	ifs1fs_init();
 	console_init();
 
 	init_screen();

@@ -32,5 +32,6 @@ config_##xxx##_get_number(	IN int8 * name,	\
 
 EXTERN_CONFIG_XXX_GET_STH(system)
 EXTERN_CONFIG_XXX_GET_STH(system_console)
+EXTERN_CONFIG_XXX_GET_STH(system_ifs1)
 
 #endif

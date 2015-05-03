@@ -35,12 +35,16 @@
 
 typedef struct File
 {
-	int8				symbol[3];
-	uint32				file_block_id;
-	struct FileBlock *	file_block;
-	int32				mode;
-	uint32				next_block_index;
-	uint32				next_block_pos;
+	int8				symbol[3];							// 被打开的文件所在的磁盘的符号。
+	uint32				file_block_id;						// 文件的ID。
+	struct FileBlock *	file_block;							// 文件的块。
+	int32				mode;								// 打开的模式。
+	uint32				next_block_index;					// 下一个要读取的字节所在的块的索引。
+	uint32				next_block_pos;						// 下一个要读取的字节在块中的位置。
+	BOOL				read_buffer_was_enabled;			// 读取缓冲区是否被启用。
+	BOOL				read_buffer_is_valid;				// 读取缓冲区的数据是否有效。
+	uint32				read_buffer_block_index;			// 读取缓冲区储存的数据对应的数据块的块ID。
+	struct DataBlock 	read_buffer_data_block;				// 读取缓冲区的数据块。
 } FILE;
 
 extern

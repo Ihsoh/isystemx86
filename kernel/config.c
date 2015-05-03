@@ -17,7 +17,7 @@
 
 static JSONLObjectPtr system_json 				= NULL;
 static JSONLObjectPtr system_console_json 		= NULL;
-
+static JSONLObjectPtr system_ifs1_json			= NULL;
 /**
 	@Function:		config_init
 	@Access:		Public
@@ -45,6 +45,7 @@ config_init(void)
 		{
 			system_json = JSONL_OBJECT(system_json_raw);
 			JSONLRawPtr value_raw = NULL;
+			// Console
 			if(	!JSONL_OBJECT_GET(system_json, "Console", &value_raw)
 				|| JSONL_TYPE(value_raw) != JSONL_TYPE_OBJECT)
 			{
@@ -52,6 +53,15 @@ config_init(void)
 				die(&info);
 			}
 			system_console_json = JSONL_OBJECT(value_raw);
+
+			// IFS1
+			if(	!JSONL_OBJECT_GET(system_json, "IFS1", &value_raw)
+				|| JSONL_TYPE(value_raw) != JSONL_TYPE_OBJECT)
+			{
+				fill_info(info, DC_INIT_CONFIG, DI_INIT_CONFIG);
+				die(&info);
+			}
+			system_ifs1_json = JSONL_OBJECT(value_raw);
 		}
 		else
 		{
@@ -220,3 +230,4 @@ config_##xxx##_get_number(	IN int8 * name,	\
 
 CONFIG_XXX_GET_STH(system, "System")
 CONFIG_XXX_GET_STH(system_console, "System-Console")
+CONFIG_XXX_GET_STH(system_ifs1, "System-IFS1")
