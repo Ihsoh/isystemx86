@@ -42,6 +42,16 @@ typedef	void *	object;
 #define	DWORD	uint32
 #define	QWORD	uint64
 
+typedef	int8 _ascchar;
+typedef	const int8 _cascchar;
+typedef int8 * _asctext;
+typedef	const int8 * _casctext;
+
+#define	ASCCHAR 	_ascchar
+#define	CASCCHAR 	_cascchar
+#define	ASCTEXT 	_asctext
+#define	CASCTEXT 	_casctext
+
 //修饰函数的参数，参数作为输入。
 //应用场合：
 //	1.	如果参数的类型不为指针，必须标注 IN。

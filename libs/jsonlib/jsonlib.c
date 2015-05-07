@@ -1,6 +1,7 @@
 #include "jsonlib.h"
 #include "types.h"
 
+#include <dslib/dslib.h>
 #include <dslib/hashtable.h>
 #include <dslib/list.h>
 #include <dslib/value.h>
@@ -20,6 +21,14 @@ jsonl_init(IN JSONLEnvironmentPtr env)
 	jsonl_malloc = env->jsonl_malloc;
 	jsonl_calloc = env->jsonl_calloc;
 	jsonl_free = env->jsonl_free;
+
+	DSLEnvironment dslenv;
+	dslenv.dsl_malloc = jsonl_malloc;
+	dslenv.dsl_calloc = jsonl_calloc;
+	dslenv.dsl_free = jsonl_free;
+	if(!dsl_init(&dslenv))
+		return FALSE;
+	
 	return TRUE;
 }
 

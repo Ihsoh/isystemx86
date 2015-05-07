@@ -10,6 +10,16 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	char file0[1024], file1[1024];
+	if(strlen(argv[1]) >= sizeof(file0))
+	{
+		printf("Error:\n    The file0's name too long\n");
+		return -1;
+	}
+	if(strlen(argv[2]) >= sizeof(file1))
+	{
+		printf("Error:\n    The file1's name too long\n");
+		return -1;
+	}
 	strcpy(file0, argv[1]);
 	strcpy(file1, argv[2]);
 	fix_path(file0, file0);

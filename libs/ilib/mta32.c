@@ -16,7 +16,7 @@ void mta32main(void)
 		argv[i] = allocm(MAX_ARG_LENGTH);
 		if(argv[i] == NULL)
 		{
-			print_str_p("MTA32Main: Cannot allocate memory!\n", CC_RED);
+			print_err_str_p("MTA32Main: Cannot allocate memory!\n", CC_RED);
 			app_exit();
 		}
 		get_param_w(argv[i]);

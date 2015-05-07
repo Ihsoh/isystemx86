@@ -232,23 +232,22 @@ _create_task(	IN int8 * name,
 		task->tss.edi = 0;
 		if(task_type == TASK_TYPE_USER)
 		{
-			task->tss.es = data_seg_desc_index << 3 | RPL3;
-			task->tss.cs = code_seg_desc_index << 3 | RPL3;
-			task->tss.ss = data_seg_desc_index << 3 | RPL3;
-			task->tss.ds = data_seg_desc_index << 3 | RPL3;
-			task->tss.fs = data_seg_desc_index << 3 | RPL3;
-			task->tss.gs = data_seg_desc_index << 3 | RPL3;
+			task->tss.es = (data_seg_desc_index << 3) | RPL3;
+			task->tss.cs = (code_seg_desc_index << 3) | RPL3;
+			task->tss.ss = (data_seg_desc_index << 3) | RPL3;
+			task->tss.ds = (data_seg_desc_index << 3) | RPL3;
+			task->tss.fs = (data_seg_desc_index << 3) | RPL3;
+			task->tss.gs = (data_seg_desc_index << 3) | RPL3;
 		}
 		else if(task_type == TASK_TYPE_SYSTEM)
 		{
-			task->tss.es = data_seg_desc_index << 3 | RPL0;
-			task->tss.cs = code_seg_desc_index << 3 | RPL0;
-			task->tss.ss = data_seg_desc_index << 3 | RPL0;
-			task->tss.ds = data_seg_desc_index << 3 | RPL0;
-			task->tss.fs = data_seg_desc_index << 3 | RPL0;
-			task->tss.gs = data_seg_desc_index << 3 | RPL0;
+			task->tss.es = (data_seg_desc_index << 3) | RPL0;
+			task->tss.cs = (code_seg_desc_index << 3) | RPL0;
+			task->tss.ss = (data_seg_desc_index << 3) | RPL0;
+			task->tss.ds = (data_seg_desc_index << 3) | RPL0;
+			task->tss.fs = (data_seg_desc_index << 3) | RPL0;
+			task->tss.gs = (data_seg_desc_index << 3) | RPL0;
 		}
-
 
 		task->tss.ldt = 0;
 		task->tss.trap = 0;

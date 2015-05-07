@@ -1,18 +1,14 @@
-#include "lexer.h"
-#include "die.h"
-
 #include <ilib/ilib.h>
-#include <dslib/dslib.h>
-#include <dslib/list.h>
-#include <dslib/value.h>
+#include <baslanglib/baslanglib.h>
+#include "die.h"
 
 int main(int argc, char * argv[])
 {
-	DSLEnvironment env;
-	env.dsl_malloc = malloc;
-	env.dsl_calloc = calloc;
-	env.dsl_free = free;
-	dsl_init(&env);
-
+	BASLANGLEnvironment env;
+	env.baslangl_malloc = malloc;
+	env.baslangl_calloc = calloc;
+	env.baslangl_free = free;
+	if(!baslangl_init(&env))
+		die("Cannot initialize 'baslanglib'.");
 	return 0;
 }
