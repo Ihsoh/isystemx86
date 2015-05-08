@@ -10,17 +10,55 @@
 #include "types.h"
 #include "system.h"
 
-void * malloc(uint num_bytes)
+#include <mempoollib/mempoollib.h>
+
+static MEMPOOLLPool pool;
+static BOOL pool_was_inited = FALSE;
+
+static void * __malloc(uint num_bytes)
 {
 	return il_allocm(num_bytes);
 }
 
-void * calloc(uint n, uint size)
+static void * __calloc(uint n, uint size)
 {
 	return il_allocm(n * size);
 }
 
-void free(void * ptr)
+static void __free(void * ptr)
 {
 	il_freem(ptr);
+}
+
+BOOL __init_mempool(void)
+{
+	if(!pool_was_inited)
+	{
+		MEMPOOLLEnvironment mpoolenv;
+		mpoolenv.mempooll_malloc = __malloc;
+		mpoolenv.mempooll_calloc = __calloc;
+		mpoolenv.mempooll_free = __free;
+		pool_was_inited = mempooll_init(&mpoolenv);
+	}
+	return pool_was_inited;
+}
+
+BOOL __destroy_mempool(void)
+{
+	return mempooll_free_pool(&pool);
+}
+
+void * malloc(uint num_bytes)
+{
+	return mempooll_alloc_memory(&pool, num_bytes);
+}
+
+void * calloc(uint n, uint size)
+{
+	return mempooll_alloc_memory(&pool, n * size);
+}
+
+void free(void * ptr)
+{
+	mempooll_free_memory(&pool, ptr);
 }

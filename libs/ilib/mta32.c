@@ -3,10 +3,17 @@
 #define	MAX_ARG_COUNT	256
 #define MAX_ARG_LENGTH	1024
 
+extern BOOL __init_mempool(void);
+extern BOOL __destroy_mempool(void);
 extern int main(int argc, char * argv[]);
 
 void mta32main(void)
 {
+	if(!__init_mempool())
+	{
+		print_err_str_p("MTA32Main: Cannot initialize memory pool!\n", CC_RED);
+		app_exit();
+	}
 	int argc = 0;
 	char * argv[MAX_ARG_COUNT];
 	get_param_w(NULL);
@@ -28,5 +35,6 @@ void mta32main(void)
 	for(i = 0; i < argc; i++)
 		freem(argv[i]);
 	__set_retvalue(retvalue);
+	__destroy_mempool();
 	app_exit();
 }

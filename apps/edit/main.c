@@ -10,7 +10,7 @@
 
 static uint column, row;
 static ushort cursor_x, cursor_y;
-static char content_buffer[MAX_ROW][MAX_COLUMN];
+static char * content_buffer[MAX_ROW];
 static char * screen_buffer;
 static uint top_column, top_row;
 static char filepath[1024];
@@ -38,13 +38,22 @@ int main(int argc, char * argv[])
 	return 0;
 }
 
+static void release_resource(void)
+{
+	if(screen_buffer != NULL)
+		free(screen_buffer);
+	uint ui;
+	for(ui = 0; ui < MAX_ROW; ui++)
+		if(content_buffer[ui] != NULL)
+			free(content_buffer[ui]);
+}
+
 void die(char * message)
 {
 	clear_screen();
 	print_str_p(message, CC_RED);
 	print_str("\n");
-	if(screen_buffer != NULL)
-		freem(screen_buffer);
+	release_resource();
 	set_clock(1);
 	app_exit();
 }
@@ -53,14 +62,21 @@ void init(void)
 {
 	uint ui, ui1;
 	for(ui = 0; ui < MAX_ROW; ui++)
+		content_buffer[ui] = NULL;
+	for(ui = 0; ui < MAX_ROW; ui++)
+	{
+		content_buffer[ui] = malloc(MAX_COLUMN);
+		if(content_buffer[ui] == NULL)
+			die("Cannot allocate memory!");
 		for(ui1 = 0; ui1 < MAX_COLUMN; ui1++)
 			content_buffer[ui][ui1] = '\0';
+	}
 	load();
 	set_clock(0);
 	get_text_screen_size(&column, &row);
 	row -= 1;
 	column -= MAX_LNUM_DIGIT;
-	screen_buffer = (char *)allocm(row * column + 1);
+	screen_buffer = (char *)malloc(row * column + 1);
 	if(screen_buffer == NULL)
 		die("Cannot alloc memory!");
 	cursor_x = MAX_LNUM_DIGIT;
@@ -193,6 +209,7 @@ void edit(void)
 					{
 						clear_screen();
 						set_clock(1);
+						release_resource();
 						app_exit();
 					}
 					else if(top_column + SBUFFER_X + 1 < MAX_COLUMN)
@@ -290,13 +307,13 @@ void flush(void)
 void load(void)
 {
 	uint file_len;
-	char * buffer = allocm(MAX_ROW * MAX_COLUMN);
+	char * buffer = malloc(MAX_ROW * MAX_COLUMN);
 	if(buffer == NULL)
 		die("Cannot alloc memory!");
 	FILE * fptr = fopen(filepath, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
-		freem(buffer);
+		free(buffer);
 		die("Cannot open file!");
 	}
 	file_len = flen(fptr);
@@ -319,7 +336,7 @@ void load(void)
 	total_line = line;
 	if(index != 0)
 		total_line++;
-	freem(buffer);
+	free(buffer);
 }
 
 void save(void)

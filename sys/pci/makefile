@@ -10,7 +10,9 @@ SysMaker=../../tools/sysmaker/bin/sysmaker
 MTA32Obj=../../libs/ilib/bin/mta32.obj
 
 $(Target): bin $(Objs)
-	$(Linker) -Tsegs.lds -e mta32main --oformat binary -o $(Target) $(MTA32Obj) $(Objs) -L../../libs/ilib/bin -lilib
+	$(Linker) -Tsegs.lds -e mta32main --oformat binary -o $(Target) $(MTA32Obj) $(Objs)	\
+-L../../libs/ilib/bin -lilib	\
+-L../../libs/mempoollib/bin -lmempoollib
 	$(SysMaker) $(Target)
 
 bin:

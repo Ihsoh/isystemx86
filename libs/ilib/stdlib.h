@@ -9,8 +9,10 @@
 #define	_STDLIB_H_
 
 #include "types.h"
+
 extern void * malloc(uint num_bytes);
 extern void * calloc(uint n, uint size);
 extern void free(void * ptr);
+extern void * realloc(void * mem_address, uint newsize);
 
 #endif

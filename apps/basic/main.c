@@ -10,5 +10,6 @@ int main(int argc, char * argv[])
 	env.baslangl_free = free;
 	if(!baslangl_init(&env))
 		die("Cannot initialize 'baslanglib'.");
+
 	return 0;
 }

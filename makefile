@@ -14,6 +14,7 @@ $(Target):	bin	\
 			libs/encryptionlib/bin/libencryptionlib.a	\
 			libs/pathlib/bin/libpathlib.a 	\
 			libs/baslanglib/bin/libbaslanglib.a 	\
+			libs/mempoollib/bin/libmempoollib.a 	\
 			boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
@@ -32,6 +33,7 @@ $(Target):	bin	\
 #tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
 	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
 	cd tools/idoc/ && python idoc.py ../../kernel ../../doc/isystemx86-kernel-doc
+	cd tools/idoc/ && python idoc.py ../../libs/mempoollib ../../doc/libs/mempoollib-doc
 
 bin:
 	-mkdir bin
@@ -54,6 +56,9 @@ libs/pathlib/bin/libpathlib.a:
 libs/baslanglib/bin/libbaslanglib.a:
 	cd libs/baslanglib && make
 
+libs/mempoollib/bin/libmempoollib.a:
+	cd libs/mempoollib && make
+
 boot/bin/boot.bin:
 	cd boot && make
 
@@ -74,6 +79,7 @@ Clear:
 	cd libs/encryptionlib && make Clear
 	cd libs/pathlib && make Clear
 	cd libs/baslanglib && make Clear
+	cd libs/mempoollib && make Clear
 
 	cd boot && make Clear
 	cd kernelldr && make Clear

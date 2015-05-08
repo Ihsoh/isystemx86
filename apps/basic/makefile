@@ -13,7 +13,8 @@ $(Target): bin $(Objs)
 	$(Linker) -Tsegs.lds -e mta32main --oformat binary -o $(Target) $(MTA32Obj) $(Objs)	\
 -L../../libs/ilib/bin -lilib	\
 -L../../libs/baslanglib/bin -lbaslanglib	\
--L../../libs/dslib/bin -ldslib
+-L../../libs/dslib/bin -ldslib	\
+-L../../libs/mempoollib/bin -lmempoollib
 	$(AppMaker) $(Target)
 
 bin:
