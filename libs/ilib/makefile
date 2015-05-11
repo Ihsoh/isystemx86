@@ -9,7 +9,7 @@ Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
-bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj
+bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj
 AR=ar
 Include=-I../
 
@@ -48,6 +48,9 @@ bin/stdio.obj: stdio.c stdio.h
 
 bin/stdlib.obj: stdlib.c stdlib.h
 	$(CC) $(CFlags) -c stdlib.c -o bin/stdlib.obj $(Include)
+
+bin/assert.obj: assert.c assert.h
+	$(CC) $(CFlags) -c assert.c -o bin/assert.obj $(Include)
 
 
 

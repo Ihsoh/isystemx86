@@ -4,8 +4,8 @@
   Version:"1.0",
   Group:"Ihsoh Software",
   WriteLogToDiskInRealTime:true,
-  EnableAPIC:true,
-  UseRTCForTaskScheduler:true,
+  EnableAPIC:false,
+  UseRTCForTaskScheduler:false,
   RTCRate:15,
   IFS1:{
     EnableReadBuffer:true,

@@ -499,3 +499,23 @@ mempooll_free_pool(IN OUT MEMPOOLLPoolPtr pool)
 	mempooll_free(pool->mem_list);
 	return TRUE;
 }
+
+/**
+	@Function:		mempooll_size
+	@Access:		Public
+	@Description:
+		获取index对应的尺寸。
+	@Parameters:
+		index, uint32, IN
+			对应尺寸的index。
+	@Return:
+		uint32
+			尺寸。如果返回0则代表无法获取内存尺寸。		
+*/
+uint32
+mempooll_size(IN uint32 index)
+{
+	if(index >= MEMPOOLL_LIST_COUNT)
+		return 0;
+	return sizes[index];
+}

@@ -394,5 +394,23 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			sparams->param1 = SPARAM(retvalue);
 			break;
 		}
+		//获取一个内存块的大小。
+		//
+		//参数:
+		//	Param0=内存块地址。
+		//
+		//返回值:
+		//	Param0=如果返回0则失败，否则返回内存块大小。
+		case SCALL_MEMORY_BLOCK_SIZE:
+		{
+			int32 tid = sparams->tid;
+			void * ptr = get_physical_address(tid,
+								VOID_PTR_SPARAM(sparams->param0));
+			uint32 r = 0;
+			if(ptr != NULL)
+				r = get_memory_block_size(ptr);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }

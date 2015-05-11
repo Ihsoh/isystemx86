@@ -57,6 +57,7 @@ typedef struct
 #define	SCALL_SET_RETVALUE		13
 #define	SCALL_EXEC				14
 #define	SCALL_WAIT				15
+#define	SCALL_MEMORY_BLOCK_SIZE	16
 
 extern void app_exit(void);
 #define	il_app_exit()	(app_exit())
@@ -128,5 +129,9 @@ extern int wait(int tid, int * retvalue);
 extern int exec_sync(char * path, char * param);
 #define	il_exec_sync(path, param)	(exec_sync((path), (param)))
 #define	ILExecuteSync(path, param)	(exec_sync((path), (param)))
+
+extern uint32 memory_size(void * ptr);
+#define	il_memory_size(ptr)	(memory_size((ptr)))
+#define	ILMemorySize(ptr)	(memory_size((ptr)))
 
 #endif

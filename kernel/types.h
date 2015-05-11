@@ -42,6 +42,8 @@ typedef	void *	object;
 #define	DWORD	uint32
 #define	QWORD	uint64
 
+typedef uint32 size_t;
+
 typedef	int8 _ascchar;
 typedef	const int8 _cascchar;
 typedef int8 * _asctext;

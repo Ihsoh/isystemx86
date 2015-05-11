@@ -16,5 +16,6 @@ extern int sprintf_s(char * buffer, uint size, const char * format, ...);
 extern int sprintf(char * buffer, const char * format, ...);
 extern int printf(const char * format, ...);
 extern int puts(const char * string);
+extern int putchar(int ch);
 
 #endif

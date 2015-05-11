@@ -269,3 +269,11 @@ int exec_sync(char * path, char * param)
 		asm volatile ("pause");
 	return retvalue;
 }
+
+uint32 memory_size(void * ptr)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(ptr);
+	system_call(SCALL_SYSTEM, SCALL_MEMORY_BLOCK_SIZE, &sparams);
+	return UINT32_SPARAM(sparams.param0);
+}

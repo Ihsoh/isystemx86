@@ -79,4 +79,8 @@ extern
 BOOL
 mempooll_free_pool(IN OUT MEMPOOLLPoolPtr pool);
 
+extern
+uint32
+mempooll_size(IN uint32 index);
+
 #endif

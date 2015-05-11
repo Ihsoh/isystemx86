@@ -31,9 +31,6 @@
 #define	KERNELLDR_VESA_1024_768		SYSTEM_PATH"kernelldrs/kernelldrgm_1024_768.bin"
 #define	KERNELLDR_VESA_1280_1024	SYSTEM_PATH"kernelldrs/kernelldrgm_1280_1024.bin"
 
-#define	SYSTEM_FLAGS_PATH			SYSTEM_PATH"flags/"
-#define	SYSTEM_FLAGS_CHECK_FS		SYSTEM_FLAGS_PATH"cfs.flg"
-
 #define	SYSTEM_LOG_FILE				SYSTEM_PATH"data/log/system.log"
 #define	SYSTEM_CONFIG_FILE			SYSTEM_PATH"data/config/system.json"
 

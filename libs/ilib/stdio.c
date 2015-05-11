@@ -198,3 +198,9 @@ int puts(const char * string)
 	il_print_char('\n');
 	return strlen(string);
 }
+
+int putchar(int ch)
+{
+	il_print_char((char)ch);
+	return ch;
+}

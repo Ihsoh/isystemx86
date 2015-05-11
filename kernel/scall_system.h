@@ -28,6 +28,7 @@
 #define	SCALL_SET_RETVALUE		13
 #define	SCALL_EXEC				14
 #define	SCALL_WAIT				15
+#define	SCALL_MEMORY_BLOCK_SIZE	16
 
 extern
 void

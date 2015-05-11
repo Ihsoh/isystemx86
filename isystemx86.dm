@@ -83,6 +83,12 @@ MAKE_DIR	VA:/isystem/data/ config
 MAKE_FILE	VA:/isystem/data/config/ system.json
 WRITE_FILE	VA:/isystem/data/config/system.json isystem/data/config/system.json
 
+#Lock directory
+MAKE_DIR	VA:/isystem/ lock
+
+MAKE_FILE	VA:/isystem/lock/ system.lock
+WRITE_FILE	VA:/isystem/lock/system.lock isystem/lock/system.lock
+
 #System resource directory
 MAKE_DIR	VA:/isystem/ resources
 MAKE_DIR	VA:/isystem/resources/ images
@@ -111,11 +117,6 @@ WRITE_FILE	VA:/isystem/resources/images/hidden_button_s.img0 isystem/resources/i
 MAKE_DIR	VA:/isystem/ fonts
 MAKE_FILE	VA:/isystem/fonts/ default.ef
 WRITE_FILE	VA:/isystem/fonts/default.ef isystem/fonts/default.ef
-
-#System flags directory
-MAKE_DIR	VA:/isystem/ flags
-MAKE_FILE	VA:/isystem/flags/ cfs.flg
-WRITE_FILE	VA:/isystem/flags/cfs.flg isystem/flags/cfs.flg
 
 #System init file
 MAKE_FILE	VA:/isystem/ init.bat

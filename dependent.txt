@@ -1,0 +1,9 @@
+isystemx86/libs/encryptionlib:
+	该库提供摘要算法。
+	从https://github.com/WaterJuice/CryptLib移植到ISystem。
+
+isystemx86/sys/pci/toaruos_pci.c,
+isystemx86/sys/pci/toaruos_pci.h,
+pci_list.h:
+	这些文件提供与PCI相关的功能。
+	从http://www.toaruos.org/, https://github.com/klange/toaruos移植到ISystem。

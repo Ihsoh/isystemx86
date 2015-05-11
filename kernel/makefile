@@ -20,7 +20,7 @@ bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_wind
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
 bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
-bin/ahci.obj
+bin/ahci.obj bin/dma.obj bin/mouse.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
@@ -180,6 +180,12 @@ bin/config.obj: config.c config.h
 
 bin/ahci.obj: ahci.c ahci.h
 	$(CC) $(CFlags) -c ahci.c -o bin/ahci.obj $(Include)
+
+bin/dma.obj: dma.c dma.h
+	$(CC) $(CFlags) -c dma.c -o bin/dma.obj $(Include)
+
+bin/mouse.obj: mouse.c mouse.h
+	$(CC) $(CFlags) -c mouse.c -o bin/mouse.obj $(Include)
 
 .PHONY:Clear
 

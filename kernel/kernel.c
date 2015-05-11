@@ -33,6 +33,7 @@
 #include "cmlock.h"
 #include "ahci.h"
 #include "serial.h"
+#include "dma.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
@@ -40,219 +41,10 @@
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
 
-static
-void
-reset_all_exceptions(void);
-
-static
-void
-disk_va_init(void);
-
-static
-BOOL
-init_dsl(void);
-
-static
-BOOL
-init_jsonl(void);
-
-static
-BOOL
-init_pathl(void);
-
-static
-void
-fpu_error_int(void);
-
-static
-void
-init_interrupt(void);
-
-static
-void
-init_noimpl(void);
-
-static
-void
-set_noimpl(IN uint32 int_num);
-
-static
-void
-noimpl_int(void);
-
-static
-void
-init_gp(void);
-
-static
-void
-gp_int(void);
-
-static
-void
-init_timer(void);
-
-static
-void
-timer_int(void);
-
-static
-void
-init_mouse(void);
-
-static
-void
-mouse_int(void);
-
-static
-void
-init_keyboard(void);
-
-static
-void
-keyboard_int(void);
-
-static
-void
-init_ide(void);
-
-static
-void
-ide_int(void);
-
-static
-void
-init_fpu(void);
-
-static
-void
-fpu_int(void);
-
-static
-void
-init_pf(void);
-
-static
-void
-pf_int(void);
-
-static
-void
-system_call_screen(	IN uint32 func,
-					IN uint32 base,
-					IN OUT struct SParams * sparams);
-
-static
-void
-system_call(void);
-
-static
-void
-system_call_int(void);
-
-static
-void
-init_system_call(void);
-
-static
-void
-enter_system(void);
-
-static
-void
-leave_system(void);
-
-static
-void
-init_dividing_by_zero(void);
-
-static
-void
-dividing_by_zero_int(void);
-
-static
-void
-init_bound_check(void);
-
-static
-void
-bound_check_int(void);
-
-static
-void
-init_double_fault(void);
-
-static
-void
-double_fault_int(void);
-
-static
-void
-init_invalid_opcode(void);
-
-static
-void
-invalid_opcode_int(void);
-
-static
-void
-init_invalid_tss(void);
-
-static
-void
-invalid_tss_int(void);
-
-static
-void
-init_invalid_seg(void);
-
-static
-void
-invalid_seg_int(void);
-
-static
-void
-init_invalid_stack(void);
-
-static
-void
-invalid_stack_int(void);
-
-static
-void
-init_mf(void);
-
-static
-void
-mf_int(void);
-
-static
-void
-init_ac(void);
-
-static
-void
-ac_int(void);
-
-static
-void
-init_mc(void);
-
-static
-void
-mc_int(void);
-
-static
-void
-init_xf(void);
-
-static
-void
-xf_int(void);
-
-static uint32 gdt_addr = 0;			//GDT的物理地址
-static int32 current_tid;			//当前正在运行的任务的TID。
-static BOOL is_kernel_task = TRUE;	//当前的任务是否是内核任务。
+static uint32	gdt_addr		= 0;	//GDT的物理地址。
+static uint32	idt_addr		= 0;	//IDT的物理地址。
+static int32	current_tid;			//当前正在运行的任务的TID。
+static BOOL		is_kernel_task	= TRUE;	//当前的任务是否是内核任务。
 
 //内核各个任务的TSS
 static struct TSS divby0_tss;		//处理除以0引发的异常的任务的TSS。
@@ -277,17 +69,18 @@ static struct TSS ide_tss;						//IDE的任务的TSS。
 static struct TSS fpu_tss;						//FPU的任务的TSS。
 static struct TSS scall_tss[MAX_TASK_COUNT];	//各个系统调用的任务的TSS。
 
-static BOOL mouse_loop_was_enabled = FALSE;	//!!!警告!!!
-											//在使用APIC模式时，不知道为什么
-											//在执行enter_system()附近的代码
-											//时会引发一次鼠标中断，导致鼠标驱动
-											//程序错误的递增了mouse_count。所以
-											//在调用完毕enter_system()之后才将
-											//mouse_loop_was_enabled设为TRUE。
-static BOOL keyboard_loop_was_enabled = FALSE;
-static BOOL use_rtc_for_task_scheduler = FALSE;
-static uint8 rtc_rate = 15;
+static BOOL		mouse_loop_was_enabled 		= FALSE;	//!!!警告!!!
+														//在使用APIC模式时，不知道为什么
+														//在执行enter_system()附近的代码
+														//时会引发一次鼠标中断，导致鼠标驱动
+														//程序错误的递增了mouse_count。所以
+														//在调用完毕enter_system()之后才将
+														//mouse_loop_was_enabled设为TRUE。
+static BOOL 	keyboard_loop_was_enabled	= FALSE;
+static BOOL		use_rtc_for_task_scheduler	= FALSE;
+static uint8	rtc_rate					= 15;
 
+#include "knlstatic.h"
 
 /**
 	@Function:		main
@@ -301,6 +94,7 @@ void
 main(void)
 {
 	gdt_addr = get_gdt_addr();
+	idt_addr = get_idt_addr();
 	
 	init_memory();
 	
@@ -354,7 +148,10 @@ main(void)
 	init_screen();
 	init_enfont();
 	init_timer();
+
 	init_mouse();
+	mouse_init();
+	
 	init_keyboard();
 	init_fpu();
 	init_tasks();
@@ -393,6 +190,7 @@ main(void)
 	enable_console_lock();
 	enable_ifs1_lock();
 
+	dma_init();
 	pci_init();
 	disk_va_init();
 
@@ -545,7 +343,7 @@ knl_lib_malloc(IN uint32 num_bytes)
 static
 void *
 knl_lib_calloc(	IN uint32 n, 
-			IN uint32 size)
+				IN uint32 size)
 {
 	return alloc_memory(n * size);
 }
@@ -820,22 +618,6 @@ init_mouse(void)
 	set_gate_to_idt(0x74, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)mouse_int, (uint32)stack);
-	
-	//允许鼠标接口
-	outb(0x64, 0xa8);
-	//通知8042下一个字节的0x60的数据发送给鼠标
-	outb(0x64, 0xd4);
-	//允许鼠标发送数据
-	outb(0x60, 0xf4);
-	//通知8042下一个字节发向0x60的数据应方向8042的命令寄存器
-	outb(0x64, 0x60);
-	//许可键盘及鼠标接口及中断
-	outb(0x60, 0x47);
-	
-	//uint8 mask = inb(0xa1);
-	//mask &= 0xef;
-	//!!!!!!!!!!!!!!!!!!!!!outb(0xa1, 0xef);
-	//outb(0xa1, mask);
 }
 
 /**
@@ -992,208 +774,6 @@ static volatile BOOL kernel_init_i387 = FALSE;
 static volatile struct I387State kernel_i387_state;
 static volatile BOOL kernel_task_ran = FALSE;
 
-// #define NEW_TIMER_INT
-
-#ifdef NEW_TIMER_INT
-static
-void
-timer_int_jump_scall_tss(IN int32 task_id)
-{
-	#define SYSTEM_CALL(tid_s)	\
-		irq_ack(0);	\
-		asm volatile (	".set TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
-						"ljmp	$TARGET"tid_s", $0\n\t");
-
-	#define SYSTEM_CALL_CASE(tid, tid_s)	\
-		case tid:	\
-			SYSTEM_CALL(tid_s);	\
-			break;
-
-	switch(task_id)
-	{
-		SYSTEM_CALL_CASE(0, "0")
-		SYSTEM_CALL_CASE(1, "1")
-		SYSTEM_CALL_CASE(2, "2")
-		SYSTEM_CALL_CASE(3, "3")
-		SYSTEM_CALL_CASE(4, "4")
-		SYSTEM_CALL_CASE(5, "5")
-		SYSTEM_CALL_CASE(6, "6")
-		SYSTEM_CALL_CASE(7, "7")
-		SYSTEM_CALL_CASE(8, "8")
-		SYSTEM_CALL_CASE(9, "9")
-		SYSTEM_CALL_CASE(10, "10")
-		SYSTEM_CALL_CASE(11, "11")
-		SYSTEM_CALL_CASE(12, "12")
-		SYSTEM_CALL_CASE(13, "13")
-		SYSTEM_CALL_CASE(14, "14")
-		SYSTEM_CALL_CASE(15, "15")
-		SYSTEM_CALL_CASE(16, "16")
-		SYSTEM_CALL_CASE(17, "17")
-		SYSTEM_CALL_CASE(18, "18")
-		SYSTEM_CALL_CASE(19, "19")
-		SYSTEM_CALL_CASE(20, "20")
-		SYSTEM_CALL_CASE(21, "21")
-		SYSTEM_CALL_CASE(22, "22")
-		SYSTEM_CALL_CASE(23, "23")
-		SYSTEM_CALL_CASE(24, "24")
-		SYSTEM_CALL_CASE(25, "25")
-		SYSTEM_CALL_CASE(26, "26")
-		SYSTEM_CALL_CASE(27, "27")
-		SYSTEM_CALL_CASE(28, "28")
-		SYSTEM_CALL_CASE(29, "29")
-		SYSTEM_CALL_CASE(30, "30")
-		SYSTEM_CALL_CASE(31, "31")
-		SYSTEM_CALL_CASE(32, "32")
-		SYSTEM_CALL_CASE(33, "33")
-		SYSTEM_CALL_CASE(34, "34")
-		SYSTEM_CALL_CASE(35, "35")
-		SYSTEM_CALL_CASE(36, "36")
-		SYSTEM_CALL_CASE(37, "37")
-		SYSTEM_CALL_CASE(38, "38")
-		SYSTEM_CALL_CASE(39, "39")
-		SYSTEM_CALL_CASE(40, "40")
-		SYSTEM_CALL_CASE(41, "41")
-		SYSTEM_CALL_CASE(42, "42")
-		SYSTEM_CALL_CASE(43, "43")
-		SYSTEM_CALL_CASE(44, "44")
-		SYSTEM_CALL_CASE(45, "45")
-		SYSTEM_CALL_CASE(46, "46")
-		SYSTEM_CALL_CASE(47, "47")
-		SYSTEM_CALL_CASE(48, "48")
-		SYSTEM_CALL_CASE(49, "49")
-		SYSTEM_CALL_CASE(50, "50")
-		SYSTEM_CALL_CASE(51, "51")
-		SYSTEM_CALL_CASE(52, "52")
-		SYSTEM_CALL_CASE(53, "53")
-		SYSTEM_CALL_CASE(54, "54")
-		SYSTEM_CALL_CASE(55, "55")
-		SYSTEM_CALL_CASE(56, "56")
-		SYSTEM_CALL_CASE(57, "57")
-		SYSTEM_CALL_CASE(58, "58")
-		SYSTEM_CALL_CASE(59, "59")
-		SYSTEM_CALL_CASE(60, "60")
-		SYSTEM_CALL_CASE(61, "61")
-		SYSTEM_CALL_CASE(62, "62")
-		SYSTEM_CALL_CASE(63, "63")
-	}
-}
-
-/**
-	@Function:		timer_int
-	@Access:		Private
-	@Description:
-		定时器的中断程序。新版本。
-		该版本的任务调度允许在有任务进行系统调用时，
-		进行任务切换。
-	@Parameters:
-	@Return:	
-*/
-static
-void
-timer_int(void)
-{	
-	while(1)
-	{
-		if(is_enable_flush_screen && vesa_is_valid())
-			if(++flush_counter == 2)
-			{
-				flush_screen();
-				flush_counter = 0;
-			}
-		if(TRUE)
-		{
-			if(--clock_counter == 0)
-			{
-				console_clock();
-				clock_counter = 100;
-			}
-			uint32 running_tid = get_running_tid();
-			uint32 tid = get_next_task_id();
-			current_tid = tid;
-			if(counter == 1 || tid == -1)
-			{
-				counter = 0;
-				is_kernel_task = TRUE;
-				struct Task task;
-
-				//如果在执行内核任务之前有其他任务，
-				//则保存任务的I387的状态。
-				if(running_tid != -1)
-				{
-					get_task_info(running_tid, &task);
-					asm volatile ("fnsave %0"::"m"(task.i387_state));
-					set_task_info(running_tid, &task);
-				}
-
-				//加载内核的I387的状态，如果未初始化则先初始化。
-				if(kernel_init_i387)
-					asm volatile ("frstor %0"::"m"(kernel_i387_state));
-				else
-				{
-					asm volatile ("fninit");
-					kernel_init_i387 = TRUE;
-				}
-
-				kernel_task_ran = TRUE;
-
-				struct Desc kernel_tss_desc;
-				get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
-				kernel_tss_desc.attr = AT386TSS + DPL0; 
-				set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
-				free_system_call_tss();
-				irq_ack(0);
-				asm volatile ("ljmp	$56, $0;");
-			}
-			else
-			{
-				counter++;
-				is_kernel_task = FALSE;
-				struct Task * task_ptr = get_task_info_ptr(running_tid);
-				if(!task_ptr->is_system_call)
-				{
-					struct Task task;
-					if(running_tid != -1)
-					{
-						get_task_info(running_tid, &task);
-						asm volatile ("fnsave %0"::"m"(task.i387_state));
-						set_task_info(running_tid, &task);
-					}
-					get_task_info(tid, &task);
-					if(task.init_i387)
-						asm volatile ("frstor %0"::"m"(task.i387_state));
-					else
-					{
-						asm volatile ("fninit");
-						task.init_i387 = 1;
-						set_task_info(tid, &task);
-					}
-					set_task_ran_state(tid);
-					struct Desc tss_desc;
-					struct Gate task_gate;
-					get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
-					get_desc_from_gdt(400 + tid * 5 + 1, (uint8 *)&task_gate);
-					tss_desc.attr = AT386TSS + DPL3;
-					set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
-					set_desc_to_gdt(11, (uint8 *)&task_gate);
-					free_system_call_tss();
-					irq_ack(0);
-					asm volatile ("ljmp	$88, $0;");	
-				}
-				else
-				{
-					irq_ack(0);
-					asm volatile ("iret;");
-				}
-			}
-		}
-		else
-		{
-			irq_ack(0);
-			asm volatile ("iret;");
-		}
-	}
-}
-#else // #ifdef NEW_TIMER_INT
 /**
 	@Function:		timer_int
 	@Access:		Private
@@ -1344,7 +924,6 @@ timer_int(void)
 		}
 	}
 }
-#endif // #ifdef NEW_TIMER_INT
 
 /**
 	@Function:		enable_flush_screen
@@ -1872,6 +1451,24 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 	asm volatile ("cli");
 }
 
+#define GET_ERROR_CODE(__errcode)	\
+{	\
+	asm volatile (	\
+		"pushal\n\t"	\
+		"movl	4(%%ebp), %%eax\n\t"	\
+		"movl	%%eax, %0\n\t"	\
+		"popal\n\t"	\
+	:"=m"(*(__errcode)));	\
+}
+
+#define PARSE_ERROR_CODE(__errcode, __ext, __idt, __ti, __sel)	\
+{	\
+	*(__ext) = __errcode & 0x00000001;	\
+	*(__idt) = __errcode & 0x00000002;	\
+	*(__ti) = __errcode & 0x00000004;	\
+	*(__sel) = (__errcode >> 3) & 0x1fff;	\
+}
+
 /*================================================================================
 							处理除数为0的故障, 0x00
 ================================================================================*/
@@ -2290,10 +1887,20 @@ invalid_tss_int(void)
 				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
+			uint32 errcode = 0;
+			GET_ERROR_CODE(&errcode);
+			uint32 ext = 0, idt = 0, ti = 0, selector = 0;
+			PARSE_ERROR_CODE(errcode, &ext, &idt, &ti, &selector);
+			
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"A task causes a exception of invalid tss, the id is %d, the name is '%s'\n",
+						"A task causes a exception of invalid tss"
+						"(Selector: %X, Table: %s, EXT: %s)"
+						", the id is %d, the name is '%s'\n",
+						selector,
+						idt ? "IDT" : (ti ? "LDT" : "GDT"),
+						ext ? "True" : "False",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
@@ -2378,10 +1985,20 @@ invalid_seg_int(void)
 				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
+			uint32 errcode = 0;
+			GET_ERROR_CODE(&errcode);
+			uint32 ext = 0, idt = 0, ti = 0, selector = 0;
+			PARSE_ERROR_CODE(errcode, &ext, &idt, &ti, &selector);
+
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"A task causes a exception of non-existent segment, the id is %d, the name is '%s'\n",
+						"A task causes a exception of non-existent segment"
+						"(Selector: %X, Table: %s, EXT: %s)"
+						", the id is %d, the name is '%s'\n",
+						selector,
+						idt ? "IDT" : (ti ? "LDT" : "GDT"),
+						ext ? "True" : "False",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
@@ -2466,10 +2083,20 @@ invalid_stack_int(void)
 				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
+			uint32 errcode = 0;
+			GET_ERROR_CODE(&errcode);
+			uint32 ext = 0, idt = 0, ti = 0, selector = 0;
+			PARSE_ERROR_CODE(errcode, &ext, &idt, &ti, &selector);
+
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"A task causes a exception of invalid stack, the id is %d, the name is '%s'\n",
+						"A task causes a exception of invalid stack"
+						"(Selector: %X, Table: %s, EXT: %s)"
+						", the id is %d, the name is '%s'\n",
+						selector,
+						idt ? "IDT" : (ti ? "LDT" : "GDT"),
+						ext ? "True" : "False",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
@@ -2554,10 +2181,20 @@ gp_int(void)
 				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
+			uint32 errcode = 0;
+			GET_ERROR_CODE(&errcode);
+			uint32 ext = 0, idt = 0, ti = 0, selector = 0;
+			PARSE_ERROR_CODE(errcode, &ext, &idt, &ti, &selector);
+
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"A task causes a global protected exception, the id is %d, the name is '%s'\n",
+						"A task causes a global protected exception"
+						"(Selector: %X, Table: %s, EXT: %s)"
+						", the id is %d, the name is '%s'\n",
+						selector,
+						idt ? "IDT" : (ti ? "LDT" : "GDT"),
+						ext ? "True" : "False",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
@@ -2642,10 +2279,45 @@ pf_int(void)
 				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
+			// 获取导致异常的线性地址。
+			uint32 badaddr = 0;
+			asm volatile (
+				"pushal\n\t"
+				"movl	%%cr2, %%eax\n\t"
+				"movl	%%eax, %0\n\t"
+				"popal\n\t"
+			:"=m"(badaddr));
+
+			// 获取错误码。
+			uint32 errcode = 0;
+			GET_ERROR_CODE(&errcode);
+			
+			// P: 错误码的位0。
+			// 异常是由于页面不存在或违反访问特权而引起的。
+			// P=0，表示页不存在。
+			// P=1，表示违反页级保护权限。
+			uint32 p = errcode & 0x00000001;
+
+			// W/R: 错误码的位1。
+			// 异常是由于内存读或写操作引起的。
+			// W/R=0，表示由读操作引起。
+			// W/R=1，表示由写操作引起。
+			uint32 wr = errcode & 0x0000002;
+			
+			// U/S: 错误码的位2。
+			// 发生异常时CPU执行的代码级别。
+			// U/S=0，表示CPU正在执行超级用户代码。
+			// U/S=1，表示CPU正在执行一般用户代码。
+			uint32 us = errcode & 0x0000004;
+
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"A task causes a error of page fault, the id is %d, the name is '%s'\n",
+						"A task causes a error of page fault(0x%X, %s, %s, %s), the id is %d, the name is '%s'\n",
+						badaddr,
+						p ? "Violating page level protected privilege" : "Page does not exist",
+						wr ? "Write" : "Read",
+						us ? "User" : "System",
 						current_tid,
 						task->name);
 			log(LOG_ERROR, buffer);
@@ -3174,7 +2846,7 @@ enter_system(void)
 	print_str("Checking system...\n");
 
 	//检查文件系统
-	FILE * fptr = fopen(SYSTEM_FLAGS_CHECK_FS, FILE_MODE_ALL);
+	FILE * fptr = fopen(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
 	if(fptr != NULL)
 		if(flen(fptr) != 0)
 		{
@@ -3219,7 +2891,7 @@ static
 void
 leave_system(void)
 {
-	FILE * fptr = fopen(SYSTEM_FLAGS_CHECK_FS, FILE_MODE_WRITE);
+	FILE * fptr = fopen(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
 	if(fptr != NULL)
 	{
 		fwrite(fptr, "", 0);

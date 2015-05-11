@@ -2297,6 +2297,26 @@ exec(	IN int8 * cmd,
 			print_str("\n");
 		}
 
+		else if(strcmp(name, "t") == 0)
+		{
+			asm volatile ("cli");
+			outb(0x0a, 0x06);
+			outb(0x0c, 0xff);
+			outb(0x04, 0x00);
+			outb(0x04, 0x10);
+			outb(0x0c, 0xff);
+			outb(0x05, 0xff);
+			outb(0x05, 0x23);
+			outb(0x81, 0x00);
+			outb(0x0a, 0x02);
+
+			outb(0x0a, 0x06);
+			outb(0x0b, 0x56);
+
+			outb(0x0a, 0x02);
+			asm volatile ("sti");
+		}
+
 		//Batch
 		else if(strcmp(name, "goto") == 0)
 		{
