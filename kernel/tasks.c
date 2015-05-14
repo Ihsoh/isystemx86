@@ -45,7 +45,7 @@ init_tasks(void)
 		tasks[ui].allocable = TRUE;
 		struct Desc tss_desc;
 		struct Gate task_gate;
-		uint32 temp = (uint32)&tasks[ui].tss;
+		uint32 temp = (uint32)&(tasks[ui].tss);
 		tss_desc.limitl = sizeof(struct TSS) - 1;
 		tss_desc.basel = (uint16)(temp & 0xFFFF);
 		tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
@@ -150,7 +150,7 @@ _create_task(	IN int8 * name,
 		task->used_memory_size = real_task_len;
 		if(task->addr == NULL)
 			return -1;
-		clear_memory((uint8 *)(task->addr), real_task_len, 0);
+		clear_memory((uint8 *)(task->addr), 0, real_task_len);
 		memcpy(task->addr + 3 * 1024 * 1024, app, app_len);
 
 		for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
@@ -426,7 +426,9 @@ _kill_task(IN int32 tid)
 
 	if(tid == running_tid)
 		running_tid = -1;
+
 	task->used = 0;
+
 	return TRUE;
 }
 

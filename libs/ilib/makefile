@@ -7,9 +7,12 @@ TargetDir=bin
 Out=libilib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
+AS=as
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
+ASFlags=--32 -march=i386 -mtune=i386
 Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
-bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj
+bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj 	\
+bin/setjmp.obj bin/longjmp.obj
 AR=ar
 Include=-I../
 
@@ -52,7 +55,11 @@ bin/stdlib.obj: stdlib.c stdlib.h
 bin/assert.obj: assert.c assert.h
 	$(CC) $(CFlags) -c assert.c -o bin/assert.obj $(Include)
 
+bin/setjmp.obj: setjmp.s
+	$(AS) $(ASFlags) -c setjmp.s -o bin/setjmp.obj
 
+bin/longjmp.obj: longjmp.s
+	$(AS) $(ASFlags) -c longjmp.s -o bin/longjmp.obj
 
 bin/mta32.obj: mta32.c
 	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj $(Include)

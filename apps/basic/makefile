@@ -14,8 +14,7 @@ $(Target): bin $(Objs)
 -L../../libs/ilib/bin -lilib	\
 -L../../libs/baslanglib/bin -lbaslanglib	\
 -L../../libs/dslib/bin -ldslib	\
--L../../libs/mempoollib/bin -lmempoollib	\
--L../../libs/regexlib/bin -lregexlib
+-L../../libs/mempoollib/bin -lmempoollib
 	$(AppMaker) $(Target)
 
 bin:

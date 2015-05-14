@@ -39,7 +39,9 @@ BOOL __init_mempool(void)
 		mpoolenv.mempooll_malloc = __malloc;
 		mpoolenv.mempooll_calloc = __calloc;
 		mpoolenv.mempooll_free = __free;
-		pool_was_inited = mempooll_init(&mpoolenv);
+		if(!mempooll_init(&mpoolenv))
+			return FALSE;
+		pool_was_inited = mempooll_init_pool(&pool);	
 	}
 	return pool_was_inited;
 }

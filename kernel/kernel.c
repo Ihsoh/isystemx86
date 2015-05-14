@@ -761,18 +761,18 @@ free_system_call_tss(void)
 	set_desc_to_gdt(14, (uint8 *)&system_call_tss_desc);
 }
 
-static volatile int32 counter = 1;
-static volatile int32 clock_counter = 100;
-static volatile int32 is_system_call = 0;
-static volatile int32 is_enable_flush_screen = 1;
-static volatile int32 flush_counter = 0;
-static volatile BOOL switch_to_kernel = FALSE;
-static volatile BOOL kt_jk_lock = TRUE;
-static volatile BOOL will_reset_all_exceptions = FALSE;
+static volatile int32	counter						= 1;
+static volatile int32	clock_counter				= 100;
+static volatile int32	is_system_call				= 0;
+static volatile int32	is_enable_flush_screen		= 1;
+static volatile int32	flush_counter				= 0;
+static volatile BOOL	switch_to_kernel			= FALSE;
+static volatile BOOL	kt_jk_lock					= TRUE;
+static volatile BOOL	will_reset_all_exceptions	= FALSE;
 
-static volatile BOOL kernel_init_i387 = FALSE;
-static volatile struct I387State kernel_i387_state;
-static volatile BOOL kernel_task_ran = FALSE;
+static volatile BOOL				kernel_init_i387	= FALSE;
+static volatile struct I387State	kernel_i387_state;
+static volatile BOOL				kernel_task_ran		= FALSE;
 
 /**
 	@Function:		timer_int
@@ -1436,8 +1436,10 @@ static
 void
 kill_task_and_jump_to_kernel(IN uint32 tid)
 {
+	is_kernel_task = TRUE;
 	kill_task(tid);
 	enable_flush_screen();
+
 	int32 wait_app_tid = get_wait_app_tid();
 	if(tid == wait_app_tid)
 		set_wait_app_tid(-1);
