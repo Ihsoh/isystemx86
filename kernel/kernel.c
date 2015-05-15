@@ -34,10 +34,12 @@
 #include "ahci.h"
 #include "serial.h"
 #include "dma.h"
+#include "kmpool.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
 #include <pathlib/pathlib.h>
+#include <mempoollib/mempoollib.h>
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
 
@@ -135,10 +137,13 @@ main(void)
 
 	ahci_init();
 
-	// 初始化外部库。DSLIB，JSONLIB，PATHLIB。 
+	// 初始化外部库。DSLIB，JSONLIB，PATHLIB, MEMPOOLLIB。 
 	init_dsl();
 	init_jsonl();
 	init_pathl();
+	init_mempooll();
+
+	kmpool_init();
 
 	config_init();
 
@@ -426,6 +431,27 @@ init_pathl(void)
 	env.pathl_calloc = knl_lib_calloc;
 	env.pathl_free = knl_lib_free;
 	return pathl_init(&env);
+}
+
+/**
+	@Function:		init_mempooll
+	@Access:		Private
+	@Description:
+		初始化 MEMPOOL 库。
+	@Parameters:
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。
+*/
+static
+BOOL
+init_mempooll(void)
+{
+	MEMPOOLLEnvironment env;
+	env.mempooll_malloc = knl_lib_malloc;
+	env.mempooll_calloc = knl_lib_calloc;
+	env.mempooll_free = knl_lib_free;
+	return mempooll_init(&env);
 }
 
 /**

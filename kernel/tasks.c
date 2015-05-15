@@ -17,6 +17,8 @@
 #include "lock.h"
 #include "mqueue.h"
 #include "scall_fs.h"
+#include "kmpool.h"
+
 #include <ilib/string.h>
 
 static struct Task tasks[MAX_TASK_COUNT];

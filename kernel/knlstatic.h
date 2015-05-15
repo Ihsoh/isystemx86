@@ -46,6 +46,10 @@ BOOL
 init_pathl(void);
 
 static
+BOOL
+init_mempooll(void);
+
+static
 void
 irq_ack(IN uint32 no);
 

@@ -1,99 +1,28 @@
 ISystem x86
 ===========
+ISystem x86 is a multitasking and x86 based operating system, in development since January of 2014.
 
-This is a multiple task, single user, x86 operating system.
+This repository contains the kernel, system applications, user applications and some libraries. nasm and gcc are required to build ISystem x86 if building environment is ubuntu 32-bit. nasm, gcc, ia32-libs and libc-dev-i386 are required if building environment is ubuntu 64-bit.
 
-这是一个多任务，单用户，基于x86的操作系统。
+## Kernel ##
+The ISystem x86 kernel provides multitasking, memory management, a tree-structured directory filesystem, a console, a simple GUI, and some device drivers. PS/2 mouse, PS/2 keyboard, ATA harddisk, VESA, serial were supported.
 
+## User Application ##
+The user application was run in the Ring3. There are some examples in the directory *apps/*.
 
-构建系统：
+## System Application ##
+The system application was run in the Ring0. The system application is kernel extension. There are some examples in the directory *sys/*.
 
-以下步骤均假定当前目录为 ISystem x86 源代码目录的根目录。
-	
+## Library ##
+The libraries are used to develop the user application and the system application. There are the libraries in the directory *libs/*.
 
-* Ubuntu 10.04 LTS amd64
-========================
-	* 汇编器和编译器
-
-		apt-get install nasm	#NASM 已存在则跳过
-
-		apt-get install gcc		#gcc  已存在则跳过	
-
-
-	* 64位 Linux 编译32位程序所需的库
-
-		apt-get install ia32-libs
-
-		apt-get install libc6-dev-i386
-
-		apt-get install linux32
-
-
-	* 编译 Application Maker
-
-		cd tools/appmaker/
-
-		make Clear
-
-		make
-
-		cd ../../
-
-
-	* 编译 Disk Maker
-
-		cd tools/diskmaker/
-
-		make Clear
-
-		make
-
-		cd ../../
-
-
-	* 构建 ISystem x86
-
-		make Clear
-
-		make
-
-
-
-
-
-
-* Ubuntu 10.04 LTS i386
-========================
-	* 汇编器和编译器
-
-		apt-get install nasm	#NASM 已存在则跳过
-
-		apt-get install gcc		#gcc  已存在则跳过	
-
-
-	* 编译 Application Maker
-
-		cd tools/appmaker/
-
-		make Clear
-
-		make
-
-		cd ../../
-
-
-	* 编译 Disk Maker
-
-		cd tools/diskmaker/
-
-		make Clear
-
-		make
-
-		cd ../../
-
-	* 构建 ISystem x86
-
-		make Clear
-
-		make
+|Name                |Detail                                   |
+|--------------------|-----------------------------------------|
+|baslanglib          |Basic Language Library.                  |
+|dslib               |Data Structure.                          |
+|encryptionlib       |Hash(md5, sha1, sha256, sha512) Library. |
+|ilib                |Standard Library.                        |
+|jsonlib             |JSON Library.                            |
+|mempool             |Memory Pool Library.                     |
+|pathlib             |Path Library.                            |
+|regexlib            |Regular Expression Library.              |

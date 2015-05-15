@@ -11,8 +11,9 @@
 #include "memory.h"
 #include "ifs1disk.h"
 #include "cmos.h"
-#include <ilib/string.h>
+#include "kmpool.h"
 
+#include <ilib/string.h>
 #include <dslib/linked_list.h>
 #include <dslib/value.h>
 
@@ -108,7 +109,7 @@ fill_bat(	IN OUT DSLLinkedListPtr bat,
 		if(!block.used)
 		{
 			DSLLinkedListNodePtr node;
-			node = (DSLLinkedListNodePtr)alloc_memory(sizeof(DSLLinkedListNode));
+			node = (DSLLinkedListNodePtr)kmpool_malloc(sizeof(DSLLinkedListNode));
 			if(node == NULL)
 				return FALSE;
 			node->value.value.uint32_value = ui;
@@ -175,7 +176,7 @@ new_block_from_bat(	IN const int8 * symbol,
 	if(node == NULL)
 		return FALSE;
 	*block_id = node->value.value.uint32_value;
-	free_memory(node);
+	kmpool_free(node);
 	return TRUE;
 }
 
@@ -291,14 +292,16 @@ del_block(	IN const int8 * symbol,
 	BOOL r = set_block(symbol, id, &temp);
 	if(r)
 	{
+		// 如果块被删除，则把这个块添加到块分配表中。
 		DSLLinkedListPtr bat = get_bat(symbol);
 		if(bat != NULL)
 		{
 			DSLLinkedListNodePtr node;
-			node = (DSLLinkedListNodePtr)alloc_memory(sizeof(DSLLinkedListNode));
+			node = (DSLLinkedListNodePtr)kmpool_malloc(sizeof(DSLLinkedListNode));
 			if(node != NULL)
 			{
 				node->value.value.uint32_value = id;
+				node->value.type = DSLVALUE_UINT32;
 				dsl_lnklst_add_node(bat, node);
 			}
 		}
