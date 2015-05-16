@@ -63,7 +63,7 @@ void Machine_Free(Machine * machine)
 	free(machine);
 }
 
-void Machine_load0(Machine * machine, FILE * fd)
+void Machine_load0(Machine * machine, ILFILE * fd)
 {
     int icount = bh_readint32(fd);
     if(!Memory_AllocProgramSpace(machine->memory, icount))
@@ -86,13 +86,13 @@ void Machine_load0(Machine * machine, FILE * fd)
 
 BOOL Machine_load1(Machine * machine, const char * fn)
 {
-	FILE *fd;
-    if(!(fd = fopen(fn, FILE_MODE_READ)))
+	ILFILE *fd;
+    if(!(fd = ILOpenFile(fn, FILE_MODE_READ)))
     {
         return FALSE;
     }
     Machine_load0(machine, fd);
-    fclose(fd);
+    ILCloseFile(fd);
     return TRUE;
 }
 

@@ -50,10 +50,10 @@ pci_get_device(IN uint32 index)
 BOOL
 pci_write_to_file(IN const int8 * path)
 {
-	FILE * fptr = fopen(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
+	ILFILE * fptr = ILOpenFile(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
 	if(fptr == NULL)
 		return FALSE;
-	fwrite(fptr, "{\n", 2);
+	ILWriteFile(fptr, "{\n", 2);
 	uint32 ui;
 	for(ui = 0; ui < pci_devices_count; ui++)
 	{
@@ -73,9 +73,9 @@ pci_write_to_file(IN const int8 * path)
 					pci_device->deviceid,
 					pci_device->vendor_name,
 					pci_device->device_name);
-		fappend(fptr, buffer, strlen(buffer));
+		ILAppendFile(fptr, buffer, strlen(buffer));
 	}
-	fappend(fptr, "}\n", 2);
-	fclose(fptr);
+	ILAppendFile(fptr, "}\n", 2);
+	ILCloseFile(fptr);
 	return TRUE;
 }

@@ -41,17 +41,17 @@ int main(int argc, char * argv[])
 							if(strlen(argv[2 + index]) < sizeof(path))
 							{
 								strcpy(path, argv[2 + index++]);
-								fix_path(path, path);
-								FILE * fptr = fopen(path, FILE_MODE_READ);
+								ILFixPath(path, path);
+								ILFILE * fptr = ILOpenFile(path, FILE_MODE_READ);
 								if(fptr != NULL)
 								{
-									fread(	fptr, 
-											buffer, 
-											flen(fptr) < sizeof(buffer)
-												? flen(fptr)
-												: sizeof(buffer) - 1);
+									ILReadFile(	fptr, 
+												buffer, 
+												ILGetFileLength(fptr) < sizeof(buffer)
+													? ILGetFileLength(fptr)
+													: sizeof(buffer) - 1);
 									print_str(buffer);
-									fclose(fptr);
+									ILCloseFile(fptr);
 								}
 							}
 						}

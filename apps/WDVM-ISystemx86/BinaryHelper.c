@@ -1,24 +1,24 @@
 #include "BinaryHelper.h"
 #include <ilib/ilib.h>
 
-void bh_saferead(unsigned char * buf, int block, int count, FILE * fd)
+void bh_saferead(unsigned char * buf, int block, int count, ILFILE * fd)
 {
     int read = 0, requ = count;
     do
     {
-        int r = fread(fd, buf, block * count);
+        int r = ILReadFile(fd, buf, block * count);
         read+=r;
     } while(read<requ);
 }
 
-unsigned char bh_readbyte(FILE * fd)
+unsigned char bh_readbyte(ILFILE * fd)
 {
     unsigned char buf;
     bh_saferead(&buf, 1, 1, fd);
     return buf;
 }
 
-unsigned short bh_readuint16(FILE * fd)
+unsigned short bh_readuint16(ILFILE * fd)
 {
     unsigned short a = 0;
     unsigned char buf[2];
@@ -28,7 +28,7 @@ unsigned short bh_readuint16(FILE * fd)
     return a;
 }
 
-int bh_readint32(FILE * fd)
+int bh_readint32(ILFILE * fd)
 {
     int a = 0;
     unsigned char buf[4];
@@ -40,7 +40,7 @@ int bh_readint32(FILE * fd)
     return a;
 }
 
-long long bh_readint64(FILE *fd)
+long long bh_readint64(ILFILE *fd)
 {
     long long a = 0;
     unsigned char buf[8];
@@ -56,7 +56,7 @@ long long bh_readint64(FILE *fd)
     return a;
 }
 
-double bh_readdouble(FILE *fd)
+double bh_readdouble(ILFILE *fd)
 {
     long long a = bh_readint64(fd);
     return *((double *)(&a));

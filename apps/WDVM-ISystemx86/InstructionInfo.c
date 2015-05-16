@@ -19,7 +19,7 @@ void InstructionInfo_Free(InstructionInfo * ii)
     free(ii);
 }
 
-InstructionInfo * InstructionInfo_Read(FILE * fd)
+InstructionInfo * InstructionInfo_Read(ILFILE * fd)
 {
 	InstructionInfo * ii = InstructionInfo_New();
     ii->ID = bh_readuint16(fd);

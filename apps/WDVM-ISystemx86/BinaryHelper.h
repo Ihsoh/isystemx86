@@ -3,11 +3,11 @@
 
 #include <ilib/ilib.h>
 
-extern void bh_saferead(unsigned char *, int, int, FILE *);
-extern unsigned char bh_readbyte(FILE *);
-extern unsigned short bh_readuint16(FILE *);
-extern int bh_readint32(FILE *);
-extern long long bh_readint64(FILE *);
-extern double bh_readdouble(FILE *);
+extern void bh_saferead(unsigned char *, int, int, ILFILE *);
+extern unsigned char bh_readbyte(ILFILE *);
+extern unsigned short bh_readuint16(ILFILE *);
+extern int bh_readint32(ILFILE *);
+extern long long bh_readint64(ILFILE *);
+extern double bh_readdouble(ILFILE *);
 
 #endif

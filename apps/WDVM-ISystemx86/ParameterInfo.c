@@ -1,6 +1,6 @@
 #include "ParameterInfo.h"
 
-ParameterInfo ParameterInfo_Read(FILE * fd)
+ParameterInfo ParameterInfo_Read(ILFILE * fd)
 {
 	ParameterInfo pi;
     pi.type=bh_readbyte(fd);

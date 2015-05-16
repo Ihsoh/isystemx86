@@ -109,87 +109,66 @@ struct DirBlock
 #define	FILE_MODE_APPEND	0x04
 #define	FILE_MODE_ALL		(FILE_MODE_READ | FILE_MODE_WRITE | FILE_MODE_APPEND)
 
-#define	FILE	void
-#define	IL_FILE	FILE
+#define	ILFILE	void
 
-extern IL_FILE * fopen(char * path, int mode);
-#define	il_fopen(path, mode) (fopen((path), (mode)))
-#define	ILOpenFile(path, mode) (fopen((path), (mode)))
+extern ILFILE * ILOpenFile(char * path, int mode);
+#define	il_fopen(path, mode) (ILOpenFile((path), (mode)))
 
-extern int fclose(FILE * fptr);
-#define	il_fclose(fptr)	(fclose((fptr)))
-#define	ILCloseFile(path, mode) (fclose((fptr)))
+extern int ILCloseFile(ILFILE * fptr);
+#define	il_fclose(fptr)	(ILCloseFile((fptr)))
 
-extern int fwrite(FILE * fptr, uchar * buffer, uint len);
-#define	il_fwrite(fptr, buffer, len) (fwrite((fptr), (buffer), (len)))
-#define	ILWriteFile(fptr, buffer, len) (fwrite((fptr), (buffer), (len)))
+extern int ILWriteFile(ILFILE * fptr, uchar * buffer, uint len);
+#define	il_fwrite(fptr, buffer, len) (ILWriteFile((fptr), (buffer), (len)))
 
-extern uint fread(FILE * fptr, uchar * buffer, uint len);
-#define	il_fread(fptr, buffer, len)	(fread((fptr), (buffer), (len)))
-#define	ILReadFile(fptr, buffer, len)	(fread((fptr), (buffer), (len)))
+extern uint ILReadFile(ILFILE * fptr, uchar * buffer, uint len);
+#define	il_fread(fptr, buffer, len)	(ILReadFile((fptr), (buffer), (len)))
 
-extern int fappend(FILE * fptr, uchar * buffer, uint len);
-#define	il_fappend(fptr, buffer, len)	(fappend((fptr), (buffer), (len)))
-#define	ILAppendFile(fptr, buffer, len)	(fappend((fptr), (buffer), (len)))
+extern int ILAppendFile(ILFILE * fptr, uchar * buffer, uint len);
+#define	il_fappend(fptr, buffer, len)	(ILAppendFile((fptr), (buffer), (len)))
 
-extern void freset(FILE * fptr);
-#define	il_freset(fptr)	(freset((fptr)))
-#define	ILResetFile(fptr)	(freset((fptr)))
+extern void ILResetFile(ILFILE * fptr);
+#define	il_freset(fptr)	(ILResetFile((fptr)))
 
-extern int exists_df(char * path);
-#define	il_exists_df(path)	(exists_df((path)))
-#define	ILPathExists(path)	(exists_df((path)))
+extern int ILPathExists(char * path);
+#define	il_exists_df(path)	(ILPathExists((path)))
 
-extern int create_dir(char * path, char * name);
-#define	il_create_dir(path, name)	(create_dir((path), (name)))
-#define	ILCreateDirectory(path, name)	(create_dir((path), (name)))
+extern int ILCreateDirectory(char * path, char * name);
+#define	il_create_dir(path, name)	(ILCreateDirectory((path), (name)))
 
-extern int create_file(char * path, char * name);
-#define	il_create_file(path, name)	(create_file((path), (name)))
-#define	ILCreateFile(path, name)	(create_file((path), (name)))
+extern int ILCreateFile(char * path, char * name);
+#define	il_create_file(path, name)	(ILCreateFile((path), (name)))
 
-extern int del_dir(char * path);
-#define	il_del_dir(path)	(del_dir((path)))
-#define	ILDeleteDirectory(path)	(del_dir((path)))
+extern int ILDeleteDirectory(char * path);
+#define	il_del_dir(path)	(ILDeleteDirectory((path)))
 
-extern int del_file(char * path);
-#define	il_del_file(path)	(del_file((path)))
-#define	ILDeleteFile(path)	(del_file((path)))
+extern int ILDeleteFile(char * path);
+#define	il_del_file(path)	(ILDeleteFile((path)))
 
-extern int del_dirs(char * path);
-#define	il_del_dirs(path)	(del_dirs((path)))
-#define	ILDeleteDirectories(path)	(del_dirs((path)))
+extern int ILDeleteDirectories(char * path);
+#define	il_del_dirs(path)	(ILDeleteDirectories((path)))
 
-extern int rename_dir(char * path, char * new_name);
-#define	il_rename_dir(path, new_name)	(rename_dir((path), (new_name)))
-#define	ILRenameDirectory(path, new_name)	(rename_dir((path), (new_name)))
+extern int ILRenameDirectory(char * path, char * new_name);
+#define	il_rename_dir(path, new_name)	(ILRenameDirectory((path), (new_name)))
 
-extern int rename_file(char * path, char * new_name);
-#define	il_rename_file(path, new_name)	(rename_file((path), (new_name)))
-#define	ILRenameFile(path, new_name)	(rename_file((path), (new_name)))
+extern int ILRenameFile(char * path, char * new_name);
+#define	il_rename_file(path, new_name)	(ILRenameFile((path), (new_name)))
 
-extern uint flen(FILE * fptr);
-#define	il_flen(fptr)	(flen((fptr)))
-#define	ILGetFileLength(fptr)	(flen((fptr)))
+extern uint ILGetFileLength(ILFILE * fptr);
+#define	il_flen(fptr)	(ILGetFileLength((fptr)))
 
-extern void fcreate_dt(FILE * fptr, struct CMOSDateTime * dt);
-#define	il_fcreate_dt(fptr, dt)	(fcreate_dt((fptr), (dt)))
-#define	ILGetFileCreatedTime(fptr, dt)	(fcreate_dt((fptr), (dt)))
+extern void ILGetFileCreatedTime(ILFILE * fptr, struct CMOSDateTime * dt);
+#define	il_fcreate_dt(fptr, dt)	(ILGetFileCreatedTime((fptr), (dt)))
 
-extern void fchange_dt(FILE * fptr, struct CMOSDateTime * dt);
-#define	il_fchange_dt(fptr, dt)	(fchange_dt((fptr), (dt)))
-#define	ILGetFileChangedTime(fptr, dt)	(fchange_dt((fptr), (dt)))
+extern void ILGetFileChangedTime(ILFILE * fptr, struct CMOSDateTime * dt);
+#define	il_fchange_dt(fptr, dt)	(ILGetFileChangedTime((fptr), (dt)))
 
-extern int df_count(char * path);
-#define	il_df_count(path)	(df_count((path))
-#define	ILGetDirectoryItemCount(path)	(df_count((path))
+extern int ILGetDirectoryItemCount(char * path);
+#define	il_df_count(path)	(ILGetDirectoryItemCount((path))
 
-extern int df(char * path, struct RawBlock * raw_blocks, uint max);
-#define	il_df(path, raw_blocks, max)	(df((path), (raw_blocks), (max)))
-#define	ILGetDirectoryItems(path, raw_blocks, max)	(df((path), (raw_blocks), (max)))
+extern int ILGetDirectoryItems(char * path, struct RawBlock * raw_blocks, uint max);
+#define	il_df(path, raw_blocks, max)	(ILGetDirectoryItems((path), (raw_blocks), (max)))
 
-extern int fix_path(char * path, char * new_path);
-#define	il_fix_path(path, new_path) (fix_path((path), (new_path)))
-#define	ILFixPath(path, new_path) (fix_path((path), (new_path)))
+extern int ILFixPath(char * path, char * new_path);
+#define	il_fix_path(path, new_path) (ILFixPath((path), (new_path)))
 
 #endif

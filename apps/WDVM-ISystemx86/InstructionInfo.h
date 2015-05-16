@@ -16,6 +16,6 @@ typedef struct
 
 extern InstructionInfo * InstructionInfo_New(void);
 extern void InstructionInfo_Free(InstructionInfo * ii);
-extern InstructionInfo * InstructionInfo_Read(FILE *);
+extern InstructionInfo * InstructionInfo_Read(ILFILE *);
 
 #endif

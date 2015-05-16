@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
 
 	char file_path[1024];
 	strcpy(file_path, argv[1]);
-	fix_path(file_path, file_path);
+	ILFixPath(file_path, file_path);
 
 	if(!Machine_load1(machine, file_path))
     {

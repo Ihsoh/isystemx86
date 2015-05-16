@@ -15,19 +15,19 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	strcpy(path, argv[2]);
-	fix_path(path, path);
-	FILE * fptr = fopen(path, FILE_MODE_APPEND);
+	ILFixPath(path, path);
+	ILFILE * fptr = ILOpenFile(path, FILE_MODE_APPEND);
 	if(fptr == NULL)
 	{
 		printf("fappend Error: Failed to open '%s'!\n", path);
 		return -1;
 	}
-	if(!fappend(fptr, text, strlen(text)))
+	if(!ILAppendFile(fptr, text, strlen(text)))
 	{
 		printf("fappend Error: Failed to append text to '%s'!\n", path);
-		fclose(fptr);
+		ILCloseFile(fptr);
 		return -1;
 	}
-	fclose(fptr);
+	ILCloseFile(fptr);
 	return 0;
 }

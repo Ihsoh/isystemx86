@@ -2,7 +2,7 @@ TargetDir=bin
 Out=ubasic.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 -DDEBUG
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 Objs=bin/main.obj bin/tokenizer.obj bin/ubasic.obj
 Linker=ld -m elf_i386
 Include=-I../../libs/

@@ -30,26 +30,26 @@ static int _fs_lock_state(void)
 	return INT32_SPARAM(sparams.param0);
 }
 
-static FILE * _fopen(char * path, int mode)
+static ILFILE * _fopen(char * path, int mode)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
 	sparams.param1 = SPARAM(mode);
 	system_call(SCALL_FS, SCALL_FOPEN, &sparams);
-	return (FILE *)UINT32_PTR_SPARAM(sparams.param0);
+	return (ILFILE *)UINT32_PTR_SPARAM(sparams.param0);
 }
 
-FILE * fopen(char * path, int mode)
+ILFILE * ILOpenFile(char * path, int mode)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
-	FILE * fptr = NULL;
+	ILFILE * fptr = NULL;
 	fptr = _fopen(path, mode);
 	_unlock_fs();
 	return fptr;
 }
 
-static int _fclose(FILE * fptr)
+static int _fclose(ILFILE * fptr)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -57,7 +57,7 @@ static int _fclose(FILE * fptr)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int fclose(FILE * fptr)
+int ILCloseFile(ILFILE * fptr)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -67,7 +67,7 @@ int fclose(FILE * fptr)
 	return retvalue;
 }
 
-static int _fwrite(FILE * fptr, uchar * buffer, uint len)
+static int _fwrite(ILFILE * fptr, uchar * buffer, uint len)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -77,7 +77,7 @@ static int _fwrite(FILE * fptr, uchar * buffer, uint len)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int fwrite(FILE * fptr, uchar * buffer, uint len)
+int ILWriteFile(ILFILE * fptr, uchar * buffer, uint len)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -87,7 +87,7 @@ int fwrite(FILE * fptr, uchar * buffer, uint len)
 	return retvalue;
 }
 
-static uint _fread(FILE * fptr, uchar * buffer, uint len)
+static uint _fread(ILFILE * fptr, uchar * buffer, uint len)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -97,7 +97,7 @@ static uint _fread(FILE * fptr, uchar * buffer, uint len)
 	return UINT32_SPARAM(sparams.param0);
 }
 
-uint fread(FILE * fptr, uchar * buffer, uint len)
+uint ILReadFile(ILFILE * fptr, uchar * buffer, uint len)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -107,7 +107,7 @@ uint fread(FILE * fptr, uchar * buffer, uint len)
 	return retvalue;
 }
 
-static int _fappend(FILE * fptr, uchar * buffer, uint len)
+static int _fappend(ILFILE * fptr, uchar * buffer, uint len)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -117,7 +117,7 @@ static int _fappend(FILE * fptr, uchar * buffer, uint len)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int fappend(FILE * fptr, uchar * buffer, uint len)
+int ILAppendFile(ILFILE * fptr, uchar * buffer, uint len)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -127,7 +127,7 @@ int fappend(FILE * fptr, uchar * buffer, uint len)
 	return retvalue;
 }
 
-void freset(FILE * fptr)
+void ILResetFile(ILFILE * fptr)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -142,7 +142,7 @@ static int _exists_df(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int exists_df(char * path)
+int ILPathExists(char * path)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -161,7 +161,7 @@ static int _create_dir(char * path, char * name)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int create_dir(char * path, char * name)
+int ILCreateDirectory(char * path, char * name)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -180,7 +180,7 @@ static int _create_file(char * path, char * name)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int create_file(char * path, char * name)
+int ILCreateFile(char * path, char * name)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -198,7 +198,7 @@ static int _del_dir(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int del_dir(char * path)
+int ILDeleteDirectory(char * path)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -216,7 +216,7 @@ static int _del_file(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int del_file(char * path)
+int ILDeleteFile(char * path)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -234,7 +234,7 @@ static int _del_dirs(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int del_dirs(char * path)
+int ILDeleteDirectories(char * path)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -253,7 +253,7 @@ static int _rename_dir(char * path, char * new_name)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int rename_dir(char * path, char * new_name)
+int ILRenameDirectory(char * path, char * new_name)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -272,7 +272,7 @@ static int _rename_file(char * path, char * new_name)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int rename_file(char * path, char * new_name)
+int ILRenameFile(char * path, char * new_name)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -282,7 +282,7 @@ int rename_file(char * path, char * new_name)
 	return retvalue;
 }
 
-uint flen(FILE * fptr)
+uint ILGetFileLength(ILFILE * fptr)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -290,7 +290,7 @@ uint flen(FILE * fptr)
 	return INT32_SPARAM(sparams.param0);
 }
 
-static void _fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
+static void _fcreate_dt(ILFILE * fptr, struct CMOSDateTime * dt)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -298,7 +298,7 @@ static void _fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
 	system_call(SCALL_FS, SCALL_FCREATE_DT, &sparams);
 }
 
-void fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
+void ILGetFileCreatedTime(ILFILE * fptr, struct CMOSDateTime * dt)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -306,7 +306,7 @@ void fcreate_dt(FILE * fptr, struct CMOSDateTime * dt)
 	_unlock_fs();
 }
 
-static void _fchange_dt(FILE * fptr, struct CMOSDateTime * dt)
+static void _fchange_dt(ILFILE * fptr, struct CMOSDateTime * dt)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
@@ -314,7 +314,7 @@ static void _fchange_dt(FILE * fptr, struct CMOSDateTime * dt)
 	system_call(SCALL_FS, SCALL_FCHANGE_DT, &sparams);
 }
 
-void fchange_dt(FILE * fptr, struct CMOSDateTime * dt)
+void ILGetFileChangedTime(ILFILE * fptr, struct CMOSDateTime * dt)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -330,7 +330,7 @@ static int _df_count(char * path)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int df_count(char * path)
+int ILGetDirectoryItemCount(char * path)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -350,7 +350,7 @@ static int _df(char * path, struct RawBlock * raw_blocks, uint max)
 	return INT32_SPARAM(sparams.param0);
 }
 
-int df(char * path, struct RawBlock * raw_blocks, uint max)
+int ILGetDirectoryItems(char * path, struct RawBlock * raw_blocks, uint max)
 {
 	while(!_lock_fs())
 		asm volatile ("pause");
@@ -360,7 +360,7 @@ int df(char * path, struct RawBlock * raw_blocks, uint max)
 	return retvalue;
 }
 
-int fix_path(char * path, char * new_path)
+int ILFixPath(char * path, char * new_path)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);

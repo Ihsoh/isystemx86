@@ -15,19 +15,19 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	strcpy(path, argv[2]);
-	fix_path(path, path);
-	FILE * fptr = fopen(path, FILE_MODE_WRITE);
+	ILFixPath(path, path);
+	ILFILE * fptr = ILOpenFile(path, FILE_MODE_WRITE);
 	if(fptr == NULL)
 	{
 		printf("fwrite Error: Failed to open '%s'!\n", path);
 		return -1;
 	}
-	if(!fwrite(fptr, text, strlen(text)))
+	if(!ILWriteFile(fptr, text, strlen(text)))
 	{
 		printf("fwrite Error: Failed to write text to '%s'!\n", path);
-		fclose(fptr);
+		ILCloseFile(fptr);
 		return -1;
 	}
-	fclose(fptr);
+	ILCloseFile(fptr);
 	return 0;
 }

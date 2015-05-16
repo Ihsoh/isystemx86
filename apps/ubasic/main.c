@@ -45,15 +45,15 @@ main(int argc, char * argv[])
   }
   
   strcpy(path, argv[1]);
-  fix_path(path, path);
-  FILE * fptr = fopen(path, FILE_MODE_READ);
+  ILFixPath(path, path);
+  ILFILE * fptr = ILOpenFile(path, FILE_MODE_READ);
   if(fptr == NULL) {
   	printf("%s\n", "error: cannot open file!");
   	return -1;
   }
-  fread(fptr, program, sizeof(program));
-  program[flen(fptr)] = '\0';
-  fclose(fptr);
+  ILReadFile(fptr, program, sizeof(program));
+  program[ILGetFileLength(fptr)] = '\0';
+  ILCloseFile(fptr);
 
 
   ubasic_init(program);

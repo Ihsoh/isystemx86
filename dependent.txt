@@ -7,3 +7,7 @@ isystemx86/sys/pci/toaruos_pci.h,
 pci_list.h:
 	这些文件提供与PCI相关的功能。
 	从http://www.toaruos.org/, https://github.com/klange/toaruos移植到ISystem。
+
+isystemx86/apps/ubasic:
+	该程序为BASIC解释器。
+	从https://github.com/adamdunkels/ubasic移植到ISystem。

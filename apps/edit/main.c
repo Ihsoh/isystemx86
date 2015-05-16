@@ -32,7 +32,7 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	strcpy(filepath, argv[1]);
-	fix_path(filepath, filepath);
+	ILFixPath(filepath, filepath);
 	init();
 	edit();
 	return 0;
@@ -310,15 +310,15 @@ void load(void)
 	char * buffer = malloc(MAX_ROW * MAX_COLUMN);
 	if(buffer == NULL)
 		die("Cannot alloc memory!");
-	FILE * fptr = fopen(filepath, FILE_MODE_READ);
+	ILFILE * fptr = ILOpenFile(filepath, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		free(buffer);
 		die("Cannot open file!");
 	}
-	file_len = flen(fptr);
-	fread(fptr, buffer, file_len);
-	fclose(fptr);
+	file_len = ILGetFileLength(fptr);
+	ILReadFile(fptr, buffer, file_len);
+	ILCloseFile(fptr);
 	uint ui;
 	uint line = 0;
 	uint index = 0;
@@ -344,19 +344,19 @@ void save(void)
 	clear_screen();
 	print_str("Saving file");
 
-	FILE * fptr = fopen(filepath, FILE_MODE_WRITE | FILE_MODE_APPEND);
+	ILFILE * fptr = ILOpenFile(filepath, FILE_MODE_WRITE | FILE_MODE_APPEND);
 	if(fptr == NULL)
 		die("Cannot open file!");
-	fwrite(fptr, "", 0);
+	ILWriteFile(fptr, "", 0);
 	uint line;
 	for(line = 0; line < total_line; line++)
 	{
 		uint len;
 		for(len = 0; len < MAX_COLUMN && content_buffer[line][len] != '\0'; len++);
-		fappend(fptr, content_buffer[line], len);
-		fappend(fptr, "\n", 1);
+		ILAppendFile(fptr, content_buffer[line], len);
+		ILAppendFile(fptr, "\n", 1);
 		if(total_line / 10 > 0 && line % (total_line / 10) == 0)
 			print_str(".");
 	}
-	fclose(fptr);
+	ILCloseFile(fptr);
 }

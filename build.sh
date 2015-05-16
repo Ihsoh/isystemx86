@@ -26,3 +26,6 @@ if [ $? -ne 0 ]; then
 	make
 	popd
 fi
+
+make Clear
+make

@@ -16,6 +16,6 @@ typedef struct
     double value_float;
 } ParameterInfo;
 
-extern ParameterInfo ParameterInfo_Read(FILE *);
+extern ParameterInfo ParameterInfo_Read(ILFILE *);
 
 #endif
