@@ -16,6 +16,7 @@ extern "C"
 #include "stdlib.h"
 #include "assert.h"
 #include "setjmp.h"
+#include "ctype.h"
 
 #include "fs.h"
 #include "keyboard.h"

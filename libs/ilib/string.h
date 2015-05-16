@@ -29,7 +29,10 @@ extern int _strcmpn(const char * str1, const char * str2, unsigned int n);
 #define	memcpm(str1, str2, n)	(_memcmp((str1), (str2), (n)))
 extern int _memcmp(const unsigned char * str1, const unsigned char * str2, unsigned int n);
 
-extern char * strchr(const char * s, char c);
+extern char * _strchr(const char * s, char c);
+#define	strchr(s, c) (_strchr((s), (c)))
+
+extern int atoi(const char * str);
 
 //Extersion:
 extern char * uctohexs(char * str, unsigned char n);

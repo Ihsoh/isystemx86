@@ -5,10 +5,8 @@
 
 typedef enum
 {
-	BASLANGL_EXPR_TYPE_UINT = 1,
-	BASLANGL_EXPR_TYPE_INT = 2,
-	BASLANGL_EXPR_TYPE_DOUBLE = 100,
-	BASLANGL_EXPR_TYPE_STRING = 1000
+	BASLANGL_EXPR_TYPE_DOUBLE = 0x00000001,
+	BASLANGL_EXPR_TYPE_STRING = 0x00000011
 
 } BASLANGLExprType, * BASLANGLExprTypePtr;
 
@@ -17,8 +15,6 @@ typedef	struct
 	BASLANGLExprType type;
 	union
 	{
-		uint32		ui;
-		int32		i;
 		double 		d;
 		ASCTEXT		str;
 	} value;

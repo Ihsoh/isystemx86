@@ -3,4 +3,8 @@
 
 #include <ilib/ilib.h>
 
+extern
+void
+die(const char * message);
+
 #endif

@@ -23,6 +23,9 @@ next_token(IN BASLANGLContextPtr context)
 	return TRUE;
 }
 
+#define	TOKEN 			(token(context))
+#define	NEXT_TOKEN()	{ next_token(context); }
+
 static
 BOOL
 atom(	IN OUT BASLANGLContextPtr context,
@@ -30,7 +33,23 @@ atom(	IN OUT BASLANGLContextPtr context,
 {
 	if(context == NULL || result == NULL)
 		return FALSE;
-	
+	if(TOKEN != NULL)
+	{
+		if(TOKEN[0] >= '0' && TOKEN[0] <= '9')
+		{
+			result->type = BASLANGL_EXPR_TYPE_DOUBLE;
+			result->value.d = stod(TOKEN);
+			NEXT_TOKEN();
+		}
+		else if(TOKEN[0] == '"')
+		{
+
+		}
+		else
+			baslangl_die("Invalid expression");
+	}
+	else
+		baslangl_die("Expect expression");
 	return TRUE;
 }
 

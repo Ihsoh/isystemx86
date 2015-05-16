@@ -28,6 +28,7 @@ $(Target):	bin	\
 	cd apps/edit && make
 	cd apps/iasm && make
 	cd apps/WDVM-ISystemx86 && make
+	cd apps/ubasic && make
 
 	cd sys/pci && make
 
@@ -99,5 +100,6 @@ Clear:
 	cd apps/edit && make Clear
 	cd apps/iasm && make Clear
 	cd apps/WDVM-ISystemx86 && make Clear
+	cd apps/ubasic && make Clear
 
 	cd sys/pci && make Clear

@@ -49,6 +49,10 @@ WRITE_FILE	VA:/isystem/bins/iasm apps/iasm/bin/iasm.bin
 MAKE_FILE	VA:/isystem/bins/ wdvm
 WRITE_FILE	VA:/isystem/bins/wdvm apps/WDVM-ISystemx86/bin/wdvm.bin
 
+#ubasic
+MAKE_FILE	VA:/isystem/bins/ ubasic
+WRITE_FILE	VA:/isystem/bins/ubasic apps/ubasic/bin/ubasic.bin
+
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd
 MAKE_FILE	VA:/isystem/wd/ fib.wd

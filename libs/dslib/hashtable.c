@@ -202,7 +202,7 @@ dsl_hashtable_keys_list(IN DSLHashTablePtr hashtable,
 					= (DSLHashTablePairPtr)(node->value.value.object_value);
 				if(node->value.type != DSLVALUE_OBJECT || pair == NULL)
 					return FALSE;
-				int8 * buffer = (int8 *)alloc_memory(DSLHASHTABLE_MAX_NAME_LEN + 1);
+				int8 * buffer = (int8 *)dsl_malloc(DSLHASHTABLE_MAX_NAME_LEN + 1);
 				if(buffer == NULL)
 				{
 					dsl_lnklst_delete_all_object_node(keys_list);
@@ -212,7 +212,7 @@ dsl_hashtable_keys_list(IN DSLHashTablePtr hashtable,
 				DSLLinkedListNodePtr key_node = dsl_lnklst_new_object_node(buffer);
 				if(key_node == NULL)
 				{
-					free_memory(buffer);
+					dsl_free(buffer);
 					dsl_lnklst_delete_all_object_node(keys_list);
 					return FALSE;
 				}

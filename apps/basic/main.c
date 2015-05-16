@@ -8,6 +8,7 @@ int main(int argc, char * argv[])
 	env.baslangl_malloc = malloc;
 	env.baslangl_calloc = calloc;
 	env.baslangl_free = free;
+	env.baslangl_die = die;
 	if(!baslangl_init(&env))
 		die("Cannot initialize 'baslanglib'.");
 

@@ -12,7 +12,7 @@ CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 ASFlags=--32 -march=i386 -mtune=i386
 Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
 bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj 	\
-bin/setjmp.obj bin/longjmp.obj
+bin/setjmp.obj bin/longjmp.obj bin/ctype.obj
 AR=ar
 Include=-I../
 
@@ -60,6 +60,10 @@ bin/setjmp.obj: setjmp.s
 
 bin/longjmp.obj: longjmp.s
 	$(AS) $(ASFlags) -c longjmp.s -o bin/longjmp.obj
+
+bin/ctype.obj: ctype.c ctype.h
+	$(CC) $(CFlags) -c ctype.c -o bin/ctype.obj $(Include)
+
 
 bin/mta32.obj: mta32.c
 	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj $(Include)
