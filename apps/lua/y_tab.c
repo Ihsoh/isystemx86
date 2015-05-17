@@ -1,9 +1,5 @@
 # line 2 "lua.stx"
-/*
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-*/
+
 #include <ilib/ilib.h>
 
 #include "opcode.h"

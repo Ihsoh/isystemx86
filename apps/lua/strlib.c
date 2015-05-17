@@ -6,11 +6,7 @@
 ** TeCGraf - PUC-Rio
 ** 19 May 93
 */
-/*
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-*/
+
 #include <ilib/ilib.h>
 
 #include "lua.h"

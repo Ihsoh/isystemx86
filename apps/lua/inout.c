@@ -8,10 +8,6 @@
 ** 11 May 93
 */
 
-/*
-#include <stdio.h>
-#include <string.h>
-*/
 #include <ilib/ilib.h>
 
 #include "opcode.h"

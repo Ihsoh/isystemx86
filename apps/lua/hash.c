@@ -6,10 +6,6 @@
 ** 12 May 93
 */
 
-/*
-#include <string.h>
-#include <stdlib.h>
-*/
 #include <ilib/ilib.h>
 
 #include "opcode.h"

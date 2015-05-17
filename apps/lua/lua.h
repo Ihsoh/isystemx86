@@ -5,7 +5,6 @@
 ** 19 May 93
 */
 
-
 #ifndef lua_h
 #define lua_h
 

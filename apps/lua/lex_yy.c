@@ -1,4 +1,3 @@
-//# include "stdio.h"
 #include <ilib/ilib.h>
 
 # define U(x) x
@@ -27,10 +26,6 @@ struct yysvf {
 	int *yystops;};
 struct yysvf *yyestate;
 extern struct yysvf yysvec[], *yybgin;
-/*
-#include <stdlib.h>
-#include <string.h>
-*/
 
 #include "opcode.h"
 #include "hash.h"

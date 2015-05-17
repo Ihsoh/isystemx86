@@ -4,10 +4,7 @@
 ** TeCGraf - PUC-Rio
 ** 11 May 93
 */
-/*
-#include <stdlib.h>
-#include <string.h>
-*/
+
 #include <ilib/ilib.h>
 
 #include "opcode.h"
