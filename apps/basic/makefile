@@ -27,7 +27,7 @@ bin/main.obj: main.c
 bin/die.obj: die.c die.h
 	$(CC) $(CFlags) -c die.c -o bin/die.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Objs) $(Target)

@@ -50,7 +50,7 @@ bin/Machine.obj: Machine.c
 bin/main.obj: main.c
 	$(CC) $(CFlags) -c main.c -o bin/main.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Objs) $(Target)

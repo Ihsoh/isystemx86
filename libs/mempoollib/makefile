@@ -16,7 +16,7 @@ bin:
 bin/mempoollib.obj: mempoollib.c mempoollib.h
 	$(CC) $(CFlags) -c mempoollib.c -o bin/mempoollib.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)

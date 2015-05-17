@@ -191,7 +191,7 @@ bin/mouse.obj: mouse.c mouse.h
 bin/kmpool.obj: kmpool.c kmpool.h
 	$(CC) $(CFlags) -c kmpool.c -o bin/kmpool.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Objs) $(Target)

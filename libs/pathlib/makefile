@@ -22,7 +22,7 @@ bin/lib.obj: lib.c lib.h
 bin/test.obj: test.c test.h
 	$(CC) $(CFlags) -c test.c -o bin/test.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)

@@ -74,34 +74,34 @@ kernelldr/bin/kernelldrtm.bin:
 kernel/bin/kernel.bin:
 	cd kernel && make
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target)
 	
-	cd libs/ilib && make Clear
-	cd libs/dslib && make Clear
-	cd libs/jsonlib && make Clear
-	cd libs/encryptionlib && make Clear
-	cd libs/pathlib && make Clear
-	cd libs/baslanglib && make Clear
-	cd libs/mempoollib && make Clear
-	cd libs/regexlib && make Clear
+	cd libs/ilib && make clean
+	cd libs/dslib && make clean
+	cd libs/jsonlib && make clean
+	cd libs/encryptionlib && make clean
+	cd libs/pathlib && make clean
+	cd libs/baslanglib && make clean
+	cd libs/mempoollib && make clean
+	cd libs/regexlib && make clean
 
-	cd boot && make Clear
-	cd kernelldr && make Clear
-	cd kernel && make Clear
+	cd boot && make clean
+	cd kernelldr && make clean
+	cd kernel && make clean
 
-	cd apps/printf && make Clear
-	cd apps/fwrite && make Clear
-	cd apps/fappend && make Clear
-	cd apps/test && make Clear
+	cd apps/printf && make clean
+	cd apps/fwrite && make clean
+	cd apps/fappend && make clean
+	cd apps/test && make clean
 
-	cd apps/basic && make Clear
-	cd apps/edit && make Clear
-	cd apps/iasm && make Clear
-	cd apps/WDVM-ISystemx86 && make Clear
-	cd apps/ubasic && make Clear
-	cd apps/lua && make Clear
+	cd apps/basic && make clean
+	cd apps/edit && make clean
+	cd apps/iasm && make clean
+	cd apps/WDVM-ISystemx86 && make clean
+	cd apps/ubasic && make clean
+	cd apps/lua && make clean
 
-	cd sys/pci && make Clear
+	cd sys/pci && make clean

@@ -1,7 +1,7 @@
 #Filename:		makefile
 #Author:		Ihsoh
 #Date:			2014-12-8
-#Descriptor:	Application maker
+#Descriptor:	System application maker
 
 TargetDir=bin
 Out=sysmaker
@@ -19,7 +19,7 @@ bin:
 bin/sysmaker.obj: sysmaker.c
 	$(CC) $(CFlags) -c sysmaker.c -o bin/sysmaker.obj
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm $(Objs) $(Target)

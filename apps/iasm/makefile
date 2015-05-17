@@ -24,7 +24,7 @@ bin/main.obj: main.c
 bin/ins.obj: ins.c
 	$(CC) $(CFlags) -c ins.c -o bin/ins.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Objs) $(Target)

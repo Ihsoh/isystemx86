@@ -27,7 +27,7 @@ bin/tokenizer.obj: tokenizer.c tokenizer.h
 bin/ubasic.obj: ubasic.c ubasic.h
 	$(CC) $(CFlags) -c ubasic.c -o bin/ubasic.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Objs) $(Target)

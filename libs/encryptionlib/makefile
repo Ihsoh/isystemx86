@@ -28,7 +28,7 @@ bin/sha256.obj: sha256.c sha256.h
 bin/sha512.obj: sha512.c sha512.h
 	$(CC) $(CFlags) -c sha512.c -o bin/sha512.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)

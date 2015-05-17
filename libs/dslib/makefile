@@ -31,7 +31,7 @@ bin/lib.obj: lib.c lib.h
 bin/hashtable.obj: hashtable.c hashtable.h
 	$(CC) $(CFlags) -c hashtable.c -o bin/hashtable.obj
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)

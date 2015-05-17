@@ -19,8 +19,8 @@ $(Target): bin boot.asm
 bin:
 	-mkdir bin
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target)
 	

@@ -19,7 +19,7 @@ bin/jsonlib.obj: jsonlib.c jsonlib.h
 bin/lib.obj: lib.c lib.h
 	$(CC) $(CFlags) -c lib.c -o bin/lib.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)

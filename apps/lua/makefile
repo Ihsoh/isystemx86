@@ -53,7 +53,7 @@ bin/y_tab.obj: y_tab.c
 bin/lib.obj: lib.c
 	$(CC) $(CFlags) -c lib.c -o bin/lib.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Objs) $(Target)

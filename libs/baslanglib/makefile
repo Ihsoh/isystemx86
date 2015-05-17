@@ -23,7 +23,7 @@ bin/lexer.obj: lexer.c lexer.h
 bin/stat_expr.obj: stat_expr.c stat_expr.h
 	$(CC) $(CFlags) -c stat_expr.c -o bin/stat_expr.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)

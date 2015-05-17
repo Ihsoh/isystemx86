@@ -17,7 +17,7 @@ $(Target): bin $(Request)
 bin:
 	-mkdir bin
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm $(TargetDir)/*

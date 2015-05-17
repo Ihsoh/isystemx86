@@ -42,7 +42,7 @@ bin/state_gen.obj: state_gen.c
 bin/state_match.obj: state_match.c
 	$(CC) $(CFlags) -c state_match.c -o bin/state_match.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)

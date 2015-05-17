@@ -19,8 +19,8 @@ bin:
 bin/floppymaker.obj: floppymaker.c floppymaker.h
 	$(CC) $(CFlags) -c floppymaker.c -o bin/floppymaker.obj
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm $(Objs) $(Target)
 

@@ -30,7 +30,7 @@ bin/386.obj: 386.c 386.h
 bin/pci.obj: pci.c pci.h
 	$(CC) $(CFlags) -c pci.c -o bin/pci.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Objs) $(Target)

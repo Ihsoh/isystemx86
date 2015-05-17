@@ -26,8 +26,8 @@ $(TMTarget): bin kernelldr.asm
 bin:
 	-mkdir bin
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(TargetDir)/$(TMOut) $(TargetDir)/$(GMOut)
 

@@ -19,7 +19,7 @@ bin:
 bin/appmaker.obj: appmaker.c
 	$(CC) $(CFlags) -c appmaker.c -o bin/appmaker.obj
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm $(Objs) $(Target)

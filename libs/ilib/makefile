@@ -68,7 +68,7 @@ bin/ctype.obj: ctype.c ctype.h
 bin/mta32.obj: mta32.c
 	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj $(Include)
 
-.PHONY:Clear
+.PHONY:clean
 
-Clear:
+clean:
 	-rm -f $(Target) $(Objs)
