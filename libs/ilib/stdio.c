@@ -9,8 +9,13 @@
 #include "stdio.h"
 #include "types.h"
 #include "stdarg.h"
+#include "string.h"
 
 #include "screen.h"
+
+extern FILE * stdin = IFS1_STDIN;
+extern FILE * stdout = IFS1_STDOUT;
+extern FILE * stderr = IFS1_STDERR;
 
 int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 {
@@ -203,4 +208,211 @@ int putchar(int ch)
 {
 	il_print_char((char)ch);
 	return ch;
+}
+
+static BOOL __parse_path(const char * path, char * dir, char * file)
+{
+	int i = (int)(strlen(path)) - 1;
+	if(i < 0)
+		return FALSE;
+	for(; i >= 0; i--)
+		if(path[i] == '/')
+			break;
+	strcpy(file, path + i + 1);
+	strncpy(dir, path, i + 1);
+	dir[i + 1] = '\0';
+	return TRUE;
+}
+
+FILE * fopen(const char * path, const char * mode)
+{
+	if(	path == NULL 
+		|| mode == NULL
+		|| strlen(path) >= 1024)
+		return NULL;
+
+	int ilmode = 0;
+	if(strcmp(mode, "r") == 0)
+		ilmode = FILE_MODE_READ;
+	else if(strcmp(mode, "r+") == 0)
+		ilmode = FILE_MODE_READ | FILE_MODE_WRITE;
+	else if(strcmp(mode, "rb") == 0)
+		ilmode = FILE_MODE_READ;
+	else if(strcmp(mode, "rb+") == 0)
+		ilmode = FILE_MODE_READ | FILE_MODE_WRITE;
+	else if(strcmp(mode, "w") == 0)
+		ilmode = FILE_MODE_WRITE | FILE_MODE_APPEND;
+	else if(strcmp(mode, "w+") == 0)
+		ilmode = FILE_MODE_READ | FILE_MODE_WRITE | FILE_MODE_APPEND;
+	else if(strcmp(mode, "a") == 0)
+		ilmode = FILE_MODE_APPEND;
+	else if(strcmp(mode, "a+") == 0)
+		ilmode = FILE_MODE_ALL;
+	else if(strcmp(mode, "wb") == 0)
+		ilmode = FILE_MODE_WRITE | FILE_MODE_APPEND;
+	else if(strcmp(mode, "wb+") == 0)
+		ilmode = FILE_MODE_READ | FILE_MODE_WRITE | FILE_MODE_APPEND;
+	else if(strcmp(mode, "at") == 0)
+		ilmode = FILE_MODE_APPEND;
+	else if(strcmp(mode, "at+") == 0)
+		ilmode = FILE_MODE_ALL;
+	else
+		return NULL;
+
+	if(	strchr(mode, 'w') != NULL
+		|| strchr(mode, 'a') != NULL)
+		if(!ILPathExists(path))
+		{
+			char dir[1024];
+			char file[1024];
+			if(!__parse_path(path, dir, file))
+				return NULL;
+			if(!ILCreateFile(dir, file))
+				return NULL;
+		}
+
+	ILFILE * ilfptr = ILOpenFile(path, ilmode);
+	if(ilfptr == NULL)
+		return NULL;
+	FILE * fptr = (FILE *)malloc(sizeof(FILE));
+	if(fptr == NULL)
+	{
+		ILCloseFile(ilfptr);
+		return NULL;
+	}
+	fptr->ilfptr = ilfptr;
+	strcpy(fptr->mode, mode);
+	fptr->ilmode = ilmode;
+	if(	strchr(mode, 'w') != NULL
+		&& strchr(mode, 'a') == NULL)
+		ILWriteFile(ilfptr, "", 0);
+	return fptr;
+}
+
+int fclose(FILE * fptr)
+{
+	if(fptr == NULL)
+		return EOF;
+	if(ILCloseFile(fptr->ilfptr))
+	{
+		free(fptr);
+		return 0;
+	}
+	else
+		return EOF;
+}
+
+size_t fread(void * buffer, size_t size, size_t count, FILE * fptr)
+{
+	return ILReadFile(fptr->ilfptr, buffer, count * size);
+}
+
+size_t fwrite(const void * buffer, size_t size, size_t count, FILE * fptr)
+{
+	if(fptr == stderr || fptr == stdout)
+	{
+		print_str(buffer);
+		return strlen(buffer);
+	}
+	else
+	{
+		uint old_size = ILGetFileLength(fptr->ilfptr);
+		if(ILAppendFile(fptr->ilfptr, buffer, count * size))
+			return count * size;
+		else
+			return ILGetFileLength(fptr->ilfptr) - old_size;
+	}
+}
+
+static int _oldchr = EOF;
+
+int fgetc(FILE * fptr)
+{
+	if(fptr->old_char != EOF)
+	{
+		char c = fptr->old_char;
+		fptr->old_char = EOF;
+		return c;
+	}
+	if(ILIsEndOfFile(fptr->ilfptr))
+		return EOF;
+	uchar b;
+	if(ILReadFile(fptr->ilfptr, &b, 1) == 0)
+		return EOF;
+	return (int)b;
+}
+
+int fputc(char c, FILE * fptr)
+{
+	if(fwrite(&c, 1, 1, fptr) == 1)
+		return c;
+	else
+		return EOF;
+}
+
+char * fgets(char * buf, int bufsize, FILE * fptr)
+{
+	if(ILIsEndOfFile(fptr->ilfptr))
+		return NULL;
+	char * s = buf;
+	int count = bufsize - 1;
+	int i;
+	for(i = 0; i < count; i++)
+	{
+		int c = fgetc(fptr);
+		if(c == EOF)
+			break;
+		*(s++) = c;
+		if(c == '\n')
+			break;
+	}
+	*s = '\0';
+	return buf;
+}
+
+int fputs(char * buf, FILE * fptr)
+{
+	if(fptr == stderr || fptr == stdout)
+	{
+		print_str(buf);
+		return 0;
+	}
+	else
+	{
+		uint len = strlen(buf);
+		if(fwrite(buf, len, 1, fptr) != len)
+			return EOF;
+		else
+			return 0;
+	}
+}
+
+int fprintf(FILE * fptr, const char * format, ...)
+{
+	char buffer[10 * 1024];
+	va_list va;
+	va_start(va, format);
+	int r = vsprintf_s(buffer, 10 * 1024, format, va);
+	va_end(va);
+	if(fptr == stderr || fptr == stdout)
+	{
+		print_str(buffer);
+		return r;
+	}
+	else
+		if(fputs(buffer, fptr) != EOF)
+			return r;
+		else
+			return EOF;
+}
+
+int ungetc(int c, FILE * fptr)
+{
+	if(fptr->old_char == EOF)
+	{
+		fptr->old_char = c;
+		return c;
+	}
+	else
+		return EOF;
 }

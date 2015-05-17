@@ -103,6 +103,7 @@ struct DirBlock
 #define	SCALL_LOCK_FS		20
 #define	SCALL_UNLOCK_FS		21
 #define	SCALL_FS_LOCK_STATE	22
+#define	SCALL_FEOF			23
 
 #define	FILE_MODE_READ		0x01
 #define	FILE_MODE_WRITE		0x02
@@ -170,5 +171,8 @@ extern int ILGetDirectoryItems(char * path, struct RawBlock * raw_blocks, uint m
 
 extern int ILFixPath(char * path, char * new_path);
 #define	il_fix_path(path, new_path) (ILFixPath((path), (new_path)))
+
+extern int ILIsEndOfFile(ILFILE * fptr);
+#define	il_feof(fptr)	(ILIsEndOfFile((fptr)))
 
 #endif

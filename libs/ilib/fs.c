@@ -287,7 +287,7 @@ uint ILGetFileLength(ILFILE * fptr)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(fptr);
 	system_call(SCALL_FS, SCALL_FLEN, &sparams);
-	return INT32_SPARAM(sparams.param0);
+	return UINT32_SPARAM(sparams.param0);
 }
 
 static void _fcreate_dt(ILFILE * fptr, struct CMOSDateTime * dt)
@@ -366,5 +366,13 @@ int ILFixPath(char * path, char * new_path)
 	sparams.param0 = SPARAM(path);
 	sparams.param1 = SPARAM(new_path);
 	system_call(SCALL_FS, SCALL_FIX_PATH, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}
+
+int ILIsEndOfFile(ILFILE * fptr)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(fptr);
+	system_call(SCALL_FS, SCALL_FEOF, &sparams);
 	return INT32_SPARAM(sparams.param0);
 }

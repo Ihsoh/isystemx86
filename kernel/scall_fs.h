@@ -34,6 +34,7 @@
 #define	SCALL_LOCK_FS		20
 #define	SCALL_UNLOCK_FS		21
 #define	SCALL_FS_LOCK_STATE	22
+#define	SCALL_FEOF			23
 
 extern
 void

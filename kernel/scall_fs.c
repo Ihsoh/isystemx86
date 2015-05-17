@@ -545,5 +545,21 @@ system_call_fs(	IN uint32 func,
 			sparams->param0 = SPARAM(lock);
 			break;
 		}
+		//检测是否已经到达文件尾
+		//
+		//参数:
+		//	Param0=文件结构体地址(相对于内核空间的偏移地址)
+		//返回值:
+		//	Param0=返回1则到达文件尾，否则未到达文件尾。
+		case SCALL_FEOF:
+		{
+			int32 tid = sparams->tid;
+			FILE * fptr = (FILE *)(sparams->param0);
+			BOOL r = FALSE;
+			if(check_priviledge(tid, fptr))
+				r = feof(fptr);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }
