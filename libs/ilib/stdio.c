@@ -88,23 +88,19 @@ int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 						break;
 					}
 					case 'f':
+					case 'g':
 					{
-						float f = va_arg(va, float);
-
-						print_str("{");
-						
-						print_str("}");
-
+						double d = va_arg(va, double);
 						char temp[100];
-						char * f_s = dtos(temp, (double)f);
-						uint f_s_len = strlen(f_s);
-						if(buf_len + f_s_len >= size)
+						char * d_s = dtos(temp, d);
+						uint d_s_len = strlen(d_s);
+						if(buf_len + d_s_len >= size)
 							end = 1;
 						else
 						{
-							strncpy(buffer, f_s, f_s_len);
-							buffer += f_s_len;
-							buf_len += f_s_len;
+							strncpy(buffer, d_s, d_s_len);
+							buffer += d_s_len;
+							buf_len += d_s_len;
 						}
 						break;
 					}
@@ -286,6 +282,7 @@ FILE * fopen(const char * path, const char * mode)
 	if(	strchr(mode, 'w') != NULL
 		&& strchr(mode, 'a') == NULL)
 		ILWriteFile(ilfptr, "", 0);
+	fptr->old_char = EOF;
 	return fptr;
 }
 
@@ -323,8 +320,6 @@ size_t fwrite(const void * buffer, size_t size, size_t count, FILE * fptr)
 			return ILGetFileLength(fptr->ilfptr) - old_size;
 	}
 }
-
-static int _oldchr = EOF;
 
 int fgetc(FILE * fptr)
 {

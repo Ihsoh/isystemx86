@@ -275,7 +275,7 @@ static void io_write (void)
  {
   int status=0;
   if (lua_isnumber(o1))
-   status = fprintf (out, "%f", (float)lua_getnumber(o1));
+   status = fprintf (out, "%g", (float)lua_getnumber(o1));
   else if (lua_isstring(o1))
    status = fprintf (out, "%s", lua_getstring(o1));
   lua_pushnumber(status);

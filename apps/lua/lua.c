@@ -11,26 +11,6 @@
 #include "lua.h"
 #include "lualib.h"
 
-
-void test (void)
-{
-  lua_pushobject(lua_getparam(1));
-  lua_call ("c", 1);
-}
-
-
-static void callfunc (void)
-{
- lua_Object obj = lua_getparam (1);
- if (lua_isstring(obj)) lua_call(lua_getstring(obj),0);
-}
-
-static void execstr (void)
-{
- lua_Object obj = lua_getparam (1);
- if (lua_isstring(obj)) lua_dostring(lua_getstring(obj));
-}
-
 int main (int argc, char *argv[])
 {
  int i;
@@ -39,13 +19,20 @@ int main (int argc, char *argv[])
   puts ("usage: lua filename [functionnames]");
   return 0;
  }
- lua_register ("callfunc", callfunc);
- lua_register ("execstr", execstr);
- lua_register ("test", test);
  iolib_open ();
  strlib_open ();
  mathlib_open ();
- lua_dofile (argv[1]);
+ char path[1024];
+ strcpy(path, argv[1]);
+ ILFixPath(path, path);
+ lua_dofile (path);
+ /*
+ lua_dostring(
+ "\
+  print(123.311 + 3 * 3 - 10)\n\
+  print(tonumber('123.345'))\n\
+ ");
+ */
  for (i=2; i<argc; i++)
  {
   lua_call (argv[i],0);

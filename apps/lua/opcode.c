@@ -24,7 +24,7 @@
 #define tostring(o) ((tag(o) != T_STRING) && (lua_tostring(o) != 0))
 
 #ifndef MAXSTACK
-#define MAXSTACK 256
+#define MAXSTACK 10000
 #endif
 static Object stack[MAXSTACK] = {{T_MARK, {NULL}}};
 static Object *top=stack+1, *base=stack+1;
@@ -925,7 +925,7 @@ void lua_print (void)
  void *obj;
  while ((obj=lua_getparam (i++)) != NULL)
  {
-  if      (lua_isnumber(obj))    printf("%d\n",(float)lua_getnumber (obj));
+  if      (lua_isnumber(obj))    { printd(lua_getnumber(obj)); print_str("\n"); }//printf("%f\n",(float)lua_getnumber (obj));
   else if (lua_isstring(obj))    printf("%s\n",lua_getstring (obj));
   else if (lua_iscfunction(obj)) printf("cfunction: %p\n",lua_getcfunction (obj));
   else if (lua_isuserdata(obj))  printf("userdata: %p\n",lua_getuserdata (obj));

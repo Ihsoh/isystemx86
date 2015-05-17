@@ -161,17 +161,14 @@ double strtod(const char * nptr, char ** endptr)
 		if(nptr[i] == '+' || nptr[i] == '-' || (nptr[i] >= '0' && nptr[i] <= '9'))
 			break;
 	s = nptr + i;
-
-	print_str(s);
-	print_str("\n");
-
 	len = strlen(s);
 	for(i = 1; i < len; i++)
 		if(!(s[i] >= '0' && s[i] <= '9') && s[i] != '.')
 			break;
 	strncpy(buffer, s, i);
 	buffer[i] = '\0';
-	*endptr = s + i;
+	if(endptr != NULL)
+		*endptr = s + i;
 	return atof(buffer);
 }
 
@@ -199,15 +196,27 @@ char * ultos(char * str, unsigned long n)
 
 char * dtos(char * str, double n)
 {
+	char * s = str;
+	if(n < 0.0)
+	{
+		n *= -1.0;
+		*s = '-';
+		s++;
+	}
+	else if(n == 0.0)
+	{
+		strcpy(str, "0");
+		return str;
+	}
 	unsigned int i, d;
 	i = (unsigned int)n;
 	d = (unsigned int)((n - i + 1) * 1000000000.0);
-	uitos(str, i);
-	unsigned int len = strlen(str);
-	str[len] = '.';
-	uitos(str + len + 1, d);
-	str[len + 1] = ' ';
-	ltrim(str + len + 1);
+	uitos(s, i);
+	unsigned int len = strlen(s);
+	s[len] = '.';
+	uitos(s + len + 1, d);
+	s[len + 1] = ' ';
+	ltrim(s + len + 1);
 	return str;
 }
 

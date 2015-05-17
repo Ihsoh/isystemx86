@@ -153,18 +153,19 @@ vsprintf_s(	OUT int8 * buffer,
 						break;
 					}
 					case 'f':
+					case 'g':
 					{
-						float f = va_arg(va, float);
+						double d = va_arg(va, double);
 						char temp[100];
-						char * f_s = dtos(temp, (double)f);
-						uint f_s_len = strlen(f_s);
-						if(buf_len + f_s_len >= size)
+						char * d_s = dtos(temp, d);
+						uint d_s_len = strlen(d_s);
+						if(buf_len + d_s_len >= size)
 							end = 1;
 						else
 						{
-							strncpy(buffer, f_s, f_s_len);
-							buffer += f_s_len;
-							buf_len += f_s_len;
+							strncpy(buffer, d_s, d_s_len);
+							buffer += d_s_len;
+							buf_len += d_s_len;
 						}
 						break;
 					}

@@ -22,6 +22,7 @@ bin:
 
 bin/main.obj: main.c
 	$(CC) $(CFlags) -c main.c -o bin/main.obj $(Include)
+	$(CC) $(CFlags) -S main.c -o bin/main.s $(Include)
 
 bin/die.obj: die.c die.h
 	$(CC) $(CFlags) -c die.c -o bin/die.obj $(Include)

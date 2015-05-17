@@ -4,12 +4,14 @@
 
 int main(int argc, char * argv[])
 {
-	char * str = " 123asd";
-	char * s;
-	printd(strtod(str, &s));
-	print_str("\n");
-	print_str(s);
-	print_str("\n");
+	char *endptr;
+    char a[] = "12345.6789";
+    char b[] = "1234.567qwer";
+    char c[] = "-232.23";
+    printf("a=%f\n", (float)strtod(a, NULL));
+    printf("b=%f\n", (float)strtod(b, &endptr));
+    printf("endptr=%s\n", endptr);
+    printf("c=%f\n", (float)strtod(c, NULL));
 	return 0;
 
 	FILE * fptr = fopen("DA:/isystem/123.txt", "wb+");
