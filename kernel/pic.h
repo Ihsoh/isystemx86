@@ -12,6 +12,9 @@
 #include "types.h"
 
 BOOL
+pic_init(void);
+
+BOOL
 pic_mask(IN uint8 irq);
 
 BOOL

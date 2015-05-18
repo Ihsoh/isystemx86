@@ -316,17 +316,8 @@ set_all_unimpl_int(void)
 	set_int(30, (uint32)unimpl_int30);
 	set_int(31, (uint32)unimpl_int31);
 	set_int(32, (uint32)unimpl_int32);
-
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// 0x21被用来设置中断IDT。
-	// 0x22被用来内核服务。
-	// 0x21和0x22均由Kernel Loader提供，所以不能被设置。
-	// set_int(33, (uint32)unimpl_int33);	//0x21
-	// set_int(34, (uint32)unimpl_int34);	//0x22
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
+	set_int(33, (uint32)unimpl_int33);
+	set_int(34, (uint32)unimpl_int34);
 	set_int(35, (uint32)unimpl_int35);
 	set_int(36, (uint32)unimpl_int36);
 	set_int(37, (uint32)unimpl_int37);

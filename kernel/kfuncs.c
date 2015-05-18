@@ -9,6 +9,7 @@
 #include "types.h"
 #include "kfuncs.h"
 #include "386.h"
+#include "knlldr.h"
 
 /**
 	@Function:		get_memory_size
@@ -26,17 +27,8 @@ get_memory_size(void)
 	uint16 ax;
 	uint16 bx;
 	uint64 memory_byte;
-	asm("pushl	%%eax\n\t"
-		"pushl	%%ebx\n\t"
-		"movb	$0x0, %%ah\n\t"
-		"int	$0x22\n\t"
-		"movw	%%ax, %0\n\t"
-		"movw	%%bx, %1\n\t"
-		"popl	%%ebx\n\t"
-		"popl	%%eax\n\t"
-		:"=r"(ax), "=r"(bx)
-		:
-		:"eax", "ebx");
+	ax = *(uint16 *)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_MEMORY_SIZE_AX);
+	bx = *(uint16 *)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_MEMORY_SIZE_BX);
 	memory_byte = (1 * 1024 * 1024) + ((ullong)ax * 1024) + ((ullong)bx * 64 * 1024);
 	return memory_byte;
 }
@@ -54,16 +46,7 @@ get_memory_size(void)
 uint32
 get_gdt_addr(void)
 {
-	uint32 eax;
-	asm("pushl	%%eax\n\t"
-		"movb	$0x1, %%ah\n\t"
-		"int	$0x22\n\t"
-		"movl	%%eax, %0\n\t"
-		"popl	%%eax\n\t"
-		:"=r"(eax)
-		:
-		:"eax");
-	return eax;
+	return (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_GDT);
 }
 
 /**
@@ -79,16 +62,7 @@ get_gdt_addr(void)
 uint32
 get_idt_addr(void)
 {
-	uint32 eax;
-	asm("pushl	%%eax\n\t"
-		"movb	$0x2, %%ah\n\t"
-		"int	$0x22\n\t"
-		"movl	%%eax, %0\n\t"
-		"popl	%%eax\n\t"
-		:"=r"(eax)
-		:
-		:"eax");
-	return eax;
+	return (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_IDT);
 }
 
 /**
@@ -107,20 +81,13 @@ get_idt_addr(void)
 uint32
 get_vesa_info_addr(OUT uint32 * mode)
 {
-	uint32 eax, ebx;
-	asm("pushl	%%eax\n\t"
-		"pushl	%%ebx\n\t"
-		"movb	$0x3, %%ah\n\t"
-		"int	$0x22\n\t"
-		"movl	%%eax, %0\n\t"
-		"movl	%%ebx, %1\n\t"
-		"popl	%%ebx\n\t"
-		"popl	%%eax\n\t"
-		:"=r"(eax), "=r"(ebx)
-		:
-		:"eax", "ebx");
-	*mode = ebx & 0x0FFF;
-	return eax;
+	if((uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_VESA_ENABLED))
+	{
+		*mode = (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_VESA_MODE) & 0x00000fff;
+		return (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_VESA_INFO);
+	}
+	else
+		return 0;
 }
 
 /**
@@ -136,14 +103,5 @@ get_vesa_info_addr(OUT uint32 * mode)
 uint32
 get_kernel_tss_addr(void)
 {
-	uint32 eax;
-	asm("pushl	%%eax\n\t"
-		"movb	$0x4, %%ah\n\t"
-		"int	$0x22\n\t"
-		"movl	%%eax, %0\n\t"
-		"popl	%%eax\n\t"
-		:"=r"(eax)
-		:
-		:"eax");
-	return eax;
+	return (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_KERNEL_TSS);
 }

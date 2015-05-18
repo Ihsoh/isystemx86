@@ -17,6 +17,52 @@
 
 #define	PIC_IRQ_COUNT		16
 
+#define PIT_A		0x40
+#define PIT_B		0x41
+#define PIT_C		0x42
+#define PIT_CONTROL	0x43
+
+#define PIT_MASK	0xFF
+#define PIT_SCALE	1193180
+#define PIT_SET		0x36
+
+/**
+	@Function:		pic_set_phase
+	@Access:		Public
+	@Description:
+		设置PIT周期。
+	@Parameters:
+		hz, int32, IN
+			HZ。
+	@Return:
+*/
+static
+void
+pic_set_phase(IN int32 hz)
+{
+	int32 divisor = PIT_SCALE / hz;
+	outb(PIT_CONTROL, PIT_SET);
+	outb(PIT_A, divisor & PIT_MASK);
+	outb(PIT_A, (divisor >> 8) & PIT_MASK);
+}
+
+/**
+	@Function:		pic_init
+	@Access:		Public
+	@Description:
+		初始化PIC。
+	@Parameters:
+	@Return:
+		BOOL
+			返回 TRUE 则成功，否则失败。	
+*/
+BOOL
+pic_init(void)
+{
+	//pic_set_phase(1000);
+	return TRUE;
+}
+
 /**
 	@Function:		pic_mask
 	@Access:		Public

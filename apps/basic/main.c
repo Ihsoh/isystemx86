@@ -4,40 +4,7 @@
 
 int main(int argc, char * argv[])
 {
-	char *endptr;
-    char a[] = "12345.6789";
-    char b[] = "1234.567qwer";
-    char c[] = "-232.23";
-    printf("a=%f\n", (float)strtod(a, NULL));
-    printf("b=%f\n", (float)strtod(b, &endptr));
-    printf("endptr=%s\n", endptr);
-    printf("c=%f\n", (float)strtod(c, NULL));
-	return 0;
-
-	FILE * fptr = fopen("DA:/isystem/123.txt", "wb+");
-	fwrite("1234\n", 1, 5, fptr);
-	fwrite("abcd\n", 1, 5, fptr);
-	fputs("XXXX\n", fptr);
-	fputs("\n", fptr);
-	fputs("YYYY\n", fptr);
-	fwrite("!@#$", 1, 4, fptr);
-	fputc('A', fptr);
-	fputc('\n', fptr);
-	fprintf(fptr, "ABC: %d, DEF: %X\n", 123, 0x12345678);
-	fclose(fptr);
-	fptr = fopen("DA:/isystem/123.txt", "r+");
-	if(fptr == NULL)
-	{
-		printf("Cannot open file to read!\n");
-		return -1;
-	}
-	char buffer[100];
-	ungetc('>', fptr);
-	ungetc('<', fptr);
-	while(fgets(buffer, 100, fptr) != NULL)
-		printf("LINE: %s", buffer);
-	fclose(fptr);
-	fprintf(stdout, "|\n");
+	*((uint *)0) = 1;
 
 	return 0;
 

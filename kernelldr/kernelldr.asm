@@ -17,6 +17,29 @@ KernelLoaderAddr	EQU (KernelLoaderSeg << 4) + KernelLoaderOff
 
 BITS	16
 
+;*==================================================*
+;|                                                  |
+;|              Kernel Loader Header                |
+;|                                                  |
+;*==================================================*
+KernelLoaderHeader:
+	DD 		KernelLoaderAddr + KernelTSS 		; 0
+	DD 		KernelLoaderAddr + MemorySize_AX	; 1
+	DD 		KernelLoaderAddr + MemorySize_BX	; 2
+	KLHVESAEnabled:
+	DD 		0 						 			; 3 Is VESA enabled?
+	DD 		KernelLoaderAddr + VESAInfo 		; 4
+	KLHVESAMode:
+	DD 		0 									; 5 VESA Mode
+	DD 		KernelLoaderAddr + GDT 				; 6
+	DD 		KernelLoaderAddr + IDT 				; 7
+	DD 		KernelLoaderAddr + VGDTR 			; 8
+	DD 		KernelLoaderAddr + VIDTR 			; 9
+%REP	1000H - ($ - KernelLoaderHeader)
+	DB 0
+%ENDREP
+
+
 CLI
 
 MOV		AX, KernelLoaderSeg
@@ -44,36 +67,16 @@ CALL	InitVESA
 %ENDIF
 
 Desc_Set_Base	CS, KernelTSSDescAddr, KernelLoaderAddr + KernelTSS
-Gate_Set_Offset	CS, INT21HAddr, INT21H
-Gate_Set_Offset	CS, INT22HAddr, INT22H
-
-LIDT	[VIDTR]
-LGDT	[VGDTR]
 
 IN		AL, 92H
 OR		AL, 2
 OUT		92H, AL
 
-;MOV 	EDX, CR0
-;AND		EDX, (-1) - (1000B + 0100B)
-;MOV 	CR0, EDX
-;FNINIT
-;FNSTSW	[FPUStateWord]
-;CMP		WORD [FPUStateWord], 0
-;JNE		NoFPU
-;JMP 	HasFPU
-
-;FPUStateWord	DW	55AAH
-;NoFPU:
-
-;MOV 	EAX, 01234567H
-;HLT
-
-;HasFPU:
+LGDT	[VGDTR]
+LIDT	[VIDTR]
 
 MOV		EAX, CR0
 OR 		EAX, 00000001H
-;AND		EAX, 00000011H
 MOV		CR0, EAX
 
 Jump16	KernelLdrCDesc, ProtectedMode
@@ -127,7 +130,9 @@ Procedure	InitVESA
 	PUSH 	CX
 	PUSH 	DI
 	
-	MOV 	BYTE [UseVesa], 1
+	MOV 	DWORD [KLHVESAEnabled], 1
+
+	MOV 	DWORD [KLHVESAMode], ModeNumber
 
 	MOV 	AX, 4F02H
 	MOV 	BX, ModeNumber
@@ -155,97 +160,15 @@ MOV		DS, AX
 MOV		ES, AX
 MOV		FS, AX
 MOV		GS, AX
-;MOV		AX, KernelStackDesc
 MOV		SS, AX
 MOV		ESP, 01FFFFEH
 
 MOV		AX, KernelTSSDesc
 LTR		AX
+
 CALL	Set8259A
 
 Jump32	KernelCDesc, 20000H
-
-;EBX = Function address
-;DL = Interrupt number
-Procedure	INT21H
-	PUSH	EAX
-	PUSH	EBX
-	PUSH	EDX
-	MOV		AL, DL
-	MOV		AH, 8
-	MUL		AH
-	MOVZX	EAX, AX
-	MOV		[KernelLoaderAddr + IDT + EAX + Gate_OffsetL], BX
-	SHR		EBX, 16
-	MOV		[KernelLoaderAddr + IDT + EAX + Gate_OffsetH], BX
-	POP		EDX
-	POP		EBX
-	POP		EAX
-	IRET
-EndProc		INT21H
-
-Temp: 	DB 0
-Temp1:	DB 0
-
-;过程名:		INT22H
-;功能:		内核服务
-Procedure	INT22H
-	;功能号:		0H
-	;功能:		获取扩展内存大小
-	;返回值:		BX=扩展内存大小. 单位为64KB.
-	CMP		AH, 0H
-	JNE		INT22H_Label0H
-	MOV		AX, [KernelLoaderAddr + MemorySize_AX]
-	MOV		BX, [KernelLoaderAddr + MemorySize_BX]
-	JMP		INT22H_End	
-
-INT22H_Label0H:
-	;功能号:		1H
-	;功能:		获取描述符储存区起始位置
-	;返回值:		EAX=描述符储存区起始位置
-	CMP		AH, 1H
-	JNE		INT22H_Label1H
-	MOV		EAX, KernelLoaderAddr + GDT
-	JMP		INT22H_End
-
-INT22H_Label1H:
-	;功能号:		2H
-	;功能:		获取中断描述符表储存区起始位置
-	;返回值:		EAX=扩展描述符储存区起始位置
-	CMP		AH, 2H
-	JNE		INT22H_Label2H
-	MOV		EAX, KernelLoaderAddr + IDT
-	JMP		INT22H_End
-
-INT22H_Label2H:
-	
-	CMP		AH, 3H
-	JNE 	INT22H_Label3H
-	MOV 	EAX, 0
-	CMP		BYTE [KernelLoaderAddr + UseVesa], 0
-	JE 		INT22H_Label3H_NoUseVesa
-	%IFDEF	VESA
-	MOV 	EAX, KernelLoaderAddr + VESAInfo
-	MOV 	EBX, ModeNumber
-	%ENDIF
-INT22H_Label3H_NoUseVesa:
-
-	JMP 	INT22H_End
-
-INT22H_Label3H:
-
-	CMP		AH, 4H
-	JNE		INT22H_Label4H
-	MOV		EAX, KernelLoaderAddr + KernelTSS
-	JMP		INT22H_End
-
-INT22H_Label4H:
-
-
-INT22H_End:
-
-	IRET
-EndProc		INT22H
 
 %MACRO		WaitIO 0
 	NOP
@@ -452,46 +375,42 @@ ExtDescs:
 
 VGDTR:	VDesc	(GDTLength - 1), GDT + (KernelLoaderSeg << 4)
 
+
 ;中断描述符表
 IDT:
 	%REP	(6H - 0H) + 1
-	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
+	Gate	0, KernelCDesc, 0, AT386IGate + DPL3
 	%ENDREP
-	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
+	Gate	0, KernelCDesc, 0, AT386IGate + DPL3
 	%REP	(0CH - 8H) + 1
-	Gate	0, KernelCDesc, 0, AT386TGate + DPL3
+	Gate	0, KernelCDesc, 0, AT386IGate + DPL3
 	%ENDREP
 	;INT 0DH
-	GlobalProtectedGate:	Gate	0, KernelCDesc, 0, AT386TGate
+	GlobalProtectedGate:	Gate	0, KernelCDesc, 0, AT386IGate
 	%REP	(20H - 0EH) + 1
-		Gate	0, KernelCDesc, 0, AT386TGate + DPL3
+		Gate	0, KernelCDesc, 0, AT386IGate + DPL3
 	%ENDREP
 	;INT 21H
 	INT21HAddr:
-	Gate	?, KernelLdrCDesc, 0, AT386TGate	
+	Gate	?, KernelLdrCDesc, 0, AT386IGate	
 	INT22HAddr:
-	Gate	?, KernelLdrCDesc, 0, AT386TGate
+	Gate	?, KernelLdrCDesc, 0, AT386IGate
 	%REP	(0FFH - 23H) + 1
-		Gate	0, KernelCDesc, 0, AT386TGate + DPL3
+		Gate	0, KernelCDesc, 0, AT386IGate + DPL3
 	%ENDREP
 	IDTLength		EQU $ - IDT
 
 VIDTR:	VDesc	IDTLength - 1, IDT + (KernelLoaderSeg << 4)
-;VIDTR:	VDesc	1024 - 1, IDT + (KernelLoaderSeg << 4)
 
 KernelTSS:
 	TSS
 	DB	0FFH
-
 	KernelTSSLength	EQU $ - KernelTSS
 
 MemorySize_AX:
 	DW	0
 MemorySize_BX:
 	DW	0
-
-UseVesa:
-	DB 	0
 
 VESAInfo:
 	TIMES 512 DB 0

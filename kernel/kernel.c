@@ -35,6 +35,7 @@
 #include "serial.h"
 #include "dma.h"
 #include "kmpool.h"
+#include "knlldr.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
@@ -71,6 +72,21 @@ static struct TSS ide_tss;						//IDE的任务的TSS。
 static struct TSS fpu_tss;						//FPU的任务的TSS。
 static struct TSS scall_tss[MAX_TASK_COUNT];	//各个系统调用的任务的TSS。
 
+static uint8 *	divby0_stack		= NULL;
+static uint8 *	bndchk_stack		= NULL;
+static uint8 *	invalidopc_stack	= NULL;
+static uint8 *	df_stack			= NULL;
+static uint8 *	invalidtss_stack	= NULL;
+static uint8 *	invalidseg_stack	= NULL;
+static uint8 *	invalidstck_stack	= NULL;
+static uint8 *	noimpl_stack		= NULL;
+static uint8 *	gp_stack			= NULL;
+static uint8 *	pf_stack			= NULL;
+static uint8 *	mf_stack			= NULL;
+static uint8 *	ac_stack			= NULL;
+static uint8 *	mc_stack			= NULL;
+static uint8 *	xf_stack			= NULL;
+
 static BOOL		mouse_loop_was_enabled 		= FALSE;	//!!!警告!!!
 														//在使用APIC模式时，不知道为什么
 														//在执行enter_system()附近的代码
@@ -84,6 +100,23 @@ static uint8	rtc_rate					= 15;
 
 #include "knlstatic.h"
 
+extern void _irq0(void);
+extern void _irq1(void);
+extern void _irq2(void);
+extern void _irq3(void);
+extern void _irq4(void);
+extern void _irq5(void);
+extern void _irq6(void);
+extern void _irq7(void);
+extern void _irq8(void);
+extern void _irq9(void);
+extern void _irq10(void);
+extern void _irq11(void);
+extern void _irq12(void);
+extern void _irq13(void);
+extern void _irq14(void);
+extern void _irq15(void);
+
 /**
 	@Function:		main
 	@Access:		Public
@@ -94,7 +127,7 @@ static uint8	rtc_rate					= 15;
 */
 void
 main(void)
-{
+{	
 	gdt_addr = get_gdt_addr();
 	idt_addr = get_idt_addr();
 	
@@ -134,7 +167,6 @@ main(void)
 	init_disk("HD");
 	init_ide();
 
-
 	ahci_init();
 
 	// 初始化外部库。DSLIB，JSONLIB，PATHLIB, MEMPOOLLIB。 
@@ -153,7 +185,6 @@ main(void)
 	init_screen();
 	init_enfont();
 	init_timer();
-
 	init_mouse();
 	mouse_init();
 	
@@ -180,10 +211,26 @@ main(void)
 		apic_enable();
 	}
 	else
+	{
+		pic_init();
 		pic_unmask_all();
+	}
 
 	ifs1blks_init();
-	
+
+	/*
+	uint32 vidtr_addr = (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_VIDTR);
+	asm volatile(
+		"pushal\n\t"
+		"movl	%0, %%eax\n\t"
+		"lidt	(%%eax)\n\t"
+		"popal\n\t"
+		:
+		:"m"(vidtr_addr));
+	uint32 delay;
+	for(delay = 0; delay < 0x0fffffff; delay++)
+		delay = delay;
+	*/
 	sti();
 
 	//在这里启用所有锁
@@ -270,21 +317,47 @@ reset_all_exceptions(void)
 {
 	struct Desc tss_desc;
 
-	#define RESET_EXCEPTION(gdt_index)	\
-		get_desc_from_gdt(gdt_index, &tss_desc);	\
+	#define RESET_EXCEPTION(__desc_idx, __tss, __eip, __esp)	\
+		get_desc_from_gdt(__desc_idx, &tss_desc);	\
 		tss_desc.attr = AT386TSS + DPL0;	\
-		set_desc_to_gdt(gdt_index, &tss_desc);
+		set_desc_to_gdt(__desc_idx, &tss_desc);	\
+		fill_tss(__tss, __eip, __esp);
 
-	RESET_EXCEPTION(21);	//除以0。
-	RESET_EXCEPTION(22);	//边界检查。
-	RESET_EXCEPTION(23);	//错误的操作码。
-	RESET_EXCEPTION(28);	//双重故障。
-	RESET_EXCEPTION(24);	//错误的 TSS。
-	RESET_EXCEPTION(25);	//段不存在故障。
-	RESET_EXCEPTION(26);	//堆栈段故障。
-	RESET_EXCEPTION(27);	//未实现中断。
-	RESET_EXCEPTION(18);	//通用保护异常。
-	RESET_EXCEPTION(20);	//页故障。
+	// 除以0。
+	RESET_EXCEPTION(21, &divby0_tss, &dividing_by_zero_int, divby0_stack);
+
+	// 边界检查。
+	RESET_EXCEPTION(22, &bndchk_tss, &bound_check_int, bndchk_stack);
+	
+	// 错误的操作码。
+	RESET_EXCEPTION(23, &invalidopc_tss, &invalid_opcode_int, invalidopc_stack);
+	
+	// 错误的 TSS。
+	RESET_EXCEPTION(24, &invalidtss_tss, &invalid_tss_int, invalidtss_stack);
+	
+	// 段不存在故障。
+	RESET_EXCEPTION(25, &invalidseg_tss, &invalid_seg_int, invalidseg_stack);
+
+	// 堆栈段故障。
+	RESET_EXCEPTION(26, &invalidstck_tss, &invalid_stack_int, invalidstck_stack);
+
+	// 未实现中断。
+	RESET_EXCEPTION(27, &noimpl_tss, &noimpl_int, noimpl_stack);
+
+	// 通用保护异常。
+	RESET_EXCEPTION(18, &gp_tss, &gp_int, gp_stack);
+
+	// 页故障。
+	RESET_EXCEPTION(20, &pf_tss, &pf_int, pf_stack);
+
+	// x87 FPU浮点错误（数学错误）的故障。
+	RESET_EXCEPTION(29, &mf_tss, &mf_int, mf_stack);
+
+	// 对齐检查故障。
+	RESET_EXCEPTION(158, &ac_tss, &ac_int, ac_stack);
+
+	// SIMD浮点异常。
+	RESET_EXCEPTION(160, &xf_tss, &xf_int, xf_stack);
 }
 
 /**
@@ -597,10 +670,13 @@ init_timer(void)
 	task_gate.dcount = 0;
 	task_gate.selector = (10 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	//IRQ 0
+	
+	// IRQ 0
 	set_gate_to_idt(0x40, (uint8 *)&task_gate);
-	//IRQ 8
+
+	// IRQ 8
 	set_gate_to_idt(0x70, (uint8 *)&task_gate);
+	
 
 	fill_tss(tss, (uint32)timer_int, (uint32)stack);
 }
@@ -641,6 +717,8 @@ init_mouse(void)
 	task_gate.dcount = 0;
 	task_gate.selector = (19 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
+
+	// IRQ12
 	set_gate_to_idt(0x74, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)mouse_int, (uint32)stack);
@@ -682,6 +760,8 @@ init_keyboard(void)
 	task_gate.dcount = 0;
 	task_gate.selector = (12 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
+	
+	// IRQ1
 	set_gate_to_idt(0x41, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)keyboard_int, (uint32)stack);
@@ -722,7 +802,9 @@ init_ide(void)
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (13 << 3) | RPL0;
-	task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
+	
+	// IRQ14
 	set_gate_to_idt(0x76, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)ide_int, (uint32)stack);
@@ -813,7 +895,7 @@ static volatile BOOL				kernel_task_ran		= FALSE;
 static
 void
 timer_int(void)
-{	
+{
 	while(1)
 	{
 		lock();
@@ -841,7 +923,7 @@ timer_int(void)
 			int32 running_tid = get_running_tid();
 			int32 tid = get_next_task_id();
 			current_tid = tid;
-			if(counter == 1 || tid == -1 || switch_to_kernel)
+			if(counter == MAX_TASK_COUNT || tid == -1 || switch_to_kernel)
 			{
 				switch_to_kernel = FALSE;
 				counter = 0;
@@ -979,15 +1061,18 @@ disable_flush_screen(void)
 	is_enable_flush_screen = 0;
 }
 
-static int32 old_mouse_x = 0;
-static int32 old_mouse_y = 0;
-static int32 mouse_x = 0;
-static int32 mouse_y = 0;
-static BOOL mouse_left_button_down = 0;
-static BOOL mouse_right_button_down = 0;
-static int32 mouse_count = 0;
-static int32 x_sign = 0;
-static int32 y_sign = 0;
+static volatile int32	old_mouse_x = 0;
+static volatile int32	old_mouse_y = 0;
+static volatile int32	mouse_x = 0;
+static volatile int32	mouse_y = 0;
+static volatile BOOL	mouse_left_button_down = 0;
+static volatile BOOL	mouse_right_button_down = 0;
+static volatile int32	mouse_count = 0;
+static volatile int32 	x_sign = 0;
+static volatile int32	y_sign = 0;
+
+#define MOUSE_DEVICE  0x60
+#define MOUSE_PENDING 0x64
 
 /**
 	@Function:		mouse_int
@@ -1005,7 +1090,7 @@ mouse_int(void)
 	{
 		int32 max_screen_width = vesa_get_width();
 		int32 max_screen_height = vesa_get_height();
-		uint8 data = inb(0x60);
+		uint8 data = inb(MOUSE_DEVICE);
 
 		if(mouse_loop_was_enabled)
 			switch(++mouse_count)
@@ -1111,6 +1196,9 @@ is_mouse_right_button_down(void)
 		return FALSE;
 }
 
+#define KEYBOARD_DEVICE  0x60
+#define KEYBOARD_PENDING 0x64
+
 /**
 	@Function:		keyboard_int
 	@Access:		Private
@@ -1126,7 +1214,7 @@ keyboard_int(void)
 	while(1)
 	{
 		uint8 scan_code = 0;
-		scan_code = inb(0x60);
+		scan_code = inb(KEYBOARD_DEVICE);
 		if(keyboard_loop_was_enabled)
 			tran_key(scan_code);
 		irq_ack(1);
@@ -1516,6 +1604,7 @@ init_dividing_by_zero(void)
 	struct die_info info;
 	struct TSS * tss = &divby0_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	divby0_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_DIV_BY_0, DI_INIT_DIV_BY_0);
@@ -1606,6 +1695,7 @@ init_bound_check(void)
 	struct die_info info;
 	struct TSS * tss = &bndchk_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	bndchk_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_BOUND_CHK, DI_INIT_BOUND_CHK);
@@ -1695,6 +1785,7 @@ init_invalid_opcode(void)
 	struct die_info info;
 	struct TSS * tss = &invalidopc_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	invalidopc_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_INVALID_OPC, DI_INIT_INVALID_OPC);
@@ -1784,6 +1875,7 @@ init_double_fault(void)
 	struct die_info info;
 	struct TSS * tss = &df_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	df_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_DOUBLE_FAULT, DI_INIT_DOUBLE_FAULT);
@@ -1862,6 +1954,7 @@ init_invalid_tss(void)
 	struct die_info info;
 	struct TSS * tss = &invalidtss_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	invalidtss_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_INVALID_TSS, DI_INIT_INVALID_TSS);
@@ -1960,6 +2053,7 @@ init_invalid_seg(void)
 	struct die_info info;
 	struct TSS * tss = &invalidseg_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	invalidseg_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_INVALID_SEG, DI_INIT_INVALID_SEG);
@@ -2058,6 +2152,7 @@ init_invalid_stack(void)
 	struct die_info info;
 	struct TSS * tss = &invalidstck_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	invalidstck_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_INVALID_STACK, DI_INIT_INVALID_STACK);
@@ -2156,6 +2251,7 @@ init_gp(void)
 	struct die_info info;
 	struct TSS * tss = &gp_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	gp_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_GP, DI_INIT_GP);
@@ -2254,6 +2350,7 @@ init_pf(void)
 	struct die_info info;
 	struct TSS * tss = &pf_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	pf_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_PF, DI_INIT_PF);
@@ -2376,6 +2473,7 @@ init_mf(void)
 	struct die_info info;
 	struct TSS * tss = &mf_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	mf_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_MF, DI_INIT_MF);
@@ -2463,6 +2561,7 @@ init_ac(void)
 	struct die_info info;
 	struct TSS * tss = &ac_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	ac_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_AC, DI_INIT_AC);
@@ -2550,6 +2649,7 @@ init_mc(void)
 	struct die_info info;
 	struct TSS * tss = &mc_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	mc_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_MC, DI_INIT_MC);
@@ -2628,6 +2728,7 @@ init_xf(void)
 	struct die_info info;
 	struct TSS * tss = &xf_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	xf_stack = stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_XF, DI_INIT_XF);

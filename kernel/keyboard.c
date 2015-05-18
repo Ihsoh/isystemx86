@@ -16,15 +16,14 @@
 #include "vesa.h"
 #include "console_window.h"
 #include "window.h"
-#include "kernel.h"
 
 #define	IBUFFER_SIZE	16
 #define	KEY_MAP_SIZE	256	
 
-static uint8 buffer[IBUFFER_SIZE];
-static int32 key_map[KEY_MAP_SIZE];
-static int32 bpos = -1;
-static BOOL shift = FALSE, control = FALSE, alt = FALSE, capslock = FALSE, ext = FALSE;
+static volatile uint8 	buffer[IBUFFER_SIZE];
+static volatile int32 	key_map[KEY_MAP_SIZE];
+static volatile int32 	bpos = -1;
+static volatile BOOL 	shift = FALSE, control = FALSE, alt = FALSE, capslock = FALSE, ext = FALSE;
 
 #define	is_upper() ((shift && !capslock) || (!shift && capslock))
 
@@ -556,7 +555,14 @@ tran_key(IN uint8 scan_code)
 uint8
 get_char(void)
 {
-	while(bpos == -1);
+	for(;;)
+	{
+		LOCK_TASK();
+		if(bpos != -1)
+			break;
+		UNLOCK_TASK();
+		PAUSE();
+	}
 	LOCK_TASK();
 	uint8 chr = buffer[0];
 	int32 i;
@@ -685,7 +691,7 @@ get_strn(	OUT int8 * input_buffer,
 	get_cursor(&startx, &starty);
 	input_buffer[0] = '\0';
 	UNLOCK_TASK();
-	while(1)
+	for(;;)
 	{
 		chr = get_char();
 		LOCK_TASK();
@@ -894,21 +900,6 @@ get_alt(void)
 }
 
 /**
-	@Function:		clear_keyboard_buffer
-	@Access:		Public
-	@Description:
-		清除键盘缓冲区。
-	@Parameters:
-	@Return:
-*/
-static
-void
-clear_keyboard_buffer(void)
-{	
-	inb(0x60);
-}
-
-/**
 	@Function:		init_keyboard_driver
 	@Access:		Public
 	@Description:
@@ -920,7 +911,13 @@ void
 init_keyboard_driver(void)
 {
 	uint32 ui;
-	clear_keyboard_buffer();
+
+	// 重置PS/2
+	uint8 tmp = inb(0x61);
+	outb(0x61, tmp | 0x80);
+	outb(0x61, tmp & 0x7f);
+	inb(0x60);
+
 	for(ui = 0; ui < KEY_MAP_SIZE; ui++)
 		key_map[ui] = 0;
 }

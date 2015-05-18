@@ -9,6 +9,7 @@ Target=$(TargetDir)/$(Out)
 CC=gcc
 AS=as
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
+ASFlags=--32 -march=i386 -mtune=i386
 StringObj=../libs/ilib/bin/string.obj
 Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
@@ -20,7 +21,7 @@ bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_wind
 bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
 bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
-bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj
+bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
@@ -190,6 +191,12 @@ bin/mouse.obj: mouse.c mouse.h
 
 bin/kmpool.obj: kmpool.c kmpool.h
 	$(CC) $(CFlags) -c kmpool.c -o bin/kmpool.obj $(Include)
+
+bin/knlldr.obj: knlldr.c knlldr.h
+	$(CC) $(CFlags) -c knlldr.c -o bin/knlldr.obj $(Include)
+
+bin/irq.obj: irq.s
+	$(AS) $(ASFlags) -c irq.s -o bin/irq.obj
 
 .PHONY:clean
 

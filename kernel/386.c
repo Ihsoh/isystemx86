@@ -224,9 +224,13 @@ void
 set_int(IN uint8 n,
 		IN uint32 addr)
 {
-	asm volatile ("int	$0x21"
-	:
-	:"b"(addr), "d"(n));
+	struct Gate gate;
+	gate.offsetl = (uint16)(addr & 0x0000ffff);
+	gate.offseth = (uint16)((addr >> 16) & 0x0000ffff);
+	gate.dcount = 0;
+	gate.selector = KERNEL_C_DESC | RPL0;
+	gate.attr = AT386TGATE | DPL3;
+	set_gate_to_idt(n, &gate);
 }
 
 /**

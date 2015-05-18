@@ -30,11 +30,13 @@ BITS	16
 CPU		386
 
 JMP 	Start
-KernelLdrAddr 	DW KLdrOffAddr, KLdrSegAddr
+KernelLdrAddr 	DW KLdrOffAddr + 1000H, KLdrSegAddr
 
 BootMsg0		DB 'Boot initializing...', 0
 
 Start:
+
+CLI
 
 MOV		AX, CS
 MOV		DS, AX
