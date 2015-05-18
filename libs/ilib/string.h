@@ -38,8 +38,6 @@ extern char * strstr(const char * s1, const char * s2);
 
 #define	atof(str) (stod(str))
 
-extern double strtod(const char * nptr, char ** endptr);
-
 //Extersion:
 extern char * uctohexs(char * str, unsigned char n);
 extern char * ustohexs(char * str, unsigned short n);

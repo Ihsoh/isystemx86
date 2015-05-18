@@ -19,4 +19,9 @@ extern void exit(int status);
 
 extern void qsort(void *base, int num, int size, int (*comparator)(const void *, const void *));
 
+
+extern unsigned long int strtoul(const char * nptr, char ** endptr, int base);
+extern long int strtol(const char * nptr, char ** endptr, int base);
+extern double strtod(const char * nptr, char ** endptr);
+
 #endif

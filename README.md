@@ -28,12 +28,12 @@ The libraries are used to develop the user application and the system applicatio
 |regexlib            |Regular Expression Library.              |
 
 ## Screenshot ##
-### Console ###
-![Alt Console](http://ihsoh.github.io/images/screenshot/screenshot0.png "Console")
-
-### Changing current directory & editing file ###
-![Alt Console](http://ihsoh.github.io/images/screenshot/screenshot1.png "Console")
+### GUI ###
+![Alt GUI](http://ihsoh.github.io/images/screenshot/screenshot3.png "GUI")
 
 ### Editor ###
-![Alt Editor](http://ihsoh.github.io/images/screenshot/screenshot2.png "Editor")
+![Alt Editor](http://ihsoh.github.io/images/screenshot/screenshot4.png "Editor")
+
+### Lua ###
+![Alt Lua](http://ihsoh.github.io/images/screenshot/screenshot5.png "Lua")
 

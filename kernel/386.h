@@ -55,6 +55,11 @@ set_int(IN uint8 n,
 		IN uint32 addr);
 
 extern
+void
+set_int_intrgate(	IN uint8 n,
+					IN uint32 addr);
+
+extern
 BOOL
 set_desc_to_gdt(IN uint32 index,
 				IN uint8 * desc);

@@ -1,19 +1,40 @@
-/*
-	定时器。
+/**
+	@File:			irq.s
+	@Author:		Ihsoh
+	@Date:			2015-05-18
+	@Description:
+		IRQs。
+
+		IRQ编号		设备名称		用途
+		================================================
+		IRQ0 		Time		电脑计时器。
+		IRQ1 		Keyboard	键盘。
+		IRQ2 		连接IRQ9		连接IRQ9。
+		IRQ3 		COM2		串口设备。
+		IRQ4 		COM1		串口设备。
+		IRQ5 		LPT2		建议声卡使用该IRQ。
+		IRQ6 		FDD			软驱传输控制用。
+		IRQ7 		LPT1		打印机传输控制用。
+		IRQ8 		CMOS Alert	即使时钟。
+		IRQ9 		连接IRQ2		连接IRQ2。
+		IRQ10 		保留			建议保留给网卡使用该IRQ。
+		IRQ11 		保留			建议保留给AGP显卡使用。
+		IRQ12 		PS/2鼠标		PS/2鼠标	。
+		IRQ13 		FPU			协处理器用。
+		IRQ14 		主IDE		IDE0传输控制用。
+		IRQ15 		从IDE		IDE1传输控制用。
 */
+
 .globl  _irq0
 .type   _irq0, @function
 _irq0:
-	// ..........
+	lcall	$0x50b, $0
 	iret
 
-/*
-	键盘。
-*/
 .globl  _irq1
 .type   _irq1, @function
 _irq1:
-	// ..........
+	lcall	$0x513, $0
 	iret
 
 .globl  _irq2
@@ -76,28 +97,22 @@ _irq11:
 	// ..........
 	iret
 
-/*
-	鼠标。
-*/
 .globl  _irq12
 .type   _irq12, @function
 _irq12:
-	// ..........
+	lcall	$0x51b, $0
 	iret
 
 .globl  _irq13
 .type   _irq13, @function
 _irq13:
-	// ..........
+	lcall	$0x52b, $0
 	iret
 
-/*
-	IDE。
-*/
 .globl  _irq14
 .type   _irq14, @function
 _irq14:
-	// ..........
+	lcall	$0x523, $0
 	iret
 
 .globl  _irq15

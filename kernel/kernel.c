@@ -669,10 +669,13 @@ init_timer(void)
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (10 << 3) | RPL0;
-	task_gate.attr = ATTASKGATE | DPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
 	
 	// IRQ 0
-	set_gate_to_idt(0x40, (uint8 *)&task_gate);
+	//set_gate_to_idt(0x40, (uint8 *)&task_gate);
+	set_desc_to_gdt(161, (uint8 *)&task_gate);
+	set_int_intrgate(0x40, _irq0);
 
 	// IRQ 8
 	set_gate_to_idt(0x70, (uint8 *)&task_gate);
@@ -716,10 +719,13 @@ init_mouse(void)
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (19 << 3) | RPL0;
-	task_gate.attr = ATTASKGATE | DPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
 
 	// IRQ12
-	set_gate_to_idt(0x74, (uint8 *)&task_gate);
+	//set_gate_to_idt(0x74, (uint8 *)&task_gate);
+	set_desc_to_gdt(163, (uint8 *)&task_gate);
+	set_int_intrgate(0x74, _irq12);
 
 	fill_tss(tss, (uint32)mouse_int, (uint32)stack);
 }
@@ -759,10 +765,13 @@ init_keyboard(void)
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (12 << 3) | RPL0;
-	task_gate.attr = ATTASKGATE | DPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
 	
 	// IRQ1
-	set_gate_to_idt(0x41, (uint8 *)&task_gate);
+	// set_gate_to_idt(0x41, (uint8 *)&task_gate);
+	set_int_intrgate(0x41, _irq1);
+	set_desc_to_gdt(162, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)keyboard_int, (uint32)stack);
 }
@@ -802,10 +811,13 @@ init_ide(void)
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (13 << 3) | RPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
 	task_gate.attr = ATTASKGATE | DPL3;
 	
 	// IRQ14
-	set_gate_to_idt(0x76, (uint8 *)&task_gate);
+	//set_gate_to_idt(0x76, (uint8 *)&task_gate);
+	set_desc_to_gdt(164, (uint8 *)&task_gate);
+	set_int_intrgate(0x76, _irq14);
 
 	fill_tss(tss, (uint32)ide_int, (uint32)stack);
 }
@@ -845,8 +857,13 @@ init_fpu(void)
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (16 << 3) | RPL0;
-	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x75, (uint8 *)&task_gate);
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
+
+	// IRQ13
+	//set_gate_to_idt(0x75, (uint8 *)&task_gate);
+	set_desc_to_gdt(165, (uint8 *)&task_gate);
+	set_int_intrgate(0x75, _irq13);
 	
 	fill_tss(tss, (uint32)fpu_int, (uint32)stack);
 }
@@ -1584,6 +1601,33 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 	*(__ti) = __errcode & 0x00000004;	\
 	*(__sel) = (__errcode >> 3) & 0x1fff;	\
 }
+
+/*
+	中断号 	标识 	意思 				类型 		错误码 	引起的条件
+	======================================================================================
+	0 		#DE 	除出错				故障 		无 		DIV或IDIV指令。
+	1 		#DB 	调试					故障/陷阱	无 		任何代码或数据引用，或是指令INT 1指令。
+	2 		-- 		NMI中断 				中断 		无 		非屏蔽外部中断。
+	3 		#BP 	断电 				陷阱 		无 		INT 3指令。
+	4 		#OF 	溢出 				陷阱 		无 		INTO指令。
+	5 		#BR 	边界范围超出 			故障 		无 		BOUND指令。
+	6 		#UD 	无效操作码 			故障 		无 		UD2指令或保留的操作码。
+	7 		#NM 	设备不存在			故障 		无 		浮点或WAIT/FWAIT指令。
+	8 		#DF 	双重故障 			异常终止 	有（0）	任何可产生的异常、NMI或INTR指令。
+	9 		-- 		协处理器段超越 		故障 		无 		浮点指令（386以后的机器不产生该异常）。
+	10 		#TS 	无效的任务状态段TSS 	故障 		有 		任务交换或访问TSS。
+	11 		#NP 	段不存在 			故障 		有 		加载段寄存器或访问系统段。
+	12 		#SS 	堆栈段错误 			故障 		有 		堆栈操作和SS寄存器加载。
+	13 		#GP 	一般保护错误 			故障 		有 		任何内存引用和其他保护检查。
+	14 		#PF 	页面错误 			故障 		有 		任何内存引用。
+	15 		-- 		（Intel保留） 					无
+	16 		#MF 	x87 FPU 浮点错误 	故障 		无 		x87 FPU浮点或WAIT/FWAIT指令。
+	17 		#AC 	对齐检查 			故障 		有（0）	对内存中任何数据的引用。
+	18 		#MC 	机器检查 			异常终止 	无 		错误码（若有）和产生源与CPU类型有关（奔腾处理器引进）。
+	19 		#XF 	SIMD浮点异常 		故障 		无 		SSE和SSE2浮点指令。
+	20-31 	-- 		（Intel保留）
+	32-255 	-- 		用户自定义			中断 				外部中断或INT n指令。
+*/
 
 /*================================================================================
 							处理除数为0的故障, 0x00

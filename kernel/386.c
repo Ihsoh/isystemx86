@@ -213,6 +213,7 @@ set_msr(IN uint32 msr,
 	@Access:		Public
 	@Description:
 		设置相应中断处理函数。
+		描述符是陷阱门描述符。
 	@Parameters:
 		n, uint8, IN
 			中断号。
@@ -230,6 +231,32 @@ set_int(IN uint8 n,
 	gate.dcount = 0;
 	gate.selector = KERNEL_C_DESC | RPL0;
 	gate.attr = AT386TGATE | DPL3;
+	set_gate_to_idt(n, &gate);
+}
+
+/**
+	@Function:		set_int_intrgate
+	@Access:		Public
+	@Description:
+		设置相应中断处理函数。
+		描述符是中断门描述符。
+	@Parameters:
+		n, uint8, IN
+			中断号。
+		addr, uint32, IN
+			处理函数的地址。
+	@Return:	
+*/
+void
+set_int_intrgate(	IN uint8 n,
+					IN uint32 addr)
+{
+	struct Gate gate;
+	gate.offsetl = (uint16)(addr & 0x0000ffff);
+	gate.offseth = (uint16)((addr >> 16) & 0x0000ffff);
+	gate.dcount = 0;
+	gate.selector = KERNEL_C_DESC | RPL0;
+	gate.attr = AT386IGATE | DPL3;
 	set_gate_to_idt(n, &gate);
 }
 

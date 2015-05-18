@@ -10,14 +10,18 @@ CC=gcc
 AS=as
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 ASFlags=--32 -march=i386 -mtune=i386
+
 Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
 bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj 	\
-bin/setjmp.obj bin/longjmp.obj bin/ctype.obj
+bin/setjmp.obj bin/longjmp.obj bin/ctype.obj bin/errno.obj bin/strtod.obj
+
+GlibcObjs=bin/strtol.obj bin/strtoul.obj
+
 AR=ar
 Include=-I../
 
-$(Target): bin  bin/mta32.obj $(Objs)
-	$(AR) -rc $(Target) $(Objs)
+$(Target): bin  bin/mta32.obj $(Objs) $(GlibcObjs)
+	$(AR) -rc $(Target) $(Objs) $(GlibcObjs)
 
 bin:
 	-mkdir bin
@@ -64,6 +68,22 @@ bin/longjmp.obj: longjmp.s
 bin/ctype.obj: ctype.c ctype.h
 	$(CC) $(CFlags) -c ctype.c -o bin/ctype.obj $(Include)
 
+bin/errno.obj: errno.c errno.h
+	$(CC) $(CFlags) -c errno.c -o bin/errno.obj $(Include)
+
+bin/strtod.obj: strtod.c
+	$(CC) $(CFlags) -c strtod.c -o bin/strtod.obj $(Include)
+
+
+#==============================glibc==============================
+
+bin/strtol.obj: strtol.c
+	$(CC) $(CFlags) -c strtol.c -o bin/strtol.obj $(Include)
+
+bin/strtoul.obj: strtoul.c
+	$(CC) $(CFlags) -c strtoul.c -o bin/strtoul.obj $(Include)
+
+#==============================glibc==============================
 
 bin/mta32.obj: mta32.c
 	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj $(Include)
@@ -71,4 +91,4 @@ bin/mta32.obj: mta32.c
 .PHONY:clean
 
 clean:
-	-rm -f $(Target) $(Objs)
+	-rm -f $(Target) $(Objs) $(GlibcObjs)

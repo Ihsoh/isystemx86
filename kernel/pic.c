@@ -59,7 +59,7 @@ pic_set_phase(IN int32 hz)
 BOOL
 pic_init(void)
 {
-	//pic_set_phase(1000);
+	pic_set_phase(1000);
 	return TRUE;
 }
 

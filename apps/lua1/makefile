@@ -1,5 +1,5 @@
 TargetDir=bin
-Out=lua.bin
+Out=lua1.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386

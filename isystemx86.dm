@@ -53,9 +53,9 @@ WRITE_FILE	VA:/isystem/bins/wdvm apps/WDVM-ISystemx86/bin/wdvm.bin
 MAKE_FILE	VA:/isystem/bins/ ubasic
 WRITE_FILE	VA:/isystem/bins/ubasic apps/ubasic/bin/ubasic.bin
 
-#lua
-MAKE_FILE	VA:/isystem/bins/ lua
-WRITE_FILE	VA:/isystem/bins/lua apps/lua/bin/lua.bin
+#lua1
+MAKE_FILE	VA:/isystem/bins/ lua1
+WRITE_FILE	VA:/isystem/bins/lua1 apps/lua1/bin/lua1.bin
 
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd
