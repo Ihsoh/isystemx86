@@ -940,7 +940,8 @@ timer_int(void)
 			int32 running_tid = get_running_tid();
 			int32 tid = get_next_task_id();
 			current_tid = tid;
-			if(counter == MAX_TASK_COUNT || tid == -1 || switch_to_kernel)
+			int32 task_count = tasks_get_count();
+			if(counter == task_count || tid == -1 || switch_to_kernel)
 			{
 				switch_to_kernel = FALSE;
 				counter = 0;

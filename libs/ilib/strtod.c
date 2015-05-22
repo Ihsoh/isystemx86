@@ -1,6 +1,7 @@
 #include "string.h"
 #include "stdlib.h"
 
+/*
 double strtod(const char * nptr, char ** endptr)
 {
 	char buffer[1024];
@@ -21,3 +22,4 @@ double strtod(const char * nptr, char ** endptr)
 		*endptr = s + i;
 	return atof(buffer);
 }
+*/

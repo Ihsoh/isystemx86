@@ -167,6 +167,10 @@ BOOL
 tasks_redirect_stderr(	IN int32 tid,
 						IN int8 * path);
 
+extern
+int32
+tasks_get_count(void);
+
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()
 

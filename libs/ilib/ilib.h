@@ -20,6 +20,7 @@ extern "C"
 #include "stddef.h"
 #include "limits.h"
 #include "errno.h"
+#include "math.h"
 
 #include "fs.h"
 #include "keyboard.h"

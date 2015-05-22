@@ -4,10 +4,17 @@
 
 int main(int argc, char * argv[])
 {
-	*((uint *)0) = 1;
-
+	uint ui;
+	double d;
+	for(ui = 0; ui < 1000; ui++)
+	{
+		d = (double)atoi(argv[1]) * 1000;
+		d += 10.5;
+		d -= 5.5;
+		printf("%u #### %f\n", ui, d);
+	}
 	return 0;
-
+	/*
 	BASLANGLEnvironment env;
 	env.baslangl_malloc = malloc;
 	env.baslangl_calloc = calloc;
@@ -30,6 +37,6 @@ int main(int argc, char * argv[])
 		printf("%s|", dsl_lst_get(tokens, ui)->value.object_value);
 	print_str("\n");
 	lexer_free_tokens(tokens);
-	
+	*/
 	return 0;
 }

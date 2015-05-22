@@ -5,8 +5,10 @@
 	@Description:
 */
 
-#ifndef	_STDLIB_H_
-#define	_STDLIB_H_
+#ifndef	_ILIB_STDLIB_H_
+#define	_ILIB_STDLIB_H_
+
+#include "stdlib/stdlib.h"
 
 #include "types.h"
 

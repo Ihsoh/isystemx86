@@ -3,9 +3,10 @@
 //Date:			2014-1-29
 //Descriptor:	String functions
 
-#ifndef	_STRING_H_
-#define	_STRING_H_
+#ifndef	_ILIB_STRING_H_
+#define	_ILIB_STRING_H_
 
+#include "string/string.h"
 
 //Standard:
 #define	strlen(str) (_strlen((str)))

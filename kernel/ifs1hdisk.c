@@ -119,10 +119,10 @@ init_hdisk(void)
 	uint32 r = 0x3;
 	
 	//初始化第一个硬盘
-	memcpy(&hdisk0, (uchar *)(0x7c00 + 512 - 2 - 0x10 * 2), sizeof(struct HardDiskArguments));
+	memcpy(&hdisk0, (uint8 *)(0x7c00 + 512 - 2 - 0x10 * 2), sizeof(struct HardDiskArguments));
 	
 	//初始化第二个硬盘
-	memcpy(&hdisk1, (uchar *)(0x7c00 + 512 - 2 - 0x10 * 1), sizeof(struct HardDiskArguments));
+	memcpy(&hdisk1, (uint8 *)(0x7c00 + 512 - 2 - 0x10 * 1), sizeof(struct HardDiskArguments));
 
 	return r;	
 }

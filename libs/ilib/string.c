@@ -113,6 +113,7 @@ char * _strchr(const char * s, char c)
 	return *s == c ? s : NULL;
 }
 
+/*
 int atoi(const char * str)
 {
 	int i;
@@ -130,6 +131,7 @@ int atoi(const char * str)
 	}
 	return n;
 }
+*/
 
 char * strstr(const char * s1, const char * s2)
 {

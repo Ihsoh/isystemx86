@@ -17,10 +17,10 @@ License along with the GNU C Library; see the file COPYING.LIB.  If
 not, write to the Free Software Foundation, Inc., 675 Mass Ave,
 Cambridge, MA 02139, USA.  */
 
-#include "types.h"
-#include "ctype.h"
-#include "limits.h"
-#include "errno.h"
+#include "../types.h"
+#include "../ctype.h"
+#include "../limits.h"
+#include "../errno.h"
 
 #ifndef	UNSIGNED
 #define	UNSIGNED	0

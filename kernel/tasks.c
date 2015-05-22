@@ -21,8 +21,9 @@
 
 #include <ilib/string.h>
 
-static struct Task tasks[MAX_TASK_COUNT];
-static int32 running_tid = -1;
+static struct Task 	tasks[MAX_TASK_COUNT];
+static int32 		running_tid 			= -1;
+static int32 		task_count 				= 0;
 
 DEFINE_LOCK_IMPL(tasks)
 
@@ -291,6 +292,7 @@ _create_task(	IN int8 * name,
 		task->init_i387 = 0;
 		task->ran = 0;
 		task->ready = FALSE;
+		task_count++;
 	}
 	return tid;
 }
@@ -430,6 +432,8 @@ _kill_task(IN int32 tid)
 		running_tid = -1;
 
 	task->used = 0;
+
+	task_count--;
 
 	return TRUE;
 }
@@ -986,4 +990,20 @@ tasks_redirect_stderr(	IN int32 tid,
 	return _tasks_redirect_io(	&(task->stderr), 
 								path,
 								FILE_MODE_APPEND);
+}
+
+/**
+	@Function:		tasks_get_count
+	@Access:		Public
+	@Description:
+		获取当前任务数量。
+	@Parameters:
+	@Return:
+		int32
+			当前任务数量。
+*/
+int32
+tasks_get_count(void)
+{
+	return task_count;
 }
