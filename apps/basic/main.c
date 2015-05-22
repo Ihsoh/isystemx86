@@ -2,18 +2,26 @@
 #include <baslanglib/baslanglib.h>
 #include "die.h"
 
+int comparetor(__const __ptr_t a, __const __ptr_t b)
+{
+	if(*(uint32 *)a > *(uint32 *)b)
+		return 1;
+	else if(*(uint32 *)a < *(uint32 *)b)
+		return -1;
+	else
+		return 0;
+}
+
 int main(int argc, char * argv[])
 {
-	uint ui;
-	double d;
-	for(ui = 0; ui < 1000; ui++)
-	{
-		d = (double)atoi(argv[1]) * 1000;
-		d += 10.5;
-		d -= 5.5;
-		printf("%u #### %f\n", ui, d);
-	}
+	uint32 arr[] = {100, 2, 3132, 23, 1, 32, 111, 33, 232131, 32};
+	qsort(arr, sizeof(arr) / sizeof(uint32), sizeof(uint32), comparetor);
+	uint32 ui;
+	for(ui = 0; ui < sizeof(arr) / sizeof(uint32); ui++)
+		printf("%u ", arr[ui]);
+	print_str("\n");
 	return 0;
+	
 	/*
 	BASLANGLEnvironment env;
 	env.baslangl_malloc = malloc;

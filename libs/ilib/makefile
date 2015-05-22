@@ -15,7 +15,9 @@ Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.o
 bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj 	\
 bin/setjmp.obj bin/longjmp.obj bin/ctype.obj bin/errno.obj bin/strtod.obj
 
-StdlibObjs=bin/strtol.obj bin/strtoul.obj bin/atoi.obj bin/atol.obj
+StdlibObjs=bin/strtol.obj bin/strtoul.obj bin/atoi.obj bin/atol.obj bin/mbstowcs.obj 	\
+bin/mbtowc.obj bin/wctomb.obj bin/wcstombs.obj bin/strtod.obj bin/atof.obj bin/abs.obj 	\
+bin/labs.obj bin/qsort.obj bin/msort.obj
 
 MathObjs=bin/ceil.obj bin/floor.obj bin/fabs.obj bin/__scalb.obj bin/__finite.obj
 
@@ -24,8 +26,7 @@ bin/atan.obj bin/exp.obj bin/exp__E.obj bin/sqrt.obj bin/acos.obj bin/acosh.obj 
 bin/__isinf.obj bin/__logb.obj bin/ldexp.obj bin/__drem.obj bin/log.obj bin/log10.obj 	\
 bin/log1p.obj bin/log__L.obj bin/asin.obj bin/atanh.obj bin/bcopy.obj bin/bzero.obj 	\
 bin/hypot.obj bin/cabs.obj bin/cosh.obj bin/fabs.obj bin/ffs.obj bin/fmod.obj bin/fexp.obj 	\
-bin/modf.obj bin/sincos.obj bin/sinh.obj bin/__expm1.obj bin/tan.obj bin/tanh.obj bin/mbstowcs.obj 	\
-bin/mbtowc.obj bin/wctomb.obj bin/wcstombs.obj bin/strtod.obj
+bin/modf.obj bin/sincos.obj bin/sinh.obj bin/__expm1.obj bin/tan.obj bin/tanh.obj
 
 LocaleObjs=bin/C-collate.obj bin/C-ctype.obj bin/C-numeric.obj bin/C-ctype_ct.obj bin/C-ctype_mb.obj 	\
 bin/C-monetary.obj bin/C-response.obj bin/C-time.obj bin/localeconv.obj bin/setlocale.obj
@@ -119,6 +120,23 @@ bin/wcstombs.obj: stdlib/wcstombs.c
 
 bin/strtod.obj: stdlib/strtod.c
 	$(CC) $(CFlags) -c stdlib/strtod.c -o bin/strtod.obj $(Include)
+
+bin/atof.obj: stdlib/atof.c
+	$(CC) $(CFlags) -c stdlib/atof.c -o bin/atof.obj $(Include)
+
+bin/abs.obj: stdlib/abs.c
+	$(CC) $(CFlags) -c stdlib/abs.c -o bin/abs.obj $(Include)
+
+bin/labs.obj: stdlib/labs.c
+	$(CC) $(CFlags) -c stdlib/labs.c -o bin/labs.obj $(Include)
+
+bin/msort.obj: stdlib/msort.c
+	$(CC) $(CFlags) -c stdlib/msort.c -o bin/msort.obj $(Include)
+
+bin/qsort.obj: stdlib/qsort.c
+	$(CC) $(CFlags) -c stdlib/qsort.c -o bin/qsort.obj $(Include)
+
+
 
 
 #==============================Math==============================

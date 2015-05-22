@@ -113,26 +113,6 @@ char * _strchr(const char * s, char c)
 	return *s == c ? s : NULL;
 }
 
-/*
-int atoi(const char * str)
-{
-	int i;
-	uint len = strlen(str);
-	for(i = 0; i < len; i++)
-		if(!(str[i] >= '0' && str[i] <= '9'))
-			break;
-	i--;
-	unsigned long n = 0;
-	unsigned long m = 1;
-	for(;i >= 0; i--)
-	{
-		n += m * (*(str + i) - '0');
-		m *= 10;
-	}
-	return n;
-}
-*/
-
 char * strstr(const char * s1, const char * s2)
 {
 	int n;
