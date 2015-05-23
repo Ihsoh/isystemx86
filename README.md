@@ -5,7 +5,7 @@ ISystem x86 is a multitasking and x86 based operating system, in development sin
 This repository contains the kernel, system applications, user applications and some libraries. nasm and gcc are required to build ISystem x86 if building environment is ubuntu 32-bit. nasm, gcc, ia32-libs and libc-dev-i386 are required if building environment is ubuntu 64-bit.
 
 ## Detail & Download ##
-[ihsoh.github.io](http://ihsoh.github.io/)
+<a href="http://ihsoh.github.io/" target="_blank">ihsoh.github.io</a>
 
 ## Kernel ##
 The ISystem x86 kernel provides multitasking, memory management, a tree-structured directory filesystem, a console, a simple GUI, and some device drivers. PS/2 mouse, PS/2 keyboard, ATA harddisk, VESA, serial were supported.
