@@ -57,6 +57,12 @@ WRITE_FILE	VA:/isystem/bins/ubasic apps/ubasic/bin/ubasic.bin
 MAKE_FILE	VA:/isystem/bins/ lua1
 WRITE_FILE	VA:/isystem/bins/lua1 apps/lua1/bin/lua1.bin
 
+#lua2
+MAKE_FILE	VA:/isystem/bins/ lua2
+WRITE_FILE	VA:/isystem/bins/lua2 apps/lua2/bin/lua2.bin
+MAKE_FILE	VA:/isystem/bins/ lua2c
+WRITE_FILE	VA:/isystem/bins/lua2c apps/lua2/bin/lua2c.bin
+
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd
 MAKE_FILE	VA:/isystem/wd/ fib.wd

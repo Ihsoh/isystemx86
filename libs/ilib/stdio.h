@@ -12,6 +12,8 @@
 #include "stdarg.h"
 #include "fs.h"
 
+extern int vsscanf(const char * buffer, const char * format, va_list va);
+extern int sscanf(char * buffer, const char * format, ...);
 extern int vsprintf_s(char * buffer, uint size, const char * format, va_list va);
 extern int sprintf_s(char * buffer, uint size, const char * format, ...);
 extern int sprintf(char * buffer, const char * format, ...);
@@ -24,17 +26,18 @@ extern int putchar(int ch);
 
 typedef struct _File
 {
-	ILFILE *	ilfptr;
-	int			ilmode;
-	char		mode[8];
-	int			old_char;
+	ILFILE *		ilfptr;
+	int				ilmode;
+	char			mode[8];
+	int				old_char;
+	struct _File * 	redirection;
 } File;
 
 #define	FILE 	File
 
-#define IFS1_STDIN		((FILE *)0x00000000)
-#define IFS1_STDOUT		((FILE *)0x00000001)
-#define IFS1_STDERR		((FILE *)0x00000002)
+#define IFS1_STDIN		((FILE *)0x00000010)
+#define IFS1_STDOUT		((FILE *)0x00000011)
+#define IFS1_STDERR		((FILE *)0x00000012)
 
 extern FILE * stdin;
 extern FILE * stdout;
@@ -53,5 +56,8 @@ extern int fputs(char * buf, FILE * fptr);
 extern int fprintf(FILE * fptr, const char * format, ...);
 #define	putc(c, fptr)	(fputc((c), (fptr)))
 extern int ungetc(int c, FILE * fptr);
+#define	getc(fptr)	(fgetc((fptr)))
+extern void perror(const char * s);
+extern FILE * freopen(const char * filename, const char * mode, FILE * fptr);
 
 #endif

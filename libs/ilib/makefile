@@ -26,12 +26,13 @@ bin/atan.obj bin/exp.obj bin/exp__E.obj bin/sqrt.obj bin/acos.obj bin/acosh.obj 
 bin/__isinf.obj bin/__logb.obj bin/ldexp.obj bin/__drem.obj bin/log.obj bin/log10.obj 	\
 bin/log1p.obj bin/log__L.obj bin/asin.obj bin/atanh.obj bin/bcopy.obj bin/bzero.obj 	\
 bin/hypot.obj bin/cabs.obj bin/cosh.obj bin/fabs.obj bin/ffs.obj bin/fmod.obj bin/fexp.obj 	\
-bin/modf.obj bin/sincos.obj bin/sinh.obj bin/__expm1.obj bin/tan.obj bin/tanh.obj
+bin/modf.obj bin/sincos.obj bin/sinh.obj bin/__expm1.obj bin/tan.obj bin/tanh.obj 	\
+bin/strncat.obj bin/strpbrk.obj bin/strspn.obj
 
 LocaleObjs=bin/C-collate.obj bin/C-ctype.obj bin/C-numeric.obj bin/C-ctype_ct.obj bin/C-ctype_mb.obj 	\
 bin/C-monetary.obj bin/C-response.obj bin/C-time.obj bin/localeconv.obj bin/setlocale.obj
 
-StringObjs=bin/strdup.obj
+StringObjs=bin/strdup.obj bin/strtok.obj
 
 
 AR=ar
@@ -270,6 +271,15 @@ bin/tan.obj: sysdeps/generic/tan.c
 bin/tanh.obj: sysdeps/generic/tanh.c
 	$(CC) $(CFlags) -c sysdeps/generic/tanh.c -o bin/tanh.obj $(Include)
 
+bin/strncat.obj: sysdeps/generic/strncat.c
+	$(CC) $(CFlags) -c sysdeps/generic/strncat.c -o bin/strncat.obj $(Include)
+
+bin/strpbrk.obj: sysdeps/generic/strpbrk.c
+	$(CC) $(CFlags) -c sysdeps/generic/strpbrk.c -o bin/strpbrk.obj $(Include)
+
+bin/strspn.obj: sysdeps/generic/strspn.c
+	$(CC) $(CFlags) -c sysdeps/generic/strspn.c -o bin/strspn.obj $(Include)
+
 
 #==============================Locale==============================
 
@@ -310,7 +320,8 @@ bin/setlocale.obj: locale/setlocale.c
 bin/strdup.obj: string/strdup.c
 	$(CC) $(CFlags) -c string/strdup.c -o bin/strdup.obj $(Include)
 
-
+bin/strtok.obj: string/strtok.c
+	$(CC) $(CFlags) -c string/strtok.c -o bin/strtok.obj $(Include)
 
 
 bin/mta32.obj: mta32.c

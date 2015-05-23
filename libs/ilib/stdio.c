@@ -17,6 +17,42 @@ extern FILE * stdin = IFS1_STDIN;
 extern FILE * stdout = IFS1_STDOUT;
 extern FILE * stderr = IFS1_STDERR;
 
+static
+FILE *
+_fptr(FILE * fptr)
+{
+	if(fptr == IFS1_STDIN || fptr == IFS1_STDOUT || fptr == IFS1_STDERR)
+		return fptr;
+	else if(fptr->redirection != NULL)
+		return fptr->redirection;
+	else
+		return fptr;
+}
+
+#define	FPTR(__fptr) (_fptr((__fptr)))
+
+int vsscanf(const char * buffer, const char * format, va_list va)
+{
+	assert(strcmp(buffer, "%f %c") == 0);
+	char * s = NULL;
+	double d = strtod(buffer, &s);
+	char c = *(s++);
+	double * dptr = va_arg(va, double *);
+	*dptr = d;
+	char * cptr = va_arg(va, char *);
+	*cptr = c;
+	return 2;
+}
+
+int sscanf(char * buffer, const char * format, ...)
+{
+	va_list va;
+	va_start(va, format);
+	int r = vsscanf(buffer, format, va);
+	va_end(va);
+	return r;
+}
+
 int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 {
 	char chr;
@@ -87,8 +123,11 @@ int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 						}
 						break;
 					}
+					case 'e':
+					case 'E':
 					case 'f':
 					case 'g':
+					case 'G':
 					{
 						double d = va_arg(va, double);
 						char temp[100];
@@ -102,6 +141,47 @@ int vsprintf_s(char * buffer, uint size, const char * format, va_list va)
 							buffer += d_s_len;
 							buf_len += d_s_len;
 						}
+						break;
+					}
+					case 'l':
+					{
+						chr = *(format++);
+						if(chr != '\0')
+							switch(chr)
+							{
+								case 'u':
+								{
+									unsigned int u = va_arg(va, unsigned int);
+									char temp[100];
+									char * u_s = uitos(temp, u);
+									uint u_s_len = strlen(u_s);
+									if(buf_len + u_s_len >= size)
+										end = 1;
+									else
+									{
+										strncpy(buffer, u_s, u_s_len);
+										buffer += u_s_len;
+										buf_len += u_s_len;
+									}
+									break;
+								}
+								case 'f':
+								{
+									double d = va_arg(va, double);
+									char temp[100];
+									char * d_s = dtos(temp, d);
+									uint d_s_len = strlen(d_s);
+									if(buf_len + d_s_len >= size)
+										end = 1;
+									else
+									{
+										strncpy(buffer, d_s, d_s_len);
+										buffer += d_s_len;
+										buf_len += d_s_len;
+									}
+									break;
+								}
+							}
 						break;
 					}
 					case 'x':
@@ -189,20 +269,19 @@ int printf(const char * format, ...)
 	va_start(va, format);
 	int r = vsprintf_s(buffer, 10 * 1024, format, va);
 	va_end(va);
-	il_print_str(buffer);
+	fprintf(stdout, buffer);
 	return r;
 }
 
 int puts(const char * string)
 {
-	il_print_str(string);
-	il_print_char('\n');
+	fprintf(stdout, "%s\n", string);
 	return strlen(string);
 }
 
 int putchar(int ch)
 {
-	il_print_char((char)ch);
+	fprintf(stdout, "%c", ch);
 	return ch;
 }
 
@@ -283,63 +362,83 @@ FILE * fopen(const char * path, const char * mode)
 		&& strchr(mode, 'a') == NULL)
 		ILWriteFile(ilfptr, "", 0);
 	fptr->old_char = EOF;
+	fptr->redirection = NULL;
 	return fptr;
 }
 
 int fclose(FILE * fptr)
 {
-	if(fptr == NULL)
-		return EOF;
-	if(ILCloseFile(fptr->ilfptr))
+	if(stdin == fptr)
 	{
-		free(fptr);
+		stdin = IFS1_STDIN;
+		return 0;
+	}
+	else if(stdout == fptr)
+	{
+		stdout = IFS1_STDOUT;
+		return 0;
+	}
+	else if(stderr == fptr)
+	{
+		stderr = IFS1_STDERR;
 		return 0;
 	}
 	else
-		return EOF;
+		if(ILCloseFile(fptr->ilfptr))
+		{
+			if(fptr->redirection != NULL)
+				if(!ILCloseFile(fptr->redirection->ilfptr))
+					return EOF;
+				else
+					free(fptr->redirection);
+			free(fptr);
+			return 0;
+		}
+		else
+			return EOF;
 }
 
 size_t fread(void * buffer, size_t size, size_t count, FILE * fptr)
 {
-	return ILReadFile(fptr->ilfptr, buffer, count * size);
+	return ILReadFile(FPTR(fptr)->ilfptr, buffer, count * size);
 }
 
 size_t fwrite(const void * buffer, size_t size, size_t count, FILE * fptr)
 {
-	if(fptr == stderr || fptr == stdout)
+	if(FPTR(fptr) == IFS1_STDERR || FPTR(fptr) == IFS1_STDOUT)
 	{
 		print_str(buffer);
 		return strlen(buffer);
 	}
 	else
 	{
-		uint old_size = ILGetFileLength(fptr->ilfptr);
-		if(ILAppendFile(fptr->ilfptr, buffer, count * size))
+		uint old_size = ILGetFileLength(FPTR(fptr)->ilfptr);
+		if(ILAppendFile(FPTR(fptr)->ilfptr, buffer, count * size))
 			return count * size;
 		else
-			return ILGetFileLength(fptr->ilfptr) - old_size;
+			return ILGetFileLength(FPTR(fptr)->ilfptr) - old_size;
 	}
 }
 
 int fgetc(FILE * fptr)
 {
-	if(fptr->old_char != EOF)
+	if(FPTR(fptr)->old_char != EOF)
 	{
-		char c = fptr->old_char;
-		fptr->old_char = EOF;
+		char c = FPTR(fptr)->old_char;
+		FPTR(fptr)->old_char = EOF;
 		return c;
 	}
-	if(ILIsEndOfFile(fptr->ilfptr))
+	if(ILIsEndOfFile(FPTR(fptr)->ilfptr))
 		return EOF;
 	uchar b;
-	if(ILReadFile(fptr->ilfptr, &b, 1) == 0)
+	if(ILReadFile(FPTR(fptr)->ilfptr, &b, 1) == 0)
 		return EOF;
 	return (int)b;
 }
 
 int fputc(char c, FILE * fptr)
 {
-	if(fwrite(&c, 1, 1, fptr) == 1)
+	if(fwrite(&c, 1, 1, FPTR(fptr)) == 1)
 		return c;
 	else
 		return EOF;
@@ -347,14 +446,14 @@ int fputc(char c, FILE * fptr)
 
 char * fgets(char * buf, int bufsize, FILE * fptr)
 {
-	if(ILIsEndOfFile(fptr->ilfptr))
+	if(ILIsEndOfFile(FPTR(fptr)->ilfptr))
 		return NULL;
 	char * s = buf;
 	int count = bufsize - 1;
 	int i;
 	for(i = 0; i < count; i++)
 	{
-		int c = fgetc(fptr);
+		int c = fgetc(FPTR(fptr));
 		if(c == EOF)
 			break;
 		*(s++) = c;
@@ -367,7 +466,7 @@ char * fgets(char * buf, int bufsize, FILE * fptr)
 
 int fputs(char * buf, FILE * fptr)
 {
-	if(fptr == stderr || fptr == stdout)
+	if(FPTR(fptr) == IFS1_STDERR || FPTR(fptr) == IFS1_STDOUT)
 	{
 		print_str(buf);
 		return 0;
@@ -375,7 +474,7 @@ int fputs(char * buf, FILE * fptr)
 	else
 	{
 		uint len = strlen(buf);
-		if(fwrite(buf, len, 1, fptr) != len)
+		if(fwrite(buf, len, 1, FPTR(fptr)) != len)
 			return EOF;
 		else
 			return 0;
@@ -389,13 +488,13 @@ int fprintf(FILE * fptr, const char * format, ...)
 	va_start(va, format);
 	int r = vsprintf_s(buffer, 10 * 1024, format, va);
 	va_end(va);
-	if(fptr == stderr || fptr == stdout)
+	if(FPTR(fptr) == IFS1_STDERR || FPTR(fptr) == IFS1_STDOUT)
 	{
 		print_str(buffer);
 		return r;
 	}
 	else
-		if(fputs(buffer, fptr) != EOF)
+		if(fputs(buffer, FPTR(fptr)) != EOF)
 			return r;
 		else
 			return EOF;
@@ -403,11 +502,32 @@ int fprintf(FILE * fptr, const char * format, ...)
 
 int ungetc(int c, FILE * fptr)
 {
-	if(fptr->old_char == EOF)
+	if(FPTR(fptr)->old_char == EOF)
 	{
-		fptr->old_char = c;
+		FPTR(fptr)->old_char = c;
 		return c;
 	}
 	else
 		return EOF;
+}
+
+void perror(const char * s)
+{
+	fprintf(stderr, s);
+}
+
+FILE * freopen(const char * filename, const char * mode, FILE * fptr)
+{
+	FILE * new_fptr = fopen(filename, mode);
+	if(new_fptr == NULL)
+		return NULL;
+	if(fptr == IFS1_STDIN)
+		stdin = new_fptr;
+	else if(fptr == IFS1_STDOUT)
+		stdout = new_fptr;
+	else if(fptr == IFS1_STDERR)
+		stderr = new_fptr;
+	else
+		fptr->redirection = new_fptr;
+	return new_fptr;
 }

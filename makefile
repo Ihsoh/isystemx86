@@ -30,6 +30,7 @@ $(Target):	bin	\
 	cd apps/WDVM-ISystemx86 && make
 	cd apps/ubasic && make
 	cd apps/lua1 && make
+	cd apps/lua2 && make
 
 	cd sys/pci && make
 
@@ -103,5 +104,6 @@ clean:
 	cd apps/WDVM-ISystemx86 && make clean
 	cd apps/ubasic && make clean
 	cd apps/lua1 && make clean
+	cd apps/lua2 && make clean
 
 	cd sys/pci && make clean
