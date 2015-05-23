@@ -103,7 +103,10 @@ static void do_compile(void)
 
 static void compile(char* filename)
 {
- if (lua_openfile(filename)==NULL)
+ char file[1024];
+ strcpy(file, filename);
+ ILFixPath(file, file);
+ if (lua_openfile(file)==NULL)
  {
   fprintf(stderr,"luac: cannot open ");
   perror(filename);
