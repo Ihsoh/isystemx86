@@ -113,7 +113,7 @@ char * _strchr(const char * s, char c)
 	return *s == c ? s : NULL;
 }
 
-char * strstr(const char * s1, const char * s2)
+char * _strstr(const char * s1, const char * s2)
 {
 	int n;
 	if (*s2)

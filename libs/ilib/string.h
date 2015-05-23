@@ -6,8 +6,6 @@
 #ifndef	_ILIB_STRING_H_
 #define	_ILIB_STRING_H_
 
-#include "string/string.h"
-
 //Standard:
 #define	strlen(str) (_strlen((str)))
 extern unsigned int _strlen(const char * str);
@@ -29,15 +27,10 @@ extern int _strcmp(const char * str1, const char * str2);
 extern int _strcmpn(const char * str1, const char * str2, unsigned int n);
 #define	memcmp(str1, str2, n)	(_memcmp((str1), (str2), (n)))
 extern int _memcmp(const unsigned char * str1, const unsigned char * str2, unsigned int n);
-
-extern char * _strchr(const char * s, char c);
 #define	strchr(s, c) (_strchr((s), (c)))
-
-extern int atoi(const char * str);
-
-extern char * strstr(const char * s1, const char * s2);
-
-#define	atof(str) (stod(str))
+extern char * _strchr(const char * s, char c);
+#define	strstr(s1, s2)	(_strstr((s1), (s2)))
+extern char * _strstr(const char * s1, const char * s2);
 
 //Extersion:
 extern char * uctohexs(char * str, unsigned char n);
@@ -61,5 +54,7 @@ extern void rtrim(char * str);
 extern void trim(char * str);
 extern int is_valid_uint(char * str);
 
-#endif
+#include "string/string.h"
+
+#endif	// #ifndef	_ILIB_STRING_H_
 
