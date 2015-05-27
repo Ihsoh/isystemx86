@@ -38,6 +38,42 @@ uint32
 inl(IN uint16 port);
 
 extern
+BOOL
+outsb(	IN uint16 port, 
+		IN uint8 * buffer,
+		IN uint32 count);
+
+extern
+BOOL
+insb(	IN uint16 port,
+		OUT uint8 * buffer,
+		IN uint32 count);
+
+extern
+BOOL
+outsw(	IN uint16 port, 
+		IN uint16 * buffer,
+		IN uint32 count);
+
+extern
+BOOL
+insw(	IN uint16 port,
+		OUT uint16 * buffer,
+		IN uint32 count);
+
+extern
+BOOL
+outsl(	IN uint16 port, 
+		IN uint32 * buffer,
+		IN uint32 count);
+
+extern
+BOOL
+insl(	IN uint16 port,
+		OUT uint32 * buffer,
+		IN uint32 count);
+
+extern
 void
 get_msr(IN uint32 msr,
 		OUT uint32 * lo,

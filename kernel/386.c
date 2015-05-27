@@ -155,6 +155,180 @@ inl(IN uint16 port)
 }
 
 /**
+	@Function:		outsb
+	@Access:		Public
+	@Description:
+		向指定端口输出指定数量的字节的数据。
+	@Parameters:
+		port, uint16, IN
+			端口号。
+		buffer, uint8 *, IN
+			数据缓冲区。
+		count, uint32, IN
+			字节的数量。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+BOOL
+outsb(	IN uint16 port, 
+		IN uint8 * buffer,
+		IN uint32 count)
+{
+	if(buffer == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < count; ui++)
+		outb(port, buffer[ui]);
+	return TRUE;
+}
+
+/**
+	@Function:		insb
+	@Access:		Public
+	@Description:
+		从指定端口读取指定数量的字节的数据。
+	@Parameters:
+		port, uint16, IN
+			端口号。
+		buffer, uint8 *, OUT
+			用于储存数据的缓冲区。
+		count, uint32, IN
+			字节的数量。
+	@Return:	
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+insb(	IN uint16 port,
+		OUT uint8 * buffer,
+		IN uint32 count)
+{
+	if(buffer == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < count; ui++)
+		buffer[ui] = inb(port);
+	return TRUE;
+}
+
+/**
+	@Function:		outsw
+	@Access:		Public
+	@Description:
+		向指定端口输出指定数量的字的数据。
+	@Parameters:
+		port, uint16, IN
+			端口号。
+		buffer, uint16 *, IN
+			数据缓冲区。
+		count, uint32, IN
+			字的数量。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+BOOL
+outsw(	IN uint16 port, 
+		IN uint16 * buffer,
+		IN uint32 count)
+{
+	if(buffer == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < count; ui++)
+		outw(port, buffer[ui]);
+	return TRUE;
+}
+
+/**
+	@Function:		insw
+	@Access:		Public
+	@Description:
+		从指定端口读取指定数量的字的数据。
+	@Parameters:
+		port, uint16, IN
+			端口号。
+		buffer, uint16 *, OUT
+			用于储存数据的缓冲区。
+		count, uint32, IN
+			字的数量。
+	@Return:	
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+insw(	IN uint16 port,
+		OUT uint16 * buffer,
+		IN uint32 count)
+{
+	if(buffer == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < count; ui++)
+		buffer[ui] = inw(port);
+	return TRUE;
+}
+
+/**
+	@Function:		outsl
+	@Access:		Public
+	@Description:
+		向指定端口输出指定数量的双字的数据。
+	@Parameters:
+		port, uint16, IN
+			端口号。
+		buffer, uint32 *, IN
+			数据缓冲区。
+		count, uint32, IN
+			双字的数量。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+BOOL
+outsl(	IN uint16 port, 
+		IN uint32 * buffer,
+		IN uint32 count)
+{
+	if(buffer == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < count; ui++)
+		outl(port, buffer[ui]);
+	return TRUE;
+}
+
+/**
+	@Function:		insl
+	@Access:		Public
+	@Description:
+		从指定端口读取指定数量的双字的数据。
+	@Parameters:
+		port, uint16, IN
+			端口号。
+		buffer, uint32 *, OUT
+			用于储存数据的缓冲区。
+		count, uint32, IN
+			双字的数量。
+	@Return:	
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+insl(	IN uint16 port,
+		OUT uint32 * buffer,
+		IN uint32 count)
+{
+	if(buffer == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < count; ui++)
+		buffer[ui] = inl(port);
+	return TRUE;
+}
+
+/**
 	@Function:		get_msr
 	@Access:		Public
 	@Description:
