@@ -161,7 +161,8 @@ dsl_hashtable_unset_all(IN OUT DSLHashTablePtr hashtable)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < DSLHASHTABLE_SIZE; ui++)
-		if(!dsl_lnklst_delete_all_object_node(hashtable->table[ui]))
+		if(	hashtable->table[ui] != NULL
+			&& !dsl_lnklst_delete_all_object_node(hashtable->table[ui]))
 			return FALSE;
 	return TRUE;
 }
@@ -173,6 +174,12 @@ dsl_hashtable_free(IN OUT DSLHashTablePtr hashtable)
 		return FALSE;
 	if(!dsl_hashtable_unset_all(hashtable))
 		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < DSLHASHTABLE_SIZE; ui++)
+		if(	hashtable->table[ui] != NULL
+			&& !dsl_lnklst_free(hashtable->table[ui]))
+				return FALSE;
+	dsl_free(hashtable);
 	return TRUE;
 }
 

@@ -5,6 +5,7 @@
 #include <dslib/hashtable.h>
 #include <dslib/list.h>
 #include <dslib/value.h>
+#include <dslib/linked_list.h>
 
 JSONLMalloc	jsonl_malloc	= NULL;
 JSONLCalloc	jsonl_calloc	= NULL;
@@ -786,4 +787,77 @@ JSONLRawPtr
 jsonl_parse_json(IN int8 * json_text)
 {
 	return jsonl_parse(json_text, NULL);
+}
+
+BOOL
+jsonl_free_json(IN JSONLRawPtr raw)
+{
+	if(raw == NULL)
+		return FALSE;
+	switch(raw->type)
+	{
+		case JSONL_TYPE_VALUE:
+			jsonl_free(JSONL_VALUE(raw));
+			jsonl_free(raw);
+			break;
+		case JSONL_TYPE_NULL:
+		case JSONL_TYPE_TRUE:
+		case JSONL_TYPE_FALSE:
+		case JSONL_TYPE_NUMBER:
+			jsonl_free(raw);
+			break;
+		case JSONL_TYPE_ARRAY:
+		{
+			JSONLArrayPtr array = (JSONLArrayPtr)raw;
+			int32 i;
+			int32 count = array->array->count;
+			for(i = 0; i < count; i++)
+			{
+				DSLValuePtr vptr = dsl_lst_get(array->array, i);
+				if(vptr == NULL)
+					return FALSE;
+				JSONLRawPtr rawvptr = (JSONLRawPtr)(vptr->value.object_value);
+				if(rawvptr == NULL)
+					return FALSE;
+				if(!jsonl_free_json(rawvptr))
+					return FALSE;
+				jsonl_free(vptr);
+			}
+			if(!dsl_lst_free(array->array))
+				return FALSE;
+			jsonl_free(array);
+			break;
+		}
+		case JSONL_TYPE_OBJECT:
+		{
+			JSONLObjectPtr obj = (JSONLObjectPtr)raw;
+			DSLLinkedListPtr keys_list = dsl_lnklst_new();
+			if(keys_list == NULL)
+				return FALSE;
+			if(!dsl_hashtable_keys_list(obj->obj, keys_list))
+				return FALSE;
+			DSLLinkedListNodePtr node = keys_list->head;
+			while(node != NULL)
+			{
+				CASCTEXT key = (CASCTEXT)(node->value.value.object_value);
+				DSLValuePtr vptr = NULL;
+				if(!dsl_hashtable_get_object(obj->obj, key, (object *)&vptr))
+					return FALSE;
+				JSONLRawPtr rawvptr = (JSONLRawPtr)(vptr->value.object_value);
+				if(!jsonl_free_json(rawvptr))
+					return FALSE;
+				jsonl_free(vptr);
+				node = node->next;
+			}
+			if(	!dsl_hashtable_free_keys_list_items(keys_list)
+				|| !dsl_lnklst_free(keys_list)
+				|| !dsl_hashtable_free(obj->obj))
+				return FALSE;
+			jsonl_free(obj);
+			break;
+		}
+		default:
+			return FALSE;
+	}
+	return TRUE;
 }

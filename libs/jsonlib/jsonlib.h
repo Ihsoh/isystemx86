@@ -132,4 +132,8 @@ extern
 JSONLRawPtr
 jsonl_parse_json(IN int8 * json_text);
 
+extern
+BOOL
+jsonl_free_json(IN JSONLRawPtr raw);
+
 #endif

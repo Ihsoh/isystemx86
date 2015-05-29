@@ -157,7 +157,9 @@ dsl_lnklst_delete_all_object_node(IN OUT DSLLinkedList * list)
 	if(list == NULL)
 		return FALSE;
 	while(list->head != NULL)
-		dsl_lnklst_delete_object_node(list, list->head);
+		if(!dsl_lnklst_delete_object_node(list, list->head))
+			return FALSE;
+	return TRUE;
 }
 
 BOOL
