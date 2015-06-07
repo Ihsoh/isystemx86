@@ -143,3 +143,10 @@ WRITE_FILE	VA:/isystem/test.bat isystem/test.bat
 #System help file
 MAKE_FILE	VA:/isystem/ help.txt
 WRITE_FILE	VA:/isystem/help.txt isystem/help.txt
+
+#Test applications directory
+MAKE_DIR	VA:/isystem/ test
+
+#Testing jsonlib application
+MAKE_FILE	VA:/isystem/test/ test_jsonlib
+WRITE_FILE	VA:/isystem/test/test_jsonlib test/test_jsonlib/bin/test_jsonlib.bin

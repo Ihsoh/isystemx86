@@ -65,7 +65,7 @@ jsonl_value_type(IN JSONLRawPtr raw)
 		return JSONL_VALUE_TYPE_BOOL;
 	else if(JSONL_TYPE(raw) == JSONL_TYPE_NULL)
 		return JSONL_VALUE_TYPE_NULL;
-	else if(JSONL_VALUE(raw)[0] == '"')
+	else if(JSONL_TYPE(raw) == JSONL_TYPE_VALUE)
 		return JSONL_VALUE_TYPE_STRING;
 	else if(JSONL_TYPE(raw) == JSONL_TYPE_NUMBER)
 		return JSONL_VALUE_TYPE_NUMBER;
@@ -172,22 +172,13 @@ jsonl_parse(IN int8 * json_text,
 				int32 len = 0;
 				if(*json_text == '"')
 				{
-					int8 * value = NULL;
+					int8 value[JSONL_MAX_VALUE_LEN + 1];
 					json_text++;
-					value = (int8 *)jsonl_malloc(JSONL_MAX_VALUE_LEN + 1);
-					if(value == NULL)
-					{
-						dsl_lst_delete_all_object_value(array->array);
-						dsl_lst_free(array->array);
-						jsonl_free(array);
-						return NULL;
-					}
 					*(value + len++) = '"';
 					while(*json_text != '"')
 					{
 						if(len >= JSONL_MAX_VALUE_LEN - 1 || *json_text == '\0')
 						{
-							jsonl_free(value);
 							dsl_lst_delete_all_object_value(array->array);
 							dsl_lst_free(array->array);
 							jsonl_free(array);
@@ -213,7 +204,6 @@ jsonl_parse(IN int8 * json_text,
 									*(value + len++) = '\v';
 									break;
 								default:
-									jsonl_free(value);
 									dsl_lst_delete_all_object_value(array->array);
 									dsl_lst_free(array->array);
 									jsonl_free(array);
@@ -230,15 +220,13 @@ jsonl_parse(IN int8 * json_text,
 					JSONLValuePtr jsonv = (JSONLValuePtr)jsonl_malloc(sizeof(JSONLValue));
 					if(jsonv == NULL)
 					{
-						jsonl_free(value);
 						dsl_lst_delete_all_object_value(array->array);
 						dsl_lst_free(array->array);
 						jsonl_free(array);
 						return NULL;
 					}
 					jsonv->type = JSONL_TYPE_VALUE;
-					jsonv->value.value.object_value = value;
-					jsonv->value.type = DSLVALUE_OBJECT;
+					jsonl_lib_memcpy(JSONL_VALUE(jsonv), value, JSONL_MAX_VALUE_LEN + 1);
 					raw_value = jsonv;
 				}
 				else if(*json_text == '[')
@@ -511,22 +499,13 @@ jsonl_parse(IN int8 * json_text,
 				int32 len = 0;
 				if(*json_text == '"')
 				{
-					int8 * value = NULL;
+					int8 value[JSONL_MAX_VALUE_LEN + 1];
 					json_text++;
-					value = (int8 *)jsonl_malloc(JSONL_MAX_VALUE_LEN + 1);
-					if(value == NULL)
-					{
-						dsl_hashtable_unset_all(obj->obj);
-						dsl_hashtable_free(obj->obj);
-						jsonl_free(obj);
-						return NULL;
-					}
 					*(value + len++) = '"';
 					while(*json_text != '"')
 					{
 						if(len >= JSONL_MAX_VALUE_LEN - 1 || *json_text == '\0')
 						{
-							jsonl_free(value);
 							dsl_hashtable_unset_all(obj->obj);
 							dsl_hashtable_free(obj->obj);
 							jsonl_free(obj);
@@ -552,7 +531,6 @@ jsonl_parse(IN int8 * json_text,
 									*(value + len++) = '\v';
 									break;
 								default:
-									jsonl_free(value);
 									dsl_hashtable_unset_all(obj->obj);
 									dsl_hashtable_free(obj->obj);
 									jsonl_free(obj);
@@ -569,15 +547,13 @@ jsonl_parse(IN int8 * json_text,
 					JSONLValuePtr jsonv = (JSONLValuePtr)jsonl_malloc(sizeof(JSONLValue));
 					if(jsonv == NULL)
 					{
-						jsonl_free(value);
 						dsl_hashtable_unset_all(obj->obj);
 						dsl_hashtable_free(obj->obj);
 						jsonl_free(obj);
 						return NULL;
 					}
 					jsonv->type = JSONL_TYPE_VALUE;
-					jsonv->value.value.object_value = value;
-					jsonv->value.type = DSLVALUE_OBJECT;
+					jsonl_lib_memcpy(JSONL_VALUE(jsonv), value, JSONL_MAX_VALUE_LEN + 1);
 					raw_value = jsonv;
 				}
 				else if(*json_text == '[')
@@ -797,9 +773,6 @@ jsonl_free_json(IN JSONLRawPtr raw)
 	switch(raw->type)
 	{
 		case JSONL_TYPE_VALUE:
-			jsonl_free(JSONL_VALUE(raw));
-			jsonl_free(raw);
-			break;
 		case JSONL_TYPE_NULL:
 		case JSONL_TYPE_TRUE:
 		case JSONL_TYPE_FALSE:

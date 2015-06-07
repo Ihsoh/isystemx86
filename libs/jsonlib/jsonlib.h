@@ -5,7 +5,6 @@
 
 #include <dslib/hashtable.h>
 #include <dslib/list.h>
-#include <dslib/value.h>
 
 #define	JSONL_TYPE_OBJECT		1
 #define	JSONL_TYPE_ARRAY		2
@@ -53,7 +52,7 @@ typedef struct _JSONLArray
 typedef struct _JSONLValue
 {
 	int32		type;
-	DSLValue	value;
+	ASCCHAR		value[JSONL_MAX_VALUE_LEN + 1];
 } JSONLValue, * JSONLValuePtr;
 
 typedef struct _JSONLNull
@@ -84,7 +83,7 @@ typedef struct _JSONLRaw
 
 #define	JSONL_TYPE(ptr) (((JSONLRawPtr)ptr)->type)
 
-#define	JSONL_VALUE(ptr)	((int8 *)(((JSONLValuePtr)ptr)->value.value.object_value))
+#define	JSONL_VALUE(ptr)	(((JSONLValuePtr)(ptr))->value)
 #define	JSONL_ARRAY(ptr)	((JSONLArrayPtr)(ptr))
 #define	JSONL_OBJECT(ptr)	((JSONLObjectPtr)(ptr))
 

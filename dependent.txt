@@ -12,5 +12,8 @@ isystemx86/apps/ubasic:
 	该程序为BASIC解释器。
 	从https://github.com/adamdunkels/ubasic移植到ISystem x86。
 
-isystemx86/apps/lua:
+isystemx86/apps/lua1:
 	该程序为Lua1.0解释器。
+
+isystemx86/apps/lua2:
+	该程序为Lua2.5.1解释器。
