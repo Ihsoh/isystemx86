@@ -33,7 +33,7 @@ _fptr(FILE * fptr)
 
 int vsscanf(const char * buffer, const char * format, va_list va)
 {
-	assert(strcmp(buffer, "%f %c") == 0);
+	assert(strcmp(buffer, "%f %c") == 0);	// for lua2!!!!!!
 	char * s = NULL;
 	double d = strtod(buffer, &s);
 	char c = *(s++);

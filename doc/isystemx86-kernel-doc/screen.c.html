@@ -205,284 +205,6 @@
 	</div>
 </div>
 <div>
-	<a id="property_to_real_color" name="property_to_real_color" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Private</div>
-		<div style="float:left; margin-left:20px;">property_to_real_color</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				把属性颜色转换为真彩色。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		p</span>,
-	<span style="color:#428cc7; font-weight:blod;"> uint8</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			属性颜色。
-</p>
-</div>
-
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;">		uint32</span>
-		<p style="padding-left: 40px;">			真彩色。
-</p>
-	</div>
-</div>
-<div>
-	<a id="new_window" name="new_window" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Private</div>
-		<div style="float:left; margin-left:20px;">new_window</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				新建窗体。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;">		struct Window *</span>
-		<p style="padding-left: 40px;">			指向窗体结构体的指针。
-</p>
-	</div>
-</div>
-<div>
-	<a id="free_window" name="free_window" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Private</div>
-		<div style="float:left; margin-left:20px;">free_window</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				释放窗体。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		window</span>,
-	<span style="color:#428cc7; font-weight:blod;"> struct Window *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
-	<p style="padding-left: 40px;">			指向窗体结构体的指针。
-</p>
-</div>
-
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
-		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
-</p>
-	</div>
-</div>
-<div>
-	<a id="switch_window" name="switch_window" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Public</div>
-		<div style="float:left; margin-left:20px;">switch_window</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				切换窗体。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;"></span>
-		<p style="padding-left: 40px;"></p>
-	</div>
-</div>
-<div>
-	<a id="create_window" name="create_window" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Public</div>
-		<div style="float:left; margin-left:20px;">create_window</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				创建窗体。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		width</span>,
-	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			宽度。
-</p>
-</div>
-<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		height</span>,
-	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			高度。
-</p>
-</div>
-<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		bgcolor</span>,
-	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			窗体背景颜色。
-</p>
-</div>
-<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		title</span>,
-	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			标题。
-</p>
-</div>
-<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		event</span>,
-	<span style="color:#428cc7; font-weight:blod;"> WindowEvent</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			窗体事件处理函数。
-</p>
-</div>
-
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;">		struct Window *</span>
-		<p style="padding-left: 40px;">			指向窗体结构体。如果创建失败则返回 NULL。
-</p>
-	</div>
-</div>
-<div>
-	<a id="destroy_window" name="destroy_window" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Public</div>
-		<div style="float:left; margin-left:20px;">destroy_window</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				销毁窗体。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		<div style="padding-left: 40px;">
-	<span style="color:#b55539; font-weight:blod;">		window</span>,
-	<span style="color:#428cc7; font-weight:blod;"> struct Window *</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
-	<p style="padding-left: 40px;">			指向窗体结构体的指针。
-</p>
-</div>
-
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
-		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
-</p>
-	</div>
-</div>
-<div>
-	<a id="get_top_window" name="get_top_window" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Public</div>
-		<div style="float:left; margin-left:20px;">get_top_window</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				获取顶层窗体的结构体的指针。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;">		struct Window *</span>
-		<p style="padding-left: 40px;">			顶层窗体的结构体的指针。
-</p>
-	</div>
-</div>
-<div>
-	<a id="flush_screen" name="flush_screen" />
-	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
-		<div style="float:left; color:blue;">		Public</div>
-		<div style="float:left; margin-left:20px;">flush_screen</div>
-		<br style="clear:both;" />
-	</h3>
-
-	<h4>函数描述</h4>
-	<hr />
-	<p style="padding-left:40px;">
-				刷新屏幕。<br />
-	</p>
-
-	<h4>参数描述</h4>
-	<hr />
-	<div>
-		
-	</div>
-
-	<h4>返回值描述</h4>
-	<hr />
-	<div style="padding-left: 40px;">
-		<span style="color:#428cc7; font-weight:blod;"></span>
-		<p style="padding-left: 40px;"></p>
-	</div>
-</div>
-<div>
 	<a id="lock_cursor" name="lock_cursor" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Public</div>
@@ -1208,6 +930,318 @@
 </p>
 </div>
 
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="property_to_real_color" name="property_to_real_color" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">property_to_real_color</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				把属性颜色转换为真彩色。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		p</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			属性颜色。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		uint32</span>
+		<p style="padding-left: 40px;">			真彩色。
+</p>
+	</div>
+</div>
+<div>
+	<a id="new_window" name="new_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">new_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				新建窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		struct Window *</span>
+		<p style="padding-left: 40px;">			指向窗体结构体的指针。
+</p>
+	</div>
+</div>
+<div>
+	<a id="free_window" name="free_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">free_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				释放窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		window</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct Window *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向窗体结构体的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="_switch_window" name="_switch_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">_switch_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				切换窗体。<br />		直到切换到一个非隐藏，非关闭的窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		top</span>,
+	<span style="color:#428cc7; font-weight:blod;"> WindowPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			当前最顶层的窗体的实例。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="switch_window" name="switch_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">switch_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				切换窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="create_window" name="create_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">create_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				创建窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		width</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			宽度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		height</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			高度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		bgcolor</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体背景颜色。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		title</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			标题。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		event</span>,
+	<span style="color:#428cc7; font-weight:blod;"> WindowEvent</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体事件处理函数。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		struct Window *</span>
+		<p style="padding-left: 40px;">			指向窗体结构体。如果创建失败则返回 NULL。
+</p>
+	</div>
+</div>
+<div>
+	<a id="destroy_window" name="destroy_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">destroy_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				销毁窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		window</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct Window *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向窗体结构体的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="get_top_window" name="get_top_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">get_top_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取顶层窗体的结构体的指针。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		struct Window *</span>
+		<p style="padding-left: 40px;">			顶层窗体的结构体的指针。
+</p>
+	</div>
+</div>
+<div>
+	<a id="flush_screen" name="flush_screen" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">flush_screen</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				刷新屏幕。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
 	</div>
 
 	<h4>返回值描述</h4>

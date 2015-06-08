@@ -6,6 +6,10 @@
 #define	FUNC_GET_DEV			3
 #define	FUNC_WRITE_TO_FILE		4
 
+static
+void
+delay(void);
+
 int main(int argc, char * argv[])
 {
 	uint mqid = il_create_mqueue("System-PCI");
@@ -13,6 +17,7 @@ int main(int argc, char * argv[])
 		return -1;
 	MQueueMessage message;
 	while(1)
+	{
 		if(il_pop_message_s(mqid, &message))
 			switch(message.message)
 			{
@@ -44,5 +49,16 @@ int main(int argc, char * argv[])
 				default:
 					break;
 			}
+		delay();
+	}
 	return 0;
+}
+
+static
+void
+delay(void)
+{
+	uint32 ui;
+	for(ui = 0; ui < 0x0fffffff; ui++)
+		asm volatile("pause");
 }

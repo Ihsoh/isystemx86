@@ -31,7 +31,7 @@
 
 #define	WINDOW_KEY_BUFFER_SIZE	16
 
-struct WindowEventParams
+typedef struct WindowEventParams
 {
 	int32					event_type;
 	int32					mouse_x;
@@ -39,11 +39,11 @@ struct WindowEventParams
 	int32					mouse_button;
 	uint8					key;
 	struct CommonImage *	screen;
-};
+} * WindowEventParamsPtr;
 
 typedef void (* WindowEvent)(struct Window * window, struct WindowEventParams * params);
 
-struct Window
+typedef struct Window
 {
 	uint32				id;
 	int32				x;
@@ -62,7 +62,7 @@ struct Window
 	struct CommonImage	image;
 	uint8				key_buffer[WINDOW_KEY_BUFFER_SIZE];
 	uint32				key_count;
-};
+} * WindowPtr;
 
 extern
 BOOL

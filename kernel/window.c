@@ -123,23 +123,59 @@ render_window(	IN struct Window * window,
 	//关闭按钮
 	if(window->has_close_button)
 		if(window->over_close_button)
-			draw_common_image(image, &close_button_s, window->width - CLOSE_BUTTON_WIDTH, 0, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
+			draw_common_image(	image, 
+								&close_button_s, 
+								window->width - CLOSE_BUTTON_WIDTH, 
+								0, 
+								CLOSE_BUTTON_WIDTH, 
+								CLOSE_BUTTON_HEIGHT);
 		else		
-			draw_common_image(image, &close_button_ns, window->width - CLOSE_BUTTON_WIDTH, 0, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
+			draw_common_image(	image, 
+								&close_button_ns, 
+								window->width - CLOSE_BUTTON_WIDTH, 
+								0, 
+								CLOSE_BUTTON_WIDTH, 
+								CLOSE_BUTTON_HEIGHT);
 	else
-		draw_common_image(image, &close_button_ns, window->width - CLOSE_BUTTON_WIDTH, 0, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
+		draw_common_image(	image, 
+							&close_button_ns, 
+							window->width - CLOSE_BUTTON_WIDTH,
+							0, 
+							CLOSE_BUTTON_WIDTH,
+							CLOSE_BUTTON_HEIGHT);
 
 	//隐藏按钮
 	if(window->has_hidden_button)
 		if(window->over_hidden_button)
-			draw_common_image(image, &hidden_button_s, window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 0, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT);
+			draw_common_image(	image,
+								&hidden_button_s,
+								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+								0,
+								HIDDEN_BUTTON_WIDTH,
+								HIDDEN_BUTTON_HEIGHT);
 		else	
-			draw_common_image(image, &hidden_button_ns, window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 0, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT);
+			draw_common_image(	image,
+								&hidden_button_ns,
+								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+								0,
+								HIDDEN_BUTTON_WIDTH,
+								HIDDEN_BUTTON_HEIGHT);
 	else
-		draw_common_image(image, &hidden_button_ns, window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 0, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT);
+		draw_common_image(	image,
+							&hidden_button_ns,
+							window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+							0,
+							HIDDEN_BUTTON_WIDTH,
+							HIDDEN_BUTTON_HEIGHT);
 
 	//画标题
-	text_common_image(image, 10, TITLE_BAR_HEIGHT / 2 - ENFONT_HEIGHT / 2, get_enfont_ptr(), window->title, (window->width - 10 - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH) / ENFONT_WIDTH, 0xff000000);
+	text_common_image(	image,
+						10,
+						TITLE_BAR_HEIGHT / 2 - ENFONT_HEIGHT / 2,
+						get_enfont_ptr(),
+						window->title,
+						(window->width - 10 - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH) / ENFONT_WIDTH,
+						0xff000000);
 	
 	/*rect_common_image(&window->workspace, 0, 0, window->width, window->height, window->bgcolor);*/
 	

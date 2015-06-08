@@ -424,14 +424,22 @@ tran_key(IN uint8 scan_code)
 				keyup(KEY_EQUAL);
 				break;
 			case KEY_TAB | KEY_KEYDOWN:
-				add_key('\t');
+				if(!vesa_is_valid())
+					add_key('\t');
+				else
+					// ALT + TAB是切换窗体的热键。
+					// 如果ALT键被按下，TAB将不会被添加到按键列表中。
+					if(!alt)
+						add_key('\t');
+
 				keydown(KEY_TAB);
 				break;
 			case KEY_TAB | KEY_KEYUP:
-				if(alt)
-					switch_window();	// ALT + TAB切换当前窗体。
-				else
-					keyup(KEY_TAB);
+				// ALT + TAB切换当前窗体。
+				if(vesa_is_valid() && alt)
+					switch_window();
+				
+				keyup(KEY_TAB);
 				break;
 			case KEY_BACKSPACE | KEY_KEYDOWN:
 				add_key(8);

@@ -45,6 +45,18 @@ static int32 flush_cbuffer = 1;
 
 struct CommonImage * target_screen = NULL;
 
+/*
+	============================== 窗体 ==============================
+*/
+#define	TCOLOR				0xffffffff
+#define	MAX_WINDOW_COUNT	32
+
+static struct Window * windows[MAX_WINDOW_COUNT];
+static uint32 window_count = 0;
+static BOOL move_window = 0;
+static BOOL mouse_left_button_down = 0;
+static int32 old_mouse_x = 0, old_mouse_y = 0;
+
 /**
 	@Function:		flush_char_buffer
 	@Access:		Public
@@ -135,448 +147,6 @@ uint8
 get_cursor_color(void)
 {
 	return cursor_color;
-}
-
-/**
-	@Function:		property_to_real_color
-	@Access:		Private
-	@Description:
-		把属性颜色转换为真彩色。
-	@Parameters:
-		p, uint8, IN
-			属性颜色。
-	@Return:
-		uint32
-			真彩色。		
-*/
-static
-uint32
-property_to_real_color(IN uint8 p)
-{
-	switch(p)
-	{
-		case CC_BLACK:
-			return VESA_RGB(0x00, 0x00, 0x00);
-		case CC_BLUE:
-			return VESA_RGB(0x00, 0x00, 0xFF);
-		case CC_GREEN:
-			return VESA_RGB(0x00, 0xFF, 0x00);
-		case CC_DARKBLUE:
-			return VESA_RGB(0x00, 0x00, 0x99);
-		case CC_RED:
-			return VESA_RGB(0xFF, 0x00, 0x00);
-		case CC_MAGENTA:
-			return VESA_RGB(0xFF, 0x00, 0xFF);
-		case CC_BROWN:
-			return VESA_RGB(0x96, 0x4B, 0x00);
-		case CC_GRAYWHITE:
-			return VESA_RGB(0xAA, 0xAA, 0xAA);
-		case CC_LIGHTGRAY:
-			return VESA_RGB(0xEE, 0xEE, 0xEE);
-		case CC_LIGHTBLUE:
-			return VESA_RGB(0x00, 0x80, 0xFF);
-		case CC_LIGHTGREEN:
-			return VESA_RGB(0xE0, 0xFF, 0xFF);
-		case CC_LIGHTCYAN:
-			return VESA_RGB(0x00, 0xFF, 0xFF);
-		case CC_LIGHTRED:
-			return VESA_RGB(0xFE, 0x00, 0x7F);
-		case CC_LIGHTMAGENTA:
-			return VESA_RGB(0xFF, 0xC0, 0xCB);
-		case CC_YELLOW:
-			return VESA_RGB(0xFF, 0xFF, 0x00);
-		case CC_WHITE:
-			return VESA_RGB(0xFF, 0xFF, 0xFF);
-	}
-}
-
-#define	TCOLOR				0xffffffff
-#define	MAX_WINDOW_COUNT	32
-
-static struct Window * windows[MAX_WINDOW_COUNT];
-static uint32 window_count = 0;
-static BOOL move_window = 0;
-static BOOL mouse_left_button_down = 0;
-static int32 old_mouse_x = 0, old_mouse_y = 0;
-
-/**
-	@Function:		new_window
-	@Access:		Private
-	@Description:
-		新建窗体。
-	@Parameters:
-	@Return:
-		struct Window * 
-			指向窗体结构体的指针。		
-*/
-static 
-struct Window * 
-new_window(void)
-{
-	uint32 ui;
-	for(ui = 0; ui < MAX_WINDOW_COUNT; ui++)
-		if(windows[ui]->id == 0)
-		{
-			windows[ui]->id = windows[ui];
-			window_count++;
-			return windows[ui];
-		}
-	return NULL;
-}
-
-/**
-	@Function:		free_window
-	@Access:		Private
-	@Description:
-		释放窗体。
-	@Parameters:
-		window, struct Window *, OUT
-			指向窗体结构体的指针。
-	@Return:
-		BOOL
-			返回TRUE则成功，否则失败。		
-*/
-static
-BOOL
-free_window(OUT struct Window * window)
-{
-	if(window == NULL)
-		return FALSE;
-	uint32 ui, ui1;
-	for(ui = 0; ui < MAX_WINDOW_COUNT; ui++)
-		if(windows[ui] == window)
-		{
-			for(ui1 = ui; ui1 < MAX_WINDOW_COUNT - 1; ui1++)
-				windows[ui1] = windows[ui1 + 1];
-			windows[MAX_WINDOW_COUNT - 1] = window;
-			window->id = NULL;
-			window_count--;
-			return TRUE;
-		}
-	return FALSE;
-}
-
-/**
-	@Function:		switch_window
-	@Access:		Public
-	@Description:
-		切换窗体。
-	@Parameters:
-	@Return:
-*/
-void
-switch_window(void)
-{
-	if(window_count < 2)
-		return;
-	uint32 ui;
-	struct Window * temp = windows[0];
-	for(ui = 0; ui < window_count - 1; ui++)
-		windows[ui] = windows[ui + 1];
-	windows[window_count - 1] = temp;
-}
-
-/**
-	@Function:		create_window
-	@Access:		Public
-	@Description:
-		创建窗体。
-	@Parameters:
-		width, uint32, IN
-			宽度。
-		height, uint32, IN
-			高度。
-		bgcolor, uint32, IN
-			窗体背景颜色。
-		title, int8 *, IN
-			标题。
-		event, WindowEvent, IN
-			窗体事件处理函数。
-	@Return:
-		struct Window *
-			指向窗体结构体。如果创建失败则返回 NULL。	
-*/
-struct Window *
-create_window(	IN uint32		width,
-				IN uint32		height,
-				IN uint32		bgcolor,
-				IN uint32		style,
-				IN int8 *		title,
-				IN WindowEvent	event)
-{
-	struct Window * window = new_window();
-	window->x = 0;
-	window->y = 0;
-	window->width = width;
-	window->height = height;
-	window->bgcolor = bgcolor;
-	window->state = WINDOW_STATE_HIDDEN;
-	window->over_close_button = 0;
-	window->over_hidden_button = 0;
-	window->has_close_button = style & WINDOW_STYLE_CLOSE_BUTTON;
-	window->has_hidden_button = style & WINDOW_STYLE_HIDDEN_BUTTON;
-	strcpy(window->title, title);
-	window->event = event;
-	if(!new_empty_image0(&window->workspace, width, height))
-	{
-		free_window(window);
-		return NULL;
-	}	
-	if(!new_empty_image0(&window->image, width, TITLE_BAR_HEIGHT + height))
-	{
-		destroy_common_image(&window->workspace);
-		free_window(window);
-		return NULL;
-	}
-	window->key_count = 0;
-	return window;
-}
-
-/**
-	@Function:		destroy_window
-	@Access:		Public
-	@Description:
-		销毁窗体。
-	@Parameters:
-		window, struct Window *, IN
-			指向窗体结构体的指针。
-	@Return:
-		BOOL
-			返回TRUE则成功，否则失败。		
-*/
-BOOL
-destroy_window(IN struct Window * window)
-{
-	if(window == NULL)
-		return FALSE;
-	free_window(window);
-	disable_memory_lock();
-	destroy_common_image(&window->workspace);
-	destroy_common_image(&window->image);
-	enable_memory_lock();	
-	return TRUE;
-}
-
-/**
-	@Function:		get_top_window
-	@Access:		Public
-	@Description:
-		获取顶层窗体的结构体的指针。
-	@Parameters:
-	@Return:
-		struct Window *
-			顶层窗体的结构体的指针。		
-*/
-struct Window *
-get_top_window(void)
-{
-	if(window_count == 0)
-		return NULL;
-	else
-		return windows[0];
-}
-
-/**
-	@Function:		flush_screen
-	@Access:		Public
-	@Description:
-		刷新屏幕。
-	@Parameters:
-	@Return:
-*/
-void
-flush_screen(void)
-{
-	uint32 x, y;
-	uint32 ui;
-	uint32 * screen_buffer_data_ptr = screen_buffer.data;
-	uint32 * console_screen_buffer_data_ptr = console_screen_buffer.data;
-
-	if(target_screen != NULL)
-		rect_common_image(target_screen, 0, 0, screen_width, screen_height, 0xff000000);
-	else	
-		rect_common_image(&screen_buffer, 0, 0, screen_width, screen_height, 0xffaaaaaa);
-		//draw_common_image(&screen_buffer, &bg_image, 0, 0, bg_image.width, bg_image.height);
-
-	//绘制控制台
-	if(flush_cbuffer)
-		for(y = 0; y < ROW; y++)
-			for(x = 0; x < COLUMN; x++)
-			{
-				uint8 * offset = screen_char_buffer + (y * COLUMN + x) * 2;
-				int8 chr = *offset;
-				uint8 p = *(offset + 1);
-				uint32 color = property_to_real_color(p & 0x0F);
-				uint32 bg_color = property_to_real_color((p >> 4) & 0x0F);
-				rect_common_image(	&console_screen_buffer, 
-									x * ENFONT_WIDTH, 
-									y * (ENFONT_HEIGHT + CURSOR_HEIGHT), 
-									ENFONT_WIDTH, 
-									ENFONT_HEIGHT + CURSOR_HEIGHT, 
-									bg_color);
-				uint8 * font = get_enfont(chr);
-				if(font != NULL)
-				{
-					uint32 font_x, font_y;
-					for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
-					{
-						uint8 row = font[font_y];
-						for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
-							if(((row >> font_x) & 0x01))
-							{
-								uint32 index = 	y * console_screen_width * (ENFONT_HEIGHT + CURSOR_HEIGHT) 
-												+ font_y * console_screen_width
-												+ x * ENFONT_WIDTH 
-												+ font_x;
-								console_screen_buffer_data_ptr[index] = color;
-							}
-					}
-				}
-			}
-	uint32 cursor_real_color = property_to_real_color(cursor_color);
-	uint32 c_x = cursor_x, c_y = cursor_y;
-	for(x = 0; x < ENFONT_WIDTH; x++)
-		for(y = 0; y < CURSOR_HEIGHT; y++)
-		{
-			uint32 index = 	c_y * (ENFONT_HEIGHT + CURSOR_HEIGHT) * console_screen_width
-							+ ENFONT_HEIGHT * console_screen_width
-							+ y * console_screen_width 
-							+ (uint32)c_x * ENFONT_WIDTH
-							+ x;
-			console_screen_buffer_data_ptr[index] = cursor_real_color;
-		}
-
-	//绘制窗体
-	int mouse_x, mouse_y;
-	get_mouse_position(&mouse_x, &mouse_y);
-	if(window_count != 0)
-	{
-		struct Window * top_window = windows[0];
-		if(point_in_rect(	mouse_x, mouse_y, 
-							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH),
-							top_window->y, 
-							CLOSE_BUTTON_WIDTH, 
-							CLOSE_BUTTON_HEIGHT))
-			top_window->over_close_button = 1;
-		else
-			top_window->over_close_button = 0;
-		if(point_in_rect(	mouse_x, mouse_y, 
-							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH),
-							top_window->y, 
-							HIDDEN_BUTTON_WIDTH, 
-							HIDDEN_BUTTON_HEIGHT))
-			top_window->over_hidden_button = 1;
-		else
-			top_window->over_hidden_button = 0;
-	}
-	mouse_left_button_down = is_mouse_left_button_down();
-	if(mouse_left_button_down)
-	{
-		if(window_count != 0)
-		{
-			struct Window * top_window = windows[0];
-			if(!move_window)
-				if(	top_window->has_close_button
-					&& point_in_rect(	mouse_x, 
-										mouse_y, 
-										top_window->x + top_window->width - CLOSE_BUTTON_WIDTH, 
-										top_window->y, 
-										CLOSE_BUTTON_WIDTH, 
-										CLOSE_BUTTON_HEIGHT))
-				{
-					destroy_window(top_window);
-					return;
-				}
-				else if(top_window->has_hidden_button
-						&& point_in_rect(	mouse_x, 
-											mouse_y, 
-											top_window->x + top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 
-											top_window->y, 
-											CLOSE_BUTTON_WIDTH, 
-											CLOSE_BUTTON_HEIGHT))
-				{
-					top_window->state = WINDOW_STATE_HIDDEN;
-					for(ui = 0; ui < window_count - 1; ui++)
-						windows[ui] = windows[ui + 1];
-					windows[window_count - 1] = top_window;
-				}
-				else if(point_in_rect(	mouse_x, 
-										mouse_y, 
-										top_window->x, 
-										top_window->y, 
-										top_window->width, 
-										TITLE_BAR_HEIGHT))
-				{
-					old_mouse_x = mouse_x;
-					old_mouse_y = mouse_y;
-					move_window = TRUE;
-				}				
-				else
-					for(ui = 1; ui < window_count; ui++)
-					{
-						struct Window * window = windows[ui];
-						if(point_in_rect(	mouse_x, 
-											mouse_y, 
-											window->x, 
-											window->y, 
-											window->width, 
-											TITLE_BAR_HEIGHT))
-						{
-							windows[ui] = windows[0];
-							windows[0] = window;
-						}
-					}
-		}
-	}
-	else if(move_window)
-		move_window = FALSE;
-	if(move_window)
-	{
-		int offset_x = mouse_x - old_mouse_x;
-		int offset_y = mouse_y - old_mouse_y;
-		struct Window * top_window = windows[0];
-		top_window->x += offset_x;
-		top_window->y += offset_y;
-		old_mouse_x = mouse_x;
-		old_mouse_y = mouse_y;
-	}
-	int32 i;
-	for(i = window_count - 1; i >= 0; i--)
-	{
-		struct Window * window = windows[i];
-		if(window->state == WINDOW_STATE_HIDDEN)
-			continue;
-		if(window->state == WINDOW_STATE_CLOSED)
-			continue;
-		if(render_window(window, &window->image, i == 0 ? TRUE : FALSE))
-			draw_common_image(	&screen_buffer, 
-								&window->image, 
-								window->x, 
-								window->y, 
-								window->image.width, 
-								window->image.height);
-	}
-	draw_common_image_t(&screen_buffer, 
-						&pointer_image, 
-						mouse_x, 
-						mouse_y, 
-						pointer_image.width, 
-						pointer_image.height, 
-						TCOLOR);
-
-	if(target_screen == NULL)	
-		vesa_draw_image(0, 
-						0, 
-						screen_width, 
-						screen_height, 
-						screen_buffer.data);
-	else
-		draw_common_image(	target_screen, 
-							&screen_buffer, 
-							0, 
-							0, 
-							screen_width, 
-							screen_height);
 }
 
 /**
@@ -1204,4 +774,464 @@ void
 set_target_screen(IN struct CommonImage * ts)
 {
 	target_screen = ts;
+}
+
+/*
+	============================== 窗体 ==============================
+*/
+
+/**
+	@Function:		property_to_real_color
+	@Access:		Private
+	@Description:
+		把属性颜色转换为真彩色。
+	@Parameters:
+		p, uint8, IN
+			属性颜色。
+	@Return:
+		uint32
+			真彩色。		
+*/
+static
+uint32
+property_to_real_color(IN uint8 p)
+{
+	switch(p)
+	{
+		case CC_BLACK:
+			return VESA_RGB(0x00, 0x00, 0x00);
+		case CC_BLUE:
+			return VESA_RGB(0x00, 0x00, 0xFF);
+		case CC_GREEN:
+			return VESA_RGB(0x00, 0xFF, 0x00);
+		case CC_DARKBLUE:
+			return VESA_RGB(0x00, 0x00, 0x99);
+		case CC_RED:
+			return VESA_RGB(0xFF, 0x00, 0x00);
+		case CC_MAGENTA:
+			return VESA_RGB(0xFF, 0x00, 0xFF);
+		case CC_BROWN:
+			return VESA_RGB(0x96, 0x4B, 0x00);
+		case CC_GRAYWHITE:
+			return VESA_RGB(0xAA, 0xAA, 0xAA);
+		case CC_LIGHTGRAY:
+			return VESA_RGB(0xEE, 0xEE, 0xEE);
+		case CC_LIGHTBLUE:
+			return VESA_RGB(0x00, 0x80, 0xFF);
+		case CC_LIGHTGREEN:
+			return VESA_RGB(0xE0, 0xFF, 0xFF);
+		case CC_LIGHTCYAN:
+			return VESA_RGB(0x00, 0xFF, 0xFF);
+		case CC_LIGHTRED:
+			return VESA_RGB(0xFE, 0x00, 0x7F);
+		case CC_LIGHTMAGENTA:
+			return VESA_RGB(0xFF, 0xC0, 0xCB);
+		case CC_YELLOW:
+			return VESA_RGB(0xFF, 0xFF, 0x00);
+		case CC_WHITE:
+			return VESA_RGB(0xFF, 0xFF, 0xFF);
+	}
+}
+
+/**
+	@Function:		new_window
+	@Access:		Private
+	@Description:
+		新建窗体。
+	@Parameters:
+	@Return:
+		struct Window * 
+			指向窗体结构体的指针。		
+*/
+static 
+struct Window * 
+new_window(void)
+{
+	uint32 ui;
+	for(ui = 0; ui < MAX_WINDOW_COUNT; ui++)
+		if(windows[ui]->id == 0)
+		{
+			windows[ui]->id = windows[ui];
+			window_count++;
+			return windows[ui];
+		}
+	return NULL;
+}
+
+/**
+	@Function:		free_window
+	@Access:		Private
+	@Description:
+		释放窗体。
+	@Parameters:
+		window, struct Window *, OUT
+			指向窗体结构体的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+static
+BOOL
+free_window(OUT struct Window * window)
+{
+	if(window == NULL)
+		return FALSE;
+	uint32 ui, ui1;
+	for(ui = 0; ui < MAX_WINDOW_COUNT; ui++)
+		if(windows[ui] == window)
+		{
+			for(ui1 = ui; ui1 < MAX_WINDOW_COUNT - 1; ui1++)
+				windows[ui1] = windows[ui1 + 1];
+			windows[MAX_WINDOW_COUNT - 1] = window;
+			window->id = NULL;
+			window_count--;
+			return TRUE;
+		}
+	return FALSE;
+}
+
+/**
+	@Function:		_switch_window
+	@Access:		Private
+	@Description:
+		切换窗体。
+		直到切换到一个非隐藏，非关闭的窗体。
+	@Parameters:
+		top, WindowPtr, IN
+			当前最顶层的窗体的实例。
+	@Return:
+*/
+static
+void
+_switch_window(WindowPtr top)
+{
+	if(top == NULL || window_count < 2)
+		return;
+	uint32 ui;
+	WindowPtr temp = windows[0];
+	for(ui = 0; ui < window_count - 1; ui++)
+		windows[ui] = windows[ui + 1];
+	windows[window_count - 1] = temp;
+	if(windows[0] == top)
+		return;
+	if(	windows[0]->state == WINDOW_STATE_HIDDEN
+		|| windows[0]->state == WINDOW_STATE_CLOSED)
+		_switch_window(top);
+}
+
+/**
+	@Function:		switch_window
+	@Access:		Public
+	@Description:
+		切换窗体。
+	@Parameters:
+	@Return:
+*/
+void
+switch_window(void)
+{
+	_switch_window(windows[0]);
+}
+
+/**
+	@Function:		create_window
+	@Access:		Public
+	@Description:
+		创建窗体。
+	@Parameters:
+		width, uint32, IN
+			宽度。
+		height, uint32, IN
+			高度。
+		bgcolor, uint32, IN
+			窗体背景颜色。
+		title, int8 *, IN
+			标题。
+		event, WindowEvent, IN
+			窗体事件处理函数。
+	@Return:
+		struct Window *
+			指向窗体结构体。如果创建失败则返回 NULL。	
+*/
+struct Window *
+create_window(	IN uint32		width,
+				IN uint32		height,
+				IN uint32		bgcolor,
+				IN uint32		style,
+				IN int8 *		title,
+				IN WindowEvent	event)
+{
+	struct Window * window = new_window();
+	window->x = 0;
+	window->y = 0;
+	window->width = width;
+	window->height = height;
+	window->bgcolor = bgcolor;
+	window->state = WINDOW_STATE_HIDDEN;
+	window->over_close_button = 0;
+	window->over_hidden_button = 0;
+	window->has_close_button = style & WINDOW_STYLE_CLOSE_BUTTON;
+	window->has_hidden_button = style & WINDOW_STYLE_HIDDEN_BUTTON;
+	strcpy(window->title, title);
+	window->event = event;
+	if(!new_empty_image0(&window->workspace, width, height))
+	{
+		free_window(window);
+		return NULL;
+	}	
+	if(!new_empty_image0(&window->image, width, TITLE_BAR_HEIGHT + height))
+	{
+		destroy_common_image(&window->workspace);
+		free_window(window);
+		return NULL;
+	}
+	window->key_count = 0;
+	return window;
+}
+
+/**
+	@Function:		destroy_window
+	@Access:		Public
+	@Description:
+		销毁窗体。
+	@Parameters:
+		window, struct Window *, IN
+			指向窗体结构体的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+destroy_window(IN struct Window * window)
+{
+	if(window == NULL)
+		return FALSE;
+	free_window(window);
+	disable_memory_lock();
+	destroy_common_image(&window->workspace);
+	destroy_common_image(&window->image);
+	enable_memory_lock();	
+	return TRUE;
+}
+
+/**
+	@Function:		get_top_window
+	@Access:		Public
+	@Description:
+		获取顶层窗体的结构体的指针。
+	@Parameters:
+	@Return:
+		struct Window *
+			顶层窗体的结构体的指针。		
+*/
+struct Window *
+get_top_window(void)
+{
+	if(window_count == 0)
+		return NULL;
+	else
+		return windows[0];
+}
+
+/**
+	@Function:		flush_screen
+	@Access:		Public
+	@Description:
+		刷新屏幕。
+	@Parameters:
+	@Return:
+*/
+void
+flush_screen(void)
+{
+	uint32 x, y;
+	uint32 ui;
+	uint32 * screen_buffer_data_ptr = screen_buffer.data;
+	uint32 * console_screen_buffer_data_ptr = console_screen_buffer.data;
+
+	if(target_screen != NULL)
+		rect_common_image(target_screen, 0, 0, screen_width, screen_height, 0xff000000);
+	else	
+		rect_common_image(&screen_buffer, 0, 0, screen_width, screen_height, 0xffaaaaaa);
+		//draw_common_image(&screen_buffer, &bg_image, 0, 0, bg_image.width, bg_image.height);
+
+	//绘制控制台
+	if(flush_cbuffer)
+		for(y = 0; y < ROW; y++)
+			for(x = 0; x < COLUMN; x++)
+			{
+				uint8 * offset = screen_char_buffer + (y * COLUMN + x) * 2;
+				int8 chr = *offset;
+				uint8 p = *(offset + 1);
+				uint32 color = property_to_real_color(p & 0x0F);
+				uint32 bg_color = property_to_real_color((p >> 4) & 0x0F);
+				rect_common_image(	&console_screen_buffer, 
+									x * ENFONT_WIDTH, 
+									y * (ENFONT_HEIGHT + CURSOR_HEIGHT), 
+									ENFONT_WIDTH, 
+									ENFONT_HEIGHT + CURSOR_HEIGHT, 
+									bg_color);
+				uint8 * font = get_enfont(chr);
+				if(font != NULL)
+				{
+					uint32 font_x, font_y;
+					for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+					{
+						uint8 row = font[font_y];
+						for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+							if(((row >> font_x) & 0x01))
+							{
+								uint32 index = 	y * console_screen_width * (ENFONT_HEIGHT + CURSOR_HEIGHT) 
+												+ font_y * console_screen_width
+												+ x * ENFONT_WIDTH 
+												+ font_x;
+								console_screen_buffer_data_ptr[index] = color;
+							}
+					}
+				}
+			}
+	uint32 cursor_real_color = property_to_real_color(cursor_color);
+	uint32 c_x = cursor_x, c_y = cursor_y;
+	for(x = 0; x < ENFONT_WIDTH; x++)
+		for(y = 0; y < CURSOR_HEIGHT; y++)
+		{
+			uint32 index = 	c_y * (ENFONT_HEIGHT + CURSOR_HEIGHT) * console_screen_width
+							+ ENFONT_HEIGHT * console_screen_width
+							+ y * console_screen_width 
+							+ (uint32)c_x * ENFONT_WIDTH
+							+ x;
+			console_screen_buffer_data_ptr[index] = cursor_real_color;
+		}
+
+	//绘制窗体
+	int mouse_x, mouse_y;
+	get_mouse_position(&mouse_x, &mouse_y);
+	if(window_count != 0)
+	{
+		struct Window * top_window = windows[0];
+		if(point_in_rect(	mouse_x, mouse_y, 
+							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH),
+							top_window->y, 
+							CLOSE_BUTTON_WIDTH, 
+							CLOSE_BUTTON_HEIGHT))
+			top_window->over_close_button = 1;
+		else
+			top_window->over_close_button = 0;
+		if(point_in_rect(	mouse_x, mouse_y, 
+							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH),
+							top_window->y, 
+							HIDDEN_BUTTON_WIDTH, 
+							HIDDEN_BUTTON_HEIGHT))
+			top_window->over_hidden_button = 1;
+		else
+			top_window->over_hidden_button = 0;
+	}
+	mouse_left_button_down = is_mouse_left_button_down();
+	if(mouse_left_button_down)
+	{
+		if(window_count != 0)
+		{
+			struct Window * top_window = windows[0];
+			if(!move_window)
+				if(	top_window->has_close_button
+					&& point_in_rect(	mouse_x, 
+										mouse_y, 
+										top_window->x + top_window->width - CLOSE_BUTTON_WIDTH, 
+										top_window->y, 
+										CLOSE_BUTTON_WIDTH, 
+										CLOSE_BUTTON_HEIGHT))
+				{
+					destroy_window(top_window);
+					return;
+				}
+				else if(top_window->has_hidden_button
+						&& point_in_rect(	mouse_x, 
+											mouse_y, 
+											top_window->x + top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 
+											top_window->y, 
+											CLOSE_BUTTON_WIDTH, 
+											CLOSE_BUTTON_HEIGHT))
+				{
+					top_window->state = WINDOW_STATE_HIDDEN;
+					for(ui = 0; ui < window_count - 1; ui++)
+						windows[ui] = windows[ui + 1];
+					windows[window_count - 1] = top_window;
+				}
+				else if(point_in_rect(	mouse_x, 
+										mouse_y, 
+										top_window->x, 
+										top_window->y, 
+										top_window->width, 
+										TITLE_BAR_HEIGHT))
+				{
+					old_mouse_x = mouse_x;
+					old_mouse_y = mouse_y;
+					move_window = TRUE;
+				}				
+				else
+					for(ui = 1; ui < window_count; ui++)
+					{
+						struct Window * window = windows[ui];
+						if(point_in_rect(	mouse_x, 
+											mouse_y, 
+											window->x, 
+											window->y, 
+											window->width, 
+											TITLE_BAR_HEIGHT))
+						{
+							windows[ui] = windows[0];
+							windows[0] = window;
+						}
+					}
+		}
+	}
+	else if(move_window)
+		move_window = FALSE;
+	if(move_window)
+	{
+		int offset_x = mouse_x - old_mouse_x;
+		int offset_y = mouse_y - old_mouse_y;
+		struct Window * top_window = windows[0];
+		top_window->x += offset_x;
+		top_window->y += offset_y;
+		old_mouse_x = mouse_x;
+		old_mouse_y = mouse_y;
+	}
+	int32 i;
+	for(i = window_count - 1; i >= 0; i--)
+	{
+		struct Window * window = windows[i];
+		if(window->state == WINDOW_STATE_HIDDEN)
+			continue;
+		if(window->state == WINDOW_STATE_CLOSED)
+			continue;
+		if(render_window(window, &window->image, i == 0 ? TRUE : FALSE))
+			draw_common_image(	&screen_buffer, 
+								&window->image, 
+								window->x, 
+								window->y, 
+								window->image.width, 
+								window->image.height);
+	}
+	draw_common_image_t(&screen_buffer, 
+						&pointer_image, 
+						mouse_x, 
+						mouse_y, 
+						pointer_image.width, 
+						pointer_image.height, 
+						TCOLOR);
+
+	if(target_screen == NULL)	
+		vesa_draw_image(0, 
+						0, 
+						screen_width, 
+						screen_height, 
+						screen_buffer.data);
+	else
+		draw_common_image(	target_screen, 
+							&screen_buffer, 
+							0, 
+							0, 
+							screen_width, 
+							screen_height);
 }

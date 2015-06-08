@@ -16,7 +16,7 @@ const char * text0 = "	\
 	e:123,	\
 	f:123.123,	\
 	g:{	\
-		a:\"123\",	\
+		a:\"test0-g-a\",	\
 		b:null,	\
 		c:true, 	\
 		d:false,	\
@@ -44,6 +44,14 @@ int main(int argc, char * argv[])
 	char buffer[1024];
 	if(	!jsonl_string_value(text0_a, buffer, sizeof(buffer))
 		|| strcmp(buffer, "test0") != 0)
+		die("Bad test0 json object!");
+	JSONLRawPtr text0_g = NULL;
+	if(!JSONL_OBJECT_GET(text0_jsonobj, "g", &text0_g))
+		die("Bad test0 json object!");
+	JSONLRawPtr text0_g_a = NULL;
+	if(!JSONL_OBJECT_GET(text0_g, "a", &text0_g_a))
+	if(	!jsonl_string_value(text0_g_a, buffer, sizeof(buffer))
+		|| strcmp(buffer, "test0-g-a") != 0)
 		die("Bad test0 json object!");
 	if(!jsonl_free_json(text0_jsonobj))
 		die("Cannot free text0 json object!");

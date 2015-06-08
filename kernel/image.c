@@ -344,7 +344,12 @@ draw_image0(IN OUT struct CommonImage * dst,
 			IN int32 width,
 			IN int32 height)
 {
-	if(dst == NULL || src == NULL || width == 0 || height == 0 || dst->type != CMMNIMAGE_IMG0 || src->type != CMMNIMAGE_IMG0)
+	if(	dst == NULL 
+		|| src == NULL 
+		|| width == 0 
+		|| height == 0 
+		|| dst->type != CMMNIMAGE_IMG0 
+		|| src->type != CMMNIMAGE_IMG0)
 		return FALSE;
 	int32 dst_x, dst_y;
 	int32 src_x, src_y;
