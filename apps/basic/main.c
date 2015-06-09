@@ -1,8 +1,11 @@
 #include <ilib/ilib.h>
 #include <baslanglib/baslanglib.h>
 #include "die.h"
+
 int main(int argc, char * argv[])
 {
+	char c = 'X';
+	printf("%c", c);
 	/*
 	BASLANGLEnvironment env;
 	env.baslangl_malloc = malloc;

@@ -23,6 +23,7 @@ Cambridge, MA 02139, USA.  */
 #include "../stdio.h"
 #include "../stdlib/stdlib.h"
 #include "../string/string.h"
+#include "../string.h"
 
 
 long int _mb_shift = 0;

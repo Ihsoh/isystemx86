@@ -17,7 +17,7 @@ bin/setjmp.obj bin/longjmp.obj bin/ctype.obj bin/errno.obj bin/strtod.obj
 
 StdlibObjs=bin/strtol.obj bin/strtoul.obj bin/atoi.obj bin/atol.obj bin/mbstowcs.obj 	\
 bin/mbtowc.obj bin/wctomb.obj bin/wcstombs.obj bin/strtod.obj bin/atof.obj bin/abs.obj 	\
-bin/labs.obj bin/qsort.obj bin/msort.obj
+bin/labs.obj bin/qsort.obj bin/msort.obj bin/mblen.obj
 
 MathObjs=bin/ceil.obj bin/floor.obj bin/fabs.obj bin/__scalb.obj bin/__finite.obj
 
@@ -34,12 +34,13 @@ bin/C-monetary.obj bin/C-response.obj bin/C-time.obj bin/localeconv.obj bin/setl
 
 StringObjs=bin/strdup.obj bin/strtok.obj
 
+StdioObjs=bin/__vfscanf.obj
 
 AR=ar
 Include=-I../
 
-$(Target): bin  bin/mta32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs)
-	$(AR) -rc $(Target) $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs)
+$(Target): bin  bin/mta32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
+	$(AR) -rc $(Target) $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
 
 bin:
 	-mkdir bin
@@ -136,6 +137,9 @@ bin/msort.obj: stdlib/msort.c
 
 bin/qsort.obj: stdlib/qsort.c
 	$(CC) $(CFlags) -c stdlib/qsort.c -o bin/qsort.obj $(Include)
+
+bin/mblen.obj: stdlib/mblen.c
+	$(CC) $(CFlags) -c stdlib/mblen.c -o bin/mblen.obj $(Include)
 
 
 
@@ -323,6 +327,10 @@ bin/strdup.obj: string/strdup.c
 bin/strtok.obj: string/strtok.c
 	$(CC) $(CFlags) -c string/strtok.c -o bin/strtok.obj $(Include)
 
+#==============================Stdio==============================
+
+bin/__vfscanf.obj: stdio/__vfscanf.c
+	$(CC) $(CFlags) -c stdio/__vfscanf.c -o bin/__vfscanf.obj $(Include)
 
 bin/mta32.obj: mta32.c
 	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj $(Include)

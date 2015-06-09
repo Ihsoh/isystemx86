@@ -9,7 +9,7 @@
 #ifndef	_STDARG_H_
 #define	_STDARG_H_
 
-#include "ilib.h"
+#include "types.h"
 
 typedef unsigned char * va_list;
 

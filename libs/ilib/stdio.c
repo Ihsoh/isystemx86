@@ -33,15 +33,10 @@ _fptr(FILE * fptr)
 
 int vsscanf(const char * buffer, const char * format, va_list va)
 {
-	assert(strcmp(buffer, "%f %c") == 0);	// for lua2!!!!!!
-	char * s = NULL;
-	double d = strtod(buffer, &s);
-	char c = *(s++);
-	double * dptr = va_arg(va, double *);
-	*dptr = d;
-	char * cptr = va_arg(va, char *);
-	*cptr = c;
-	return 2;
+	FILE * fptr = il_sopen(buffer);
+	int r = __vfscanf(fptr, format, va);
+	fclose(fptr);
+	return r;
 }
 
 int sscanf(char * buffer, const char * format, ...)
@@ -299,6 +294,31 @@ static BOOL __parse_path(const char * path, char * dir, char * file)
 	return TRUE;
 }
 
+FILE * il_sopen(const char * str)
+{
+	if(str == NULL)
+		return NULL;
+	FILE * fptr = (FILE *)malloc(sizeof(FILE));
+	if(fptr == NULL)
+		return NULL;
+	// 公共
+	fptr->type = FILE_TYPE_STRING;
+	fptr->old_char = EOF;
+	fptr->redirection = NULL;
+	
+	// FILE_TYPE_FILE
+	fptr->ilfptr = NULL;
+	fptr->ilmode = FILE_MODE_READ;
+	strcpy(fptr->mode, "r");
+
+	// FILE_TYPE_STRING
+	fptr->str_cursor = 0;
+	fptr->str_len = strlen(str);
+	fptr->str = str;
+
+	return fptr;
+}
+
 FILE * fopen(const char * path, const char * mode)
 {
 	if(	path == NULL 
@@ -363,83 +383,168 @@ FILE * fopen(const char * path, const char * mode)
 		ILWriteFile(ilfptr, "", 0);
 	fptr->old_char = EOF;
 	fptr->redirection = NULL;
+	fptr->type = FILE_TYPE_FILE;
+
+	// FILE_TYPE_STRING
+	fptr->str_cursor = 0;
+	fptr->str_len = 0;
+	fptr->str = NULL;
+
 	return fptr;
 }
 
 int fclose(FILE * fptr)
 {
-	if(stdin == fptr)
+	if(fptr == NULL)
+		return EOF;
+	if(fptr->type == FILE_TYPE_FILE)
 	{
-		stdin = IFS1_STDIN;
-		return 0;
-	}
-	else if(stdout == fptr)
-	{
-		stdout = IFS1_STDOUT;
-		return 0;
-	}
-	else if(stderr == fptr)
-	{
-		stderr = IFS1_STDERR;
-		return 0;
-	}
-	else
-		if(ILCloseFile(fptr->ilfptr))
+		if(stdin == fptr)
 		{
-			if(fptr->redirection != NULL)
-				if(!ILCloseFile(fptr->redirection->ilfptr))
-					return EOF;
-				else
-					free(fptr->redirection);
-			free(fptr);
+			stdin = IFS1_STDIN;
+			return 0;
+		}
+		else if(stdout == fptr)
+		{
+			stdout = IFS1_STDOUT;
+			return 0;
+		}
+		else if(stderr == fptr)
+		{
+			stderr = IFS1_STDERR;
 			return 0;
 		}
 		else
-			return EOF;
+			if(ILCloseFile(fptr->ilfptr))
+			{
+				if(fptr->redirection != NULL)
+					if(!ILCloseFile(fptr->redirection->ilfptr))
+						return EOF;
+					else
+						free(fptr->redirection);
+				free(fptr);
+				return 0;
+			}
+			else
+				return EOF;
+	}
+	else if(fptr->type == FILE_TYPE_STRING)
+	{
+		free(fptr);
+		return 0;
+	}
+	else
+		return EOF;
 }
 
 size_t fread(void * buffer, size_t size, size_t count, FILE * fptr)
 {
-	return ILReadFile(FPTR(fptr)->ilfptr, buffer, count * size);
+	if(	buffer == NULL
+		|| size == 0
+		|| count == 0
+		|| fptr == NULL)
+		return 0;
+	if(FPTR(fptr)->type == FILE_TYPE_FILE)
+		return ILReadFile(FPTR(fptr)->ilfptr, buffer, count * size);
+	else if(FPTR(fptr)->type == FILE_TYPE_STRING)
+	{
+		if(FPTR(fptr)->str_cursor >= FPTR(fptr)->str_len)
+			return 0;
+		size_t total = size * count;
+		if(total <= FPTR(fptr)->str_len - FPTR(fptr)->str_cursor)
+		{
+			memcpy(buffer, FPTR(fptr)->str + FPTR(fptr)->str_cursor, total);
+			FPTR(fptr)->str_cursor += total;
+			return total;
+		}
+		else
+		{
+			size_t cc = FPTR(fptr)->str_len - FPTR(fptr)->str_cursor;
+			memcpy(buffer, FPTR(fptr)->str + FPTR(fptr)->str_cursor, cc);
+			FPTR(fptr)->str_cursor = FPTR(fptr)->str_len;
+			return cc;
+		}
+	}
+	else
+		return 0;
 }
 
 size_t fwrite(const void * buffer, size_t size, size_t count, FILE * fptr)
 {
+	if(	buffer == NULL
+		|| size == 0
+		|| count == 0
+		|| fptr == NULL)
+		return 0;
 	if(FPTR(fptr) == IFS1_STDERR || FPTR(fptr) == IFS1_STDOUT)
 	{
-		print_str(buffer);
-		return strlen(buffer);
+		char * s = (char *)buffer;
+		size_t total = size * count;
+		while(total--)
+			print_char(*(s++));
+		return total;
 	}
 	else
-	{
-		uint old_size = ILGetFileLength(FPTR(fptr)->ilfptr);
-		if(ILAppendFile(FPTR(fptr)->ilfptr, buffer, count * size))
-			return count * size;
+		if(FPTR(fptr)->type == FILE_TYPE_FILE)
+		{
+			uint old_size = ILGetFileLength(FPTR(fptr)->ilfptr);
+			if(ILAppendFile(FPTR(fptr)->ilfptr, buffer, count * size))
+				return count * size;
+			else
+				return ILGetFileLength(FPTR(fptr)->ilfptr) - old_size;
+		}
+		else if(FPTR(fptr)->type == FILE_TYPE_STRING)
+			return 0;
 		else
-			return ILGetFileLength(FPTR(fptr)->ilfptr) - old_size;
-	}
+			return 0;
 }
 
 int fgetc(FILE * fptr)
 {
+	if(fptr == NULL)
+		return EOF;
 	if(FPTR(fptr)->old_char != EOF)
 	{
 		char c = FPTR(fptr)->old_char;
 		FPTR(fptr)->old_char = EOF;
 		return c;
 	}
-	if(ILIsEndOfFile(FPTR(fptr)->ilfptr))
+	if(FPTR(fptr)->type == FILE_TYPE_FILE)
+	{
+		if(ILIsEndOfFile(FPTR(fptr)->ilfptr))
+			return EOF;
+		uchar b;
+		if(ILReadFile(FPTR(fptr)->ilfptr, &b, 1) == 0)
+			return EOF;
+		return (int)b;
+	}
+	else if(FPTR(fptr)->type == FILE_TYPE_STRING)
+	{
+		uchar b;
+		if(fread(&b, 1, 1, FPTR(fptr)) == 0)
+			return EOF;
+		return (int)b;
+	}
+	else
 		return EOF;
-	uchar b;
-	if(ILReadFile(FPTR(fptr)->ilfptr, &b, 1) == 0)
-		return EOF;
-	return (int)b;
 }
 
 int fputc(char c, FILE * fptr)
 {
-	if(fwrite(&c, 1, 1, FPTR(fptr)) == 1)
-		return c;
+	if(fptr == NULL)
+		return EOF;
+	if(	FPTR(fptr) == IFS1_STDIN
+		|| FPTR(fptr) == IFS1_STDOUT
+		|| FPTR(fptr) == IFS1_STDERR
+		|| FPTR(fptr)->type == FILE_TYPE_FILE)
+	{
+		if(fwrite(&c, 1, 1, FPTR(fptr)) == 1)
+			return c;
+		else
+			return EOF;
+	}
+	else if(FPTR(fptr)->type == FILE_TYPE_STRING)
+		return EOF;
 	else
 		return EOF;
 }

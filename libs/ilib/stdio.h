@@ -21,16 +21,27 @@ extern int printf(const char * format, ...);
 extern int puts(const char * string);
 extern int putchar(int ch);
 
+#define	FILE_TYPE_FILE		1
+#define	FILE_TYPE_STRING	2
 
 #define	EOF		-1
 
 typedef struct _File
 {
+	// 公共
+	int 			type;
+	int				old_char;
+	struct _File * 	redirection;
+
+	// FILE_TYPE_FILE
 	ILFILE *		ilfptr;
 	int				ilmode;
 	char			mode[8];
-	int				old_char;
-	struct _File * 	redirection;
+
+	// FILE_TYPE_STRING
+	uint			str_cursor;
+	uint 			str_len;
+	char *			str;
 } File;
 
 #define	FILE 	File
@@ -59,5 +70,11 @@ extern int ungetc(int c, FILE * fptr);
 #define	getc(fptr)	(fgetc((fptr)))
 extern void perror(const char * s);
 extern FILE * freopen(const char * filename, const char * mode, FILE * fptr);
+
+
+extern int __vfscanf(FILE * s, const char * format, va_list arg);
+
+
+extern FILE * il_sopen(const char * str);
 
 #endif
