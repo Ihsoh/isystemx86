@@ -2,8 +2,8 @@
 #define	_BMP_H_
 
 #include "types.h"
-#include "dslib/list.h"
-#include "ilib/ilib.h"
+#include <dslib/list.h>
+#include <ilib/ilib.h>
 
 #define	BI_RGB			0
 #define	BI_BITFIELDS	3

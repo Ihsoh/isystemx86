@@ -108,6 +108,10 @@ MAKE_DIR	VA:/isystem/data/ config
 MAKE_FILE	VA:/isystem/data/config/ system.json
 WRITE_FILE	VA:/isystem/data/config/system.json isystem/data/config/system.json
 
+#GUI config file
+MAKE_FILE	VA:/isystem/data/config/ gui.json
+WRITE_FILE	VA:/isystem/data/config/gui.json isystem/data/config/gui.json
+
 #Lock directory
 MAKE_DIR	VA:/isystem/ lock
 

@@ -1,0 +1,11 @@
+{
+  Background640x480:"/isystem/resources/images/bg640x480.bmp",
+  Background800x600:"/isystem/resources/images/bg800x600.bmp",
+  Background1024x768:"/isystem/resources/images/bg1024x768.bmp",
+  Background1280x1024:"/isystem/resources/images/bg1280x1024.bmp",
+  CloseButton:"/isystem/resources/images/closebutton.bmp",
+  CloseButtonHover:"/isystem/resources/images/closebuttonhover.bmp",
+  HiddenButton:"/isystem/resources/images/hiddenbutton.bmp",
+  HiddenButtonHover:"/isystem/resources/images/hiddenbuttonhover.bmp"
+  Pointer:"/isystem/resources/images/pointer.bmp"
+}

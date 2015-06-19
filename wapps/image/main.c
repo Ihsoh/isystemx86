@@ -23,14 +23,14 @@ main(	IN int32 argc,
 	printf("File: %s\n", argv[1]);
 	IMGLBMPPtr bmpobj = imgl_bmp_create(argv[1]);
 	if(bmpobj == NULL)
-		die("Cannot open image file!\n");
+		die("Cannot open image file.\n");
 	int32 width = imgl_bmp_get_width(bmpobj);
 	int32 height = imgl_bmp_get_height(bmpobj);
 	printf("Width: %d, Height: %d.\n", width, height);
 
 	struct CommonImage image;
 	if(!new_empty_image0(&image, width, height))
-		die("Cannot create common image!\n");
+		die("Cannot create common image.\n");
 	
 	uint32 x, y;
 	for(x = 0; x < (uint32)width; x++)
@@ -45,7 +45,8 @@ main(	IN int32 argc,
 								0xffffffff,
 								WINDOW_STYLE_HIDDEN_BUTTON,
 								"Image");
-
+	if(wid == -1)
+	die("Cannot create window.");
 	ILShowWindow(wid);
 	ILDrawWindow(wid, &image);
 	for(;;)

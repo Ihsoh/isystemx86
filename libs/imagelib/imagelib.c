@@ -1,6 +1,6 @@
 #include "imagelib.h"
-#include <ilib/ilib.h>
 #include <dslib/dslib.h>
+#include <ilib/ilib.h>
 
 BOOL
 imagelib_init(void)

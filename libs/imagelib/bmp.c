@@ -1,8 +1,8 @@
 #include "bmp.h"
 #include "types.h"
-#include "dslib/list.h"
-#include "dslib/value.h"
-#include "ilib/ilib.h"
+#include <dslib/list.h>
+#include <dslib/value.h>
+#include <ilib/ilib.h>
 
 static
 int32
