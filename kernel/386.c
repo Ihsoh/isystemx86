@@ -587,3 +587,51 @@ halt_cpu(void)
 		"cli\n\t"
 		"hlt\n\t");
 }
+
+void
+pause(void)
+{
+	uint32 delay_count = 0x00010000;
+	while(--delay_count)
+		asm volatile (
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t"
+			"pause\n\t");
+}

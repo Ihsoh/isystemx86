@@ -59,6 +59,6 @@ void
 delay(void)
 {
 	uint32 ui;
-	for(ui = 0; ui < 0x0fffffff; ui++)
+	for(ui = 0; ui < 0x00030000; ui++)
 		asm volatile("pause");
 }

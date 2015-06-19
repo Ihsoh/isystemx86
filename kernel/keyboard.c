@@ -534,7 +534,6 @@ tran_key(IN uint8 scan_code)
 						set_wait_app_tid(-1);
 						kill_task(tid);
 						clear_screen();
-						enable_flush_screen();
 					}
 				}
 				else if(alt)
@@ -569,7 +568,6 @@ get_char(void)
 		if(bpos != -1)
 			break;
 		UNLOCK_TASK();
-		PAUSE();
 	}
 	LOCK_TASK();
 	uint8 chr = buffer[0];

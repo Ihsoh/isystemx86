@@ -39,14 +39,6 @@ is_mouse_right_button_down(void);
 
 extern
 void
-enable_flush_screen(void);
-
-extern
-void
-disable_flush_screen(void);
-
-extern
-void
 shutdown_system(void);
 
 extern

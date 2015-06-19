@@ -13,6 +13,7 @@
 #include "enfont.h"
 #include "image.h"
 #include "window.h"
+
 #include <ilib/string.h>
 
 #define	COLUMN		80

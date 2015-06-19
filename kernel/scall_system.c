@@ -46,7 +46,7 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 		{
 			int32 tid = INT32_SPARAM(sparams->param0);
 
-			kill_task(tid);
+			kill_sys_task(tid);
 
 			if(tid == get_wait_app_tid())
 				set_wait_app_tid(-1);

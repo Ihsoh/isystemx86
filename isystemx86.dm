@@ -14,6 +14,14 @@ WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1024_768.bin kernelldr/bin/kernell
 MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1280_1024.bin
 WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1280_1024.bin kernelldr/bin/kernelldrgm_1280_1024.bin
 
+#System window application directory
+MAKE_DIR	VA:/isystem/ wbins
+
+#Window application 'image'
+MAKE_FILE	VA:/isystem/wbins/ image
+WRITE_FILE	VA:/isystem/wbins/image wapps/image/bin/image.bin
+
+
 #System commands directory
 MAKE_DIR	VA:/isystem/ bins
 
@@ -77,6 +85,9 @@ MAKE_DIR	VA:/isystem/ sys
 
 MAKE_FILE	VA:/isystem/sys/ pci.sys
 WRITE_FILE	VA:/isystem/sys/pci.sys sys/pci/bin/pci.bin
+
+MAKE_FILE	VA:/isystem/sys/ screen.sys
+WRITE_FILE	VA:/isystem/sys/screen.sys sys/screen/bin/screen.bin
 
 #System dump directory
 MAKE_DIR	VA:/isystem/ dump
@@ -150,3 +161,6 @@ MAKE_DIR	VA:/isystem/ test
 #Testing jsonlib application
 MAKE_FILE	VA:/isystem/test/ test_jsonlib
 WRITE_FILE	VA:/isystem/test/test_jsonlib test/test_jsonlib/bin/test_jsonlib.bin
+
+MAKE_FILE	VA:/isystem/ girl.bmp
+WRITE_FILE	VA:/isystem/girl.bmp isystem/girl.bmp

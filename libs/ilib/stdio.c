@@ -21,7 +21,9 @@ static
 FILE *
 _fptr(FILE * fptr)
 {
-	if(fptr == IFS1_STDIN || fptr == IFS1_STDOUT || fptr == IFS1_STDERR)
+	if(	fptr == IFS1_STDIN
+		|| fptr == IFS1_STDOUT
+		|| fptr == IFS1_STDERR)
 		return fptr;
 	else if(fptr->redirection != NULL)
 		return fptr->redirection;

@@ -27,8 +27,8 @@
 #define	SCALL_GET_TEXT_SCREEN_SIZE	12
 #define	SCALL_LOCK_CURSOR			13
 #define	SCALL_UNLOCK_CURSOR			14
-#define	SCALL_ENABLE_FLUSH_SCREEN	15
-#define	SCALL_DISABLE_FLUSH_SCREEN	16
+// NOT USED							15
+// NOT USED							16
 #define	SCALL_SET_TARGET_SCREEN		17
 
 #define	SCALL_CREATE_WINDOW			18
@@ -43,6 +43,7 @@
 #define	SCALL_PRINT_ERR_STR			26
 #define	SCALL_PRINT_ERR_STR_P		27
 
+#define	SCALL_FLUSH_SCREEN 			28
 
 #define	CC_BLACK		0
 #define	CC_BLUE			1
@@ -168,6 +169,10 @@ extern void print_err_str(char * str);
 extern void print_err_str_p(char * str, uchar p);
 #define	il_print_err_str_p(str, p)	(print_err_str_p((str), (p)))
 #define	ILPrintErrorStringWithProperty(str, p)	(print_err_str_p((str), (p)))
+
+extern void flush_screen(void);
+#define	il_flush_screen()	(flush_screen())
+#define	ILFlushScreen()	(flush_screen())
 
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\

@@ -202,20 +202,6 @@ system_call_screen(	IN uint32 func,
 			unlock_cursor();
 			break;
 		}
-		//允许刷新屏幕
-		//
-		case SCALL_ENABLE_FLUSH_SCREEN:
-		{
-			enable_flush_screen();
-			break;
-		}
-		//禁用刷新屏幕
-		//
-		case SCALL_DISABLE_FLUSH_SCREEN:
-		{
-			disable_flush_screen();
-			break;
-		}
 		case SCALL_SET_TARGET_SCREEN:
 		{
 			if(target_screen != NULL)
@@ -337,6 +323,13 @@ system_call_screen(	IN uint32 func,
 		{
 			const int8 * str = (const int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
 			print_err_str_p(str, UINT8_SPARAM(sparams->param1));
+			break;
+		}
+		//刷新屏幕。
+		//
+		case SCALL_FLUSH_SCREEN:
+		{
+			flush_screen();
 			break;
 		}
 	}

@@ -26,6 +26,22 @@ typedef enum
 	TASK_TYPE_SYSTEM	= 2
 } TaskType;
 
+typedef enum
+{
+	TASK_ATTR_NONE 				= 0x00000000,
+} TaskAttr;
+
+typedef enum
+{
+	TASK_PRIORITY_HIGH		= 1,
+	TASK_PRIORITY_NORMAL	= 2,
+	TASK_PRIORITY_LOW		= 3
+} TaskPriority;
+
+#define TASK_TICK_HIGH		40
+#define TASK_TICK_NORMAL	15
+#define TASK_TICK_LOW		5
+
 typedef void (* OnTaskExit)(int32 tid, int32 retvalue);
 
 //结构名:	Task
@@ -62,6 +78,9 @@ struct Task
 	TaskType 			type;				//任务的类型。
 											//如果为TASK_TYPE_USER，则表示该任务为用户任务，运行于Ring3。
 											//如果为TASK_TYPE_SYSTEM，则表示该任务为系统任务，运行于Ring0。
+	TaskAttr 			attr;				//任务属性。
+	TaskPriority 		priority;			//任务优先级。
+	int32				tick;				//滴答。到0时切换任务。
 	OnTaskExit			on_exit;			//当任务退出时调用。
 };
 
@@ -89,6 +108,10 @@ create_sys_task(IN int8 * name,
 extern
 BOOL
 kill_task(IN int32 tid);
+
+extern
+BOOL
+kill_sys_task(IN int32 tid);
 
 extern
 void

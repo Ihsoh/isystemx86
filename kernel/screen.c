@@ -23,6 +23,8 @@
 #include "console_window.h"
 #include "sfunc_window.h"
 #include "klib.h"
+#include "cmlock.h"
+
 #include <ilib/string.h>
 
 #define	VIDEO_MEM	0xb8000
@@ -1213,6 +1215,7 @@ flush_screen(void)
 								window->image.width, 
 								window->image.height);
 	}
+
 	draw_common_image_t(&screen_buffer, 
 						&pointer_image, 
 						mouse_x, 

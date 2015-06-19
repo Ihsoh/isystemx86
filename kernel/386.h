@@ -123,6 +123,10 @@ extern
 void
 halt_cpu(void);
 
+extern
+void
+pause(void);
+
 #define	sti() { asm volatile ("sti"); }
 #define	cli() { asm volatile ("cli"); }
 

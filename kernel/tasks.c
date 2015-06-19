@@ -101,6 +101,12 @@ init_tasks(void)
 			工作目录。
 		task_type, TaskType, IN
 			任务类型。
+		task_attr, TaskAttr, IN
+			任务属性。
+			*===============================*===================================================*
+			|属性							|意思												|
+			*===============================*===================================================*
+			*-------------------------------*---------------------------------------------------*
 	@Return:
 		int32
 			如果失败则返回-1, 否则返回任务的 ID。
@@ -112,7 +118,8 @@ _create_task(	IN int8 * name,
 				IN uint8 * app,
 				IN uint32 app_len,
 				IN int8 * working_dir,
-				IN TaskType task_type)
+				IN TaskType task_type,
+				IN TaskAttr task_attr)
 {
 	if(task_type != TASK_TYPE_USER && task_type != TASK_TYPE_SYSTEM)
 		return -1;
@@ -141,14 +148,16 @@ _create_task(	IN int8 * name,
 		task->stdin = NULL;
 		task->stdout = NULL;
 		task->stderr = NULL;
-		task->type = task_type;
 		task->read_count = 0;
+		task->type = task_type;
+		task->priority = TASK_TICK_NORMAL;
+		task->tick = TASK_TICK_NORMAL;
 
 		strcpy(task->name, name);
 		strcpy(task->param, param);
 		strcpy(task->working_dir, working_dir);
 		task->app_len = app_len;
-		uint32 real_task_len = 3 * 1024 * 1024 + MAX_APP_LEN;
+		uint32 real_task_len = 3 * 1024 * 1024 + app_len;
 		task->addr = (uint8 *)alloc_memory(real_task_len);
 		task->used_memory_size = real_task_len;
 		if(task->addr == NULL)
@@ -264,8 +273,8 @@ _create_task(	IN int8 * name,
 		}
 		// 把程序空间的0x00000000到0x00ffffff映射到物理空间的0x00000000到0x00ffffff。
 		// 权限为读和执行。0x00000000到0x00ffffff为内核空间。
-		// 在执行系统调用时会执行包含对内核空间写操作的代码，但是由于这个操作是在0x90中断
-		// 程序中进行，并且执行0x90中断程序时CPL为Ring0，所以写操作为合法。
+		// 在执行系统调用时会执行包含对内核空间写操作的代码，但是由于这个操作是在0xa0中断
+		// 程序中进行，并且执行0xa0中断程序时CPL为Ring0，所以写操作为合法。
 		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 
 								0x00000000,
 								0x01000000,
@@ -329,7 +338,8 @@ create_task(IN int8 * name,
 						app, 
 						app_len, 
 						working_dir, 
-						TASK_TYPE_USER);
+						TASK_TYPE_USER,
+						TASK_ATTR_NONE);
 }
 
 /**
@@ -364,7 +374,8 @@ create_sys_task(IN int8 * name,
 						app, 
 						app_len, 
 						working_dir, 
-						TASK_TYPE_SYSTEM);
+						TASK_TYPE_SYSTEM,
+						TASK_ATTR_NONE);
 }
 
 /**
@@ -386,7 +397,9 @@ _kill_task(IN int32 tid)
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
 	struct Task * task = tasks + tid;
-	free_memory(task->addr);
+
+	if(task->addr != NULL)
+		free_memory(task->addr);
 	
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
@@ -413,7 +426,8 @@ _kill_task(IN int32 tid)
 		}
 	}
 
-	free_memory(task->pagedt_addr);
+	if(task->pagedt_addr != NULL)
+		free_memory(task->pagedt_addr);
 
 	if(task->on_exit != NULL)
 		task->on_exit(tid, task->retvalue);
@@ -457,6 +471,26 @@ kill_task(IN int32 tid)
 		return FALSE;
 	struct Task * task = tasks + tid;
 	if(task->type != TASK_TYPE_USER)
+		return FALSE;
+	return _kill_task(tid);
+}
+
+/**
+	@Function:		kill_sys_task
+	@Access:		Public
+	@Description:
+		可以杀死任何类型的任务。
+	@Parameters:
+		tid, int32, IN
+			任务的 ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+kill_sys_task(IN int32 tid)
+{
+	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
 	return _kill_task(tid);
 }
@@ -602,6 +636,8 @@ task_ready(IN int32 tid)
 			工作目录。
 		task_type, TaskType, IN
 			任务类型。
+		task_attr, TaskAttr, IN
+			任务属性。
 	@Return:
 		int32
 			如果失败则返回-1, 否则返回任务的 ID。
@@ -611,7 +647,8 @@ int32
 _create_task_by_file(	IN int8 * filename,
 						IN int8 * param,
 						IN int8 * working_dir,
-						IN TaskType task_type)
+						IN TaskType task_type,
+						IN TaskAttr task_attr)
 {
 	if(	filename == NULL 
 		|| param == NULL 
@@ -660,7 +697,8 @@ _create_task_by_file(	IN int8 * filename,
 								app + 256,
 								flen(fptr) - 256,
 								working_dir,
-								task_type);
+								task_type,
+								task_attr);
 	free_memory(app);
 	fclose(fptr);
 	return tid;
@@ -690,7 +728,8 @@ create_task_by_file(	IN int8 * filename,
 	return _create_task_by_file(filename,
 								param,
 								working_dir,
-								TASK_TYPE_USER);
+								TASK_TYPE_USER,
+								TASK_ATTR_NONE);
 }
 
 /**
@@ -717,7 +756,8 @@ create_sys_task_by_file(IN int8 * filename,
 	return _create_task_by_file(filename,
 								param,
 								working_dir,
-								TASK_TYPE_SYSTEM);
+								TASK_TYPE_SYSTEM,
+								TASK_ATTR_NONE);
 }
 
 /**
@@ -775,6 +815,25 @@ create_task_by_file_wait(	IN int8 * filename,
 int32
 get_next_task_id(void)
 {
+	if(running_tid != -1)
+	{
+		struct Task * running_task = tasks + running_tid;
+		if(--running_task->tick > 0)
+			return running_tid;
+		else
+			switch(running_task->priority)
+			{
+				case TASK_PRIORITY_HIGH:
+					running_task->tick = TASK_TICK_HIGH;
+					break;
+				case TASK_PRIORITY_NORMAL:
+					running_task->tick = TASK_TICK_NORMAL;
+					break;
+				case TASK_PRIORITY_LOW:
+					running_task->tick = TASK_TICK_LOW;
+					break;
+			}
+	}
 	int32 i;
 	if(running_tid == -1)
 	{

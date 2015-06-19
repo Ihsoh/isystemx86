@@ -93,6 +93,10 @@ free_system_call_tss(void);
 
 static
 void
+free_task_tss(void);
+
+static
+void
 timer_int(void);
 
 static

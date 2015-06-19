@@ -16,6 +16,7 @@ $(Target):	bin	\
 			libs/baslanglib/bin/libbaslanglib.a 	\
 			libs/mempoollib/bin/libmempoollib.a 	\
 			libs/regexlib/bin/libregexlib.a 	\
+			libs/imagelib/bin/libimagelib.a 	\
 			boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
@@ -32,7 +33,10 @@ $(Target):	bin	\
 	cd apps/lua1 && make
 	cd apps/lua2 && make
 
+	cd wapps/image && make
+
 	cd sys/pci && make
+	cd sys/screen && make
 
 	cd test/test_jsonlib && make
 
@@ -68,6 +72,9 @@ libs/mempoollib/bin/libmempoollib.a:
 libs/regexlib/bin/libregexlib.a:
 	cd libs/regexlib && make
 
+libs/imagelib/bin/libimagelib.a:
+	cd libs/imagelib && make
+
 boot/bin/boot.bin:
 	cd boot && make
 
@@ -90,6 +97,7 @@ clean:
 	cd libs/baslanglib && make clean
 	cd libs/mempoollib && make clean
 	cd libs/regexlib && make clean
+	cd libs/imagelib && make clean
 
 	cd boot && make clean
 	cd kernelldr && make clean
@@ -108,7 +116,10 @@ clean:
 	cd apps/lua1 && make clean
 	cd apps/lua2 && make clean
 
+	cd wapps/image && make clean
+
 	cd sys/pci && make clean
+	cd sys/screen && make clean
 
 	cd test/test_jsonlib && make clean
 

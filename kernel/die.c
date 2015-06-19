@@ -29,7 +29,6 @@
 void
 die(IN struct die_info * info)
 {
-	enable_flush_screen();
 	asm volatile ("cli");
 	lock_level = 0x7fffffff;
 	apic_stop_timer();

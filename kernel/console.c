@@ -2633,7 +2633,7 @@ call_init_bat(void)
 */
 void
 console(void)
-{
+{	
 	int8 command[1024];
 	global_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	struct Vars * local_vars_s;

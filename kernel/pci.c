@@ -11,7 +11,7 @@
 #include "system.h"
 #include <ilib/string.h>
 
-#define	RETRY_COUNT				1000//0xffffffff
+#define	RETRY_COUNT				0xffffffff
 
 #define	FUNC_INIT				1
 #define	FUNC_UPDATE				2

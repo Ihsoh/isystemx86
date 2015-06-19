@@ -160,18 +160,6 @@ void unlock_cursor(void)
 	system_call(SCALL_SCREEN, SCALL_UNLOCK_CURSOR, &sparams);
 }
 
-void enable_flush_screen(void)
-{
-	struct SParams sparams;
-	system_call(SCALL_SCREEN, SCALL_ENABLE_FLUSH_SCREEN, &sparams);
-}
-
-void disable_flush_screen(void)
-{
-	struct SParams sparams;
-	system_call(SCALL_SCREEN, SCALL_DISABLE_FLUSH_SCREEN, &sparams);
-}
-
 void set_target_screen(struct CommonImage * ts)
 {
 	struct SParams sparams;
@@ -268,4 +256,10 @@ void print_err_str_p(char * str, uchar p)
 	sparams.param0 = SPARAM(str);
 	sparams.param1 = SPARAM(p);
 	system_call(SCALL_SCREEN, SCALL_PRINT_ERR_STR_P, &sparams);
+}
+
+void flush_screen(void)
+{
+	struct SParams sparams;
+	system_call(SCALL_SCREEN, SCALL_FLUSH_SCREEN, &sparams);
 }

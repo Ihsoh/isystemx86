@@ -264,6 +264,14 @@ main(void)
 	mouse_loop_was_enabled = TRUE;
 	keyboard_loop_was_enabled = TRUE;
 
+	common_lock();
+	int32 sys_screen_tid = create_sys_task_by_file(	"DA:/isystem/sys/screen.sys",
+													"DA:/isystem/sys/screen.sys",
+													"DA:/isystem/sys/");
+	get_task_info_ptr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
+	task_ready(sys_screen_tid);
+	common_unlock();
+
 	console();
 }
 
@@ -880,17 +888,41 @@ static
 void
 free_system_call_tss(void)
 {
-	struct Desc system_call_tss_desc;
-	get_desc_from_gdt(14, (uint8 *)&system_call_tss_desc);
-	system_call_tss_desc.attr = AT386TSS + DPL0; 
-	set_desc_to_gdt(14, (uint8 *)&system_call_tss_desc);
+	uint32 ui;
+	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
+	{
+		struct Desc system_call_tss_desc;
+		get_desc_from_gdt(30 + ui * 2, (uint8 *)&system_call_tss_desc);
+		system_call_tss_desc.attr = AT386TSS + DPL3; 
+		set_desc_to_gdt(30 + ui * 2, (uint8 *)&system_call_tss_desc);
+	}
+}
+
+/**
+	@Function:		free_task_tss
+	@Access:		Private
+	@Description:
+		释放所有任务的 TSS。清除所有任务的 TSS 的 BUSY 状态。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+free_task_tss(void)
+{
+	uint32 ui;
+	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
+	{
+		struct Desc tss_desc;
+		get_desc_from_gdt(400 + ui * 5 + 0, (uint8 *)&tss_desc);
+		tss_desc.attr = AT386TSS + DPL3;
+		set_desc_to_gdt(400 + ui * 5 + 0, (uint8 *)&tss_desc);
+	}
 }
 
 static volatile int32	counter						= 1;
 static volatile int32	clock_counter				= 100;
 static volatile int32	is_system_call				= 0;
-static volatile int32	is_enable_flush_screen		= 1;
-static volatile int32	flush_counter				= 0;
 static volatile BOOL	switch_to_kernel			= FALSE;
 static volatile BOOL	kt_jk_lock					= TRUE;
 static volatile BOOL	will_reset_all_exceptions	= FALSE;
@@ -903,7 +935,7 @@ static volatile BOOL				kernel_task_ran		= FALSE;
 	@Function:		timer_int
 	@Access:		Private
 	@Description:
-		定时器的中断程序。旧版本。
+		定时器的中断程序。
 		该版本的任务调度无法在有任务进行系统调用时，
 		进行任务切换。
 	@Parameters:
@@ -916,6 +948,7 @@ timer_int(void)
 	while(1)
 	{
 		lock();
+
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
 		kt_jk_lock = FALSE;
@@ -924,120 +957,50 @@ timer_int(void)
 			reset_all_exceptions();
 			will_reset_all_exceptions = FALSE;
 		}
-		if(is_enable_flush_screen && vesa_is_valid())
-			if(++flush_counter == 2)
-			{
-				flush_screen();
-				flush_counter = 0;
-			}
-		if(is_system_call == 0)
+		if(--clock_counter == 0)
 		{
-			if(--clock_counter == 0)
+			console_clock();
+			clock_counter = 100;
+		}
+		int32 running_tid = get_running_tid();
+		int32 tid = get_next_task_id();
+		current_tid = tid;
+		int32 task_count = tasks_get_count();
+		if(counter >= task_count || tid == -1 || switch_to_kernel)
+		{
+			switch_to_kernel = FALSE;
+			counter = 0;
+			is_kernel_task = TRUE;
+			struct Task task;
+
+			//如果在执行内核任务之前有其他任务，
+			//则保存任务的I387的状态。
+			if(running_tid != -1)
 			{
-				console_clock();
-				clock_counter = 100;
+				get_task_info(running_tid, &task);
+				asm volatile ("fnsave %0"::"m"(task.i387_state));
+				set_task_info(running_tid, &task);
 			}
-			int32 running_tid = get_running_tid();
-			int32 tid = get_next_task_id();
-			current_tid = tid;
-			int32 task_count = tasks_get_count();
-			if(counter == task_count || tid == -1 || switch_to_kernel)
+
+			//加载内核的I387的状态，如果未初始化则先初始化。
+			if(kernel_init_i387)
 			{
-				switch_to_kernel = FALSE;
-				counter = 0;
-				is_kernel_task = TRUE;
-				struct Task task;
-
-				//如果在执行内核任务之前有其他任务，
-				//则保存任务的I387的状态。
-				if(running_tid != -1)
-				{
-					get_task_info(running_tid, &task);
-					asm volatile ("fnsave %0"::"m"(task.i387_state));
-					set_task_info(running_tid, &task);
-				}
-
-				//加载内核的I387的状态，如果未初始化则先初始化。
-				if(kernel_init_i387)
-				{
-					if(!kernel_task_ran)
-						asm volatile ("frstor %0"::"m"(kernel_i387_state));
-				}
-				else
-				{
-					asm volatile ("fninit");
-					kernel_init_i387 = TRUE;
-				}
-
-				kernel_task_ran = TRUE;
-
-				struct Desc kernel_tss_desc;
-				get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
-				kernel_tss_desc.attr = AT386TSS + DPL0; 
-				set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
-				free_system_call_tss();
-				if(!use_rtc_for_task_scheduler && apic_is_enable())
-					apic_start_timer();
-				end_of_rtc();
-				unlock_without_sti();
-				if(use_rtc_for_task_scheduler)
-					irq_ack(8);
-				else
-					irq_ack(0);
-				asm volatile ("ljmp	$56, $0;");
+				if(!kernel_task_ran)
+					asm volatile ("frstor %0"::"m"(kernel_i387_state));
 			}
 			else
 			{
-				counter++;
-				is_kernel_task = FALSE;
-				struct Task task;
-
-				if(kernel_task_ran)
-				{
-					//刚才执行的是内核任务，所以保存内核的I387状态。
-					asm volatile ("fnsave %0"::"m"(kernel_i387_state));
-					kernel_task_ran = FALSE;
-				}
-				else
-					if(running_tid != -1)
-					{
-						//刚才执行的不是内核任务，保存上一个任务的I387状态。
-						get_task_info(running_tid, &task);
-						asm volatile ("fnsave %0"::"m"(task.i387_state));
-						set_task_info(running_tid, &task);
-					}
-
-				get_task_info(tid, &task);
-				if(task.init_i387)
-					asm volatile ("frstor %0"::"m"(task.i387_state));
-				else
-				{
-					asm volatile ("fninit");
-					task.init_i387 = 1;
-					set_task_info(tid, &task);
-				}
-				set_task_ran_state(tid);
-				struct Desc tss_desc;
-				struct Gate task_gate;
-				get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
-				get_desc_from_gdt(400 + tid * 5 + 1, (uint8 *)&task_gate);
-				tss_desc.attr = AT386TSS + DPL3;
-				set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
-				set_desc_to_gdt(11, (uint8 *)&task_gate);
-				free_system_call_tss();
-				if(!use_rtc_for_task_scheduler && apic_is_enable())
-					apic_start_timer();
-				end_of_rtc();
-				unlock_without_sti();
-				if(use_rtc_for_task_scheduler)
-					irq_ack(8);
-				else
-					irq_ack(0);
-				asm volatile ("ljmp	$88, $0;");	
+				asm volatile ("fninit");
+				kernel_init_i387 = TRUE;
 			}
-		}
-		else
-		{
+
+			kernel_task_ran = TRUE;
+
+			struct Desc kernel_tss_desc;
+			get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
+			kernel_tss_desc.attr = AT386TSS + DPL0; 
+			set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
+			free_system_call_tss();
 			if(!use_rtc_for_task_scheduler && apic_is_enable())
 				apic_start_timer();
 			end_of_rtc();
@@ -1046,37 +1009,144 @@ timer_int(void)
 				irq_ack(8);
 			else
 				irq_ack(0);
-			asm volatile ("iret;");
+			asm volatile ("ljmp	$56, $0;");
+		}
+		else
+		{
+			counter++;
+			is_kernel_task = FALSE;
+			struct Task task;
+
+			if(kernel_task_ran)
+			{
+				//刚才执行的是内核任务，所以保存内核的I387状态。
+				asm volatile ("fnsave %0"::"m"(kernel_i387_state));
+				kernel_task_ran = FALSE;
+			}
+			else
+				if(running_tid != -1)
+				{
+					//刚才执行的不是内核任务，保存上一个任务的I387状态。
+					get_task_info(running_tid, &task);
+					asm volatile ("fnsave %0"::"m"(task.i387_state));
+					set_task_info(running_tid, &task);
+				}
+
+			get_task_info(tid, &task);
+			if(task.init_i387)
+				asm volatile ("frstor %0"::"m"(task.i387_state));
+			else
+			{
+				asm volatile ("fninit");
+				task.init_i387 = 1;
+				set_task_info(tid, &task);
+			}
+			set_task_ran_state(tid);
+			free_system_call_tss();
+			if(!use_rtc_for_task_scheduler && apic_is_enable())
+				apic_start_timer();
+			end_of_rtc();
+			unlock_without_sti();
+			if(use_rtc_for_task_scheduler)
+				irq_ack(8);
+			else
+				irq_ack(0);
+
+			if(task.is_system_call)
+			{
+				#define SYSTEM_CALL(tid_s)	\
+					asm volatile (	".set TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
+									"ljmp	$TARGET"tid_s", $0\n\t");
+
+				#define SYSTEM_CALL_CASE(tid, tid_s)	\
+					case tid:	\
+						SYSTEM_CALL(tid_s);	\
+						break;
+
+				switch(tid)
+				{
+					SYSTEM_CALL_CASE(0, "0")
+					SYSTEM_CALL_CASE(1, "1")
+					SYSTEM_CALL_CASE(2, "2")
+					SYSTEM_CALL_CASE(3, "3")
+					SYSTEM_CALL_CASE(4, "4")
+					SYSTEM_CALL_CASE(5, "5")
+					SYSTEM_CALL_CASE(6, "6")
+					SYSTEM_CALL_CASE(7, "7")
+					SYSTEM_CALL_CASE(8, "8")
+					SYSTEM_CALL_CASE(9, "9")
+					SYSTEM_CALL_CASE(10, "10")
+					SYSTEM_CALL_CASE(11, "11")
+					SYSTEM_CALL_CASE(12, "12")
+					SYSTEM_CALL_CASE(13, "13")
+					SYSTEM_CALL_CASE(14, "14")
+					SYSTEM_CALL_CASE(15, "15")
+					SYSTEM_CALL_CASE(16, "16")
+					SYSTEM_CALL_CASE(17, "17")
+					SYSTEM_CALL_CASE(18, "18")
+					SYSTEM_CALL_CASE(19, "19")
+					SYSTEM_CALL_CASE(20, "20")
+					SYSTEM_CALL_CASE(21, "21")
+					SYSTEM_CALL_CASE(22, "22")
+					SYSTEM_CALL_CASE(23, "23")
+					SYSTEM_CALL_CASE(24, "24")
+					SYSTEM_CALL_CASE(25, "25")
+					SYSTEM_CALL_CASE(26, "26")
+					SYSTEM_CALL_CASE(27, "27")
+					SYSTEM_CALL_CASE(28, "28")
+					SYSTEM_CALL_CASE(29, "29")
+					SYSTEM_CALL_CASE(30, "30")
+					SYSTEM_CALL_CASE(31, "31")
+					SYSTEM_CALL_CASE(32, "32")
+					SYSTEM_CALL_CASE(33, "33")
+					SYSTEM_CALL_CASE(34, "34")
+					SYSTEM_CALL_CASE(35, "35")
+					SYSTEM_CALL_CASE(36, "36")
+					SYSTEM_CALL_CASE(37, "37")
+					SYSTEM_CALL_CASE(38, "38")
+					SYSTEM_CALL_CASE(39, "39")
+					SYSTEM_CALL_CASE(40, "40")
+					SYSTEM_CALL_CASE(41, "41")
+					SYSTEM_CALL_CASE(42, "42")
+					SYSTEM_CALL_CASE(43, "43")
+					SYSTEM_CALL_CASE(44, "44")
+					SYSTEM_CALL_CASE(45, "45")
+					SYSTEM_CALL_CASE(46, "46")
+					SYSTEM_CALL_CASE(47, "47")
+					SYSTEM_CALL_CASE(48, "48")
+					SYSTEM_CALL_CASE(49, "49")
+					SYSTEM_CALL_CASE(50, "50")
+					SYSTEM_CALL_CASE(51, "51")
+					SYSTEM_CALL_CASE(52, "52")
+					SYSTEM_CALL_CASE(53, "53")
+					SYSTEM_CALL_CASE(54, "54")
+					SYSTEM_CALL_CASE(55, "55")
+					SYSTEM_CALL_CASE(56, "56")
+					SYSTEM_CALL_CASE(57, "57")
+					SYSTEM_CALL_CASE(58, "58")
+					SYSTEM_CALL_CASE(59, "59")
+					SYSTEM_CALL_CASE(60, "60")
+					SYSTEM_CALL_CASE(61, "61")
+					SYSTEM_CALL_CASE(62, "62")
+					SYSTEM_CALL_CASE(63, "63")
+				}
+
+				#undef	SYSTEM_CALL
+				#undef	SYSTEM_CALL_CASE
+			}
+			else
+			{
+				struct Desc tss_desc;
+				struct Gate task_gate;
+				get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+				get_desc_from_gdt(400 + tid * 5 + 1, (uint8 *)&task_gate);
+				tss_desc.attr = AT386TSS + DPL3;
+				set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+				set_desc_to_gdt(11, (uint8 *)&task_gate);
+				asm volatile ("ljmp	$88, $0;");
+			}
 		}
 	}
-}
-
-/**
-	@Function:		enable_flush_screen
-	@Access:		Public
-	@Description:
-		允许刷新屏幕。
-	@Parameters:
-	@Return:	
-*/
-void
-enable_flush_screen(void)
-{
-	is_enable_flush_screen = 1;
-}
-
-/**
-	@Function:		disable_flush_screen
-	@Access:		Public
-	@Description:
-		禁用刷新屏幕。
-	@Parameters:
-	@Return:	
-*/
-void
-disable_flush_screen(void)
-{
-	is_enable_flush_screen = 0;
 }
 
 static volatile int32	old_mouse_x = 0;
@@ -1402,6 +1472,7 @@ system_call(void)
 	LOCK_TASK();
 
 	// 该区域处于关中断状态 {
+
 	is_system_call--;
 
 	task->is_system_call = FALSE;
@@ -1550,6 +1621,9 @@ system_call_int(void)
 		SYSTEM_CALL_CASE(63, "63")
 	}
 
+	#undef	SYSTEM_CALL
+	#undef	SYSTEM_CALL_CASE
+
 	INT_EXIT();
 }
 
@@ -1569,8 +1643,18 @@ void
 kill_task_and_jump_to_kernel(IN uint32 tid)
 {
 	is_kernel_task = TRUE;
-	kill_task(tid);
-	enable_flush_screen();
+
+	// 检测screen.sys任务是不是被杀死了。
+	if(strcmp(get_task_info_ptr(tid)->name, "DA:/isystem/sys/screen.sys") == 0)
+	{
+		int32 sys_screen_tid = create_sys_task_by_file(	"DA:/isystem/sys/screen.sys",
+														"DA:/isystem/sys/screen.sys",
+														"DA:/isystem/sys/");
+		get_task_info_ptr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
+		task_ready(sys_screen_tid);
+	}
+	
+	kill_sys_task(tid);
 
 	int32 wait_app_tid = get_wait_app_tid();
 	if(tid == wait_app_tid)

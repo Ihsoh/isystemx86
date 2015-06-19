@@ -134,4 +134,8 @@ extern uint32 memory_size(void * ptr);
 #define	il_memory_size(ptr)	(memory_size((ptr)))
 #define	ILMemorySize(ptr)	(memory_size((ptr)))
 
+extern void console(void);
+#define	il_console()	(console())
+#define	ILConsole()	(console())
+
 #endif
