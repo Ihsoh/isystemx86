@@ -17,3 +17,8 @@ isystemx86/apps/lua1:
 
 isystemx86/apps/lua2:
 	该程序为Lua2.5.1解释器。
+
+isystemx86/libs/imagelib/bmp.c,
+isystemx86/libs/imagelib/bmp.h:
+	从https://github.com/foreverbell/ray-tracer/blob/master/src/image_bmp.cpp，
+	https://github.com/foreverbell/ray-tracer/blob/master/src/image_bmp.hpp移植。
