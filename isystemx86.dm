@@ -92,25 +92,22 @@ WRITE_FILE	VA:/isystem/sys/screen.sys sys/screen/bin/screen.bin
 #System dump directory
 MAKE_DIR	VA:/isystem/ dump
 
-#System data directory
-MAKE_DIR	VA:/isystem/ data
-
 #Log directory
-MAKE_DIR	VA:/isystem/data/ log
+MAKE_DIR	VA:/isystem/ log
 
 #System log file
-MAKE_FILE	VA:/isystem/data/log/ system.log
+MAKE_FILE	VA:/isystem/log/ system.log
 
 #Config directory
-MAKE_DIR	VA:/isystem/data/ config
+MAKE_DIR	VA:/isystem/ config
 
 #System config file
-MAKE_FILE	VA:/isystem/data/config/ system.json
-WRITE_FILE	VA:/isystem/data/config/system.json isystem/data/config/system.json
+MAKE_FILE	VA:/isystem/config/ system.json
+WRITE_FILE	VA:/isystem/config/system.json isystem/config/system.json
 
 #GUI config file
-MAKE_FILE	VA:/isystem/data/config/ gui.json
-WRITE_FILE	VA:/isystem/data/config/gui.json isystem/data/config/gui.json
+MAKE_FILE	VA:/isystem/config/ gui.json
+WRITE_FILE	VA:/isystem/config/gui.json isystem/config/gui.json
 
 #Lock directory
 MAKE_DIR	VA:/isystem/ lock
@@ -125,14 +122,6 @@ MAKE_DIR	VA:/isystem/resources/ images
 #Images
 MAKE_FILE	VA:/isystem/resources/images/ pointer.img0
 WRITE_FILE	VA:/isystem/resources/images/pointer.img0 isystem/resources/images/pointer.img0
-MAKE_FILE	VA:/isystem/resources/images/ bg_640_480.img0
-WRITE_FILE	VA:/isystem/resources/images/bg_640_480.img0 isystem/resources/images/bg_640_480.img0
-MAKE_FILE	VA:/isystem/resources/images/ bg_800_600.img0
-WRITE_FILE	VA:/isystem/resources/images/bg_800_600.img0 isystem/resources/images/bg_800_600.img0
-MAKE_FILE	VA:/isystem/resources/images/ bg_1024_768.img0
-WRITE_FILE	VA:/isystem/resources/images/bg_1024_768.img0 isystem/resources/images/bg_1024_768.img0
-MAKE_FILE	VA:/isystem/resources/images/ bg_1280_1024.img0
-WRITE_FILE	VA:/isystem/resources/images/bg_1280_1024.img0 isystem/resources/images/bg_1280_1024.img0
 MAKE_FILE	VA:/isystem/resources/images/ close_button_ns.img0
 WRITE_FILE	VA:/isystem/resources/images/close_button_ns.img0 isystem/resources/images/close_button_ns.img0
 MAKE_FILE	VA:/isystem/resources/images/ close_button_s.img0
@@ -141,6 +130,15 @@ MAKE_FILE	VA:/isystem/resources/images/ hidden_button_ns.img0
 WRITE_FILE	VA:/isystem/resources/images/hidden_button_ns.img0 isystem/resources/images/hidden_button_ns.img0
 MAKE_FILE	VA:/isystem/resources/images/ hidden_button_s.img0
 WRITE_FILE	VA:/isystem/resources/images/hidden_button_s.img0 isystem/resources/images/hidden_button_s.img0
+
+MAKE_FILE	VA:/isystem/resources/images/ bg640x480.bmp
+WRITE_FILE	VA:/isystem/resources/images/bg640x480.bmp res/bmp/bg640x480.bmp
+MAKE_FILE	VA:/isystem/resources/images/ bg800x600.bmp
+WRITE_FILE	VA:/isystem/resources/images/bg800x600.bmp res/bmp/bg800x600.bmp
+MAKE_FILE	VA:/isystem/resources/images/ bg1024x768.bmp
+WRITE_FILE	VA:/isystem/resources/images/bg1024x768.bmp res/bmp/bg1024x768.bmp
+MAKE_FILE	VA:/isystem/resources/images/ bg1280x1024.bmp
+WRITE_FILE	VA:/isystem/resources/images/bg1280x1024.bmp res/bmp/bg1280x1024.bmp
 
 #System font directory
 MAKE_DIR	VA:/isystem/ fonts

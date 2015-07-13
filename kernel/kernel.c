@@ -18,7 +18,6 @@
 #include "tasks.h"
 #include "vesa.h"
 #include "sparams.h"
-#include "kernel.h"
 #include "paging.h"
 #include "ifs1fs.h"
 #include "system.h"

@@ -18,6 +18,9 @@
 static JSONLObjectPtr system_json 				= NULL;
 static JSONLObjectPtr system_console_json 		= NULL;
 static JSONLObjectPtr system_ifs1_json			= NULL;
+
+static JSONLObjectPtr gui_json					= NULL;
+
 /**
 	@Function:		config_init
 	@Access:		Public
@@ -33,7 +36,10 @@ config_init(void)
 {
 	struct die_info info;
 	int8 buffer[KB(64)];
-	FILE * fptr = fopen(SYSTEM_CONFIG_FILE, FILE_MODE_READ);
+	FILE * fptr = NULL;
+
+	// system.json
+	fptr = fopen(SYSTEM_SYSTEM_CONFIG_FILE, FILE_MODE_READ);
 	if(fptr != NULL)
 	{
 		uint32 len = fread(fptr, buffer, sizeof(buffer));
@@ -49,7 +55,7 @@ config_init(void)
 			if(	!JSONL_OBJECT_GET(system_json, "Console", &value_raw)
 				|| JSONL_TYPE(value_raw) != JSONL_TYPE_OBJECT)
 			{
-				fill_info(info, DC_INIT_CONFIG, DI_INIT_CONFIG);
+				fill_info(info, DC_INIT_SYSTEM_CONFIG, DI_INIT_SYSTEM_CONFIG);
 				die(&info);
 			}
 			system_console_json = JSONL_OBJECT(value_raw);
@@ -58,22 +64,46 @@ config_init(void)
 			if(	!JSONL_OBJECT_GET(system_json, "IFS1", &value_raw)
 				|| JSONL_TYPE(value_raw) != JSONL_TYPE_OBJECT)
 			{
-				fill_info(info, DC_INIT_CONFIG, DI_INIT_CONFIG);
+				fill_info(info, DC_INIT_SYSTEM_CONFIG, DI_INIT_SYSTEM_CONFIG);
 				die(&info);
 			}
 			system_ifs1_json = JSONL_OBJECT(value_raw);
 		}
 		else
 		{
-			fill_info(info, DC_INIT_CONFIG, DI_INIT_CONFIG);
+			fill_info(info, DC_INIT_SYSTEM_CONFIG, DI_INIT_SYSTEM_CONFIG);
 			die(&info);
 		}
 	}
 	else
 	{
-		fill_info(info, DC_INIT_CONFIG, DI_INIT_CONFIG);
+		fill_info(info, DC_INIT_SYSTEM_CONFIG, DI_INIT_SYSTEM_CONFIG);
 		die(&info);
 	}
+
+	// gui.json
+	fptr = fopen(SYSTEM_GUI_CONFIG_FILE, FILE_MODE_READ);
+	if(fptr != NULL)
+	{
+		uint32 len = fread(fptr, buffer, sizeof(buffer));
+		buffer[len] = '\0';
+		fclose(fptr);
+		JSONLRawPtr gui_json_raw = jsonl_parse_json(buffer);
+		if(	gui_json_raw != NULL
+			&& JSONL_TYPE(gui_json_raw) == JSONL_TYPE_OBJECT)
+			gui_json = JSONL_OBJECT(gui_json_raw);
+		else
+		{
+			fill_info(info, DC_INIT_GUI_CONFIG, DI_INIT_GUI_CONFIG);
+			die(&info);
+		}
+	}
+	else
+	{
+		fill_info(info, DC_INIT_GUI_CONFIG, DI_INIT_GUI_CONFIG);
+		die(&info);
+	}
+
 	return TRUE;
 }
 
@@ -231,3 +261,5 @@ config_##xxx##_get_number(	IN int8 * name,	\
 CONFIG_XXX_GET_STH(system, "System")
 CONFIG_XXX_GET_STH(system_console, "System-Console")
 CONFIG_XXX_GET_STH(system_ifs1, "System-IFS1")
+
+CONFIG_XXX_GET_STH(gui, "GUI")

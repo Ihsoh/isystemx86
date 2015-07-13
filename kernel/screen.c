@@ -24,6 +24,7 @@
 #include "sfunc_window.h"
 #include "klib.h"
 #include "cmlock.h"
+#include "bmp/bmp.h"
 
 #include <ilib/string.h>
 
@@ -638,25 +639,34 @@ init_screen(void)
 			screen_char_buffer[ui + 1] = CC_BLACK;
 		}
 
-		FILE * fptr = NULL;
+		ASCCHAR bgfile[1024];
 		if(screen_width == 640 && screen_height == 480)
-			fptr = fopen(SYSTEM_BG_640_480, FILE_MODE_READ);
+			config_gui_get_string("Background640x480", bgfile, sizeof(bgfile));
 		else if(screen_width == 800 && screen_height == 600)
-			fptr = fopen(SYSTEM_BG_800_600, FILE_MODE_READ);
+			config_gui_get_string("Background800x600", bgfile, sizeof(bgfile));
 		else if(screen_width == 1024 && screen_height == 768)
-			fptr = fopen(SYSTEM_BG_1024_768, FILE_MODE_READ);
+			config_gui_get_string("Background1024x768", bgfile, sizeof(bgfile));
 		else if(screen_width == 1280 && screen_height == 1024)
-			fptr = fopen(SYSTEM_BG_1280_1024, FILE_MODE_READ);
-		if(fptr != NULL)
-		{		
+			config_gui_get_string("Background1280x1024", bgfile, sizeof(bgfile));
+		IMGLBMPPtr bgbmpobj = imgl_bmp_create(bgfile);
+		if(bgbmpobj != NULL)
+		{
+			int32 bgbmp_width, bgbmp_height;
+			int32 x, y;
 			destroy_common_image(&bg_image);
-			uint8 * bg_image_data = alloc_memory(flen(fptr));
-			fread(fptr, bg_image_data, flen(fptr));
-			fclose(fptr);
-			new_common_image(&bg_image, bg_image_data);
-			free_memory(bg_image_data);
+			new_empty_image0(&bg_image, screen_width, screen_height);
+			bgbmp_width = imgl_bmp_get_width(bgbmpobj);
+			bgbmp_height = imgl_bmp_get_height(bgbmpobj);
+			for(x = 0; x < (int32)screen_width && x < bgbmp_width; x++)
+				for(y = 0; y < (int32)screen_height && y < bgbmp_height; y++)
+				{
+					uint32 pixel = imgl_bmp_get_color(bgbmpobj, x, y);
+					set_pixel_common_image(&bg_image, x, y, pixel);
+				}
+			imgl_bmp_destroy(bgbmpobj);
 		}
 
+		FILE * fptr = NULL;
 		fptr = fopen(SYSTEM_POINTER, FILE_MODE_READ);
 		if(fptr != NULL)
 		{
@@ -1052,10 +1062,11 @@ flush_screen(void)
 	uint32 * console_screen_buffer_data_ptr = console_screen_buffer.data;
 
 	if(target_screen != NULL)
-		rect_common_image(target_screen, 0, 0, screen_width, screen_height, 0xff000000);
-	else	
-		rect_common_image(&screen_buffer, 0, 0, screen_width, screen_height, 0xffaaaaaa);
-		//draw_common_image(&screen_buffer, &bg_image, 0, 0, bg_image.width, bg_image.height);
+		//rect_common_image(target_screen, 0, 0, screen_width, screen_height, 0xff000000);
+		draw_common_image(target_screen, &bg_image, 0, 0, bg_image.width, bg_image.height);
+	else
+		//rect_common_image(&screen_buffer, 0, 0, screen_width, screen_height, 0xffaaaaaa);
+		draw_common_image(&screen_buffer, &bg_image, 0, 0, bg_image.width, bg_image.height);
 
 	//绘制控制台
 	if(flush_cbuffer)

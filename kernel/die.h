@@ -115,8 +115,8 @@ die(IN struct die_info * info);
 	#define	DC_DOUBLE_FAULT_TSK		0x0000001d
 	#define	DI_DOUBLE_FAULT_TSK		"A task causes a exception of double fault, the id is %d, the name is '%s'"
 
-	#define	DC_INIT_CONFIG			0x0000001e
-	#define	DI_INIT_CONFIG			"Failed to initialize system configuration. Please check "SYSTEM_CONFIG_FILE
+	#define	DC_INIT_SYSTEM_CONFIG	0x0000001e
+	#define	DI_INIT_SYSTEM_CONFIG	"Failed to initialize system configuration. Please check "SYSTEM_SYSTEM_CONFIG_FILE
 
 	#define	DC_INIT_MF				0x0000001f
 	#define	DI_INIT_MF				"Failed to initialize procedure to process exception of FPU float point error"
@@ -144,5 +144,8 @@ die(IN struct die_info * info);
 
 	#define	DC_XF 					0x00000027
 	#define	DI_XF 					"Kernel causes a exception of SIMD float point"
+
+	#define	DC_INIT_GUI_CONFIG		0x00000028
+	#define	DI_INIT_GUI_CONFIG		"Failed to initialize gui configuration. Please check "SYSTEM_GUI_CONFIG_FILE
 
 #endif

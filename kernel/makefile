@@ -22,11 +22,12 @@ bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/a
 bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
 bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
+BMPObjs=bmp/bin/bmp.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
-$(Target): bin $(Objs)
-	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) $(StringObj)	\
+$(Target): bin $(Objs) $(BMPObjs)
+	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) $(StringObj) $(BMPObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -198,7 +199,14 @@ bin/knlldr.obj: knlldr.c knlldr.h
 bin/irq.obj: irq.s
 	$(AS) $(ASFlags) -c irq.s -o bin/irq.obj
 
+
+
+bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
+	$(CC) $(CFlags) -c bmp/bmp.c -o bmp/bin/bmp.obj $(Include) -std=c99
+
+
+
 .PHONY:clean
 
 clean:
-	-rm -f $(Objs) $(Target)
+	-rm -f $(Objs) $(BMPObjs) $(Target)
