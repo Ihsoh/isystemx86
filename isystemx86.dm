@@ -119,18 +119,6 @@ WRITE_FILE	VA:/isystem/lock/system.lock isystem/lock/system.lock
 MAKE_DIR	VA:/isystem/ resources
 MAKE_DIR	VA:/isystem/resources/ images
 
-#Images
-MAKE_FILE	VA:/isystem/resources/images/ pointer.img0
-WRITE_FILE	VA:/isystem/resources/images/pointer.img0 isystem/resources/images/pointer.img0
-MAKE_FILE	VA:/isystem/resources/images/ close_button_ns.img0
-WRITE_FILE	VA:/isystem/resources/images/close_button_ns.img0 isystem/resources/images/close_button_ns.img0
-MAKE_FILE	VA:/isystem/resources/images/ close_button_s.img0
-WRITE_FILE	VA:/isystem/resources/images/close_button_s.img0 isystem/resources/images/close_button_s.img0
-MAKE_FILE	VA:/isystem/resources/images/ hidden_button_ns.img0
-WRITE_FILE	VA:/isystem/resources/images/hidden_button_ns.img0 isystem/resources/images/hidden_button_ns.img0
-MAKE_FILE	VA:/isystem/resources/images/ hidden_button_s.img0
-WRITE_FILE	VA:/isystem/resources/images/hidden_button_s.img0 isystem/resources/images/hidden_button_s.img0
-
 MAKE_FILE	VA:/isystem/resources/images/ bg640x480.bmp
 WRITE_FILE	VA:/isystem/resources/images/bg640x480.bmp res/bmp/bg640x480.bmp
 MAKE_FILE	VA:/isystem/resources/images/ bg800x600.bmp
@@ -139,6 +127,22 @@ MAKE_FILE	VA:/isystem/resources/images/ bg1024x768.bmp
 WRITE_FILE	VA:/isystem/resources/images/bg1024x768.bmp res/bmp/bg1024x768.bmp
 MAKE_FILE	VA:/isystem/resources/images/ bg1280x1024.bmp
 WRITE_FILE	VA:/isystem/resources/images/bg1280x1024.bmp res/bmp/bg1280x1024.bmp
+
+MAKE_FILE	VA:/isystem/resources/images/ closebutton.bmp
+WRITE_FILE	VA:/isystem/resources/images/closebutton.bmp res/bmp/closebutton.bmp
+MAKE_FILE	VA:/isystem/resources/images/ closebuttonhover.bmp
+WRITE_FILE	VA:/isystem/resources/images/closebuttonhover.bmp res/bmp/closebuttonhover.bmp
+MAKE_FILE	VA:/isystem/resources/images/ closebuttonblur.bmp
+WRITE_FILE	VA:/isystem/resources/images/closebuttonblur.bmp res/bmp/closebuttonblur.bmp
+MAKE_FILE	VA:/isystem/resources/images/ hiddenbutton.bmp
+WRITE_FILE	VA:/isystem/resources/images/hiddenbutton.bmp res/bmp/hiddenbutton.bmp
+MAKE_FILE	VA:/isystem/resources/images/ hiddenbuttonhover.bmp
+WRITE_FILE	VA:/isystem/resources/images/hiddenbuttonhover.bmp res/bmp/hiddenbuttonhover.bmp
+MAKE_FILE	VA:/isystem/resources/images/ hiddenbuttonblur.bmp
+WRITE_FILE	VA:/isystem/resources/images/hiddenbuttonblur.bmp res/bmp/hiddenbuttonblur.bmp
+
+MAKE_FILE	VA:/isystem/resources/images/ pointer.bmp
+WRITE_FILE	VA:/isystem/resources/images/pointer.bmp res/bmp/pointer.bmp
 
 #System font directory
 MAKE_DIR	VA:/isystem/ fonts

@@ -12,7 +12,7 @@
 #include "image.h"
 
 #define	TITLE_BAR_HEIGHT		30
-#define	TITLE_BAR_BGCOLOR		0xff2474d8
+#define	TITLE_BAR_BGCOLOR		0xff8e70c9
 #define	TITLE_BAR_BGCOLOR_NT	0xffcccccc
 
 #define	WINDOW_STATE_SHOW		1

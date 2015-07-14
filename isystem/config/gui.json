@@ -5,7 +5,9 @@
   Background1280x1024:"DA:/isystem/resources/images/bg1280x1024.bmp",
   CloseButton:"DA:/isystem/resources/images/closebutton.bmp",
   CloseButtonHover:"DA:/isystem/resources/images/closebuttonhover.bmp",
+  CloseButtonBlur:"DA:/isystem/resources/images/closebuttonblur.bmp",
   HiddenButton:"DA:/isystem/resources/images/hiddenbutton.bmp",
   HiddenButtonHover:"DA:/isystem/resources/images/hiddenbuttonhover.bmp"
+  HiddenButtonBlur:"DA:/isystem/resources/images/hiddenbuttonblur.bmp"
   Pointer:"DA:/isystem/resources/images/pointer.bmp"
 }

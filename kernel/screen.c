@@ -666,16 +666,17 @@ init_screen(void)
 			imgl_bmp_destroy(bgbmpobj);
 		}
 
-		FILE * fptr = NULL;
-		fptr = fopen(SYSTEM_POINTER, FILE_MODE_READ);
-		if(fptr != NULL)
+		ASCCHAR pointer_file[1024];
+		IMGLBMPPtr pointer_bmpobj = NULL;
+		config_gui_get_string("Pointer", pointer_file, sizeof(pointer_file));
+		pointer_bmpobj = imgl_bmp_create(pointer_file);
+		int32 pointer_width = imgl_bmp_get_width(pointer_bmpobj);
+		int32 pointer_height = imgl_bmp_get_height(pointer_bmpobj);
+		new_empty_image0(&pointer_image, pointer_width, pointer_height);
+		if(pointer_bmpobj != NULL)
 		{
-			destroy_common_image(&pointer_image);
-			uint8 * pointer_image_data = alloc_memory(flen(fptr));
-			fread(fptr, pointer_image_data, flen(fptr));
-			fclose(fptr);
-			new_common_image(&pointer_image, pointer_image_data);
-			free_memory(pointer_image_data);
+			img_draw_bmp_to_cimage(pointer_bmpobj, pointer_width, pointer_height, &pointer_image);
+			imgl_bmp_destroy(pointer_bmpobj);
 		}
 
 		//Window Mode

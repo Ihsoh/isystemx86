@@ -23,11 +23,12 @@ bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
 bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
 BMPObjs=bmp/bin/bmp.obj
+UtilsObjs=utils/bin/img.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
-$(Target): bin $(Objs) $(BMPObjs)
-	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) $(StringObj) $(BMPObjs)	\
+$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs)
+	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) $(StringObj) $(BMPObjs) $(UtilsObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -204,6 +205,8 @@ bin/irq.obj: irq.s
 bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
 	$(CC) $(CFlags) -c bmp/bmp.c -o bmp/bin/bmp.obj $(Include) -std=c99
 
+utils/bin/img.obj: utils/img.c utils/img.h
+	$(CC) $(CFlags) -c utils/img.c -o utils/bin/img.obj $(Include)
 
 
 .PHONY:clean

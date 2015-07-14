@@ -11,16 +11,15 @@
 #include "image.h"
 #include "enfont.h"
 #include "ifs1fs.h"
+#include "bmp/bmp.h"
+#include "utils/img.h"
 
-#define	CLOSE_BUTTON_NS_IMAGE_PATH	"DA:/isystem/resources/images/close_button_ns.img0"
-#define	CLOSE_BUTTON_S_IMAGE_PATH	"DA:/isystem/resources/images/close_button_s.img0"
-#define	HIDDEN_BUTTON_NS_IMAGE_PATH	"DA:/isystem/resources/images/hidden_button_ns.img0"
-#define	HIDDEN_BUTTON_S_IMAGE_PATH	"DA:/isystem/resources/images/hidden_button_s.img0"
-
-static struct CommonImage close_button_ns;
-static struct CommonImage close_button_s;
-static struct CommonImage hidden_button_ns;
-static struct CommonImage hidden_button_s;
+static struct CommonImage close_button;
+static struct CommonImage close_button_hover;
+static struct CommonImage close_button_blur;
+static struct CommonImage hidden_button;
+static struct CommonImage hidden_button_hover;
+static struct CommonImage hidden_button_blur;
 
 /**
 	@Function:		load_image
@@ -71,10 +70,62 @@ load_image(	OUT struct CommonImage * common_image,
 BOOL
 init_window_resources(void)
 {
-	return 	load_image(&close_button_ns, CLOSE_BUTTON_NS_IMAGE_PATH)
-			&& load_image(&close_button_s, CLOSE_BUTTON_S_IMAGE_PATH)
-			&& load_image(&hidden_button_ns, HIDDEN_BUTTON_NS_IMAGE_PATH)
-			&& load_image(&hidden_button_s, HIDDEN_BUTTON_S_IMAGE_PATH);
+	new_empty_image0(&close_button, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
+	new_empty_image0(&close_button_hover, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
+	new_empty_image0(&close_button_blur, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
+	new_empty_image0(&hidden_button, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT);
+	new_empty_image0(&hidden_button_hover, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT);
+	new_empty_image0(&hidden_button_blur, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT);
+
+	ASCCHAR imgfile[1024];
+	IMGLBMPPtr bmpobj = NULL;
+	config_gui_get_string("CloseButton", imgfile, sizeof(imgfile));
+	bmpobj = imgl_bmp_create(imgfile);
+	if(bmpobj != NULL)
+	{
+		img_draw_bmp_to_cimage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button);
+		imgl_bmp_destroy(bmpobj);
+	}
+
+	config_gui_get_string("CloseButtonHover", imgfile, sizeof(imgfile));
+	bmpobj = imgl_bmp_create(imgfile);
+	if(bmpobj != NULL)
+	{
+		img_draw_bmp_to_cimage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button_hover);
+		imgl_bmp_destroy(bmpobj);
+	}
+
+	config_gui_get_string("CloseButtonBlur", imgfile, sizeof(imgfile));
+	bmpobj = imgl_bmp_create(imgfile);
+	if(bmpobj != NULL)
+	{
+		img_draw_bmp_to_cimage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button_blur);
+		imgl_bmp_destroy(bmpobj);
+	}
+
+	config_gui_get_string("HiddenButton", imgfile, sizeof(imgfile));
+	bmpobj = imgl_bmp_create(imgfile);
+	if(bmpobj != NULL)
+	{
+		img_draw_bmp_to_cimage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button);
+		imgl_bmp_destroy(bmpobj);
+	}
+
+	config_gui_get_string("HiddenButtonHover", imgfile, sizeof(imgfile));
+	bmpobj = imgl_bmp_create(imgfile);
+	if(bmpobj != NULL)
+	{
+		img_draw_bmp_to_cimage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button_hover);
+		imgl_bmp_destroy(bmpobj);
+	}
+
+	config_gui_get_string("HiddenButtonBlur", imgfile, sizeof(imgfile));
+	bmpobj = imgl_bmp_create(imgfile);
+	if(bmpobj != NULL)
+	{
+		img_draw_bmp_to_cimage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button_blur);
+		imgl_bmp_destroy(bmpobj);
+	}
 }
 
 /**
@@ -88,10 +139,10 @@ init_window_resources(void)
 void
 destroy_window_resources(void)
 {
-	destroy_common_image(&close_button_ns);
-	destroy_common_image(&close_button_s);
-	destroy_common_image(&hidden_button_ns);
-	destroy_common_image(&hidden_button_s);
+	destroy_common_image(&close_button);
+	destroy_common_image(&close_button_hover);
+	destroy_common_image(&hidden_button);
+	destroy_common_image(&hidden_button_hover);
 }
 
 /**
@@ -122,51 +173,83 @@ render_window(	IN struct Window * window,
 
 	//关闭按钮
 	if(window->has_close_button)
-		if(window->over_close_button)
+		if(top)
+			if(window->over_close_button)
+				draw_common_image(	image, 
+									&close_button_hover, 
+									window->width - CLOSE_BUTTON_WIDTH, 
+									0, 
+									CLOSE_BUTTON_WIDTH, 
+									CLOSE_BUTTON_HEIGHT);
+			else		
+				draw_common_image(	image, 
+									&close_button, 
+									window->width - CLOSE_BUTTON_WIDTH, 
+									0, 
+									CLOSE_BUTTON_WIDTH, 
+									CLOSE_BUTTON_HEIGHT);
+		else
 			draw_common_image(	image, 
-								&close_button_s, 
-								window->width - CLOSE_BUTTON_WIDTH, 
-								0, 
-								CLOSE_BUTTON_WIDTH, 
-								CLOSE_BUTTON_HEIGHT);
-		else		
-			draw_common_image(	image, 
-								&close_button_ns, 
+								&close_button_blur, 
 								window->width - CLOSE_BUTTON_WIDTH, 
 								0, 
 								CLOSE_BUTTON_WIDTH, 
 								CLOSE_BUTTON_HEIGHT);
 	else
-		draw_common_image(	image, 
-							&close_button_ns, 
-							window->width - CLOSE_BUTTON_WIDTH,
-							0, 
-							CLOSE_BUTTON_WIDTH,
-							CLOSE_BUTTON_HEIGHT);
+		if(top)
+			draw_common_image(	image, 
+								&close_button, 
+								window->width - CLOSE_BUTTON_WIDTH,
+								0, 
+								CLOSE_BUTTON_WIDTH,
+								CLOSE_BUTTON_HEIGHT);
+		else
+			draw_common_image(	image, 
+								&close_button_blur, 
+								window->width - CLOSE_BUTTON_WIDTH,
+								0, 
+								CLOSE_BUTTON_WIDTH,
+								CLOSE_BUTTON_HEIGHT);
 
 	//隐藏按钮
 	if(window->has_hidden_button)
-		if(window->over_hidden_button)
+		if(top)
+			if(window->over_hidden_button)
+				draw_common_image(	image,
+									&hidden_button_hover,
+									window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+									0,
+									HIDDEN_BUTTON_WIDTH,
+									HIDDEN_BUTTON_HEIGHT);
+			else	
+				draw_common_image(	image,
+									&hidden_button,
+									window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+									0,
+									HIDDEN_BUTTON_WIDTH,
+									HIDDEN_BUTTON_HEIGHT);
+		else
 			draw_common_image(	image,
-								&hidden_button_s,
-								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
-								0,
-								HIDDEN_BUTTON_WIDTH,
-								HIDDEN_BUTTON_HEIGHT);
-		else	
-			draw_common_image(	image,
-								&hidden_button_ns,
+								&hidden_button_blur,
 								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
 								0,
 								HIDDEN_BUTTON_WIDTH,
 								HIDDEN_BUTTON_HEIGHT);
 	else
-		draw_common_image(	image,
-							&hidden_button_ns,
-							window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
-							0,
-							HIDDEN_BUTTON_WIDTH,
-							HIDDEN_BUTTON_HEIGHT);
+		if(top)
+			draw_common_image(	image,
+								&hidden_button,
+								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+								0,
+								HIDDEN_BUTTON_WIDTH,
+								HIDDEN_BUTTON_HEIGHT);
+		else
+			draw_common_image(	image,
+								&hidden_button_blur,
+								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+								0,
+								HIDDEN_BUTTON_WIDTH,
+								HIDDEN_BUTTON_HEIGHT);
 
 	//画标题
 	text_common_image(	image,
