@@ -12,10 +12,12 @@
 #include "screen.h"
 #include "tasks.h"
 #include "kernel.h"
-#include "sfunc_window.h"
 #include "vesa.h"
-#include "console_window.h"
 #include "window.h"
+
+#include "windows/sfunc.h"
+#include "windows/clock.h"
+#include "windows/console.h"
 
 #define	IBUFFER_SIZE	16
 #define	KEY_MAP_SIZE	256	

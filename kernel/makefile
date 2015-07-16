@@ -17,18 +17,20 @@ bin/console.obj bin/ifs1disk.obj bin/ifs1vdisk.obj bin/ifs1blocks.obj bin/memory
 bin/kfuncs.obj bin/ifs1hdisk.obj bin/cmos.obj bin/ifs1fs.obj bin/tasks.obj \
 bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scall_fs.obj \
 bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
-bin/paging.obj bin/lock.obj bin/window.obj bin/clock_window.obj bin/console_window.obj	\
-bin/klib.obj bin/sfunc_window.obj bin/kstring.obj bin/log.obj bin/rsdp.obj bin/acpi.obj	\
-bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
+bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.obj bin/rsdp.obj	\
+bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
 bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
 BMPObjs=bmp/bin/bmp.obj
 UtilsObjs=utils/bin/img.obj
+DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
+WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
-$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs)
-	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs) $(StringObj) $(BMPObjs) $(UtilsObjs)	\
+$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)
+	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -122,17 +124,8 @@ bin/lock.obj: lock.c lock.h
 bin/window.obj: window.c window.h
 	$(CC) $(CFlags) -c window.c -o bin/window.obj $(Include)
 
-bin/clock_window.obj: clock_window.c clock_window.h
-	$(CC) $(CFlags) -c clock_window.c -o bin/clock_window.obj $(Include)
-
-bin/console_window.obj: console_window.c console_window.h
-	$(CC) $(CFlags) -c console_window.c -o bin/console_window.obj $(Include)
-
 bin/klib.obj: klib.c klib.h
 	$(CC) $(CFlags) -c klib.c -o bin/klib.obj $(Include)
-
-bin/sfunc_window.obj: sfunc_window.c sfunc_window.h
-	$(CC) $(CFlags) -c sfunc_window.c -o bin/sfunc_window.obj $(Include)
 
 bin/kstring.obj: kstring.c kstring.h
 	$(CC) $(CFlags) -c kstring.c -o bin/kstring.obj $(Include)
@@ -205,8 +198,27 @@ bin/irq.obj: irq.s
 bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
 	$(CC) $(CFlags) -c bmp/bmp.c -o bmp/bin/bmp.obj $(Include) -std=c99
 
+
 utils/bin/img.obj: utils/img.c utils/img.h
 	$(CC) $(CFlags) -c utils/img.c -o utils/bin/img.obj $(Include)
+
+
+dump/bin/dump.obj: dump/dump.c dump/dump.h
+	$(CC) $(CFlags) -c dump/dump.c -o dump/bin/dump.obj $(Include)
+
+dump/bin/msg.obj: dump/msg.c dump/msg.h
+	$(CC) $(CFlags) -c dump/msg.c -o dump/bin/msg.obj $(Include)
+
+
+windows/bin/clock.obj: windows/clock.c windows/clock.h
+	$(CC) $(CFlags) -c windows/clock.c -o windows/bin/clock.obj $(Include)
+
+windows/bin/console.obj: windows/console.c windows/console.h
+	$(CC) $(CFlags) -c windows/console.c -o windows/bin/console.obj $(Include)
+
+windows/bin/sfunc.obj: windows/sfunc.c windows/sfunc.h
+	$(CC) $(CFlags) -c windows/sfunc.c -o windows/bin/sfunc.obj $(Include)
+
 
 
 .PHONY:clean

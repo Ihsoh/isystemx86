@@ -1,21 +1,21 @@
 /**
-	@File:			sfunc_window.c
+	@File:			sfunc.c
 	@Author:		Ihsoh
 	@Date:			2014-12-12
 	@Description:
 		系统功能的窗体程序。
 */
 
-#include "sfunc_window.h"
-#include "types.h"
-#include "screen.h"
-#include "image.h"
-#include "enfont.h"
-#include "klib.h"
-#include "kernel.h"
-#include "clock_window.h"
-#include "console_window.h"
-#include "window.h"
+#include "sfunc.h"
+#include "clock.h"
+#include "console.h"
+#include "../types.h"
+#include "../screen.h"
+#include "../image.h"
+#include "../enfont.h"
+#include "../klib.h"
+#include "../kernel.h"
+#include "../window.h"
 
 static struct Window * sfunc_window;
 

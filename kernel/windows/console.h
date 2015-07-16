@@ -1,5 +1,5 @@
 /**
-	@File:			console_window.h
+	@File:			console.h
 	@Author:		Ihsoh
 	@Date:			2014-12-11
 	@Description:
@@ -8,8 +8,8 @@
 #ifndef	_CONSOLE_WINDOW_
 #define	_CONSOLE_WINDOW_
 
-#include "types.h"
-#include "window.h"
+#include "../types.h"
+#include "../window.h"
 
 extern struct Window * console_window;
 

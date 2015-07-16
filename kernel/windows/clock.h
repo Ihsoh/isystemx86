@@ -1,5 +1,5 @@
 /**
-	@File:			clock_window.h
+	@File:			clock.h
 	@Author:		Ihsoh
 	@Date:			2014-12-11
 	@Description:
@@ -8,7 +8,7 @@
 #ifndef	_CLOCK_WINDOW_
 #define	_CLOCK_WINDOW_
 
-#include "types.h"
+#include "../types.h"
 
 extern
 BOOL

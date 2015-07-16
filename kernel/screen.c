@@ -19,12 +19,13 @@
 #include "kernel.h"
 #include "image.h"
 #include "window.h"
-#include "clock_window.h"
-#include "console_window.h"
-#include "sfunc_window.h"
 #include "klib.h"
 #include "cmlock.h"
 #include "bmp/bmp.h"
+
+#include "windows/clock.h"
+#include "windows/console.h"
+#include "windows/sfunc.h"
 
 #include <ilib/string.h>
 

@@ -1,15 +1,15 @@
 /**
-	@File:			console_window.c
+	@File:			console.c
 	@Author:		Ihsoh
 	@Date:			2014-12-11
 	@Description:
 		控制台窗体程序。
 */
 
-#include "console_window.h"
-#include "types.h"
-#include "screen.h"
-#include "window.h"
+#include "console.h"
+#include "../types.h"
+#include "../screen.h"
+#include "../window.h"
 
 #define	WINDOW_TITLE	"Console"
 #define	WINDOW_WIDTH	console_screen_width

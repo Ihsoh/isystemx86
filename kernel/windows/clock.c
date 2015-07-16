@@ -1,18 +1,18 @@
 /**
-	@File:			clock_window.c
+	@File:			clock.c
 	@Author:		Ihsoh
 	@Date:			2014-12-11
 	@Description:
 		系统内置的时钟窗体程序。
 */
 
-#include "clock_window.h"
-#include "types.h"
-#include "screen.h"
-#include "cmos.h"
-#include "image.h"
-#include "enfont.h"
-#include "window.h"
+#include "clock.h"
+#include "../types.h"
+#include "../screen.h"
+#include "../cmos.h"
+#include "../image.h"
+#include "../enfont.h"
+#include "../window.h"
 
 #define	WINDOW_TITLE	"Clock"
 #define	WINDOW_WIDTH	250

@@ -1,5 +1,5 @@
 /**
-	@File:			sfunc_window.h
+	@File:			sfunc.h
 	@Author:		Ihsoh
 	@Date:			2014-12-12
 	@Description:
@@ -8,8 +8,8 @@
 #ifndef	_SFUNC_WINDOW_H_
 #define	_SFUNC_WINDOW_H_
 
-#include "types.h"
-#include "window.h"
+#include "../types.h"
+#include "../window.h"
 
 extern
 BOOL
