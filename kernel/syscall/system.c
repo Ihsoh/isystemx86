@@ -1,25 +1,23 @@
 /**
-	@File:			scall_system.c
+	@File:			system.c
 	@Author:		Ihsoh
 	@Date:			2014-7-29
 	@Description:
 		系统功能的系统调用处理程序。
 */
 
-#include "scall_system.h"
-#include "types.h"
-#include "sparams.h"
-#include "tasks.h"
-#include "console.h"
-#include "memory.h"
-#include "cmos.h"
-#include "console.h"
-#include "paging.h"
-#include "lock.h"
-#include "mqueue.h"
+#include "system.h"
+#include "../types.h"
+#include "../sparams.h"
+#include "../tasks.h"
+#include "../console.h"
+#include "../memory.h"
+#include "../cmos.h"
+#include "../console.h"
+#include "../paging.h"
+#include "../lock.h"
+#include "../mqueue.h"
 #include <ilib/string.h>
-
-#include "screen.h"
 
 /**
 	@Function:		system_call_system

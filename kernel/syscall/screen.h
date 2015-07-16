@@ -1,15 +1,15 @@
 /**
-	@File:			scall_screen.h
+	@File:			screen.h
 	@Author:		Ihsoh
 	@Date:			2014-7-28
 	@Description:
 */
 
-#ifndef	_SCALL_SCREEN_
-#define	_SCALL_SCREEN_
+#ifndef	_SYSCALL_SCREEN_
+#define	_SYSCALL_SCREEN_
 
-#include "types.h"
-#include "sparams.h"
+#include "../types.h"
+#include "../sparams.h"
 
 #define	SCALL_PRINT_CHAR			0
 #define	SCALL_PRINT_CHAR_P			1

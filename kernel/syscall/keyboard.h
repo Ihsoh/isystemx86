@@ -1,16 +1,16 @@
 /**
-	@File:			scall_keyboard.h
+	@File:			keyboard.h
 	@Author:		Ihsoh
 	@Date:			2014-7-29
 	@Description:
 		键盘的系统调用处理程序。
 */
 
-#ifndef	_SCALL_KEYBOARD_
-#define	_SCALL_KEYBOARD_
+#ifndef	_SYSCALL_KEYBOARD_
+#define	_SYSCALL_KEYBOARD_
 
-#include "types.h"
-#include "sparams.h"
+#include "../types.h"
+#include "../sparams.h"
 
 #define	SCALL_GET_CHAR			0
 #define	SCALL_GET_STR_N			1

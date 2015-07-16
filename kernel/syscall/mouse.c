@@ -1,15 +1,15 @@
 /**
-	@File:			scall_mouse.c
+	@File:			mouse.c
 	@Author:		Ihsoh
 	@Date:			2014-11-14
 	@Description:
 		鼠标的系统调用处理程序。
 */
 
-#include "scall_mouse.h"
-#include "types.h"
-#include "sparams.h"
-#include "kernel.h"
+#include "mouse.h"
+#include "../types.h"
+#include "../sparams.h"
+#include "../kernel.h"
 
 /**
 	@Function:		system_call_mouse

@@ -1,16 +1,16 @@
 /**
-	@File:			scall_system.h
+	@File:			system.h
 	@Author:		Ihsoh
 	@Date:			2014-7-29
 	@Description:
 */
 
-#ifndef	_SCALL_SYSTEM_H_
-#define	_SCALL_SYSTEM_H_
+#ifndef	_SYSCALL_SYSTEM_H_
+#define	_SYSCALL_SYSTEM_H_
 
-#include "types.h"
-#include "sparams.h"
-#include "lock.h"
+#include "../types.h"
+#include "../sparams.h"
+#include "../lock.h"
 
 #define	SCALL_EXIT				0
 #define	SCALL_ALLOC_M			1

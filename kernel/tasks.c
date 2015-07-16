@@ -16,7 +16,7 @@
 #include "die.h"
 #include "lock.h"
 #include "mqueue.h"
-#include "scall_fs.h"
+#include "syscall/fs.h"
 #include "kmpool.h"
 
 #include <ilib/string.h>

@@ -1,15 +1,15 @@
 /**
-	@File:			scall_fs.h
+	@File:			fs.h
 	@Author:		Ihsoh
 	@Date:			2014-7-29
 	@Description:
 */
 
-#ifndef	_SCALL_FS_H_
-#define	_SCALL_FS_H_
+#ifndef	_SYSCALL_FS_H_
+#define	_SYSCALL_FS_H_
 
-#include "types.h"
-#include "sparams.h"
+#include "../types.h"
+#include "../sparams.h"
 
 #define	SCALL_FOPEN			0
 #define	SCALL_FCLOSE		1

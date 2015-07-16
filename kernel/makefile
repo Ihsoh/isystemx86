@@ -15,8 +15,7 @@ Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
 bin/console.obj bin/ifs1disk.obj bin/ifs1vdisk.obj bin/ifs1blocks.obj bin/memory.obj \
 bin/kfuncs.obj bin/ifs1hdisk.obj bin/cmos.obj bin/ifs1fs.obj bin/tasks.obj \
-bin/vesa.obj bin/enfont.obj bin/scall_screen.obj bin/scall_keyboard.obj bin/scall_fs.obj \
-bin/scall_system.obj bin/vars.obj bin/image.obj bin/scall_mouse.obj bin/cpu.obj	\
+bin/vesa.obj bin/enfont.obj bin/vars.obj bin/image.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.obj bin/rsdp.obj	\
 bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
@@ -25,12 +24,14 @@ BMPObjs=bmp/bin/bmp.obj
 UtilsObjs=utils/bin/img.obj
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj
+SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
+syscall/bin/system.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
-$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)
+$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	$(SyscallObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -91,26 +92,11 @@ bin/vesa.obj: vesa.c vesa.h
 bin/enfont.obj: enfont.c enfont.h
 	$(CC) $(CFlags) -c enfont.c -o bin/enfont.obj $(Include)
 
-bin/scall_screen.obj: scall_screen.c scall_screen.h
-	$(CC) $(CFlags) -c scall_screen.c -o bin/scall_screen.obj $(Include)
-
-bin/scall_keyboard.obj: scall_keyboard.c scall_keyboard.h
-	$(CC) $(CFlags) -c scall_keyboard.c -o bin/scall_keyboard.obj $(Include)
-
-bin/scall_fs.obj: scall_fs.c scall_fs.h
-	$(CC) $(CFlags) -c scall_fs.c -o bin/scall_fs.obj $(Include)
-
-bin/scall_system.obj: scall_system.c scall_system.h
-	$(CC) $(CFlags) -c scall_system.c -o bin/scall_system.obj $(Include)
-
 bin/vars.obj: vars.c vars.h
 	$(CC) $(CFlags) -c vars.c -o bin/vars.obj $(Include)
 
 bin/image.obj: image.c image.h
 	$(CC) $(CFlags) -c image.c -o bin/image.obj $(Include) -D_KERNEL_MODEL_
-
-bin/scall_mouse.obj: scall_mouse.c scall_mouse.h
-	$(CC) $(CFlags) -c scall_mouse.c -o bin/scall_mouse.obj $(Include)
 
 bin/cpu.obj: cpu.c cpu.h
 	$(CC) $(CFlags) -c cpu.c -o bin/cpu.obj $(Include)
@@ -220,8 +206,23 @@ windows/bin/sfunc.obj: windows/sfunc.c windows/sfunc.h
 	$(CC) $(CFlags) -c windows/sfunc.c -o windows/bin/sfunc.obj $(Include)
 
 
+syscall/bin/fs.obj: syscall/fs.c syscall/fs.h
+	$(CC) $(CFlags) -c syscall/fs.c -o syscall/bin/fs.obj $(Include)
+
+syscall/bin/keyboard.obj: syscall/keyboard.c syscall/keyboard.h
+	$(CC) $(CFlags) -c syscall/keyboard.c -o syscall/bin/keyboard.obj $(Include)
+
+syscall/bin/mouse.obj: syscall/mouse.c syscall/mouse.h
+	$(CC) $(CFlags) -c syscall/mouse.c -o syscall/bin/mouse.obj $(Include)
+
+syscall/bin/screen.obj: syscall/screen.c syscall/screen.h
+	$(CC) $(CFlags) -c syscall/screen.c -o syscall/bin/screen.obj $(Include)
+
+syscall/bin/system.obj: syscall/system.c syscall/system.h
+	$(CC) $(CFlags) -c syscall/system.c -o syscall/bin/system.obj $(Include)
+
 
 .PHONY:clean
 
 clean:
-	-rm -f $(Objs) $(BMPObjs) $(Target)
+	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs) $(Target)

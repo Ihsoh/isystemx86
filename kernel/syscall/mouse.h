@@ -1,15 +1,15 @@
 /**
-	@File:			scall_mouse.h
+	@File:			mouse.h
 	@Author:		Ihsoh
 	@Date:			2014-11-14
 	@Description:
 */
 
-#ifndef	_SCALL_MOUSE_
-#define	_SCALL_MOUSE_
+#ifndef	_SYSCALL_MOUSE_
+#define	_SYSCALL_MOUSE_
 
-#include "types.h"
-#include "sparams.h"
+#include "../types.h"
+#include "../sparams.h"
 
 #define	SCALL_GET_MPOSITION		0
 #define	SCALL_GET_MLBSTATE		1

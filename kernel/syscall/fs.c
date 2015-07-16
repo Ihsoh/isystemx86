@@ -1,19 +1,19 @@
 /**
-	@File:			scall_fs.c
+	@File:			fs.c
 	@Author:		Ihsoh
 	@Date:			2014-7-29
 	@Description:
 		文件系统的系统调用处理程序。
 */
 
-#include "scall_fs.h"
-#include "types.h"
-#include "sparams.h"
-#include "ifs1fs.h"
-#include "cmos.h"
-#include "ifs1blocks.h"
-#include "tasks.h"
-#include "console.h"
+#include "fs.h"
+#include "../types.h"
+#include "../sparams.h"
+#include "../ifs1fs.h"
+#include "../cmos.h"
+#include "../ifs1blocks.h"
+#include "../tasks.h"
+#include "../console.h"
 #include <ilib/string.h>
 
 static BOOL lock = FALSE;

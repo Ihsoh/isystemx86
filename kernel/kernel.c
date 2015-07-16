@@ -36,6 +36,12 @@
 #include "kmpool.h"
 #include "knlldr.h"
 
+#include "syscall/fs.h"
+#include "syscall/keyboard.h"
+#include "syscall/mouse.h"
+#include "syscall/screen.h"
+#include "syscall/system.h"
+
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
 #include <pathlib/pathlib.h>

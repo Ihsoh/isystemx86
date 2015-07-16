@@ -1,19 +1,19 @@
 /**
-	@File:			scall_screen.c
+	@File:			screen.c
 	@Author:		Ihsoh
 	@Date:			2014-7-28
 	@Description:
 		屏幕的系统调用处理程序。
 */
 
-#include "scall_screen.h"
-#include "types.h"
-#include "sparams.h"
 #include "screen.h"
-#include "tasks.h"
-#include "vesa.h"
-#include "kernel.h"
-#include "image.h"
+#include "../types.h"
+#include "../sparams.h"
+#include "../screen.h"
+#include "../tasks.h"
+#include "../vesa.h"
+#include "../kernel.h"
+#include "../image.h"
 
 /**
 	@Function:		system_call_screen

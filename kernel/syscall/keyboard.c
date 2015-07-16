@@ -1,16 +1,16 @@
 /**
-	@File:			scall_keyboard.c
+	@File:			keyboard.c
 	@Author:		Ihsoh
 	@Date:			2014-7-29
 	@Description:
 		键盘的系统调用处理程序。
 */
 
-#include "scall_keyboard.h"
-#include "types.h"
-#include "sparams.h"
 #include "keyboard.h"
-#include "tasks.h"
+#include "../types.h"
+#include "../sparams.h"
+#include "../keyboard.h"
+#include "../tasks.h"
 
 /**
 	@Function:		system_call_keyboard
