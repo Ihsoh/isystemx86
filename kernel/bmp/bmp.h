@@ -1,5 +1,5 @@
-#ifndef	_BMP_H_
-#define	_BMP_H_
+#ifndef	_BMP_BMP_H_
+#define	_BMP_BMP_H_
 
 #include "../types.h"
 #include "../ifs1fs.h"
