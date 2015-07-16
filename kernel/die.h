@@ -148,4 +148,7 @@ die(IN struct die_info * info);
 	#define	DC_INIT_GUI_CONFIG		0x00000028
 	#define	DI_INIT_GUI_CONFIG		"Failed to initialize gui configuration. Please check "SYSTEM_GUI_CONFIG_FILE
 
+	#define	DC_INIT_ENFONT			0x00000029
+	#define	DI_INIT_ENFONT			"Failed to initialize enfont"
+
 #endif

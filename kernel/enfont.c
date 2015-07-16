@@ -10,8 +10,11 @@
 #include "types.h"
 #include "ifs1fs.h"
 #include "system.h"
+#include "die.h"
 
 #define	__ISYS_KNL_BUILTIN_ENFONT__
+
+#define	ENFONT_BUFFER_SIZE	(6 + 256 * 16)
 
 #ifdef __ISYS_KNL_BUILTIN_ENFONT__
 
@@ -326,6 +329,19 @@ get_enfont(IN uint8 chr)
 void 
 init_enfont(void)
 {
+	#ifndef __ISYS_KNL_BUILTIN_ENFONT__
+	if(enfont == NULL)
+	{
+		enfont = (uint8 *)alloc_memory(ENFONT_BUFFER_SIZE);
+		if(enfont == NULL)
+		{
+			struct die_info info;
+			fill_info(info, DC_INIT_ENFONT, DI_INIT_ENFONT);
+			die(&info);
+		}
+	}
+	#endif
+
 	FILE * fptr = fopen(SYSTEM_DEFAULT_FONT_FILE, FILE_MODE_READ);
 	if(fptr == NULL)
 		return;
