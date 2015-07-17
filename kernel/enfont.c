@@ -377,7 +377,7 @@ enfont_die(void)
 void 
 init_enfont(void)
 {
-	if(/*vesa_is_valid()*/TRUE)
+	if(vesa_is_valid())
 	{
 		#ifndef __ISYS_KNL_BUILTIN_ENFONT__
 		if(enfont == NULL)
@@ -402,14 +402,6 @@ init_enfont(void)
 				enfont_die();
 			if(fread(fptr, enfontx, ENFONTX_BUFFER_SIZE) != ENFONTX_BUFFER_SIZE)
 				enfont_die();
-
-
-			/*if(strncmp(enfont, "ENFNTX", 6) != 0)
-				enfont_die();
-			
-			print_str("\n<HERE>\n");
-			asm volatile("cli; hlt;");*/
-
 			fclose(fptr);
 		}
 		else
