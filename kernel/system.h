@@ -18,7 +18,6 @@
 
 #define	SYSTEM_INIT_BAT				SYSTEM_PATH"init.bat"
 #define	SYSTEM_HELP_FILE			SYSTEM_PATH"help.txt"
-#define	SYSTEM_DEFAULT_FONT_FILE	SYSTEM_PATH"fonts/default.ef"
 #define	SYSTEM_POINTER				SYSTEM_PATH"resources/images/pointer.img0"
 #define	SYSTEM_BG_640_480			SYSTEM_PATH"resources/images/bg_640_480.img0"
 #define	SYSTEM_BG_800_600			SYSTEM_PATH"resources/images/bg_800_600.img0"

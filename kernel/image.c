@@ -10,6 +10,7 @@
 #include "types.h"
 
 #ifdef	_KERNEL_MODEL_
+	#include "enfont.h"
 	#include "memory.h"
 	#include "ifs1fs.h"
 	#include <ilib/string.h>
@@ -274,8 +275,8 @@ set_pixel_common_image(	IN OUT struct CommonImage * common_image,
 static
 uint32
 get_pixel_image0(	IN struct CommonImage * common_image,
-					IN uint32 x,
-					IN uint32 y)
+					IN int32 x,
+					IN int32 y)
 {
 	if(common_image == NULL || x >= common_image->width || y >= common_image->height || x < 0 || y < 0)
 		return IMAGE_PIXEL_RGB(0x00, 0x00, 0x00);
@@ -301,8 +302,8 @@ get_pixel_image0(	IN struct CommonImage * common_image,
 */
 uint32
 get_pixel_common_image(	IN struct CommonImage * common_image,
-						IN uint32 x,
-						IN uint32 y)
+						IN int32 x,
+						IN int32 y)
 {
 	switch(common_image->type)
 	{
@@ -703,6 +704,44 @@ text_common_image(	OUT struct CommonImage * common_image,
 	uint32 ui;	
 	for(ui = 0; ui < char_count && ui < count; ui++)
 	{
+		#ifdef	_KERNEL_MODEL_
+		if(enfontx_enabled())
+		{
+			uint8 * char_image = enfont + (6 + text[ui] * 8 * 16);
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+				{
+					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
+					uint32 font_pixel = (uint32)*(char_image + font_y * ENFONT_WIDTH + font_x);
+					double r1 = (double)((color >> 16) & 0x000000ff);
+					double g1 = (double)((color >> 8) & 0x000000ff);
+					double b1 = (double)(color & 0x000000ff);
+					double r2 = (double)((pixel >> 16) & 0x000000ff);
+					double g2 = (double)((pixel >> 8) & 0x000000ff);
+					double b2 = (double)(pixel & 0x000000ff);
+					double a = (double)font_pixel;
+					double r = 0.0, g = 0.0, b = 0.0;
+					r = (r1 * (255.0 - a) + r2 * a) / 255.0;
+					g = (g1 * (255.0 - a) + g2 * a) / 255.0;
+					b = (b1 * (255.0 - a) + b2 * a) / 255.0;
+					uint32 result = ((uint32)r << 16) | ((uint32)g << 8) | (uint32)b | 0xff000000;
+					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, result);
+				}
+		}
+		else
+		{
+			uint8 * char_image = enfont + 6 + text[ui] * 16;
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+			{
+				uint8 row = char_image[font_y];
+				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+					if(((row >> font_x) & 0x01))
+						set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
+			}
+		}
+		#else
 		uint8 * char_image = enfont + 6 + text[ui] * 16;
 		int32 font_x, font_y;
 		for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
@@ -712,6 +751,7 @@ text_common_image(	OUT struct CommonImage * common_image,
 				if(((row >> font_x) & 0x01))
 					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
 		}
+		#endif
 		draw_x += ENFONT_WIDTH;
 	}
 	return TRUE;

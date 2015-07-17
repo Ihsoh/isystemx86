@@ -11,10 +11,22 @@
 #include "ifs1fs.h"
 #include "system.h"
 #include "die.h"
+#include "vesa.h"
 
 #define	__ISYS_KNL_BUILTIN_ENFONT__
 
 #define	ENFONT_BUFFER_SIZE	(6 + 256 * 16)
+#define	ENFONTX_BUFFER_SIZE	(6 + 256 * 8 * 16)
+
+static ASCCHAR	enfont_file[1024];
+#ifdef __ISYS_KNL_BUILTIN_ENFONT__
+static BOOL		enfont_builtin = TRUE;
+#else
+static BOOL		enfont_builtin = FALSE;
+#endif
+static ASCCHAR	enfontx_file[1024];
+static BOOL		_enfontx_enabled = FALSE;
+static uint8 *	enfontx = NULL;
 
 #ifdef __ISYS_KNL_BUILTIN_ENFONT__
 
@@ -297,7 +309,26 @@ static uint8 * enfont = NULL;
 uint8 *
 get_enfont_ptr(void)
 {
-	return enfont;
+	if(_enfontx_enabled)
+		return enfontx;
+	else
+		return enfont;
+}
+
+/**
+	@Function:		get_enfontx_ptr
+	@Access:		Public
+	@Description:
+		获取ENFontX的起始指针。
+	@Parameters:
+	@Return:
+		uint8 *
+			ENFontX的起始指针。		
+*/
+uint8 *
+get_enfontx_ptr(void)
+{
+	return enfontx;
 }
 
 /**
@@ -319,6 +350,23 @@ get_enfont(IN uint8 chr)
 }
 
 /**
+	@Function:		enfont_die
+	@Access:		Private
+	@Description:
+		ENFont出现致命错误，调用该函数停机。
+	@Parameters:
+	@Return:		
+*/
+static
+void
+enfont_die(void)
+{
+	struct die_info info;
+	fill_info(info, DC_INIT_ENFONT, DI_INIT_ENFONT);
+	die(&info);
+}
+
+/**
 	@Function:		init_enfont
 	@Access:		Public
 	@Description:
@@ -329,22 +377,72 @@ get_enfont(IN uint8 chr)
 void 
 init_enfont(void)
 {
-	#ifndef __ISYS_KNL_BUILTIN_ENFONT__
-	if(enfont == NULL)
+	if(/*vesa_is_valid()*/TRUE)
 	{
-		enfont = (uint8 *)alloc_memory(ENFONT_BUFFER_SIZE);
+		#ifndef __ISYS_KNL_BUILTIN_ENFONT__
 		if(enfont == NULL)
 		{
-			struct die_info info;
-			fill_info(info, DC_INIT_ENFONT, DI_INIT_ENFONT);
-			die(&info);
+			enfont = (uint8 *)alloc_memory(ENFONT_BUFFER_SIZE);
+			if(enfont == NULL)
+				enfont_die();
+		}
+		#endif
+
+		if(	!config_gui_get_string("ENFont", enfont_file, sizeof(enfont_file))
+			|| !config_gui_get_string("ENFontX", enfontx_file, sizeof(enfontx_file))
+			|| !config_gui_get_bool("EnableENFontX", &_enfontx_enabled))
+			enfont_die();
+		if(_enfontx_enabled)
+		{
+			enfontx = (uint8 *)alloc_memory(ENFONTX_BUFFER_SIZE);
+			if(enfontx == NULL)
+				enfont_die();
+			FILE * fptr = fopen(enfontx_file, FILE_MODE_READ);
+			if(fptr == NULL)
+				enfont_die();
+			if(fread(fptr, enfontx, ENFONTX_BUFFER_SIZE) != ENFONTX_BUFFER_SIZE)
+				enfont_die();
+
+
+			/*if(strncmp(enfont, "ENFNTX", 6) != 0)
+				enfont_die();
+			
+			print_str("\n<HERE>\n");
+			asm volatile("cli; hlt;");*/
+
+			fclose(fptr);
+		}
+		else
+		{
+			if(strcmp(enfont_file, "") == 0 && !enfont_builtin)
+				enfont_die();
+			if(strcmp(enfont_file, "") != 0)
+			{
+				FILE * fptr = fopen(enfont_file, FILE_MODE_READ);
+				if(fptr == NULL && !enfont_builtin)
+					enfont_die();
+				if(fread(fptr, enfont, ENFONT_BUFFER_SIZE) != ENFONT_BUFFER_SIZE)
+					enfont_die();
+				if(strncmp(enfont, "ENFONT", 6) != 0)
+					enfont_die();
+				fclose(fptr);
+			}
 		}
 	}
-	#endif
+}
 
-	FILE * fptr = fopen(SYSTEM_DEFAULT_FONT_FILE, FILE_MODE_READ);
-	if(fptr == NULL)
-		return;
-	fread(fptr, enfont, 6 + 256 * 16);
-	fclose(fptr);
+/**
+	@Function:		enfontx_enabled
+	@Access:		Public
+	@Description:
+		检测ENFontX是否可用。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则可用，否则不可用。
+*/
+BOOL
+enfontx_enabled(void)
+{
+	return _enfontx_enabled;
 }

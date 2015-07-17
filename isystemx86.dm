@@ -148,6 +148,8 @@ WRITE_FILE	VA:/isystem/resources/images/pointer.bmp res/bmp/pointer.bmp
 MAKE_DIR	VA:/isystem/ fonts
 MAKE_FILE	VA:/isystem/fonts/ default.ef
 WRITE_FILE	VA:/isystem/fonts/default.ef isystem/fonts/default.ef
+MAKE_FILE	VA:/isystem/fonts/ Consolas.efx
+WRITE_FILE	VA:/isystem/fonts/Consolas.efx isystem/fonts/Consolas.efx
 
 #System init file
 MAKE_FILE	VA:/isystem/ init.bat

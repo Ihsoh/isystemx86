@@ -23,7 +23,15 @@ uint8 *
 get_enfont(IN uint8 chr);
 
 extern
+uint8 *
+get_enfontx_ptr(void);
+
+extern
 void
 init_enfont(void);
+
+extern
+BOOL
+enfontx_enabled(void);
 
 #endif

@@ -64,8 +64,8 @@ set_pixel_common_image(	IN OUT struct CommonImage * common_image,
 extern
 uint32
 get_pixel_common_image(	IN struct CommonImage * common_image,
-						IN uint32 x,
-						IN uint32 y);
+						IN int32 x,
+						IN int32 y);
 
 extern
 BOOL

@@ -1086,24 +1086,16 @@ flush_screen(void)
 									ENFONT_WIDTH, 
 									ENFONT_HEIGHT + CURSOR_HEIGHT, 
 									bg_color);
-				uint8 * font = get_enfont(chr);
+				uint8 * font = get_enfont_ptr();
+
 				if(font != NULL)
-				{
-					uint32 font_x, font_y;
-					for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
-					{
-						uint8 row = font[font_y];
-						for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
-							if(((row >> font_x) & 0x01))
-							{
-								uint32 index = 	y * console_screen_width * (ENFONT_HEIGHT + CURSOR_HEIGHT) 
-												+ font_y * console_screen_width
-												+ x * ENFONT_WIDTH 
-												+ font_x;
-								console_screen_buffer_data_ptr[index] = color;
-							}
-					}
-				}
+					text_common_image(	&console_screen_buffer,
+										x * ENFONT_WIDTH,
+										y * (ENFONT_HEIGHT + CURSOR_HEIGHT),
+										font,
+										&chr,
+										1,
+										color);
 			}
 	uint32 cursor_real_color = property_to_real_color(cursor_color);
 	uint32 c_x = cursor_x, c_y = cursor_y;

@@ -9,5 +9,8 @@
   HiddenButton:"DA:/isystem/resources/images/hiddenbutton.bmp",
   HiddenButtonHover:"DA:/isystem/resources/images/hiddenbuttonhover.bmp"
   HiddenButtonBlur:"DA:/isystem/resources/images/hiddenbuttonblur.bmp"
-  Pointer:"DA:/isystem/resources/images/pointer.bmp"
+  Pointer:"DA:/isystem/resources/images/pointer.bmp",
+  ENFont:"DA:/isystem/fonts/default.ef",
+  EnableENFontX:true,
+  ENFontX:"DA:/isystem/fonts/Consolas.efx"
 }
