@@ -707,7 +707,7 @@ text_common_image(	OUT struct CommonImage * common_image,
 		#ifdef	_KERNEL_MODEL_
 		if(enfontx_enabled())
 		{
-			uint8 * char_image = enfont + (6 + text[ui] * 8 * 16);
+			uint8 * char_image = enfont + (6 + text[ui] * ENFONT_WIDTH * ENFONT_HEIGHT);
 			int32 font_x, font_y;
 			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
 				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)

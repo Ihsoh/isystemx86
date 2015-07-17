@@ -15,8 +15,17 @@
 
 #define	__ISYS_KNL_BUILTIN_ENFONT__
 
-#define	ENFONT_BUFFER_SIZE	(6 + 256 * 16)
-#define	ENFONTX_BUFFER_SIZE	(6 + 256 * 8 * 16)
+#define	_ENFONT_WIDTH 	8
+#define	_ENFONT_HEIGHT 	16
+
+#define	_ENFONTX_WIDTH	8
+#define	_ENFONTX_HEIGHT	16
+
+#define	ENFONT_BUFFER_SIZE	(6 + 256 * _ENFONT_HEIGHT)
+#define	ENFONTX_BUFFER_SIZE	(6 + 256 * _ENFONTX_WIDTH * _ENFONTX_HEIGHT)
+
+uint32 __enfont_width	= _ENFONT_WIDTH;
+uint32 __enfont_height	= _ENFONT_HEIGHT;
 
 static ASCCHAR	enfont_file[1024];
 #ifdef __ISYS_KNL_BUILTIN_ENFONT__
@@ -394,6 +403,8 @@ init_enfont(void)
 			enfont_die();
 		if(_enfontx_enabled)
 		{
+			__enfont_width = _ENFONTX_WIDTH;
+			__enfont_height = _ENFONTX_HEIGHT;
 			enfontx = (uint8 *)alloc_memory(ENFONTX_BUFFER_SIZE);
 			if(enfontx == NULL)
 				enfont_die();

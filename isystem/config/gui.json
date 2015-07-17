@@ -12,5 +12,5 @@
   Pointer:"DA:/isystem/resources/images/pointer.bmp",
   ENFont:"DA:/isystem/fonts/default.ef",
   EnableENFontX:true,
-  ENFontX:"DA:/isystem/fonts/Consolas.efx"
+  ENFontX:"DA:/isystem/fonts/consolab.efx"
 }

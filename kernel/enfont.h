@@ -11,8 +11,11 @@
 
 #include "types.h"
 
-#define	ENFONT_WIDTH	8
-#define	ENFONT_HEIGHT	16
+#define	ENFONT_WIDTH	(__enfont_width)
+#define	ENFONT_HEIGHT	(__enfont_height)
+
+extern uint32 __enfont_width;
+extern uint32 __enfont_height;
 
 extern
 uint8 *

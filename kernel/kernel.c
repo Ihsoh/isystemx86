@@ -187,8 +187,8 @@ main(void)
 	ifs1fs_init();
 	console_init();
 
-	init_screen();
 	init_enfont();
+	init_screen();
 	init_timer();
 	init_mouse();
 	mouse_init();
