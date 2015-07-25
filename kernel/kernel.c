@@ -1679,6 +1679,16 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 		get_task_info_ptr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
 		task_ready(sys_screen_tid);
 	}
+
+	// 检测pci.sys任务是不是被杀死了。
+	if(strcmp(get_task_info_ptr(tid)->name, "DA:/isystem/sys/pci.sys") == 0)
+	{
+		int32 sys_pci_tid = create_sys_task_by_file("DA:/isystem/sys/pci.sys",
+													"DA:/isystem/sys/pci.sys",
+													"DA:/isystem/sys/");
+		//get_task_info_ptr(sys_pci_tid)->priority = TASK_PRIORITY_HIGH;
+		task_ready(sys_pci_tid);
+	}
 	
 	kill_sys_task(tid);
 

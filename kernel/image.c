@@ -22,6 +22,12 @@
 	#define	FREEM(ptr)	(freem((ptr)))
 #endif
 
+#define	IMAGE_MODE_NORMAL	1
+#define	IMAGE_MODE_SSE		2
+#define	IMAGE_MODE_SSE_EX	3
+
+static int32 image_mode = IMAGE_MODE_SSE_EX;
+
 /**
 	@Function:		image_fast_fill_uint8
 	@Access:		Private
@@ -684,9 +690,9 @@ rect_common_image(	OUT struct CommonImage * common_image,
 	@Description:
 		Alpha混合两个像素。
 	@Parameters:
-		colorBack, uint32, IN
+		back, uint32, IN
 			位于后方的像素的颜色值。
-		colorFore, uint32, IN
+		fore, uint32, IN
 			位于前方的像素的颜色值。
 		alpha, uint32, IN
 			Alpha值。
@@ -696,11 +702,11 @@ rect_common_image(	OUT struct CommonImage * common_image,
 */
 static
 uint32
-blend(	IN uint32 colorBack,
-		IN uint32 colorFore,
+blend(	IN uint32 back,
+		IN uint32 fore,
 		IN uint32 alpha)
 {
-	uint32 maskFull = 0xFFFFFFFF;
+	uint32 mask_full = 0xFFFFFFFF;
 	uint32 result;
 
 	__asm__ __volatile__ (
@@ -723,10 +729,385 @@ blend(	IN uint32 colorBack,
 		"PACKUSWB %%xmm0, %%xmm0;"
 		"MOVD %%xmm0, %0;"
 		: "=m"(result)
-		: "m"(colorBack), "m"(colorFore), "m"(alpha), "m"(maskFull)
+		: "m"(back), "m"(fore), "m"(alpha), "m"(mask_full)
 	);
 
 	return result;
+}
+
+/**
+	@Function:		blendx_init
+	@Access:		Private
+	@Description:
+		在使用blendx(...)函数之前必须先调用该函数。
+	@Parameters:
+	@Return:
+*/
+static
+void
+blendx_init()
+{
+	__asm__ (
+		"PXOR %%xmm7, %%xmm7;"
+		"MOV $0x01000100, %%ebx;"
+		"MOVD %%ebx, %%xmm6;"
+		"PUNPCKLDQ %%xmm6, %%xmm6;"
+		"PUNPCKLQDQ %%xmm6, %%xmm6;"
+		:
+		:
+	);
+}
+
+/**
+	@Function:		blendx
+	@Access:		Private
+	@Description:
+		一次Alpha混合两组像素。
+		在调用该函数前必须调用blendx_init()。
+	@Parameters:
+		back, uint32 *, IN
+			指向储存着位于后方的两个像素的颜色值的缓冲区。
+		fore, uint32 *, IN
+			指向储存着位于前方的两个像素的颜色值的缓冲区。
+		alpha, uint8 *, IN
+			指向储存着两个Alpha值的缓存区。
+		result, uint32 *, OUT
+			指向一个能保存两个uitn32的缓冲区。
+	@Return:	
+*/
+static
+void
+blendx(	IN uint32 * back,
+		IN uint32 * fore,
+		IN uint8 * alpha,
+		OUT uint32 * result)
+{
+	__asm__ (
+		"MOV %1, %%ebx;"
+		"MOVQ (%%ebx), %%xmm0;"   // back
+		"MOV %2, %%ebx;"
+		"MOVQ (%%ebx), %%xmm1;"   // fore
+		"XOR %%ebx, %%ebx;"
+		"MOV (%3), %%bx;"
+		"MOVD %%ebx, %%xmm2;"   // alpha
+		"PUNPCKLBW %%xmm7, %%xmm0;"
+		"PUNPCKLBW %%xmm7, %%xmm1;"
+		"PUNPCKLBW %%xmm2, %%xmm2;"
+		"PUNPCKLWD %%xmm2, %%xmm2;"
+		"PUNPCKLBW %%xmm7, %%xmm2;"
+		"MOVDQA %%xmm6, %%xmm3;"
+		"PMULLW %%xmm2, %%xmm1;"  // xmm1 = fore * alpha
+		"PSUBW %%xmm2, %%xmm3;"   // xmm3 = 256 - alpha
+		"PMULLW %%xmm3, %%xmm0;"  // xmm0 = back * (256 - alpha)
+		"PADDW %%xmm1, %%xmm0;"   // xmm0 = xmm0 + xmm1
+		"PSRLW $8, %%xmm0;"       // xmm0 = xmm0 >> 8
+		"PACKUSWB %%xmm0, %%xmm0;"
+		"MOV %0, %%ebx;"
+		"MOVQ %%xmm0, (%%ebx);"
+		: "=m"(result)
+		: "m"(back), "m"(fore), "p"(alpha)
+	);
+}
+
+/**
+	@Function:		text_common_image_normal
+	@Access:		Private
+	@Description:
+		渲染一段文本。
+		这个版本未使用SSE，而是直接使用无符号整形进行Alpha混合计算。
+	@Parameters:
+		common_image, struct CommonImage *, OUT
+			图片。
+		draw_x, int32, IN
+			起始位置 X 坐标。
+		draw_y, int32, IN
+			起始位置 Y 坐标。
+		enfont, uint8 *, IN
+			英文字体数据。
+		text, int8 *, IN
+			文本。
+		count, uint32, IN
+			文本中的字符数。
+		color, uint32, IN
+			文本颜色。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。			
+*/
+static
+BOOL
+text_common_image_normal(	OUT struct CommonImage * common_image,
+							IN int32 draw_x,
+							IN int32 draw_y,
+							IN uint8 * enfont,
+							IN int8 * text,
+							IN uint32 count,
+							IN uint32 color)
+{
+	if(common_image == NULL || enfont == NULL || text == NULL)
+		return FALSE;
+	uint32 char_count = strlen(text);
+	uint32 ui;
+	#ifdef	_KERNEL_MODEL_
+	BOOL enfx_enabled = enfontx_enabled();
+	uint8 * enfont_content = enfont + 6;
+	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
+	#endif
+	for(ui = 0; ui < char_count && ui < count; ui++)
+	{
+		#ifdef	_KERNEL_MODEL_
+		if(enfx_enabled)
+		{
+			uint8 * char_image = enfont_content + text[ui] * enfont_size;
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+			{
+				uint8 * font_pixels = char_image + font_y * ENFONT_WIDTH;
+				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+				{
+					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
+					uint32 font_pixel = font_pixels[font_x];
+
+					uint32 r1 = (color >> 16) & 0x000000ff;
+					uint32 g1 = (color >> 8) & 0x000000ff;
+					uint32 b1 = color & 0x000000ff;
+					uint32 r2 = (pixel >> 16) & 0x000000ff;
+					uint32 g2 = (pixel >> 8) & 0x000000ff;
+					uint32 b2 = pixel & 0x000000ff;
+					uint32 a = font_pixel;
+					uint32 r = 0, g = 0, b = 0;
+					uint32 a1 = 256 - a;
+					r = (r1 * a1 + r2 * a) >> 8;
+					g = (g1 * a1 + g2 * a) >> 8;
+					b = (b1 * a1 + b2 * a) >> 8;
+					uint32 result = (r << 16) | (g << 8) | b | 0xff000000;
+
+					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, result);
+				}
+			}
+		}
+		else
+		{
+			uint8 * char_image = enfont + 6 + text[ui] * 16;
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+			{
+				uint8 row = char_image[font_y];
+				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+					if(((row >> font_x) & 0x01))
+						set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
+			}
+		}
+		#else
+		uint8 * char_image = enfont + 6 + text[ui] * 16;
+		int32 font_x, font_y;
+		for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+		{
+			uint8 row = char_image[font_y];
+			for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+				if(((row >> font_x) & 0x01))
+					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
+		}
+		#endif
+		draw_x += ENFONT_WIDTH;
+	}
+	return TRUE;
+}
+
+/**
+	@Function:		text_common_image_sse
+	@Access:		Private
+	@Description:
+		渲染一段文本。
+		这个版本使用了SSE。
+	@Parameters:
+		common_image, struct CommonImage *, OUT
+			图片。
+		draw_x, int32, IN
+			起始位置 X 坐标。
+		draw_y, int32, IN
+			起始位置 Y 坐标。
+		enfont, uint8 *, IN
+			英文字体数据。
+		text, int8 *, IN
+			文本。
+		count, uint32, IN
+			文本中的字符数。
+		color, uint32, IN
+			文本颜色。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。			
+*/
+static
+BOOL
+text_common_image_sse(	OUT struct CommonImage * common_image,
+						IN int32 draw_x,
+						IN int32 draw_y,
+						IN uint8 * enfont,
+						IN int8 * text,
+						IN uint32 count,
+						IN uint32 color)
+{
+	if(common_image == NULL || enfont == NULL || text == NULL)
+		return FALSE;
+	uint32 char_count = strlen(text);
+	uint32 ui;
+	#ifdef	_KERNEL_MODEL_
+	BOOL enfx_enabled = enfontx_enabled();
+	uint8 * enfont_content = enfont + 6;
+	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
+	#endif
+	for(ui = 0; ui < char_count && ui < count; ui++)
+	{
+		#ifdef	_KERNEL_MODEL_
+		if(enfx_enabled)
+		{
+			uint8 * char_image = enfont_content + text[ui] * enfont_size;
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+			{
+				uint8 * font_pixels = char_image + font_y * ENFONT_WIDTH;
+				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+				{
+					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
+					uint32 font_pixel = font_pixels[font_x];
+					uint32 result = blend(color, pixel, font_pixel);
+					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, result);
+				}
+			}
+		}
+		else
+		{
+			uint8 * char_image = enfont + 6 + text[ui] * 16;
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+			{
+				uint8 row = char_image[font_y];
+				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+					if(((row >> font_x) & 0x01))
+						set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
+			}
+		}
+		#else
+		uint8 * char_image = enfont + 6 + text[ui] * 16;
+		int32 font_x, font_y;
+		for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+		{
+			uint8 row = char_image[font_y];
+			for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+				if(((row >> font_x) & 0x01))
+					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
+		}
+		#endif
+		draw_x += ENFONT_WIDTH;
+	}
+	return TRUE;
+}
+
+/**
+	@Function:		text_common_image_sse_ex
+	@Access:		Private
+	@Description:
+		渲染一段文本。
+		这个版本使用了SSE。使用了blendex(...)来进行Alpha混合计算。
+	@Parameters:
+		common_image, struct CommonImage *, OUT
+			图片。
+		draw_x, int32, IN
+			起始位置 X 坐标。
+		draw_y, int32, IN
+			起始位置 Y 坐标。
+		enfont, uint8 *, IN
+			英文字体数据。
+		text, int8 *, IN
+			文本。
+		count, uint32, IN
+			文本中的字符数。
+		color, uint32, IN
+			文本颜色。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。			
+*/
+static
+BOOL
+text_common_image_sse_ex(	OUT struct CommonImage * common_image,
+							IN int32 draw_x,
+							IN int32 draw_y,
+							IN uint8 * enfont,
+							IN int8 * text,
+							IN uint32 count,
+							IN uint32 color)
+{
+	if(common_image == NULL || enfont == NULL || text == NULL)
+		return FALSE;
+	uint32 char_count = strlen(text);
+	uint32 ui;
+	#ifdef	_KERNEL_MODEL_
+	BOOL enfx_enabled = enfontx_enabled();
+	uint8 * enfont_content = enfont + 6;
+	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
+	uint32 half_enfont_width = ENFONT_WIDTH / 2;
+	#endif
+	blendx_init();
+	for(ui = 0; ui < char_count && ui < count; ui++)
+	{
+		#ifdef	_KERNEL_MODEL_
+		if(enfx_enabled)
+		{
+			uint8 * char_image = enfont_content + text[ui] * enfont_size;
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+			{
+				uint8 * font_pixels = char_image + font_y * ENFONT_WIDTH;
+				for(font_x = 0; font_x < half_enfont_width; font_x++)
+				{
+					uint32 back[2];
+					uint32 fore[2];
+					uint8 alpha[2];
+					uint32 result[2];
+					back[0] = color;
+					back[1] = color;
+					uint32 temp = draw_x + font_x * 2;
+					fore[0] = get_pixel_common_image(common_image, temp, draw_y + font_y);
+					fore[1] = get_pixel_common_image(common_image, temp + 1, draw_y + font_y);
+					uint8 * tempu8 = char_image + font_y * ENFONT_WIDTH + font_x * 2;
+					alpha[0] = *tempu8;
+					alpha[1] = *(tempu8 + 1);
+					blendx(back, fore, alpha, result);
+					temp = draw_x + font_x * 2;
+					set_pixel_common_image(common_image, temp, draw_y + font_y, result[0]);
+					set_pixel_common_image(common_image, temp + 1, draw_y + font_y, result[1]);
+				}
+			}
+		}
+		else
+		{
+			uint8 * char_image = enfont + 6 + text[ui] * 16;
+			int32 font_x, font_y;
+			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+			{
+				uint8 row = char_image[font_y];
+				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+					if(((row >> font_x) & 0x01))
+						set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
+			}
+		}
+		#else
+		uint8 * char_image = enfont + 6 + text[ui] * 16;
+		int32 font_x, font_y;
+		for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
+		{
+			uint8 row = char_image[font_y];
+			for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
+				if(((row >> font_x) & 0x01))
+					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
+		}
+		#endif
+		draw_x += ENFONT_WIDTH;
+	}
+	return TRUE;
 }
 
 /**
@@ -762,85 +1143,33 @@ text_common_image(	OUT struct CommonImage * common_image,
 					IN uint32 count,
 					IN uint32 color)
 {
-	if(common_image == NULL || enfont == NULL || text == NULL)
-		return FALSE;
-	uint32 char_count = strlen(text);
-	uint32 ui;
-	#ifdef	_KERNEL_MODEL_
-	BOOL enfx_enabled = enfontx_enabled();
-	#endif
-	for(ui = 0; ui < char_count && ui < count; ui++)
+	switch(image_mode)
 	{
-		#ifdef	_KERNEL_MODEL_
-		if(enfx_enabled)
-		{
-			uint8 * char_image = enfont + (6 + text[ui] * ENFONT_WIDTH * ENFONT_HEIGHT);
-			int32 font_x, font_y;
-			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
-				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
-				{
-					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
-					uint32 font_pixel = (uint32)*(char_image + font_y * ENFONT_WIDTH + font_x);
-
-					/*
-					float r1 = (color >> 16) & 0x000000ff;
-					float g1 = (color >> 8) & 0x000000ff;
-					float b1 = color & 0x000000ff;
-					float r2 = (pixel >> 16) & 0x000000ff;
-					float g2 = (pixel >> 8) & 0x000000ff;
-					float b2 = pixel & 0x000000ff;
-					float a = font_pixel;
-					a /= 255.0f;
-					float r = 0.0f, g = 0.0f, b = 0.0f;
-					r = r1 * (1.0f - a) + r2 * a;
-					g = g1 * (1.0f - a) + g2 * a;
-					b = b1 * (1.0f - a) + b2 * a;
-					*/
-
-					/*
-					uint32 r1 = (color >> 16) & 0x000000ff;
-					uint32 g1 = (color >> 8) & 0x000000ff;
-					uint32 b1 = color & 0x000000ff;
-					uint32 r2 = (pixel >> 16) & 0x000000ff;
-					uint32 g2 = (pixel >> 8) & 0x000000ff;
-					uint32 b2 = pixel & 0x000000ff;
-					uint32 a = font_pixel;
-					uint32 r = 0, g = 0, b = 0;
-					uint32 a1 = 256 - a;
-					r = (r1 * a1 + r2 * a) >> 8;
-					g = (g1 * a1 + g2 * a) >> 8;
-					b = (b1 * a1 + b2 * a) >> 8;
-					uint32 result = (r << 16) | (g << 8) | b | 0xff000000;
-					*/
-
-					uint32 result = blend(color, pixel, font_pixel);
-					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, result);
-				}
-		}
-		else
-		{
-			uint8 * char_image = enfont + 6 + text[ui] * 16;
-			int32 font_x, font_y;
-			for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
-			{
-				uint8 row = char_image[font_y];
-				for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
-					if(((row >> font_x) & 0x01))
-						set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
-			}
-		}
-		#else
-		uint8 * char_image = enfont + 6 + text[ui] * 16;
-		int32 font_x, font_y;
-		for(font_y = 0; font_y < ENFONT_HEIGHT; font_y++)
-		{
-			uint8 row = char_image[font_y];
-			for(font_x = 0; font_x < ENFONT_WIDTH; font_x++)
-				if(((row >> font_x) & 0x01))
-					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, color);
-		}
-		#endif
-		draw_x += ENFONT_WIDTH;
+		case IMAGE_MODE_SSE:
+			return text_common_image_sse(	common_image,
+											draw_x,
+											draw_y,
+											enfont,
+											text,
+											count,
+											color);
+		case IMAGE_MODE_SSE_EX:
+			return text_common_image_sse_ex(common_image,
+											draw_x,
+											draw_y,
+											enfont,
+											text,
+											count,
+											color);
+		case IMAGE_MODE_NORMAL:
+		default:
+			return text_common_image_normal(common_image,
+											draw_x,
+											draw_y,
+											enfont,
+											text,
+											count,
+											color);
 	}
-	return TRUE;
 }
+
