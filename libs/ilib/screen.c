@@ -263,3 +263,12 @@ void flush_screen(void)
 	struct SParams sparams;
 	system_call(SCALL_SCREEN, SCALL_FLUSH_SCREEN, &sparams);
 }
+
+int write_console_buffer(uint8 * buffer, uint32 size)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(buffer);
+	sparams.param1 = SPARAM(size);
+	system_call(SCALL_SCREEN, SCALL_WRITE_CONSOLE_BUFFER, &sparams);
+	return INT32_SPARAM(sparams.param0);
+}

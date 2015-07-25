@@ -1,30 +1,37 @@
 #include <ilib/ilib.h>
 
-#define	MAX_COLUMN				1024
-#define	MAX_ROW					2048
+#define	MAX_COLUMN				1024			// 列数的最大值。
+#define	MAX_ROW					2048			// 行数的最大值。
 
-#define	MAX_LNUM_DIGIT			5
+#define	MAX_LNUM_DIGIT			5				// 行号的最大字符数量。
 
-#define	SBUFFER_X (cursor_x - MAX_LNUM_DIGIT)
-#define	SBUFFER_Y (cursor_y)
+#define	EDITAREA_X (cursor_x - MAX_LNUM_DIGIT)	// 光标相对内容编辑区的X坐标。
+#define	EDITAREA_Y (cursor_y)					// 光标相对内容编辑区的Y坐标。
 
-static uint column, row;
-static ushort cursor_x, cursor_y;
-static char * content_buffer[MAX_ROW];
-static char * screen_buffer;
-static uint top_column, top_row;
-static char filepath[1024];
-static uint total_line;
-static BOOL is_changed = FALSE;
+#define	SBUFFER_CHR(n)	(n * 2)					// 屏幕缓冲区中第n个字符的偏移值。
+#define	SBUFFER_PRO(n)	(n * 2 + 1)				// 屏幕缓冲区中第n个字符的属性的偏移值。
 
-void die(char * message);
-void init(void);
-void edit(void);
-void flush(void);
-void load(void);
-void save(void);
+static uint32 column, row;						// 文本编辑区的列和行。
+static uint32 scr_column, scr_row;				// 屏幕的列和行。
+static uint16 cursor_x, cursor_y;				// 光标的坐标。
+static ASCCHAR * content_buffer[MAX_ROW];		// 内容缓冲区。
+static uint8 * screen_buffer = NULL;			// 屏幕缓冲区。
+static uint32 top_column, top_row;				// 屏幕缓冲区左上角相对于内容缓冲区的偏移量。
+static ASCCHAR filepath[1024];					// 文件路径。
+static uint32 total_line;						// 总行数。
+static BOOL is_changed = FALSE;					// 是否已编辑。
 
-int main(int argc, char * argv[])
+static void release_resource(void);
+static void die(ASCCHAR * message);
+static void init(void);
+static int get_line_len(uint32 line);
+static void edit(void);
+static void strcpy_sbuffer(ASCCHAR * dest, CASCCHAR * src);
+static void flush(void);
+static void load(void);
+static void save(void);
+
+int32 main(int32 argc, ASCCHAR * argv[])
 {
 	if(argc != 2)
 	{
@@ -42,25 +49,25 @@ static void release_resource(void)
 {
 	if(screen_buffer != NULL)
 		free(screen_buffer);
-	uint ui;
+	uint32 ui;
 	for(ui = 0; ui < MAX_ROW; ui++)
 		if(content_buffer[ui] != NULL)
 			free(content_buffer[ui]);
 }
 
-void die(char * message)
+static void die(ASCCHAR * message)
 {
 	clear_screen();
 	print_str_p(message, CC_RED);
 	print_str("\n");
 	release_resource();
 	set_clock(1);
-	app_exit();
+	exit(-1);
 }
 
-void init(void)
+static void init(void)
 {
-	uint ui, ui1;
+	uint32 ui, ui1;
 	for(ui = 0; ui < MAX_ROW; ui++)
 		content_buffer[ui] = NULL;
 	for(ui = 0; ui < MAX_ROW; ui++)
@@ -73,12 +80,12 @@ void init(void)
 	}
 	load();
 	set_clock(0);
-	get_text_screen_size(&column, &row);
-	row -= 1;
-	column -= MAX_LNUM_DIGIT;
-	screen_buffer = (char *)malloc(row * column + 1);
+	get_text_screen_size(&scr_column, &scr_row);
+	row = scr_row - 1;
+	column = scr_column - MAX_LNUM_DIGIT;
+	screen_buffer = (uint8 *)malloc(scr_row * scr_column * 2);
 	if(screen_buffer == NULL)
-		die("Cannot alloc memory!");
+		die("Cannot allocate memory!");
 	cursor_x = MAX_LNUM_DIGIT;
 	cursor_y = 0;
 	top_row = 0;
@@ -87,43 +94,43 @@ void init(void)
 	set_cursor(cursor_x, cursor_y);
 }
 
-static int get_line_len(uint line)
+static int get_line_len(uint32 line)
 {
-	int len = 0;
+	int32 len = 0;
 	for(len = 0; len < MAX_COLUMN && content_buffer[line][len] != '\0'; len++);
 	return len;
 }
 
-void edit(void)
+static void edit(void)
 {
 	flush();
 	while(1)
 	{
-		uchar chr = get_char();
-		char chr1;
+		uint8 chr = get_char();
+		uint8 chr1;
 		if(chr == KEY_EXT)
 			switch(chr1 = get_char())
 			{
 				case KEY_UP:
-					if(SBUFFER_Y != 0)
+					if(EDITAREA_Y != 0)
 						cursor_y--;
 					else if(top_row != 0)
 						top_row--;
 					break;
 				case KEY_DOWN:
-					if(top_row + SBUFFER_Y + 1 < total_line && SBUFFER_Y + 1 < row)
+					if(top_row + EDITAREA_Y + 1 < total_line && EDITAREA_Y + 1 < row)
 						cursor_y++;
 					else if(top_row + row < total_line && top_row + row < MAX_ROW)
 						top_row++;
 					break;
 				case KEY_LEFT:
-					if(SBUFFER_X != 0)
+					if(EDITAREA_X != 0)
 						cursor_x--;
 					else if(top_column != 0)
 						top_column--;
 					break;
 				case KEY_RIGHT:
-					if(SBUFFER_X + 1 < column)
+					if(EDITAREA_X + 1 < column)
 						cursor_x++;
 					else if(top_column + column < MAX_COLUMN)
 						top_column++;
@@ -136,29 +143,29 @@ void edit(void)
 			{
 				case 8:
 				{
-					uint prev_line_len, curr_line_len;
-					if((top_column + SBUFFER_X) != 0)
+					uint32 prev_line_len, curr_line_len;
+					if((top_column + EDITAREA_X) != 0)
 					{
-						uint ui;
-						for(ui = top_column + SBUFFER_X; ui < MAX_COLUMN; ui++)
-							content_buffer[top_row + SBUFFER_Y][ui - 1] = content_buffer[top_row + SBUFFER_Y][ui];
-						content_buffer[top_row + SBUFFER_Y][MAX_COLUMN - 1] = '\0';
-						if(SBUFFER_X != 0)
+						uint32 ui;
+						for(ui = top_column + EDITAREA_X; ui < MAX_COLUMN; ui++)
+							content_buffer[top_row + EDITAREA_Y][ui - 1] = content_buffer[top_row + EDITAREA_Y][ui];
+						content_buffer[top_row + EDITAREA_Y][MAX_COLUMN - 1] = '\0';
+						if(EDITAREA_X != 0)
 							cursor_x--;
 						else
 							top_column--;
 						is_changed = TRUE;
 					}
-					else if(top_row + SBUFFER_Y != 0 
-							&& (prev_line_len = get_line_len(top_row + SBUFFER_Y - 1)) 
-													+ (curr_line_len = get_line_len(top_row + SBUFFER_Y)) 
+					else if(top_row + EDITAREA_Y != 0 
+							&& (prev_line_len = get_line_len(top_row + EDITAREA_Y - 1)) 
+													+ (curr_line_len = get_line_len(top_row + EDITAREA_Y)) 
 									< MAX_COLUMN)
 					{
-						memcpy(content_buffer[top_row + SBUFFER_Y - 1] + prev_line_len, content_buffer[top_row + SBUFFER_Y], curr_line_len);
-						int i;
-						for(i = top_row + SBUFFER_Y; i < total_line - 1; i++)
+						memcpy(content_buffer[top_row + EDITAREA_Y - 1] + prev_line_len, content_buffer[top_row + EDITAREA_Y], curr_line_len);
+						int32 i;
+						for(i = top_row + EDITAREA_Y; i < total_line - 1; i++)
 							memcpy(content_buffer[i], content_buffer[i + 1], MAX_COLUMN);
-						if(SBUFFER_Y != 0)
+						if(EDITAREA_Y != 0)
 							cursor_y--;
 						else
 							top_row--;
@@ -174,23 +181,23 @@ void edit(void)
 					if(total_line < MAX_ROW)
 					{
 						total_line++;
-						int i, i1;
+						int32 i, i1;
 						if(total_line == 0)
 							for(i = 0; i < MAX_COLUMN; i++)
-								content_buffer[top_row + SBUFFER_Y + 1][i] = content_buffer[top_row + SBUFFER_Y][i];
+								content_buffer[top_row + EDITAREA_Y + 1][i] = content_buffer[top_row + EDITAREA_Y][i];
 						else
-							for(i = total_line; i > top_row + SBUFFER_Y + 1; i--)
+							for(i = total_line; i > top_row + EDITAREA_Y + 1; i--)
 								for(i1 = 0; i1 < MAX_COLUMN; i1++)
 									content_buffer[i][i1] = content_buffer[i - 1][i1];
 						for(i = 0; i < MAX_COLUMN; i++)
-							content_buffer[top_row + SBUFFER_Y + 1][i] = '\0';
-						for(i = top_column + SBUFFER_X, i1 = 0; i < MAX_COLUMN; i++, i1++)
+							content_buffer[top_row + EDITAREA_Y + 1][i] = '\0';
+						for(i = top_column + EDITAREA_X, i1 = 0; i < MAX_COLUMN; i++, i1++)
 						{
-							content_buffer[top_row + SBUFFER_Y + 1][i1] = content_buffer[top_row + SBUFFER_Y][i]; 
-							content_buffer[top_row + SBUFFER_Y][i] = '\0';
+							content_buffer[top_row + EDITAREA_Y + 1][i1] = content_buffer[top_row + EDITAREA_Y][i]; 
+							content_buffer[top_row + EDITAREA_Y][i] = '\0';
 						}
 						cursor_x = MAX_LNUM_DIGIT;
-						if(SBUFFER_Y + 1 >= row)
+						if(EDITAREA_Y + 1 >= row)
 							top_row++;
 						else
 							cursor_y++;
@@ -208,24 +215,38 @@ void edit(void)
 					else if(chr == 27)
 					{
 						clear_screen();
-						set_clock(1);
-						release_resource();
-						app_exit();
+						BOOL b = TRUE;
+						while(b)
+						{
+							printf("Are you ready to exit?(y/N): ");
+							int32 in = toupper((int32)ILGetChar());
+							if(in == 'Y')
+							{
+								clear_screen();
+								set_clock(1);
+								release_resource();
+								exit(0);
+							}
+							else if(in == 'N' || in == '\r' || in == '\n')
+								b = FALSE;
+							printf("\n");
+						}
+						break;
 					}
-					else if(top_column + SBUFFER_X + 1 < MAX_COLUMN)
+					else if(top_column + EDITAREA_X + 1 < MAX_COLUMN)
 					{
-						int i;
-						for(i = MAX_COLUMN - 1; i > top_column + SBUFFER_X; i--)
-							content_buffer[top_row + SBUFFER_Y][i] = content_buffer[top_row + SBUFFER_Y][i - 1];
-						content_buffer[top_row + SBUFFER_Y][top_column + SBUFFER_X] = chr;
-						for(i = 0; i < top_column + SBUFFER_X; i++)
-							if(content_buffer[top_row + SBUFFER_Y][i] == 0)
-								content_buffer[top_row + SBUFFER_Y][i] = ' ';
-						if(SBUFFER_X + 1 < column)
+						int32 i;
+						for(i = MAX_COLUMN - 1; i > top_column + EDITAREA_X; i--)
+							content_buffer[top_row + EDITAREA_Y][i] = content_buffer[top_row + EDITAREA_Y][i - 1];
+						content_buffer[top_row + EDITAREA_Y][top_column + EDITAREA_X] = chr;
+						for(i = 0; i < top_column + EDITAREA_X; i++)
+							if(content_buffer[top_row + EDITAREA_Y][i] == 0)
+								content_buffer[top_row + EDITAREA_Y][i] = ' ';
+						if(EDITAREA_X + 1 < column)
 							cursor_x++;
 						else if(top_column + column < MAX_COLUMN)
 							top_column++;
-						if(top_column + SBUFFER_Y == total_line)
+						if(top_column + EDITAREA_Y == total_line)
 							total_line++;
 						is_changed = TRUE;
 					}
@@ -235,76 +256,102 @@ void edit(void)
 	}
 }
 
-void flush(void)
+static void strcpy_sbuffer(ASCCHAR * dest, CASCCHAR * src)
+{
+	while(*src != '\0')
+	{
+		*dest = *src;
+		dest += 2;
+		src++;
+	}
+}
+
+static void flush(void)
 {
 	lock_cursor();
-	uint ui, ui1;
+
+	uint32 ui, ui1;
 	for(ui = top_row; ui < top_row + row; ui++)
 	{
-		char * line = content_buffer[ui];
+		// 输出行号。
+		uint32 ln = 1 + top_row + ui;
+		uint32 lnoff = (ui - top_row) * scr_column * 2;
+		screen_buffer[lnoff + 0] = ' ';
+		screen_buffer[lnoff + 1] = CC_GRAYWHITE | CBGC_BLUE;
+		screen_buffer[lnoff + 2] = ' ';
+		screen_buffer[lnoff + 3] = CC_GRAYWHITE | CBGC_BLUE;
+		screen_buffer[lnoff + 4] = ' ';
+		screen_buffer[lnoff + 5] = CC_GRAYWHITE | CBGC_BLUE;
+		screen_buffer[lnoff + 6] = ' ';
+		screen_buffer[lnoff + 7] = CC_GRAYWHITE | CBGC_BLUE;
+		screen_buffer[lnoff + 8] = ' ';
+		screen_buffer[lnoff + 9] = CC_GRAYWHITE | CBGC_BLUE;
+		int8 ln_s[20];
+		itos(ln_s, ln);
+		if(strlen(ln_s) > MAX_LNUM_DIGIT)
+		{
+			screen_buffer[lnoff + 0] = 'X';
+			screen_buffer[lnoff + 2] = 'X';
+			screen_buffer[lnoff + 4] = 'X';
+			screen_buffer[lnoff + 6] = 'X';
+			screen_buffer[lnoff + 8] = 'X';
+		}
+		else
+			for(ui1 = 0; ui1 < MAX_LNUM_DIGIT && ln_s[ui1] != '\0'; ui1++)
+				screen_buffer[lnoff + ui1 * 2] = ln_s[ui1];
+
+		// 输出内容到内容编辑区。
+		ASCCHAR * line = content_buffer[ui];
 		for(ui1 = 0; ui1 < column; ui1++)
-			screen_buffer[(ui - top_row) * column + ui1] 
+		{
+			uint32 offset = ((ui - top_row) * scr_column + (MAX_LNUM_DIGIT + ui1)) * 2;
+			screen_buffer[offset + 0] 
 				= ((line[top_column + ui1] == '\0' || line[top_column + ui1] == '\t') 
 					? ' ' 
 					: line[top_column + ui1]);
-	}
-	screen_buffer[row * column] = '\0';
-	if(vesa_is_valid())
-		clear_screen();
-	else
-		set_cursor(0, 0);
-	
-	for(ui = 0; ui < row; ui++)
-	{
-		char temp[8192];
-		if(column >= sizeof(temp))
-		{
-			memcpy(temp, screen_buffer + ui * column, sizeof(temp) - 1);
-			temp[sizeof(temp) - 1] = '\0';
+			screen_buffer[offset + 1] = CC_GRAYWHITE;
 		}
-		else
-		{
-			memcpy(temp, screen_buffer + ui * column, column);
-			temp[column] = '\0';
-		}
-		char ln[10];
-		itos(ln, 1 + top_row + ui);
-		for(ui1 = 0; ui1 < MAX_LNUM_DIGIT - strlen(ln); ui1++)
-			print_str_p(" ", CC_GRAYWHITE | CBGC_BLUE);
-		print_str_p(ln, CC_GRAYWHITE | CBGC_BLUE);
-		if(cursor_y == ui)
-			print_str_p(temp, CC_GRAYWHITE | CBGC_BROWN);
-		else
-			print_str(temp);
 	}
 
-	char buffer[100];
-	print_str("                                                                      ");
-	set_cursor(0, row);
+	// 输出状态栏。
+	uint32 sbaroff = row * scr_column * 2;
+	for(ui = 0; ui < scr_column; ui++)
+	{
+		screen_buffer[sbaroff + SBUFFER_CHR(ui)] = ' ';
+		screen_buffer[sbaroff + SBUFFER_PRO(ui)] = CBGC_GRAYWHITE | CC_YELLOW;
+	}
 	if(is_changed)
-		print_str_p("*|", CC_YELLOW | CBGC_GRAYWHITE);
-	else
-		print_str_p(" |", CC_YELLOW | CBGC_GRAYWHITE);
-	print_str_p(uitos(buffer, top_column + SBUFFER_X), CC_YELLOW | CBGC_GRAYWHITE);
-	print_str_p(",", CC_YELLOW | CBGC_GRAYWHITE);
-	print_str_p(uitos(buffer, top_row + SBUFFER_Y), CC_YELLOW | CBGC_GRAYWHITE);
-	print_str_p("|L:", CC_YELLOW | CBGC_GRAYWHITE);
-	print_str_p(uitos(buffer, total_line), CC_YELLOW | CBGC_GRAYWHITE);
-	print_str_p("|", CC_YELLOW | CBGC_GRAYWHITE);
-	if(strlen(filepath) <= 40)
-		print_str_p(filepath, CC_YELLOW | CBGC_GRAYWHITE);
+		screen_buffer[sbaroff + SBUFFER_CHR(0)] = '*';
+	screen_buffer[sbaroff + SBUFFER_CHR(1)] = '|';
+	uint32 pos = 2;
+	ASCCHAR temp[100];
+	uitos(temp, 1 + top_column + EDITAREA_X);
+	strcpy_sbuffer(&screen_buffer[sbaroff + SBUFFER_CHR(pos)], temp);
+	pos += strlen(temp);
+	screen_buffer[sbaroff + SBUFFER_CHR(pos)] = ',';
+	pos++;
+	uitos(temp, 1 + top_row + EDITAREA_Y);
+	strcpy_sbuffer(&screen_buffer[sbaroff + SBUFFER_CHR(pos)], temp);
+	pos += strlen(temp);
+	screen_buffer[sbaroff + SBUFFER_CHR(pos)] = '|';
+	pos++;
+	uint32 len = strlen(filepath);
+	if(len <= 40)
+		strcpy_sbuffer(&screen_buffer[sbaroff + SBUFFER_CHR(pos)], filepath);
 	else
 	{
-		memcpy(buffer, filepath, 40);
-		buffer[40] = '\0';
-		print_str_p(buffer, CC_YELLOW | CBGC_GRAYWHITE);
+		memcpy(temp, filepath, 40);
+		temp[40] = '\0';
+		strcpy_sbuffer(&screen_buffer[sbaroff + SBUFFER_CHR(pos)], temp);
 	}
+	pos += len;
 
+	ILWriteConsoleBuffer(screen_buffer, scr_row * scr_column * 2);
 	unlock_cursor();
 	set_cursor(cursor_x, cursor_y);
 }
 
-void load(void)
+static void load(void)
 {
 	uint file_len;
 	char * buffer = malloc(MAX_ROW * MAX_COLUMN);
@@ -339,7 +386,7 @@ void load(void)
 	free(buffer);
 }
 
-void save(void)
+static void save(void)
 {
 	clear_screen();
 	print_str("Saving file");

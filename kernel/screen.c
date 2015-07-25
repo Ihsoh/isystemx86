@@ -62,6 +62,37 @@ static BOOL mouse_left_button_down = 0;
 static int32 old_mouse_x = 0, old_mouse_y = 0;
 
 /**
+	@Function:		screen_write_console_buffer
+	@Access:		Public
+	@Description:
+		写控制台字符缓冲区。
+	@Parameters:
+		buffer, const uint8 *, IN
+			要写入的字符的缓冲区。
+		size, uint32, IN
+			缓冲区大小。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+screen_write_console_buffer(IN const uint8 * buffer,
+							IN uint32 size)
+{
+	uint8 * off;
+	if(vesa_is_valid())
+			off = (uint8 *)screen_char_buffer;
+		else
+			off = (uint8 *)VIDEO_MEM;
+	if(size > ROW * COLUMN * 2)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < size; ui++)
+		off[ui] = buffer[ui];
+	return TRUE;
+}
+
+/**
 	@Function:		flush_char_buffer
 	@Access:		Public
 	@Description:

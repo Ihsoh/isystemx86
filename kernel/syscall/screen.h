@@ -44,6 +44,10 @@
 
 #define	SCALL_FLUSH_SCREEN 			28
 
+#define	SCALL_WRITE_CONSOLE_BUFFER	29
+
+
+
 extern
 void
 system_call_screen(	IN uint32 func,

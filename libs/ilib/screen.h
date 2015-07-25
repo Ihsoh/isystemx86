@@ -45,6 +45,8 @@
 
 #define	SCALL_FLUSH_SCREEN 			28
 
+#define	SCALL_WRITE_CONSOLE_BUFFER	29
+
 #define	CC_BLACK		0
 #define	CC_BLUE			1
 #define	CC_GREEN		2
@@ -173,6 +175,11 @@ extern void print_err_str_p(char * str, uchar p);
 extern void flush_screen(void);
 #define	il_flush_screen()	(flush_screen())
 #define	ILFlushScreen()	(flush_screen())
+
+extern int write_console_buffer(uint8 * buffer, uint32 size);
+#define	il_write_console_buffer(buffer, size)	(write_console_buffer((buffer), (size)))
+#define	ILWriteConsoleBuffer(buffer, size)	(write_console_buffer((buffer), (size)))
+
 
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\

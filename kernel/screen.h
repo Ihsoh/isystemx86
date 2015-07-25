@@ -47,6 +47,11 @@
 #define	CBGC_GRAYWHITE	(CC_GRAYWHITE << 4)
 
 extern
+BOOL
+screen_write_console_buffer(IN const uint8 * buffer,
+							IN uint32 size);
+
+extern
 void
 flush_char_buffer(void);
 

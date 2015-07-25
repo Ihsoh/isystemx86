@@ -332,5 +332,15 @@ system_call_screen(	IN uint32 func,
 			flush_screen();
 			break;
 		}
+		//写控制台字符缓冲区。
+		//
+		case SCALL_WRITE_CONSOLE_BUFFER:
+		{
+			const uint8 * buffer = (const uint8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			uint32 size = UINT32_SPARAM(sparams->param1);
+			BOOL r = screen_write_console_buffer(buffer, size);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }
