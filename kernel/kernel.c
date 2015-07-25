@@ -147,6 +147,17 @@ main(void)
 	disable_console_lock();
 	disable_ifs1_lock();
 
+	// 启用SSE。
+	asm volatile (
+		"mov 	%cr0, %eax\n\t"
+		"and 	$0xfffb, %ax\n\t"
+		"or 	$0x2, %ax\n\t"
+		"mov	%eax, %cr0\n\t"
+		"mov	%cr4, %eax\n\t"
+		"or		$0x3 << 9, %ax\n\t"
+		"mov	%eax, %cr4\n\t"
+		);
+
 	init_vesa();
 	init_paging();
 
@@ -935,6 +946,7 @@ static volatile BOOL	will_reset_all_exceptions	= FALSE;
 static volatile BOOL				kernel_init_i387	= FALSE;
 static volatile struct I387State	kernel_i387_state;
 static volatile BOOL				kernel_task_ran		= FALSE;
+static volatile SSEState			kernel_sse_state;
 
 /**
 	@Function:		timer_int
@@ -984,6 +996,7 @@ timer_int(void)
 			{
 				get_task_info(running_tid, &task);
 				asm volatile ("fnsave %0"::"m"(task.i387_state));
+				asm volatile ("fxsave %0"::"m"(task.sse_state));
 				set_task_info(running_tid, &task);
 			}
 
@@ -991,7 +1004,10 @@ timer_int(void)
 			if(kernel_init_i387)
 			{
 				if(!kernel_task_ran)
+				{
 					asm volatile ("frstor %0"::"m"(kernel_i387_state));
+					asm volatile ("fxrstor %0"::"m"(kernel_sse_state));
+				}
 			}
 			else
 			{
@@ -1026,6 +1042,7 @@ timer_int(void)
 			{
 				//刚才执行的是内核任务，所以保存内核的I387状态。
 				asm volatile ("fnsave %0"::"m"(kernel_i387_state));
+				asm volatile ("fxsave %0"::"m"(kernel_sse_state));
 				kernel_task_ran = FALSE;
 			}
 			else
@@ -1034,12 +1051,16 @@ timer_int(void)
 					//刚才执行的不是内核任务，保存上一个任务的I387状态。
 					get_task_info(running_tid, &task);
 					asm volatile ("fnsave %0"::"m"(task.i387_state));
+					asm volatile ("fxsave %0"::"m"(task.sse_state));
 					set_task_info(running_tid, &task);
 				}
 
 			get_task_info(tid, &task);
 			if(task.init_i387)
+			{
 				asm volatile ("frstor %0"::"m"(task.i387_state));
+				asm volatile ("fxrstor %0"::"m"(task.sse_state));
+			}
 			else
 			{
 				asm volatile ("fninit");

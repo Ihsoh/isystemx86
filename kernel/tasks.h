@@ -59,6 +59,7 @@ struct Task
 	struct TSS 			tss;				//任务的TSS。
 	struct I387State	i387_state;			//Intel 80387状态。
 	int32				init_i387;			//该任务是否初始化了Intel 80387。
+	SSEState			sse_state;			//SSE的状态。
 	uint32 * 			pagedt_addr;		//页目录表和页表的地址。
 	uint32				real_pagedt_addr;	//真正页目录表和页表的地址。
 	FILE **				opened_file_ptrs;	//打开文件指针列表。

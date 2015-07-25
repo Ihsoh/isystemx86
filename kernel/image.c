@@ -679,6 +679,57 @@ rect_common_image(	OUT struct CommonImage * common_image,
 }
 
 /**
+	@Function:		blend
+	@Access:		Private
+	@Description:
+		Alpha混合两个像素。
+	@Parameters:
+		colorBack, uint32, IN
+			位于后方的像素的颜色值。
+		colorFore, uint32, IN
+			位于前方的像素的颜色值。
+		alpha, uint32, IN
+			Alpha值。
+	@Return:
+		uint32
+			混合完的像素值。	
+*/
+static
+uint32
+blend(	IN uint32 colorBack,
+		IN uint32 colorFore,
+		IN uint32 alpha)
+{
+	uint32 maskFull = 0xFFFFFFFF;
+	uint32 result;
+
+	__asm__ __volatile__ (
+		"PXOR %%xmm7, %%xmm7;"
+		"MOVD %1, %%xmm0;"  // back
+		"MOVD %2, %%xmm1;"  // fore
+		"MOVD %3, %%xmm2;"  // alpha
+		"MOVD %4, %%xmm3;"  // 0xFFFFFFFF
+		"PUNPCKLBW %%xmm7, %%xmm0;"
+		"PUNPCKLBW %%xmm7, %%xmm1;"
+		"PUNPCKLBW %%xmm2, %%xmm2;"
+		"PUNPCKLWD %%xmm2, %%xmm2;"
+		"PUNPCKLBW %%xmm7, %%xmm2;"
+		"PUNPCKLBW %%xmm7, %%xmm3;"
+		"PMULLW %%xmm2, %%xmm1;"  // xmm1 = fore * alpha
+		"PSUBW %%xmm2, %%xmm3;"   // xmm3 = 255 - alpha
+		"PMULLW %%xmm3, %%xmm0;"  // xmm0 = back * (255 - alpha)
+		"PADDW %%xmm1, %%xmm0;"   // xmm0 = xmm0 + xmm1
+		"PSRLW $8, %%xmm0;"       // xmm0 = xmm0 >> 8
+		"PACKUSWB %%xmm0, %%xmm0;"
+		"MOVD %%xmm0, %0;"
+		: "=m"(result)
+		: "m"(colorBack), "m"(colorFore), "m"(alpha), "m"(maskFull)
+	);
+
+	return result;
+}
+
+/**
 	@Function:		text_common_image
 	@Access:		Public
 	@Description:
@@ -714,11 +765,14 @@ text_common_image(	OUT struct CommonImage * common_image,
 	if(common_image == NULL || enfont == NULL || text == NULL)
 		return FALSE;
 	uint32 char_count = strlen(text);
-	uint32 ui;	
+	uint32 ui;
+	#ifdef	_KERNEL_MODEL_
+	BOOL enfx_enabled = enfontx_enabled();
+	#endif
 	for(ui = 0; ui < char_count && ui < count; ui++)
 	{
 		#ifdef	_KERNEL_MODEL_
-		if(enfontx_enabled())
+		if(enfx_enabled)
 		{
 			uint8 * char_image = enfont + (6 + text[ui] * ENFONT_WIDTH * ENFONT_HEIGHT);
 			int32 font_x, font_y;
@@ -727,20 +781,6 @@ text_common_image(	OUT struct CommonImage * common_image,
 				{
 					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
 					uint32 font_pixel = (uint32)*(char_image + font_y * ENFONT_WIDTH + font_x);
-					
-					/*
-					float r1 = (float)((color >> 16) & 0x000000ff);
-					float g1 = (float)((color >> 8) & 0x000000ff);
-					float b1 = (float)(color & 0x000000ff);
-					float r2 = (float)((pixel >> 16) & 0x000000ff);
-					float g2 = (float)((pixel >> 8) & 0x000000ff);
-					float b2 = (float)(pixel & 0x000000ff);
-					float a = (float)font_pixel;
-					float r = 0.0, g = 0.0, b = 0.0;
-					r = (r1 * (255.0 - a) + r2 * a) / 255.0;
-					g = (g1 * (255.0 - a) + g2 * a) / 255.0;
-					b = (b1 * (255.0 - a) + b2 * a) / 255.0;
-					*/
 
 					/*
 					float r1 = (color >> 16) & 0x000000ff;
@@ -756,6 +796,8 @@ text_common_image(	OUT struct CommonImage * common_image,
 					g = g1 * (1.0f - a) + g2 * a;
 					b = b1 * (1.0f - a) + b2 * a;
 					*/
+
+					/*
 					uint32 r1 = (color >> 16) & 0x000000ff;
 					uint32 g1 = (color >> 8) & 0x000000ff;
 					uint32 b1 = color & 0x000000ff;
@@ -768,8 +810,10 @@ text_common_image(	OUT struct CommonImage * common_image,
 					r = (r1 * a1 + r2 * a) >> 8;
 					g = (g1 * a1 + g2 * a) >> 8;
 					b = (b1 * a1 + b2 * a) >> 8;
-
 					uint32 result = (r << 16) | (g << 8) | b | 0xff000000;
+					*/
+
+					uint32 result = blend(color, pixel, font_pixel);
 					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, result);
 				}
 		}

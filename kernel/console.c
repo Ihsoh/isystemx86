@@ -2299,10 +2299,7 @@ exec(	IN int8 * cmd,
 
 		else if(strcmp(name, "t") == 0)
 		{
-			ASCCHAR buffer[1024];
-			config_gui_get_string("Background640x480", buffer, sizeof(buffer));
-			print_str(buffer);
-			print_str("\n");
+
 		}
 
 		//Batch
