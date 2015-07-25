@@ -236,7 +236,7 @@ struct I387State
 	uint8	st_space[80];
 } __attribute__((packed));
 
-typedef uint8 SSEState[512];
+typedef uint8 __attribute__((aligned(16))) SSEState[512] __attribute__((aligned(16)));
 
 #define	NORMAL_C_DESC		((0 << 3) | RPL0)
 #define	KERNEL_C_DESC		((1 << 3) | RPL0)
