@@ -23,6 +23,39 @@
 #endif
 
 /**
+	@Function:		image_fast_fill_uint8
+	@Access:		Private
+	@Description:
+		快速填充uint8数据。
+	@Parameters:
+		dest, uint8 *, OUT
+			填充的目标。
+		data, uint8, IN
+			要填充的数据。
+		count, uint32, IN
+			填充uint8的数量。
+	@Return:
+*/
+static
+void
+image_fast_fill_uint8(	OUT uint8 * dest,
+						IN uint8 data,
+						IN uint32 count)
+{
+	uint32 uidata = ((uint32)data << 24)
+					| ((uint32)data << 16)
+					| ((uint32)data << 8)
+					| (uint32)data;
+	uint32 ui;
+	uint32 * uiptr = (uint32 *)dest;
+	for(ui = 0; ui < count / 4; ui++)
+		*(uiptr++) = uidata;
+	dest = (uint8 *)uiptr;
+	for(ui = 0; ui < count % 4; ui++)
+		*(dest++) = data;
+}
+
+/**
 	@Function:		new_common_image
 	@Access:		Public
 	@Description:
@@ -186,40 +219,7 @@ fill_image_by_byte(	IN OUT struct CommonImage * common_image,
 		return FALSE;
 	uint32 ui;
 	uint32 len = common_image->width * common_image->height * 4;
-	for(ui = 0; ui < len; ui++)
-		common_image->data[ui] = data;
-	return TRUE;
-}
-
-/**
-	@Function:		set_pixel_image0
-	@Access:		Public
-	@Description:
-		设置 Image0 图片的像素。
-	@Parameters:
-		common_image, struct CommonImage *, IN OUT
-			Image0 图片。
-		x, int32, IN
-			X 坐标。
-		y, int32, IN
-			Y 坐标。
-		pixel, uint32, IN
-			像素值。
-	@Return:
-		BOOL
-			返回TRUE则成功，否则失败。			
-*/
-static
-BOOL
-set_pixel_image0(	IN OUT struct CommonImage * common_image,
-					IN int32 x,
-					IN int32 y,
-					IN uint32 pixel)
-{
-	if(common_image == NULL || x >= common_image->width || y >= common_image->height || x < 0 || y < 0)
-		return FALSE;
-	uint32 * data_ptr = common_image->data;
-	data_ptr[y * common_image->width + x] = pixel;
+	image_fast_fill_uint8(common_image->data, data, len);
 	return TRUE;
 }
 
@@ -250,7 +250,13 @@ set_pixel_common_image(	IN OUT struct CommonImage * common_image,
 	switch(common_image->type)
 	{
 		case CMMNIMAGE_IMG0:
-			return set_pixel_image0(common_image, x, y, pixel);
+		{
+			if(common_image == NULL || x >= common_image->width || y >= common_image->height || x < 0 || y < 0)
+				return FALSE;
+			uint32 * data_ptr = common_image->data;
+			data_ptr[y * common_image->width + x] = pixel;
+			return TRUE;
+		}
 		default:
 			return FALSE;
 	}
@@ -356,20 +362,27 @@ draw_image0(IN OUT struct CommonImage * dst,
 	int32 src_x, src_y;
 	uint32 * dst_ptr = dst->data;
 	uint32 * src_ptr = src->data;
-	for(dst_x = draw_x, src_x = 0; dst_x < draw_x + width; dst_x++, src_x++)
-		for(dst_y = draw_y, src_y = 0; dst_y < draw_y + height; dst_y++, src_y++)
+	uint32 draw_x_width = draw_x + width;
+	uint32 draw_y_height = draw_y + height;
+	for(dst_y = draw_y, src_y = 0; dst_y < draw_y_height; dst_y++, src_y++)
+	{
+		if(	dst_y >= dst->height
+			|| src_y >= height
+			|| src_y >= src->height
+			|| dst_y < 0)
+			continue;
+		uint32 dstoff = dst_y * dst->width;
+		uint32 srcoff = src_y * src->width;
+		for(dst_x = draw_x, src_x = 0; dst_x < draw_x_width; dst_x++, src_x++)
 		{
-			if(	dst_x >= dst->width 
-				|| dst_y >= dst->height 
-				|| src_x >= width 
-				|| src_y >= height 
-				|| src_x >= src->width 
-				|| src_y >= src->height
-				|| dst_x < 0
-				|| dst_y < 0)
+			if(	dst_x >= dst->width
+				|| src_x >= width
+				|| src_x >= src->width
+				|| dst_x < 0)
 				continue;
-			dst_ptr[dst_y * dst->width + dst_x] = src_ptr[src_y * src->width + src_x];
+			dst_ptr[dstoff + dst_x] = src_ptr[srcoff + src_x];
 		}
+	}
 	return TRUE;
 }
 
@@ -714,18 +727,49 @@ text_common_image(	OUT struct CommonImage * common_image,
 				{
 					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
 					uint32 font_pixel = (uint32)*(char_image + font_y * ENFONT_WIDTH + font_x);
-					double r1 = (double)((color >> 16) & 0x000000ff);
-					double g1 = (double)((color >> 8) & 0x000000ff);
-					double b1 = (double)(color & 0x000000ff);
-					double r2 = (double)((pixel >> 16) & 0x000000ff);
-					double g2 = (double)((pixel >> 8) & 0x000000ff);
-					double b2 = (double)(pixel & 0x000000ff);
-					double a = (double)font_pixel;
-					double r = 0.0, g = 0.0, b = 0.0;
+					
+					/*
+					float r1 = (float)((color >> 16) & 0x000000ff);
+					float g1 = (float)((color >> 8) & 0x000000ff);
+					float b1 = (float)(color & 0x000000ff);
+					float r2 = (float)((pixel >> 16) & 0x000000ff);
+					float g2 = (float)((pixel >> 8) & 0x000000ff);
+					float b2 = (float)(pixel & 0x000000ff);
+					float a = (float)font_pixel;
+					float r = 0.0, g = 0.0, b = 0.0;
 					r = (r1 * (255.0 - a) + r2 * a) / 255.0;
 					g = (g1 * (255.0 - a) + g2 * a) / 255.0;
 					b = (b1 * (255.0 - a) + b2 * a) / 255.0;
-					uint32 result = ((uint32)r << 16) | ((uint32)g << 8) | (uint32)b | 0xff000000;
+					*/
+
+					/*
+					float r1 = (color >> 16) & 0x000000ff;
+					float g1 = (color >> 8) & 0x000000ff;
+					float b1 = color & 0x000000ff;
+					float r2 = (pixel >> 16) & 0x000000ff;
+					float g2 = (pixel >> 8) & 0x000000ff;
+					float b2 = pixel & 0x000000ff;
+					float a = font_pixel;
+					a /= 255.0f;
+					float r = 0.0f, g = 0.0f, b = 0.0f;
+					r = r1 * (1.0f - a) + r2 * a;
+					g = g1 * (1.0f - a) + g2 * a;
+					b = b1 * (1.0f - a) + b2 * a;
+					*/
+					uint32 r1 = (color >> 16) & 0x000000ff;
+					uint32 g1 = (color >> 8) & 0x000000ff;
+					uint32 b1 = color & 0x000000ff;
+					uint32 r2 = (pixel >> 16) & 0x000000ff;
+					uint32 g2 = (pixel >> 8) & 0x000000ff;
+					uint32 b2 = pixel & 0x000000ff;
+					uint32 a = font_pixel;
+					uint32 r = 0, g = 0, b = 0;
+					uint32 a1 = 256 - a;
+					r = (r1 * a1 + r2 * a) >> 8;
+					g = (g1 * a1 + g2 * a) >> 8;
+					b = (b1 * a1 + b2 * a) >> 8;
+
+					uint32 result = (r << 16) | (g << 8) | b | 0xff000000;
 					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, result);
 				}
 		}

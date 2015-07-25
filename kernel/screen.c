@@ -1142,7 +1142,7 @@ flush_screen(void)
 		}
 
 	//绘制窗体
-	int mouse_x, mouse_y;
+	int32 mouse_x, mouse_y;
 	get_mouse_position(&mouse_x, &mouse_y);
 	if(window_count != 0)
 	{
@@ -1227,8 +1227,8 @@ flush_screen(void)
 		move_window = FALSE;
 	if(move_window)
 	{
-		int offset_x = mouse_x - old_mouse_x;
-		int offset_y = mouse_y - old_mouse_y;
+		int32 offset_x = mouse_x - old_mouse_x;
+		int32 offset_y = mouse_y - old_mouse_y;
 		struct Window * top_window = windows[0];
 		top_window->x += offset_x;
 		top_window->y += offset_y;
