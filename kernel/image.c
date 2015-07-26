@@ -368,8 +368,10 @@ draw_image0(IN OUT struct CommonImage * dst,
 	int32 src_x, src_y;
 	uint32 * dst_ptr = dst->data;
 	uint32 * src_ptr = src->data;
-	uint32 draw_x_width = draw_x + width;
-	uint32 draw_y_height = draw_y + height;
+	int32 draw_x_width = draw_x + width;
+	int32 draw_y_height = draw_y + height;
+	int32 dst_width = (int32)dst->width;
+	int32 src_width = (int32)src->width;
 	for(dst_y = draw_y, src_y = 0; dst_y < draw_y_height; dst_y++, src_y++)
 	{
 		if(	dst_y >= dst->height
@@ -377,8 +379,8 @@ draw_image0(IN OUT struct CommonImage * dst,
 			|| src_y >= src->height
 			|| dst_y < 0)
 			continue;
-		uint32 dstoff = dst_y * dst->width;
-		uint32 srcoff = src_y * src->width;
+		int32 dstoff = dst_y * dst_width;
+		int32 srcoff = src_y * src_width;
 		for(dst_x = draw_x, src_x = 0; dst_x < draw_x_width; dst_x++, src_x++)
 		{
 			if(	dst_x >= dst->width

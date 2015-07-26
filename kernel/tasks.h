@@ -12,6 +12,7 @@
 #include "386.h"
 #include "ifs1fs.h"
 #include "lock.h"
+#include "sse.h"
 
 #define	MAX_TASK_COUNT				64
 #define	MAX_APP_LEN					(16 * 1024 * 1024)

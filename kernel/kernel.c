@@ -35,6 +35,7 @@
 #include "dma.h"
 #include "kmpool.h"
 #include "knlldr.h"
+#include "sse.h"
 
 #include "syscall/fs.h"
 #include "syscall/keyboard.h"
@@ -148,6 +149,12 @@ main(void)
 	disable_ifs1_lock();
 
 	// 启用SSE。
+	// In order to allow SSE instructions to be executed without generating a #UD, 
+	// we need to alter the CR0 and CR4 registers.
+	// clear the CR0.EM bit (bit 2) [ CR0 &= ~(1 << 2) ]
+	// set the CR0.MP bit (bit 1) [ CR0 |= (1 << 1) ]
+	// set the CR4.OSFXSR bit (bit 9) [ CR4 |= (1 << 9) ]
+	// set the CR4.OSXMMEXCPT bit (bit 10) [ CR4 |= (1 << 10) ]
 	asm volatile (
 		"mov 	%cr0, %eax\n\t"
 		"and 	$0xfffb, %ax\n\t"
