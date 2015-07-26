@@ -40,7 +40,7 @@ $(Target):	bin	\
 
 	cd test/test_jsonlib && make
 
-#tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
+	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
 	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
 	cd tools/idoc/ && python idoc.py ../../kernel ../../doc/isystemx86-kernel-doc
 	cd tools/idoc/ && python idoc.py ../../libs/mempoollib ../../doc/libs/mempoollib-doc

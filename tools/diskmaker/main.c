@@ -445,7 +445,7 @@ int main(int argc, char * argv[])
 		image = argv[5];
 		script = argv[6];
 		disk_type = argv[7];
-		if(strcmp(disk_type, "vhd") != 0 && strcmp(disk_type, "flat") == 0)
+		if(strcmp(disk_type, "vhd") != 0 && strcmp(disk_type, "flat") != 0)
 			die("Invalid disk type");
 		make_vhd(boot, kldr, kernel, image, script, disk_type);
 	}
@@ -463,7 +463,7 @@ int main(int argc, char * argv[])
 		path = argv[4];
 		name = argv[5];
 		file = argv[6];
-		if(strcmp(type, "vhd") != 0 && strcmp(type, "flat") == 0)
+		if(strcmp(type, "vhd") != 0 && strcmp(type, "flat") != 0)
 			die("Invalid disk type");
 		add_file_to_vhd(hdfile, type, path, name, file);
 	}
