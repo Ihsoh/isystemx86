@@ -23,9 +23,9 @@ font = ImageFont.truetype(font_file, font_size)
 
 if mode == u'test':
 	def create(char):
-		image = Image.new(u'RGB', (font_width, font_height), (255, 255, 255))
+		image = Image.new(u'RGB', (font_width, font_height), (0, 0, 0))
 		draw = ImageDraw.Draw(image)
-		draw.text((0, 0), char, font=font, fill=(0, 0, 0))
+		draw.text((0, 0), char, font=font, fill=(255, 255, 255))
 		image.save(u'out/' + char + u'.png', u'png')
 	create(u'A')
 	create(u'a')
@@ -35,9 +35,9 @@ if mode == u'test':
 	create(u'|')
 elif mode == u'build':
 	def create(char):
-		image = Image.new(u'RGB', (font_width, font_height), (255, 255, 255))
+		image = Image.new(u'RGB', (font_width, font_height), (0, 0, 0))
 		draw = ImageDraw.Draw(image)
-		draw.text((0, 1), char, font=font, fill=(0, 0, 0))
+		draw.text((0, 1), char, font=font, fill=(255, 255, 255))
 		return image
 	fname = os.path.splitext(font_file)[0]
 	f = open(u'out/' + fname + '.efx', u'wb')

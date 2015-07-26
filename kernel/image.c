@@ -870,12 +870,12 @@ text_common_image_normal(	OUT struct CommonImage * common_image,
 					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
 					uint32 font_pixel = font_pixels[font_x];
 
-					uint32 r1 = (color >> 16) & 0x000000ff;
-					uint32 g1 = (color >> 8) & 0x000000ff;
-					uint32 b1 = color & 0x000000ff;
-					uint32 r2 = (pixel >> 16) & 0x000000ff;
-					uint32 g2 = (pixel >> 8) & 0x000000ff;
-					uint32 b2 = pixel & 0x000000ff;
+					uint32 r2 = (color >> 16) & 0x000000ff;
+					uint32 g2 = (color >> 8) & 0x000000ff;
+					uint32 b2 = color & 0x000000ff;
+					uint32 r1 = (pixel >> 16) & 0x000000ff;
+					uint32 g1 = (pixel >> 8) & 0x000000ff;
+					uint32 b1 = pixel & 0x000000ff;
 					uint32 a = font_pixel;
 					uint32 r = 0, g = 0, b = 0;
 					uint32 a1 = 256 - a;
@@ -974,7 +974,7 @@ text_common_image_sse(	OUT struct CommonImage * common_image,
 				{
 					uint32 pixel = (uint32)get_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y);
 					uint32 font_pixel = font_pixels[font_x];
-					uint32 result = blend(color, pixel, font_pixel);
+					uint32 result = blend(pixel, color, font_pixel);
 					set_pixel_common_image(common_image, draw_x + font_x, draw_y + font_y, result);
 				}
 			}
@@ -1065,15 +1065,15 @@ text_common_image_sse_ex(	OUT struct CommonImage * common_image,
 				uint8 * font_pixels = char_image + font_y * ENFONT_WIDTH;
 				for(font_x = 0; font_x < half_enfont_width; font_x++)
 				{
-					uint32 back[2];
-					uint32 fore[2];
-					uint8 alpha[2];
-					uint32 result[2];
-					back[0] = color;
-					back[1] = color;
+					uint32 back[2] __attribute__((aligned(16)));
+					uint32 fore[2] __attribute__((aligned(16)));
+					uint8 alpha[2] __attribute__((aligned(16)));
+					uint32 result[2] __attribute__((aligned(16)));
+					fore[0] = color;
+					fore[1] = color;
 					uint32 temp = draw_x + font_x * 2;
-					fore[0] = get_pixel_common_image(common_image, temp, draw_y + font_y);
-					fore[1] = get_pixel_common_image(common_image, temp + 1, draw_y + font_y);
+					back[0] = get_pixel_common_image(common_image, temp, draw_y + font_y);
+					back[1] = get_pixel_common_image(common_image, temp + 1, draw_y + font_y);
 					uint8 * tempu8 = char_image + font_y * ENFONT_WIDTH + font_x * 2;
 					alpha[0] = *tempu8;
 					alpha[1] = *(tempu8 + 1);
@@ -1174,4 +1174,3 @@ text_common_image(	OUT struct CommonImage * common_image,
 											color);
 	}
 }
-
