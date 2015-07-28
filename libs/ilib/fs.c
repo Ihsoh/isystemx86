@@ -8,7 +8,7 @@
 #include "sparams.h"
 #include "system.h"
 
-#define	MAX_RETRY_COUNT	0x10000
+#define	MAX_RETRY_COUNT	0x100
 
 static int _lock_fs(void)
 {
