@@ -44,9 +44,13 @@ ILFILE * ILOpenFile(char * path, int mode)
 	while(!_lock_fs())
 		asm volatile ("pause");
 	ILFILE * fptr = NULL;
-	uint ui;
+	uint ui, ui1;
 	for(ui = 0; ui < MAX_RETRY_COUNT && fptr == NULL; ui++)
+	{
 		fptr = _fopen(path, mode);
+		for(ui1 = 0; ui1 < 0x1000; ui1++)
+			asm volatile("pause");
+	}
 	_unlock_fs();
 	return fptr;
 }
