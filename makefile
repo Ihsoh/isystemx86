@@ -17,6 +17,7 @@ $(Target):	bin	\
 			libs/mempoollib/bin/libmempoollib.a 	\
 			libs/regexlib/bin/libregexlib.a 	\
 			libs/imagelib/bin/libimagelib.a 	\
+			libs/imagelib/bin/libisys.a 	\
 			boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
@@ -75,6 +76,9 @@ libs/regexlib/bin/libregexlib.a:
 libs/imagelib/bin/libimagelib.a:
 	cd libs/imagelib && make
 
+libs/imagelib/bin/libisys.a:
+	cd libs/isys && make
+
 boot/bin/boot.bin:
 	cd boot && make
 
@@ -98,6 +102,7 @@ clean:
 	cd libs/mempoollib && make clean
 	cd libs/regexlib && make clean
 	cd libs/imagelib && make clean
+	cd libs/isys && make clean
 
 	cd boot && make clean
 	cd kernelldr && make clean
