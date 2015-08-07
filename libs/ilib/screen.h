@@ -93,8 +93,8 @@ extern void clear_screen(void);
 #define	ILClearScreen()	(clear_screen())
 
 extern void set_cursor(ushort x, ushort y);
-#define	il_set_cursor(x, y)	(set_cursor((x), (y))
-#define	ILSetCursor(x, y)	(set_cursor((x), (y))
+#define	il_set_cursor(x, y)	(set_cursor((x), (y)))
+#define	ILSetCursor(x, y)	(set_cursor((x), (y)))
 
 extern void get_cursor(ushort * x, ushort * y);
 #define	il_get_cursor(x, y)	(get_cursor((x), (y)))

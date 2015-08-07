@@ -53,7 +53,6 @@ ISYSUnlockCaret(VOID);
 extern
 BOOL
 ISYSWriteConsoleBuffer(	IN BYTEPTR buffer,
-						IN UINT32 offset,
 						IN UINT32 size);
 
 extern
