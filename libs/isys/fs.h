@@ -66,7 +66,7 @@ ISYSFEOF(IN ISYSFilePtr file);
 
 extern
 UINT32
-ISYSGetFileLength(IN BYTEPTR path);
+ISYSGetFileLength(IN ISYSFilePtr path);
 
 extern
 BOOL

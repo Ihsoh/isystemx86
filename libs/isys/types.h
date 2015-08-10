@@ -31,6 +31,8 @@ typedef unsigned long long *	UINT64PTR;
 typedef	VOID *	VOIDPTR;
 
 typedef	INT32	BOOL;
+#define	TRUE	1
+#define	FALSE	0
 
 #define	IN
 #define	OUT
