@@ -30,7 +30,8 @@ FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
-$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1)
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin windows/bin \
+$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
 $(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	$(SyscallObjs) $(FS_IFS1)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
@@ -41,6 +42,21 @@ $(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	$(SyscallObjs) $
 
 bin:
 	-mkdir bin
+
+bmp/bin:
+	-mkdir bmp/bin
+
+fs/ifs1/bin:
+	-mkdir fs/ifs1/bin
+
+syscall/bin:
+	-mkdir syscall/bin
+
+utils/bin:
+	-mkdir utils/bin
+
+windows/bin:
+	-mkdir windows/bin
 
 bin/kernel.obj: kernel.c kernel.h
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include)
