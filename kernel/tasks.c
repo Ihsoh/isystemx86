@@ -11,13 +11,15 @@
 #include "386.h"
 #include "memory.h"
 #include "screen.h"
-#include "ifs1fs.h"
 #include "paging.h"
 #include "die.h"
 #include "lock.h"
 #include "mqueue.h"
-#include "syscall/fs.h"
 #include "kmpool.h"
+
+#include "fs/ifs1/fs.h"
+
+#include "syscall/fs.h"
 
 #include <ilib/string.h>
 

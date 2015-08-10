@@ -1,13 +1,13 @@
 /**
-	@File:			ifs1vdisk.c
+	@File:			vdisk.c
 	@Author:		Ihsoh
 	@Date:			2014-6-5
 	@Description:
-		提供IFS1虚拟硬盘的功能。
+		提供虚拟硬盘的功能。
 */
 
 
-#include "ifs1vdisk.h"
+#include "vdisk.h"
 #include "types.h"
 #include "memory.h"
 #include "screen.h"

@@ -2,7 +2,7 @@
 #define	_BMP_BMP_H_
 
 #include "../types.h"
-#include "../ifs1fs.h"
+#include "../fs/ifs1/fs.h"
 #include <dslib/list.h>
 
 #define	BI_RGB			0

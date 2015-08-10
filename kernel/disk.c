@@ -1,15 +1,15 @@
 /**
-	@File:			ifs1disk.c
+	@File:			disk.c
 	@Author:		Ihsoh
 	@Date:			2014-6-5
 	@Description:
 		提供磁盘操作功能。
 */
 
-#include "ifs1disk.h"
+#include "disk.h"
 #include "types.h"
-#include "ifs1vdisk.h"
-#include "ifs1hdisk.h"
+#include "vdisk.h"
+#include "hdisk.h"
 #include <ilib/string.h>
 
 static int8 disk_list[MAX_DISK_COUNT][3] = {{0, 0, 0},

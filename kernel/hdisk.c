@@ -1,12 +1,12 @@
 /**
-	@File:			ifs1hdisk.c
+	@File:			hdisk.c
 	@Author:		Ihsoh
 	@Date:			2014-7-14
 	@Description:
 		提供支持ATA协议的硬盘的操作功能。
 */
 
-#include "ifs1hdisk.h"
+#include "hdisk.h"
 #include "types.h"
 #include "386.h"
 #include "log.h"

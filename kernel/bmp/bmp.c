@@ -1,6 +1,6 @@
 #include "bmp.h"
 #include "../types.h"
-#include "../ifs1fs.h"
+#include "../fs/ifs1/fs.h"
 #include <dslib/list.h>
 #include <dslib/value.h>
 

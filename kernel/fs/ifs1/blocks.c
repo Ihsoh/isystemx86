@@ -1,17 +1,17 @@
 /**
-	@File:			ifs1blocks.c
+	@File:			blocks.c
 	@Author:		Ihsoh
 	@Date:			2014-6-5
 	@Description:
 		提供IFS1文件系统的块操作功能。
 */
 
-#include "ifs1blocks.h"
-#include "types.h"
-#include "memory.h"
-#include "ifs1disk.h"
-#include "cmos.h"
-#include "kmpool.h"
+#include "blocks.h"
+#include "../../types.h"
+#include "../../memory.h"
+#include "../../disk.h"
+#include "../../cmos.h"
+#include "../../kmpool.h"
 
 #include <ilib/string.h>
 #include <dslib/linked_list.h>

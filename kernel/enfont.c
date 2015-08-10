@@ -8,10 +8,11 @@
 
 #include "enfont.h"
 #include "types.h"
-#include "ifs1fs.h"
 #include "system.h"
 #include "die.h"
 #include "vesa.h"
+
+#include "fs/ifs1/fs.h"
 
 #define	__ISYS_KNL_BUILTIN_ENFONT__
 

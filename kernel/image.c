@@ -12,7 +12,7 @@
 #ifdef	_KERNEL_MODEL_
 	#include "enfont.h"
 	#include "memory.h"
-	#include "ifs1fs.h"
+	#include "fs/ifs1/fs.h"
 	#include <ilib/string.h>
 	#define	ALLOCM(n)	(alloc_memory((n)))
 	#define	FREEM(ptr)	(free_memory((ptr)))

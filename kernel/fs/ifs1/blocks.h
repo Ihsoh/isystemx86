@@ -1,15 +1,15 @@
 /**
-	@File:			ifs1blocks.h
+	@File:			blocks.h
 	@Author:		Ihsoh
 	@Date:			2014-6-5
 	@Description:
 */
 
-#ifndef	_IFS1BLOCKS_H_
-#define	_IFS1BLOCKS_H_
+#ifndef	_FS_IFS1_BLOCKS_H_
+#define	_FS_IFS1_BLOCKS_H_
 
-#include "types.h"
-#include "cmos.h"
+#include "../../types.h"
+#include "../../cmos.h"
 
 #define	BLOCK_TYPE_FILE		1
 #define	BLOCK_TYPE_DATA		2

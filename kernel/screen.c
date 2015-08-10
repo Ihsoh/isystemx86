@@ -13,7 +13,6 @@
 #include "vesa.h"
 #include "enfont.h"
 #include "tasks.h"
-#include "ifs1fs.h"
 #include "system.h"
 #include "die.h"
 #include "kernel.h"
@@ -26,6 +25,8 @@
 #include "windows/clock.h"
 #include "windows/console.h"
 #include "windows/sfunc.h"
+
+#include "fs/ifs1/fs.h"
 
 #include <ilib/string.h>
 

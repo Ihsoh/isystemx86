@@ -8,11 +8,13 @@
 
 #include "log.h"
 #include "types.h"
-#include "ifs1fs.h"
 #include "cmos.h"
 #include "memory.h"
 #include "system.h"
 #include "config.h"
+
+#include "fs/ifs1/fs.h"
+
 #include <ilib/string.h>
 
 static int8 * log_buffer 	= NULL;

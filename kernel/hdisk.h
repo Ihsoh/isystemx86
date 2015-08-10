@@ -1,12 +1,12 @@
 /**
-	@File:			ifs1hdisk.h
+	@File:			hdisk.h
 	@Author:		Ihsoh
 	@Date:			2014-7-14
 	@Description:
 */
 
-#ifndef	_IFS1HDISK_H_
-#define	_IFS1HDISK_H_
+#ifndef	_HDISK_H_
+#define	_HDISK_H_
 
 #include "types.h"
 

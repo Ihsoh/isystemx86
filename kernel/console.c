@@ -13,9 +13,7 @@
 #include "memory.h"
 #include "kfuncs.h"
 #include "cmos.h"
-#include "ifs1disk.h"
-#include "ifs1fs.h"
-#include "ifs1blocks.h"
+#include "disk.h"
 #include "tasks.h"
 #include "system.h"
 #include "vars.h"
@@ -24,6 +22,9 @@
 #include "log.h"
 #include "pci.h"
 #include "config.h"
+
+#include "fs/ifs1/fs.h"
+#include "fs/ifs1/blocks.h"
 
 #include <ilib/string.h>
 

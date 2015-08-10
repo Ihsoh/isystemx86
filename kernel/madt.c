@@ -11,7 +11,8 @@
 #include "rsdt.h"
 #include "madt.h"
 #include "memory.h"
-#include "ifs1fs.h"
+
+#include "fs/ifs1/fs.h"
 
 #define	MAX_MADT_ENTRY_COUNT	32
 

@@ -10,8 +10,9 @@
 #include "types.h"
 #include "die.h"
 #include "system.h"
-#include "ifs1fs.h"
 #include "log.h"
+
+#include "fs/ifs1/fs.h"
 
 #include <jsonlib/jsonlib.h>
 

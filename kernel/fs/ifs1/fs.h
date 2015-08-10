@@ -1,16 +1,16 @@
 /**
-	@File:			ifs1fs.h
+	@File:			fs.h
 	@Author:		Ihsoh
 	@Date:			2014-7-18
 	@Description:
 */
 
-#ifndef	_IFS1FS_H_
-#define	_IFS1FS_H_
+#ifndef	_FS_IFS1_FS_H_
+#define	_FS_IFS1_FS_H_
 
-#include "types.h"
-#include "ifs1blocks.h"
-#include "lock.h"
+#include "blocks.h"
+#include "../../types.h"
+#include "../../lock.h"
 
 #include <dslib/linked_list.h>
 

@@ -9,11 +9,13 @@
 #include "fs.h"
 #include "../types.h"
 #include "../sparams.h"
-#include "../ifs1fs.h"
 #include "../cmos.h"
-#include "../ifs1blocks.h"
 #include "../tasks.h"
 #include "../console.h"
+
+#include "../fs/ifs1/fs.h"
+#include "../fs/ifs1/blocks.h"
+
 #include <ilib/string.h>
 
 static BOOL lock = FALSE;

@@ -13,8 +13,8 @@ ASFlags=--32 -march=i386 -mtune=i386
 StringObj=../libs/ilib/bin/string.obj
 Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
-bin/console.obj bin/ifs1disk.obj bin/ifs1vdisk.obj bin/ifs1blocks.obj bin/memory.obj \
-bin/kfuncs.obj bin/ifs1hdisk.obj bin/cmos.obj bin/ifs1fs.obj bin/tasks.obj \
+bin/console.obj bin/disk.obj bin/vdisk.obj bin/memory.obj \
+bin/kfuncs.obj bin/hdisk.obj bin/cmos.obj bin/tasks.obj \
 bin/vesa.obj bin/enfont.obj bin/vars.obj bin/image.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.obj bin/rsdp.obj	\
 bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
@@ -26,12 +26,13 @@ DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj
+FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
-$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs)
+$(Target): bin $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	$(SyscallObjs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	$(SyscallObjs) $(FS_IFS1)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -59,14 +60,11 @@ bin/keyboard.obj: keyboard.c keyboard.h types.h
 bin/console.obj: console.c console.h keyboard.h screen.h
 	$(CC) $(CFlags) -c console.c -o bin/console.obj $(Include)
 
-bin/ifs1disk.obj: ifs1disk.c ifs1disk.h
-	$(CC) $(CFlags) -c ifs1disk.c -o bin/ifs1disk.obj $(Include)
+bin/disk.obj: disk.c disk.h
+	$(CC) $(CFlags) -c disk.c -o bin/disk.obj $(Include)
 
-bin/ifs1vdisk.obj: ifs1vdisk.c ifs1vdisk.h
-	$(CC) $(CFlags) -c ifs1vdisk.c -o bin/ifs1vdisk.obj $(Include)
-
-bin/ifs1blocks.obj: ifs1blocks.c ifs1blocks.h
-	$(CC) $(CFlags) -c ifs1blocks.c -o bin/ifs1blocks.obj $(Include)
+bin/vdisk.obj: vdisk.c vdisk.h
+	$(CC) $(CFlags) -c vdisk.c -o bin/vdisk.obj $(Include)
 
 bin/memory.obj: memory.c memory.h
 	$(CC) $(CFlags) -c memory.c -o bin/memory.obj $(Include)
@@ -74,14 +72,11 @@ bin/memory.obj: memory.c memory.h
 bin/kfuncs.obj: kfuncs.c kfuncs.h
 	$(CC) $(CFlags) -c kfuncs.c -o bin/kfuncs.obj $(Include)
 
-bin/ifs1hdisk.obj: ifs1hdisk.c ifs1hdisk.h
-	$(CC) $(CFlags) -c ifs1hdisk.c -o bin/ifs1hdisk.obj $(Include)
+bin/hdisk.obj: hdisk.c hdisk.h
+	$(CC) $(CFlags) -c hdisk.c -o bin/hdisk.obj $(Include)
 
 bin/cmos.obj: cmos.c cmos.h
 	$(CC) $(CFlags) -c cmos.c -o bin/cmos.obj $(Include)
-
-bin/ifs1fs.obj: ifs1fs.c ifs1fs.h
-	$(CC) $(CFlags) -c ifs1fs.c -o bin/ifs1fs.obj $(Include)
 
 bin/tasks.obj: tasks.c tasks.h
 	$(CC) $(CFlags) -c tasks.c -o bin/tasks.obj $(Include)
@@ -220,6 +215,14 @@ syscall/bin/screen.obj: syscall/screen.c syscall/screen.h
 
 syscall/bin/system.obj: syscall/system.c syscall/system.h
 	$(CC) $(CFlags) -c syscall/system.c -o syscall/bin/system.obj $(Include)
+
+
+fs/ifs1/bin/blocks.obj: fs/ifs1/blocks.c fs/ifs1/blocks.h
+	$(CC) $(CFlags) -c fs/ifs1/blocks.c -o fs/ifs1/bin/blocks.obj $(Include)
+
+fs/ifs1/bin/fs.obj: fs/ifs1/fs.c fs/ifs1/fs.h
+	$(CC) $(CFlags) -c fs/ifs1/fs.c -o fs/ifs1/bin/fs.obj $(Include)
+
 
 
 .PHONY:clean

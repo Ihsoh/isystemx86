@@ -1,18 +1,18 @@
 /**
-	@File:			ifs1fs.c
+	@File:			fs.c
 	@Author:		Ihsoh
 	@Date:			2014-7-18
 	@Description:
 		提供IFS1文件系统的相关功能。
 */
 
-#include "ifs1fs.h"
-#include "types.h"
-#include "ifs1blocks.h"
-#include "cmos.h"
-#include "screen.h"
-#include "lock.h"
-#include "config.h"
+#include "fs.h"
+#include "blocks.h"
+#include "../../types.h"
+#include "../../cmos.h"
+#include "../../screen.h"
+#include "../../lock.h"
+#include "../../config.h"
 
 #include <ilib/string.h>
 #include <dslib/linked_list.h>

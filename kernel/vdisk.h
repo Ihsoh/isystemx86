@@ -1,12 +1,12 @@
 /**
-	@File:			ifs1vdisk.h
+	@File:			vdisk.h
 	@Author:		Ihsoh
 	@Date:			2014-6-5
 	@Description:
 */
 
-#ifndef	_IFS1VDISK_H_
-#define	_IFS1VDISK_H_
+#ifndef	_VDISK_H_
+#define	_VDISK_H_
 
 #include "types.h"
 

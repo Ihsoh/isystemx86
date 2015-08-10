@@ -10,9 +10,12 @@
 #include "memory.h"
 #include "image.h"
 #include "enfont.h"
-#include "ifs1fs.h"
+
 #include "bmp/bmp.h"
+
 #include "utils/img.h"
+
+#include "fs/ifs1/fs.h"
 
 static struct CommonImage close_button;
 static struct CommonImage close_button_hover;

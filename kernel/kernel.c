@@ -13,13 +13,12 @@
 #include "die.h"
 #include "keyboard.h"
 #include "console.h"
-#include "ifs1disk.h"
+#include "disk.h"
 #include "memory.h"
 #include "tasks.h"
 #include "vesa.h"
 #include "sparams.h"
 #include "paging.h"
-#include "ifs1fs.h"
 #include "system.h"
 #include "lock.h"
 #include "log.h"
@@ -42,6 +41,8 @@
 #include "syscall/mouse.h"
 #include "syscall/screen.h"
 #include "syscall/system.h"
+
+#include "fs/ifs1/fs.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
