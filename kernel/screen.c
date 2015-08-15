@@ -949,7 +949,7 @@ free_window(OUT struct Window * window)
 */
 static
 void
-_switch_window(WindowPtr top)
+_switch_window(IN WindowPtr top)
 {
 	if(top == NULL || window_count < 2)
 		return;
@@ -977,6 +977,41 @@ void
 switch_window(void)
 {
 	_switch_window(windows[0]);
+}
+
+/**
+	@Function:		set_top_window
+	@Access:		Public
+	@Description:
+		把指定窗体置顶。
+	@Parameters:
+		window, WindowPtr, IN
+			需要置顶的窗体。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+set_top_window(IN WindowPtr window)
+{
+	if(window == NULL || window_count == 0)
+		return FALSE;
+	if(windows[0] == window)
+		return TRUE;
+	int32 pos;
+	for(pos = 0; pos < window_count; pos++)
+		if(windows[pos] == window)
+			break;
+	if(pos < window_count)
+	{
+		int32 i;
+		for(i = pos - 1; i >= 0; i--)
+			windows[i + 1] = windows[i];
+		windows[0] = window;
+		return TRUE;
+	}
+	else
+		return FALSE;
 }
 
 /**
@@ -1016,8 +1051,7 @@ create_window(	IN uint32		width,
 	window->state = WINDOW_STATE_HIDDEN;
 	window->over_close_button = 0;
 	window->over_hidden_button = 0;
-	window->has_close_button = style & WINDOW_STYLE_CLOSE_BUTTON;
-	window->has_hidden_button = style & WINDOW_STYLE_HIDDEN_BUTTON;
+	window->style = style;
 	strcpy(window->title, title);
 	window->event = event;
 	if(!new_empty_image0(&window->workspace, width, height))
@@ -1148,6 +1182,7 @@ flush_screen(void)
 	if(window_count != 0)
 	{
 		struct Window * top_window = windows[0];
+		uint32 wstyle = top_window->style;
 		if(point_in_rect(	mouse_x, mouse_y, 
 							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH),
 							top_window->y, 
@@ -1171,8 +1206,9 @@ flush_screen(void)
 		if(window_count != 0)
 		{
 			struct Window * top_window = windows[0];
+			uint32 wstyle = top_window->style;
 			if(!move_window)
-				if(	top_window->has_close_button
+				if(	wstyle & WINDOW_STYLE_CLOSE
 					&& point_in_rect(	mouse_x, 
 										mouse_y, 
 										top_window->x + top_window->width - CLOSE_BUTTON_WIDTH, 
@@ -1183,7 +1219,7 @@ flush_screen(void)
 					destroy_window(top_window);
 					return;
 				}
-				else if(top_window->has_hidden_button
+				else if(wstyle & WINDOW_STYLE_MINIMIZE
 						&& point_in_rect(	mouse_x, 
 											mouse_y, 
 											top_window->x + top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 
@@ -1208,7 +1244,7 @@ flush_screen(void)
 					move_window = TRUE;
 				}				
 				else
-					for(ui = 1; ui < window_count; ui++)
+					for(ui = 0; ui < window_count; ui++)
 					{
 						struct Window * window = windows[ui];
 						if(point_in_rect(	mouse_x, 
@@ -1216,10 +1252,11 @@ flush_screen(void)
 											window->x, 
 											window->y, 
 											window->width, 
-											TITLE_BAR_HEIGHT))
+											window->height + TITLE_BAR_HEIGHT))
 						{
 							windows[ui] = windows[0];
 							windows[0] = window;
+							break;
 						}
 					}
 		}

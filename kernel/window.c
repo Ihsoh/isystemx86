@@ -174,8 +174,10 @@ render_window(	IN struct Window * window,
 	uint32 title_bar_bgcolor = top ? TITLE_BAR_BGCOLOR : TITLE_BAR_BGCOLOR_NT;
 	rect_common_image(image, 0, 0, window->width, TITLE_BAR_HEIGHT, title_bar_bgcolor);
 
+	uint32 wstyle = window->style;
+
 	//关闭按钮
-	if(window->has_close_button)
+	if(wstyle & WINDOW_STYLE_CLOSE)
 		if(top)
 			if(window->over_close_button)
 				draw_common_image(	image, 
@@ -215,7 +217,7 @@ render_window(	IN struct Window * window,
 								CLOSE_BUTTON_HEIGHT);
 
 	//隐藏按钮
-	if(window->has_hidden_button)
+	if(wstyle & WINDOW_STYLE_MINIMIZE)
 		if(top)
 			if(window->over_hidden_button)
 				draw_common_image(	image,
@@ -272,6 +274,7 @@ render_window(	IN struct Window * window,
 		x = x - window->x;
 		y = y - window->y - TITLE_BAR_HEIGHT;
 		struct WindowEventParams params;
+		params.wid = window->id;
 		params.mouse_x = x;
 		params.mouse_y = y;
 		params.screen = &window->workspace;

@@ -26,6 +26,8 @@
 #include "fs/ifs1/fs.h"
 #include "fs/ifs1/blocks.h"
 
+#include "windows/message.h"
+
 #include <ilib/string.h>
 
 #include "386.h"
@@ -2297,10 +2299,23 @@ exec(	IN int8 * cmd,
 
 			print_str("\n");
 		}
-
+		else if(strcmp(name, "message") == 0)
+		{
+			ASCCHAR title[1024];
+			ASCCHAR text[1024];
+			parse_cmd(NULL, title, 1023);
+			parse_cmd(NULL, text, 1023);
+			message_window_show(title,
+								text,
+								MESSAGE_WINDOW_STYLE_CENTER
+								| MESSAGE_WINDOW_STYLE_TOP,
+								0,
+								0,
+								0xff000000,
+								0xffffffff);
+		}
 		else if(strcmp(name, "t") == 0)
 		{
-
 		}
 
 		//Batch

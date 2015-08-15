@@ -119,7 +119,7 @@ init_sfunc_window(void)
 	sfunc_window = create_window(	320, 
 									200, 
 									0xffffffff, 
-									WINDOW_STYLE_HIDDEN_BUTTON, 
+									WINDOW_STYLE_MINIMIZE, 
 									"System Function", 
 									sfunc_window_event);
 	if(sfunc_window == NULL)

@@ -97,7 +97,7 @@ init_clock_window(void)
 	clock_window = create_window(	WINDOW_WIDTH, 
 									WINDOW_HEIGHT, 
 									0xffffffff,
-									WINDOW_STYLE_HIDDEN_BUTTON, 
+									WINDOW_STYLE_MINIMIZE, 
 									WINDOW_TITLE, 
 									clock_window_event);
 	if(clock_window == NULL)

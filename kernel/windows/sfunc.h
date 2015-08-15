@@ -5,8 +5,8 @@
 	@Description:
 */
 
-#ifndef	_WINDOW_SFUNC_H_
-#define	_WINDOW_SFUNC_H_
+#ifndef	_WINDOWS_SFUNC_H_
+#define	_WINDOWS_SFUNC_H_
 
 #include "../types.h"
 #include "../window.h"

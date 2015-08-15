@@ -209,12 +209,13 @@ extern struct CommonImage * target_screen;
 extern uint32 console_screen_width, console_screen_height;
 extern struct CommonImage console_screen_buffer;
 
-#define	WINDOW_STYLE_HIDDEN_BUTTON		0x00000001
-#define	WINDOW_STYLE_CLOSE_BUTTON		0x00000002
-
 extern
 void
 switch_window(void);
+
+extern
+BOOL
+set_top_window(IN WindowPtr window);
 
 extern
 struct Window *

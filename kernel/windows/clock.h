@@ -5,8 +5,8 @@
 	@Description:
 */
 
-#ifndef	_WINDOW_CLOCK_H_
-#define	_WINDOW_CLOCK_H_
+#ifndef	_WINDOWS_CLOCK_H_
+#define	_WINDOWS_CLOCK_H_
 
 #include "../types.h"
 

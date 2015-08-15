@@ -25,6 +25,10 @@
 #define	HIDDEN_BUTTON_WIDTH		55
 #define	HIDDEN_BUTTON_HEIGHT	30
 
+#define	WINDOW_STYLE_NONE				0x00000000
+#define	WINDOW_STYLE_CLOSE				0x00000001
+#define	WINDOW_STYLE_MINIMIZE			0x00000002
+#define	WINDOW_STYLE_MAXIMIZE			0x00000004
 
 #define	WINDOW_EVENT_PAINT		1
 #define	WINDOW_EVENT_KEYDOWN	2
@@ -33,6 +37,7 @@
 
 typedef struct WindowEventParams
 {
+	uint32					wid;
 	int32					event_type;
 	int32					mouse_x;
 	int32					mouse_y;
@@ -50,11 +55,10 @@ typedef struct Window
 	int32				y;
 	uint32				width;
 	uint32				height;
-	int8				title[1024];
+	ASCCHAR				title[1024];
 	uint32				bgcolor;
 	int32				state;
-	int32				has_close_button;
-	int32				has_hidden_button;
+	uint32				style;
 	int32				over_close_button;
 	int32				over_hidden_button;
 	WindowEvent			event;

@@ -60,7 +60,7 @@ init_console_window(void)
 	console_window = create_window(	WINDOW_WIDTH, 
 									WINDOW_HEIGHT, 
 									0xffbbbbbb, 
-									WINDOW_STYLE_HIDDEN_BUTTON, 
+									WINDOW_STYLE_MINIMIZE, 
 									WINDOW_TITLE, 
 									console_window_event);
 	if(console_window == NULL)

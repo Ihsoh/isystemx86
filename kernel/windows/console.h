@@ -5,8 +5,8 @@
 	@Description:
 */
 
-#ifndef	_WINDOW_CONSOLE_H_
-#define	_WINDOW_CONSOLE_H_
+#ifndef	_WINDOWS_CONSOLE_H_
+#define	_WINDOWS_CONSOLE_H_
 
 #include "../types.h"
 #include "../window.h"

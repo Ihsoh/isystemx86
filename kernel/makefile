@@ -23,7 +23,7 @@ bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
 BMPObjs=bmp/bin/bmp.obj
 UtilsObjs=utils/bin/img.obj
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
-WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj
+WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj
 FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
@@ -215,6 +215,9 @@ windows/bin/console.obj: windows/console.c windows/console.h
 
 windows/bin/sfunc.obj: windows/sfunc.c windows/sfunc.h
 	$(CC) $(CFlags) -c windows/sfunc.c -o windows/bin/sfunc.obj $(Include)
+
+windows/bin/message.obj: windows/message.c windows/message.h
+	$(CC) $(CFlags) -c windows/message.c -o windows/bin/message.obj $(Include)
 
 
 syscall/bin/fs.obj: syscall/fs.c syscall/fs.h
