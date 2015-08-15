@@ -89,7 +89,11 @@ message_window_show(IN CASCTEXT title,
 	if(window == NULL)
 		return NULL;
 	struct CommonImage * workspace = &(window->workspace);
-	rect_common_image(workspace, 0, 0, _WIDTH, _HEIGHT, bgcolor);
+	if(!rect_common_image(workspace, 0, 0, _WIDTH, _HEIGHT, bgcolor))
+	{
+		destroy_window(window);
+		return FALSE;
+	}
 
 	uint32 len = strlen(text);
 	if(len <= _MAX_CHAR)

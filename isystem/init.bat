@@ -22,7 +22,7 @@ rpn @__path__ @__path__ @__system__ strcat "wbins/;" strcat
 
 rem Go to window mode
 rpn :is_window_mode @__video_mode__ "text" seq not
-vmode vesa800_600
+vmode vesa1024_768
 reboot
 :is_window_mode
 

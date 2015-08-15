@@ -54,7 +54,7 @@ struct CommonImage * target_screen = NULL;
 	============================== 窗体 ==============================
 */
 #define	TCOLOR				0xffffffff
-#define	MAX_WINDOW_COUNT	32
+#define	MAX_WINDOW_COUNT	64
 
 static struct Window * windows[MAX_WINDOW_COUNT];
 static uint32 window_count = 0;
