@@ -64,7 +64,7 @@ struct Task
 	SSEState			sse_state;			//SSE的状态。
 	uint32 * 			pagedt_addr;		//页目录表和页表的地址。
 	uint32				real_pagedt_addr;	//真正页目录表和页表的地址。
-	FILE **				opened_file_ptrs;	//打开文件指针列表。
+	FileObject **				opened_file_ptrs;	//打开文件指针列表。
 	void **				memory_block_ptrs;	//内存块指针列表。
 	uint32 *			mqueue_ids;			//任务打开的消息队列的ID集合。
 	uint32				used_memory_size;	//任务内存使用量。
@@ -74,9 +74,9 @@ struct Task
 											//直到为 True 时，才会开始运行。
 	BOOL				is_system_call;		//是否在进行系统调用。
 	BOOL				fs_lock;			//是否获得了文件系统锁。
-	FILE * 				stdin;				//任务的标准输入。如果为NULL则为键盘，否则为文件。
-	FILE *				stdout;				//任务的标准输出。如果为NULL则为屏幕，否则为文件。
-	FILE *				stderr;				//任务的标准错误。如果为NULL则为屏幕，否则为文件。
+	FileObject * 				stdin;				//任务的标准输入。如果为NULL则为键盘，否则为文件。
+	FileObject *				stdout;				//任务的标准输出。如果为NULL则为屏幕，否则为文件。
+	FileObject *				stderr;				//任务的标准错误。如果为NULL则为屏幕，否则为文件。
 	uint32				read_count;			//已从标准输入读取了的字符数。
 	TaskType 			type;				//任务的类型。
 											//如果为TASK_TYPE_USER，则表示该任务为用户任务，运行于Ring3。

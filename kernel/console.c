@@ -1355,7 +1355,7 @@ static
 int32
 help(void)
 {
-	FILE * fptr = open_file(SYSTEM_HELP_FILE, FILE_MODE_READ);
+	FileObject * fptr = open_file(SYSTEM_HELP_FILE, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		error("Cannot open file '"SYSTEM_HELP_FILE"'!");
@@ -1458,7 +1458,7 @@ static
 int32
 vmode(IN int8 * mode)
 {
-	FILE * fptr = NULL;
+	FileObject * fptr = NULL;
 	if(strcmp(mode, "text") == 0)
 		fptr = open_file(KERNELLDR_TEXT, FILE_MODE_READ);
 	else if(strcmp(mode, "vesa640_480") == 0)
@@ -1813,7 +1813,7 @@ batch(IN int8 * path)
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	if(local_vars_s == NULL)
 		return 0;
-	FILE * fptr = open_file(temp, FILE_MODE_READ);
+	FileObject * fptr = open_file(temp, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		free_vars(local_vars_s);

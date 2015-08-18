@@ -44,7 +44,7 @@ system_call_fs_unlock_fs(void)
 	@Parameters:
 		tid, int32, IN
 			任务 ID。
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 	@Return:
 		BOOL
@@ -53,7 +53,7 @@ system_call_fs_unlock_fs(void)
 static
 BOOL
 check_priviledge(	IN int32 tid,
-					IN FILE * fptr)
+					IN FileObject * fptr)
 {
 	struct Task * task = get_task_info_ptr(tid);
 	if(task != NULL)
@@ -112,19 +112,19 @@ system_call_fs(	IN uint32 func,
 					filename = (int8 *)get_physical_address(tid, 
 															VOID_PTR_SPARAM(sparams->param0));
 					int32 mode = INT32_SPARAM(sparams->param1);
-					FILE * fptr = open_file(filename, mode);
+					FileObject * fptr = open_file(filename, mode);
 					task->opened_file_ptrs[ui] = fptr;
 					sparams->param0 = SPARAM(fptr);
 				}
 				else
 				{
-					FILE * fptr = NULL;
+					FileObject * fptr = NULL;
 					sparams->param0 = SPARAM(fptr);
 				}
 			}
 			else
 			{
-				FILE * fptr = NULL;
+				FileObject * fptr = NULL;
 				sparams->param0 = SPARAM(fptr);
 			}
 			break;
@@ -139,7 +139,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			struct Task * task = get_task_info_ptr(tid);
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(task != NULL && fptr != NULL) 
 			{
 				uint32 ui;
@@ -176,7 +176,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FWRITE:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
 				uint8 * buffer = NULL;
@@ -204,7 +204,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FREAD:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
 				uint8 * buffer = NULL;
@@ -232,7 +232,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FAPPEND:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
 				uint8 * buffer = NULL;
@@ -256,7 +256,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FRESET:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 				reset_file(fptr);
 			break;
@@ -406,7 +406,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FLEN:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 				sparams->param0 = SPARAM(flen(fptr));
 			else
@@ -424,7 +424,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FCREATE_DT:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
 				struct CMOSDateTime * dt = NULL;
@@ -442,7 +442,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FCHANGE_DT:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
 			{
 				struct CMOSDateTime * dt = NULL;
@@ -556,7 +556,7 @@ system_call_fs(	IN uint32 func,
 		case SCALL_FEOF:
 		{
 			int32 tid = sparams->tid;
-			FILE * fptr = (FILE *)(sparams->param0);
+			FileObject * fptr = (FileObject *)(sparams->param0);
 			BOOL r = FALSE;
 			if(check_priviledge(tid, fptr))
 				r = is_eof(fptr);

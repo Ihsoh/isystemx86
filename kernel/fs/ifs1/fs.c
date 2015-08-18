@@ -1638,10 +1638,10 @@ copy_file(	IN int8 * src_path,
 		|| exists_df(temp)
 		|| !create_file(dst_path, dst_name))
 		return FALSE;
-	FILE * src = open_file(src_path, FILE_MODE_READ);
+	FileObject * src = open_file(src_path, FILE_MODE_READ);
 	if(src == NULL)
 		return FALSE;
-	FILE * dst = open_file(temp, FILE_MODE_APPEND);
+	FileObject * dst = open_file(temp, FILE_MODE_APPEND);
 	if(dst == NULL)
 	{
 		close_file(src);
@@ -1785,15 +1785,15 @@ exists_df(IN int8 * path)
 		mode, int32, IN
 			打开模式。
 	@Return:
-		FILE *
+		FileObject *
 			文件结构体指针。		
 */
 static
-FILE * 
+FileObject * 
 _open_file_unsafe(	IN int8 * path, 
 					IN int32 mode)
 {
-	FILE * fptr = (FILE *)alloc_memory(sizeof(FILE));
+	FileObject * fptr = (FileObject *)alloc_memory(sizeof(FileObject));
 	if(fptr == NULL)
 		return NULL;
 	int32 type;
@@ -1846,22 +1846,22 @@ _open_file_unsafe(	IN int8 * path,
 		mode, int32, IN
 			打开模式。
 	@Return:
-		FILE *
+		FileObject *
 			文件结构体指针。		
 */
-FILE * 
+FileObject * 
 open_file(	IN int8 * path, 
 			IN int32 mode)
 {
 	lock();
-	FILE * fptr = _open_file_unsafe(path, mode);
+	FileObject * fptr = _open_file_unsafe(path, mode);
 	unlock();
 	return fptr;
 }
 
 static
 BOOL
-_append_file_without_buffer_unsafe(	IN FILE * fptr, 
+_append_file_without_buffer_unsafe(	IN FileObject * fptr, 
 									IN uint8 * buffer, 
 									IN uint32 len);
 
@@ -1871,7 +1871,7 @@ _append_file_without_buffer_unsafe(	IN FILE * fptr,
 	@Description:
 		关闭文件。非安全版本。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 	@Return:
 		BOOL
@@ -1879,7 +1879,7 @@ _append_file_without_buffer_unsafe(	IN FILE * fptr,
 */
 static
 BOOL
-_close_file_unsafe(IN FILE * fptr)
+_close_file_unsafe(IN FileObject * fptr)
 {
 	if(fptr == NULL)
 		return FALSE;
@@ -1910,14 +1910,14 @@ _close_file_unsafe(IN FILE * fptr)
 	@Description:
 		关闭文件。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 	@Return:
 		BOOL
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-close_file(IN FILE * fptr)
+close_file(IN FileObject * fptr)
 {
 	lock();
 	BOOL r = _close_file_unsafe(fptr);
@@ -1931,7 +1931,7 @@ close_file(IN FILE * fptr)
 	@Description:
 		写文件。非安全版本。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 		buffer, uint8 *, IN
 			数据缓冲区。
@@ -1943,7 +1943,7 @@ close_file(IN FILE * fptr)
 */
 static
 BOOL
-_write_file_unsafe(	IN FILE * fptr, 
+_write_file_unsafe(	IN FileObject * fptr, 
 					IN uint8 * buffer, 
 					IN uint32 len)
 {
@@ -1986,7 +1986,7 @@ _write_file_unsafe(	IN FILE * fptr,
 	if((fptr->mode & FILE_MODE_READ) != 0)
 	{
 		// 如果打开文件的方式包含读方式，
-		// 则改写文件后需要把FILE结构体的读取缓冲区设为无效。
+		// 则改写文件后需要把FileObject结构体的读取缓冲区设为无效。
 		fptr->read_buffer_is_valid = FALSE;
 		fptr->read_buffer_block_index = 0;
 	}
@@ -2000,7 +2000,7 @@ _write_file_unsafe(	IN FILE * fptr,
 	@Description:
 		写文件。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 		buffer, uint8 *, IN
 			数据缓冲区。
@@ -2011,7 +2011,7 @@ _write_file_unsafe(	IN FILE * fptr,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-write_file(	IN FILE * fptr, 
+write_file(	IN FileObject * fptr, 
 			IN uint8 * buffer, 
 			IN uint32 len)
 {
@@ -2028,7 +2028,7 @@ write_file(	IN FILE * fptr,
 		读文件。非安全版本。
 		该版本包含读取缓冲区的功能。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 		buffer, uint8 *, OUT
 			数据缓冲区。
@@ -2040,7 +2040,7 @@ write_file(	IN FILE * fptr,
 */
 static
 uint32
-_read_file_unsafe(	IN FILE * fptr, 
+_read_file_unsafe(	IN FileObject * fptr, 
 					OUT uint8 * buffer, 
 					IN uint32 len)
 {
@@ -2098,7 +2098,7 @@ _read_file_unsafe(	IN FILE * fptr,
 	@Description:
 		读文件。非安全版本。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 			该版本不包含读取缓冲区的功能。
 		buffer, uint8 *, OUT
@@ -2111,7 +2111,7 @@ _read_file_unsafe(	IN FILE * fptr,
 */
 static
 uint32
-_read_file_without_buffer_unsafe(	IN FILE * fptr, 
+_read_file_without_buffer_unsafe(	IN FileObject * fptr, 
 									OUT uint8 * buffer, 
 									IN uint32 len)
 {
@@ -2154,7 +2154,7 @@ _read_file_without_buffer_unsafe(	IN FILE * fptr,
 	@Description:
 		读文件。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 		buffer, uint8 *, OUT
 			数据缓冲区。
@@ -2165,7 +2165,7 @@ _read_file_without_buffer_unsafe(	IN FILE * fptr,
 			实际读入长度。		
 */
 uint32
-read_file(	IN FILE * fptr, 
+read_file(	IN FileObject * fptr, 
 			OUT uint8 * buffer, 
 			IN uint32 len)
 {
@@ -2185,12 +2185,12 @@ read_file(	IN FILE * fptr,
 	@Description:
 		重置文件的读取指针。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 	@Return:	
 */
 void
-reset_file(IN FILE * fptr)
+reset_file(IN FileObject * fptr)
 {
 	fptr->next_block_index = 0;
 	fptr->next_block_pos = 0;
@@ -2202,14 +2202,14 @@ reset_file(IN FILE * fptr)
 	@Description:
 		检查文件指针是否已到达文件尾。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 	@Return:
 		BOOL
 			返回TRUE则到达文件尾，否则未到达。
 */
 BOOL
-is_eof(IN FILE * fptr)
+is_eof(IN FileObject * fptr)
 {
 	uint32 next = 	fptr->next_block_index
 					* DATA_BLOCK_DATA_LEN
@@ -2224,7 +2224,7 @@ is_eof(IN FILE * fptr)
 		追加文件。非安全版本。
 		该版本不包含追加缓冲区的功能。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 		buffer, uint8 *, IN
 			数据缓冲区。
@@ -2236,7 +2236,7 @@ is_eof(IN FILE * fptr)
 */
 static
 BOOL
-_append_file_without_buffer_unsafe(	IN FILE * fptr, 
+_append_file_without_buffer_unsafe(	IN FileObject * fptr, 
 									IN uint8 * buffer, 
 									IN uint32 len)
 {
@@ -2335,7 +2335,7 @@ _append_file_without_buffer_unsafe(	IN FILE * fptr,
 	if((fptr->mode & FILE_MODE_READ) != 0)
 	{
 		// 如果打开文件的方式包含读方式，
-		// 则改写文件后需要把FILE结构体的读取缓冲区设为无效。
+		// 则改写文件后需要把FileObject结构体的读取缓冲区设为无效。
 		fptr->read_buffer_is_valid = FALSE;
 		fptr->read_buffer_block_index = 0;
 	}
@@ -2350,7 +2350,7 @@ _append_file_without_buffer_unsafe(	IN FILE * fptr,
 		追加文件。非安全版本。
 		该版本包含追加缓冲区的功能。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 		buffer, uint8 *, IN
 			数据缓冲区。
@@ -2362,7 +2362,7 @@ _append_file_without_buffer_unsafe(	IN FILE * fptr,
 */
 static
 BOOL
-_append_file_unsafe(IN FILE * fptr, 
+_append_file_unsafe(IN FileObject * fptr, 
 					IN uint8 * buffer, 
 					IN uint32 len)
 {
@@ -2407,7 +2407,7 @@ _append_file_unsafe(IN FILE * fptr,
 	@Description:
 		追加文件。
 	@Parameters:
-		fptr, FILE *, IN
+		fptr, FileObject *, IN
 			文件指针。
 		buffer, uint8 *, IN
 			数据缓冲区。
@@ -2418,7 +2418,7 @@ _append_file_unsafe(IN FILE * fptr,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-append_file(IN FILE * fptr, 
+append_file(IN FileObject * fptr, 
 			IN uint8 * buffer, 
 			IN uint32 len)
 {

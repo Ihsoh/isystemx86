@@ -37,7 +37,7 @@ config_init(void)
 {
 	struct die_info info;
 	int8 buffer[KB(64)];
-	FILE * fptr = NULL;
+	FileObject * fptr = NULL;
 
 	// system.json
 	fptr = open_file(SYSTEM_SYSTEM_CONFIG_FILE, FILE_MODE_READ);

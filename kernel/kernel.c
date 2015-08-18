@@ -3148,7 +3148,7 @@ enter_system(void)
 	print_str("Checking system...\n");
 
 	//检查文件系统
-	FILE * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
+	FileObject * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
 	if(fptr != NULL)
 		if(flen(fptr) != 0)
 		{
@@ -3193,7 +3193,7 @@ static
 void
 leave_system(void)
 {
-	FILE * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
+	FileObject * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
 	if(fptr != NULL)
 	{
 		write_file(fptr, "", 0);

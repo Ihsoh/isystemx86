@@ -273,7 +273,7 @@ madt_write_to_file(IN const int8 * path)
 {
 	if(madt == NULL)
 		return FALSE;
-	FILE * fptr = open_file(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
+	FileObject * fptr = open_file(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
 	if(fptr == NULL)
 		return FALSE;
 	write_file(fptr, "", 0);

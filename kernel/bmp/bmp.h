@@ -10,7 +10,7 @@
 
 typedef	struct
 {
-	FILE *		imgfile_ptr;
+	FileObject *		imgfile_ptr;
 	uint8 *		data_ptr;
 	uint8 *		pixel_array_ptr;
 	int32		width, height, color_depth, compression, palette_size;

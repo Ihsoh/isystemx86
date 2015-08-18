@@ -409,7 +409,7 @@ init_enfont(void)
 			enfontx = (uint8 *)alloc_memory(ENFONTX_BUFFER_SIZE);
 			if(enfontx == NULL)
 				enfont_die();
-			FILE * fptr = open_file(enfontx_file, FILE_MODE_READ);
+			FileObject * fptr = open_file(enfontx_file, FILE_MODE_READ);
 			if(fptr == NULL)
 				enfont_die();
 			if(read_file(fptr, enfontx, ENFONTX_BUFFER_SIZE) != ENFONTX_BUFFER_SIZE)
@@ -422,7 +422,7 @@ init_enfont(void)
 				enfont_die();
 			if(strcmp(enfont_file, "") != 0)
 			{
-				FILE * fptr = open_file(enfont_file, FILE_MODE_READ);
+				FileObject * fptr = open_file(enfont_file, FILE_MODE_READ);
 				if(fptr == NULL && !enfont_builtin)
 					enfont_die();
 				if(read_file(fptr, enfont, ENFONT_BUFFER_SIZE) != ENFONT_BUFFER_SIZE)

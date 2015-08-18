@@ -171,7 +171,7 @@ save_common_image(	IN struct CommonImage * common_image,
 	if(common_image == NULL || path == NULL)
 		return FALSE;
 	#ifdef	_KERNEL_MODEL_
-	FILE * fptr = open_file(path, FILE_MODE_ALL);
+	FileObject * fptr = open_file(path, FILE_MODE_ALL);
 	#else
 	ILFILE * fptr = ILOpenFile(path, FILE_MODE_ALL);
 	#endif

@@ -29,9 +29,9 @@
 
 #define	MAX_OPENED_FILE_COUNT	(10 * 1024)
 
-#define IFS1_STDIN		((FILE *)0x00000000)
-#define IFS1_STDOUT		((FILE *)0x00000001)
-#define IFS1_STDERR		((FILE *)0x00000002)
+#define IFS1_STDIN		((FileObject *)0x00000000)
+#define IFS1_STDOUT		((FileObject *)0x00000001)
+#define IFS1_STDERR		((FileObject *)0x00000002)
 
 typedef struct File
 {
@@ -48,7 +48,7 @@ typedef struct File
 	BOOL				append_buffer_was_enabled;
 	uint32				append_buffer_byte_count;
 	uint8				append_buffer_bytes[DATA_BLOCK_DATA_LEN];
-} FILE;
+} FileObject, * FileObjectPtr;
 
 extern
 BOOL
@@ -181,37 +181,37 @@ BOOL
 exists_df(IN int8 * path);
 
 extern
-FILE *
+FileObject *
 open_file(	IN int8 * path,
 			IN int32 mode);
 
 extern
 BOOL
-close_file(IN FILE * fptr);
+close_file(IN FileObject * fptr);
 
 extern
 BOOL
-write_file(	IN FILE * fptr,
+write_file(	IN FileObject * fptr,
 			IN uint8 * buffer,
 			IN uint32 len);
 
 extern
 uint32
-read_file(	IN FILE * fptr,
+read_file(	IN FileObject * fptr,
 			OUT uint8 * buffer,
 			IN uint32 len);
 
 extern
 void
-reset_file(IN FILE * fptr);
+reset_file(IN FileObject * fptr);
 
 extern
 BOOL
-is_eof(IN FILE * fptr);
+is_eof(IN FileObject * fptr);
 
 extern
 BOOL
-append_file(IN FILE * fptr,
+append_file(IN FileObject * fptr,
 			IN uint8 * buffer,
 			IN uint32 len);
 

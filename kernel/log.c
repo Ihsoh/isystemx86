@@ -46,7 +46,7 @@ write_log_to_disk(void)
 {
 	if(log_buffer == NULL)
 		return;
-	FILE * fptr = open_file(SYSTEM_LOG_FILE, FILE_MODE_APPEND);
+	FileObject * fptr = open_file(SYSTEM_LOG_FILE, FILE_MODE_APPEND);
 	if(fptr == NULL)
 		return;
 	append_file(fptr, log_buffer, strlen(log_buffer));

@@ -65,7 +65,7 @@ init_tasks(void)
 		task_gate.attr = ATTASKGATE | DPL3;
 		set_desc_to_gdt(400 + ui * 5 + 1, (uint8 *)&task_gate);
 
-		tasks[ui].opened_file_ptrs = alloc_memory(MAX_TASK_OPENED_FILE_COUNT * sizeof(FILE *));
+		tasks[ui].opened_file_ptrs = alloc_memory(MAX_TASK_OPENED_FILE_COUNT * sizeof(FileObject *));
 		tasks[ui].memory_block_ptrs = alloc_memory(MAX_TASK_MEMORY_BLOCK_COUNT * sizeof(void *));
 		tasks[ui].mqueue_ids = alloc_memory(MAX_TASK_MQUEUE_COUNT * sizeof(uint32));
 		tasks[ui].working_dir = alloc_memory(1024);
@@ -657,7 +657,7 @@ _create_task_by_file(	IN int8 * filename,
 		|| working_dir == NULL)
 		return -1;
 	uint8 * app;
-	FILE * fptr = open_file(filename, FILE_MODE_READ);
+	FileObject * fptr = open_file(filename, FILE_MODE_READ);
 	if(fptr == NULL)
 		return -1;
 	app = (uint8 *)alloc_memory(flen(fptr));
@@ -948,7 +948,7 @@ get_physical_address(	IN int32 tid,
 	@Description:
 		重定向任务的IO。
 	@Parameters:
-		v, FILE **, IN OUT
+		v, FileObject **, IN OUT
 			指向struct Task结构体中的stdin或stdout或stderr的指针。
 		path, int8 *, IN
 			重定向到文件的文件路径。
@@ -960,13 +960,13 @@ get_physical_address(	IN int32 tid,
 */
 static
 BOOL
-_tasks_redirect_io(	IN OUT FILE ** v,
+_tasks_redirect_io(	IN OUT FileObject ** v,
 					IN int8 * path,
 					IN int32 mode)
 {
 	if(v == NULL || path == NULL)
 		return FALSE;
-	FILE * new = open_file(path, mode);
+	FileObject * new = open_file(path, mode);
 	if(new == NULL)
 		return FALSE;
 	if(*v != NULL)
