@@ -19,7 +19,7 @@ bin/vesa.obj bin/enfont.obj bin/vars.obj bin/image.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.obj bin/rsdp.obj	\
 bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
-bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
+bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj bin/timer.obj
 BMPObjs=bmp/bin/bmp.obj
 UtilsObjs=utils/bin/img.obj
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
@@ -189,6 +189,9 @@ bin/knlldr.obj: knlldr.c knlldr.h
 
 bin/irq.obj: irq.s
 	$(AS) $(ASFlags) -c irq.s -o bin/irq.obj
+
+bin/timer.obj: timer.c timer.h
+	$(CC) $(CFlags) -c timer.c -o bin/timer.obj $(Include)
 
 
 

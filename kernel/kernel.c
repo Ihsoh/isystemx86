@@ -35,6 +35,7 @@
 #include "kmpool.h"
 #include "knlldr.h"
 #include "sse.h"
+#include "timer.h"
 
 #include "syscall/fs.h"
 #include "syscall/keyboard.h"
@@ -206,6 +207,7 @@ main(void)
 	ifs1fs_init();
 	console_init();
 
+	timer_init();
 	init_enfont();
 	init_screen();
 	init_timer();
@@ -973,6 +975,8 @@ timer_int(void)
 	while(1)
 	{
 		lock();
+
+		timer_inc_ticks();
 
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();

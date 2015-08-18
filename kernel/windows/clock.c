@@ -14,6 +14,8 @@
 #include "../enfont.h"
 #include "../window.h"
 
+#include <ilib/string.h>
+
 #define	WINDOW_TITLE	"Clock"
 #define	WINDOW_WIDTH	250
 #define	WINDOW_HEIGHT	20
