@@ -171,7 +171,7 @@ save_common_image(	IN struct CommonImage * common_image,
 	if(common_image == NULL || path == NULL)
 		return FALSE;
 	#ifdef	_KERNEL_MODEL_
-	FILE * fptr = fopen(path, FILE_MODE_ALL);
+	FILE * fptr = open_file(path, FILE_MODE_ALL);
 	#else
 	ILFILE * fptr = ILOpenFile(path, FILE_MODE_ALL);
 	#endif
@@ -181,10 +181,10 @@ save_common_image(	IN struct CommonImage * common_image,
 	{
 		case CMMNIMAGE_IMG0:
 			#ifdef	_KERNEL_MODEL_
-			fwrite(fptr, CMMNIMAGE_IMG0_SYMBOL, strlen(CMMNIMAGE_IMG0_SYMBOL));			
-			fappend(fptr, (uint8 *)&(common_image->width), 4);	
-			fappend(fptr, (uint8 *)&(common_image->height), 4);
-			fappend(fptr, common_image->data, common_image->width * common_image->height * 4);
+			write_file(fptr, CMMNIMAGE_IMG0_SYMBOL, strlen(CMMNIMAGE_IMG0_SYMBOL));			
+			append_file(fptr, (uint8 *)&(common_image->width), 4);	
+			append_file(fptr, (uint8 *)&(common_image->height), 4);
+			append_file(fptr, common_image->data, common_image->width * common_image->height * 4);
 			#else
 			ILWriteFile(fptr, CMMNIMAGE_IMG0_SYMBOL, strlen(CMMNIMAGE_IMG0_SYMBOL));			
 			ILAppendFile(fptr, (uint8 *)&(common_image->width), 4);	
@@ -196,7 +196,7 @@ save_common_image(	IN struct CommonImage * common_image,
 			return FALSE;
 	}
 	#ifdef	_KERNEL_MODEL_
-	fclose(fptr);
+	close_file(fptr);
 	#else
 	ILCloseFile(fptr);
 	#endif

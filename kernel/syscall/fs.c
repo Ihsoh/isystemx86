@@ -112,7 +112,7 @@ system_call_fs(	IN uint32 func,
 					filename = (int8 *)get_physical_address(tid, 
 															VOID_PTR_SPARAM(sparams->param0));
 					int32 mode = INT32_SPARAM(sparams->param1);
-					FILE * fptr = fopen(filename, mode);
+					FILE * fptr = open_file(filename, mode);
 					task->opened_file_ptrs[ui] = fptr;
 					sparams->param0 = SPARAM(fptr);
 				}
@@ -149,7 +149,7 @@ system_call_fs(	IN uint32 func,
 				if(ui < MAX_TASK_OPENED_FILE_COUNT)
 				{
 					task->opened_file_ptrs[ui] = NULL;
-					BOOL r = fclose(fptr);
+					BOOL r = close_file(fptr);
 					sparams->param0 = SPARAM(r);
 				}
 				else
@@ -183,7 +183,7 @@ system_call_fs(	IN uint32 func,
 				buffer = (uint8 *)get_physical_address(	tid, 
 														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				BOOL r = fwrite(fptr, buffer, len);
+				BOOL r = write_file(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
 			}
 			else
@@ -211,7 +211,7 @@ system_call_fs(	IN uint32 func,
 				buffer = (uint8 *)get_physical_address(	tid, 
 														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				uint32 real_len = fread(fptr, buffer, len);
+				uint32 real_len = read_file(fptr, buffer, len);
 				sparams->param0 = SPARAM(real_len);
 			}
 			else
@@ -239,7 +239,7 @@ system_call_fs(	IN uint32 func,
 				buffer = (uint8 *)get_physical_address(	tid, 
 														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				BOOL r = fappend(fptr, buffer, len);
+				BOOL r = append_file(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
 			}
 			else
@@ -258,7 +258,7 @@ system_call_fs(	IN uint32 func,
 			int32 tid = sparams->tid;
 			FILE * fptr = (FILE *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
-				freset(fptr);
+				reset_file(fptr);
 			break;
 		}
 		//确认文件或文件夹是否存在
@@ -559,7 +559,7 @@ system_call_fs(	IN uint32 func,
 			FILE * fptr = (FILE *)(sparams->param0);
 			BOOL r = FALSE;
 			if(check_priviledge(tid, fptr))
-				r = feof(fptr);
+				r = is_eof(fptr);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

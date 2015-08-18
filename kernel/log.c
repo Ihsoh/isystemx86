@@ -46,11 +46,11 @@ write_log_to_disk(void)
 {
 	if(log_buffer == NULL)
 		return;
-	FILE * fptr = fopen(SYSTEM_LOG_FILE, FILE_MODE_APPEND);
+	FILE * fptr = open_file(SYSTEM_LOG_FILE, FILE_MODE_APPEND);
 	if(fptr == NULL)
 		return;
-	fappend(fptr, log_buffer, strlen(log_buffer));
-	fclose(fptr);
+	append_file(fptr, log_buffer, strlen(log_buffer));
+	close_file(fptr);
 }
 
 void

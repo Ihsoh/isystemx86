@@ -43,14 +43,14 @@ BOOL
 load_image(	OUT struct CommonImage * common_image,
 			IN int8 * path)
 {
-	FILE * fptr = fopen(path, FILE_MODE_READ);
+	FILE * fptr = open_file(path, FILE_MODE_READ);
 	if(fptr == NULL)
 		return FALSE;
 	uchar * image_data = alloc_memory(flen(fptr));
 	if(image_data == NULL)
 		return FALSE;
-	fread(fptr, image_data, flen(fptr));
-	fclose(fptr);
+	read_file(fptr, image_data, flen(fptr));
+	close_file(fptr);
 	if(!new_common_image(common_image, image_data))
 	{
 		free_memory(image_data);

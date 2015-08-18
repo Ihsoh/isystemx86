@@ -1638,13 +1638,13 @@ copy_file(	IN int8 * src_path,
 		|| exists_df(temp)
 		|| !create_file(dst_path, dst_name))
 		return FALSE;
-	FILE * src = fopen(src_path, FILE_MODE_READ);
+	FILE * src = open_file(src_path, FILE_MODE_READ);
 	if(src == NULL)
 		return FALSE;
-	FILE * dst = fopen(temp, FILE_MODE_APPEND);
+	FILE * dst = open_file(temp, FILE_MODE_APPEND);
 	if(dst == NULL)
 	{
-		fclose(src);
+		close_file(src);
 		return FALSE;
 	}
 	uint32 len = flen(src);
@@ -1656,22 +1656,22 @@ copy_file(	IN int8 * src_path,
 			copy_len = 1024;
 		else
 			copy_len = len;
-		if(!fread(src, buffer, copy_len))
+		if(!read_file(src, buffer, copy_len))
 		{
-			fclose(src);
-			fclose(dst);
+			close_file(src);
+			close_file(dst);
 			return FALSE;
 		}
-		if(!fappend(dst, buffer, copy_len))
+		if(!append_file(dst, buffer, copy_len))
 		{
-			fclose(src);
-			fclose(dst);
+			close_file(src);
+			close_file(dst);
 			return FALSE;
 		}
 		len -= copy_len;
 	}
-	fclose(src);
-	fclose(dst);
+	close_file(src);
+	close_file(dst);
 	return TRUE;
 }
 
@@ -1775,7 +1775,7 @@ exists_df(IN int8 * path)
 }
 
 /**
-	@Function:		_fopen_unsafe
+	@Function:		_open_file_unsafe
 	@Access:		Private
 	@Description:
 		打开一个文件。非安全版本。
@@ -1790,8 +1790,8 @@ exists_df(IN int8 * path)
 */
 static
 FILE * 
-_fopen_unsafe(	IN int8 * path, 
-				IN int32 mode)
+_open_file_unsafe(	IN int8 * path, 
+					IN int32 mode)
 {
 	FILE * fptr = (FILE *)alloc_memory(sizeof(FILE));
 	if(fptr == NULL)
@@ -1836,7 +1836,7 @@ _fopen_unsafe(	IN int8 * path,
 }
 
 /**
-	@Function:		fopen
+	@Function:		open_file
 	@Access:		Public
 	@Description:
 		打开一个文件。
@@ -1850,23 +1850,23 @@ _fopen_unsafe(	IN int8 * path,
 			文件结构体指针。		
 */
 FILE * 
-fopen(	IN int8 * path, 
-		IN int32 mode)
+open_file(	IN int8 * path, 
+			IN int32 mode)
 {
 	lock();
-	FILE * fptr = _fopen_unsafe(path, mode);
+	FILE * fptr = _open_file_unsafe(path, mode);
 	unlock();
 	return fptr;
 }
 
 static
 BOOL
-_fappend_without_buffer_unsafe(	IN FILE * fptr, 
-								IN uint8 * buffer, 
-								IN uint32 len);
+_append_file_without_buffer_unsafe(	IN FILE * fptr, 
+									IN uint8 * buffer, 
+									IN uint32 len);
 
 /**
-	@Function:		_fclose_unsafe
+	@Function:		_close_file_unsafe
 	@Access:		Private
 	@Description:
 		关闭文件。非安全版本。
@@ -1879,7 +1879,7 @@ _fappend_without_buffer_unsafe(	IN FILE * fptr,
 */
 static
 BOOL
-_fclose_unsafe(IN FILE * fptr)
+_close_file_unsafe(IN FILE * fptr)
 {
 	if(fptr == NULL)
 		return FALSE;
@@ -1890,7 +1890,7 @@ _fclose_unsafe(IN FILE * fptr)
 		&& fptr->append_buffer_was_enabled 
 		&& fptr->append_buffer_byte_count != 0)
 	{
-		if(	!_fappend_without_buffer_unsafe(fptr, 
+		if(	!_append_file_without_buffer_unsafe(fptr, 
 											fptr->append_buffer_bytes, 
 											fptr->append_buffer_byte_count))
 			return FALSE;
@@ -1905,7 +1905,7 @@ _fclose_unsafe(IN FILE * fptr)
 }
 
 /**
-	@Function:		fclose
+	@Function:		close_file
 	@Access:		Public
 	@Description:
 		关闭文件。
@@ -1917,16 +1917,16 @@ _fclose_unsafe(IN FILE * fptr)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-fclose(IN FILE * fptr)
+close_file(IN FILE * fptr)
 {
 	lock();
-	BOOL r = _fclose_unsafe(fptr);
+	BOOL r = _close_file_unsafe(fptr);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_fwrite_unsafe
+	@Function:		_write_file_unsafe
 	@Access:		Private
 	@Description:
 		写文件。非安全版本。
@@ -1943,9 +1943,9 @@ fclose(IN FILE * fptr)
 */
 static
 BOOL
-_fwrite_unsafe(	IN FILE * fptr, 
-				IN uint8 * buffer, 
-				IN uint32 len)
+_write_file_unsafe(	IN FILE * fptr, 
+					IN uint8 * buffer, 
+					IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_WRITE) == 0 || len > MAX_FILE_LEN)
 		return FALSE;
@@ -1995,7 +1995,7 @@ _fwrite_unsafe(	IN FILE * fptr,
 }
 
 /**
-	@Function:		fwrite
+	@Function:		write_file
 	@Access:		Public
 	@Description:
 		写文件。
@@ -2011,18 +2011,18 @@ _fwrite_unsafe(	IN FILE * fptr,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-fwrite(	IN FILE * fptr, 
-		IN uint8 * buffer, 
-		IN uint32 len)
+write_file(	IN FILE * fptr, 
+			IN uint8 * buffer, 
+			IN uint32 len)
 {
 	lock();
-	BOOL r = _fwrite_unsafe(fptr, buffer, len);
+	BOOL r = _write_file_unsafe(fptr, buffer, len);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_fread_unsafe
+	@Function:		_read_file_unsafe
 	@Access:		Private
 	@Description:
 		读文件。非安全版本。
@@ -2040,9 +2040,9 @@ fwrite(	IN FILE * fptr,
 */
 static
 uint32
-_fread_unsafe(	IN FILE * fptr, 
-				OUT uint8 * buffer, 
-				IN uint32 len)
+_read_file_unsafe(	IN FILE * fptr, 
+					OUT uint8 * buffer, 
+					IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_READ) == 0 || len == 0)
 		return 0;
@@ -2093,7 +2093,7 @@ _fread_unsafe(	IN FILE * fptr,
 }
 
 /**
-	@Function:		_fread_without_buffer_unsafe
+	@Function:		_read_file_without_buffer_unsafe
 	@Access:		Private
 	@Description:
 		读文件。非安全版本。
@@ -2111,9 +2111,9 @@ _fread_unsafe(	IN FILE * fptr,
 */
 static
 uint32
-_fread_without_buffer_unsafe(	IN FILE * fptr, 
-								OUT uint8 * buffer, 
-								IN uint32 len)
+_read_file_without_buffer_unsafe(	IN FILE * fptr, 
+									OUT uint8 * buffer, 
+									IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_READ) == 0 || len == 0)
 		return 0;
@@ -2149,7 +2149,7 @@ _fread_without_buffer_unsafe(	IN FILE * fptr,
 }
 
 /**
-	@Function:		fread
+	@Function:		read_file
 	@Access:		Public
 	@Description:
 		读文件。
@@ -2165,22 +2165,22 @@ _fread_without_buffer_unsafe(	IN FILE * fptr,
 			实际读入长度。		
 */
 uint32
-fread(	IN FILE * fptr, 
-		OUT uint8 * buffer, 
-		IN uint32 len)
+read_file(	IN FILE * fptr, 
+			OUT uint8 * buffer, 
+			IN uint32 len)
 {
 	lock();
 	uint32 r = FALSE;
 	if(read_buffer_was_enabled)
-		r = _fread_unsafe(fptr, buffer, len);
+		r = _read_file_unsafe(fptr, buffer, len);
 	else
-		r = _fread_without_buffer_unsafe(fptr, buffer, len);
+		r = _read_file_without_buffer_unsafe(fptr, buffer, len);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		freset
+	@Function:		reset_file
 	@Access:		Public
 	@Description:
 		重置文件的读取指针。
@@ -2190,14 +2190,14 @@ fread(	IN FILE * fptr,
 	@Return:	
 */
 void
-freset(IN FILE * fptr)
+reset_file(IN FILE * fptr)
 {
 	fptr->next_block_index = 0;
 	fptr->next_block_pos = 0;
 }
 
 /**
-	@Function:		feof
+	@Function:		is_eof
 	@Access:		Public
 	@Description:
 		检查文件指针是否已到达文件尾。
@@ -2209,7 +2209,7 @@ freset(IN FILE * fptr)
 			返回TRUE则到达文件尾，否则未到达。
 */
 BOOL
-feof(IN FILE * fptr)
+is_eof(IN FILE * fptr)
 {
 	uint32 next = 	fptr->next_block_index
 					* DATA_BLOCK_DATA_LEN
@@ -2218,7 +2218,7 @@ feof(IN FILE * fptr)
 }
 
 /**
-	@Function:		_fappend_without_buffer_unsafe
+	@Function:		_append_file_without_buffer_unsafe
 	@Access:		Private
 	@Description:
 		追加文件。非安全版本。
@@ -2236,9 +2236,9 @@ feof(IN FILE * fptr)
 */
 static
 BOOL
-_fappend_without_buffer_unsafe(	IN FILE * fptr, 
-								IN uint8 * buffer, 
-								IN uint32 len)
+_append_file_without_buffer_unsafe(	IN FILE * fptr, 
+									IN uint8 * buffer, 
+									IN uint32 len)
 {
 	if(	fptr == NULL
 		|| buffer == NULL
@@ -2344,7 +2344,7 @@ _fappend_without_buffer_unsafe(	IN FILE * fptr,
 }
 
 /**
-	@Function:		_fappend_unsafe
+	@Function:		_append_file_unsafe
 	@Access:		Private
 	@Description:
 		追加文件。非安全版本。
@@ -2362,9 +2362,9 @@ _fappend_without_buffer_unsafe(	IN FILE * fptr,
 */
 static
 BOOL
-_fappend_unsafe(IN FILE * fptr, 
-				IN uint8 * buffer, 
-				IN uint32 len)
+_append_file_unsafe(IN FILE * fptr, 
+					IN uint8 * buffer, 
+					IN uint32 len)
 {
 	if(	fptr == NULL
 		|| buffer == NULL
@@ -2375,13 +2375,13 @@ _fappend_unsafe(IN FILE * fptr,
 	if(fptr->append_buffer_byte_count + len > sizeof(fptr->append_buffer_bytes))
 	{
 		if(fptr->append_buffer_byte_count != 0)
-			if(!_fappend_without_buffer_unsafe(	fptr, 
+			if(!_append_file_without_buffer_unsafe(	fptr, 
 												fptr->append_buffer_bytes, 
 												fptr->append_buffer_byte_count))
 				return FALSE;
 		if(len > sizeof(fptr->append_buffer_bytes))
 		{
-			if(!_fappend_without_buffer_unsafe(fptr, buffer, len))
+			if(!_append_file_without_buffer_unsafe(fptr, buffer, len))
 				return FALSE;
 			fptr->append_buffer_byte_count = 0;
 		}
@@ -2402,7 +2402,7 @@ _fappend_unsafe(IN FILE * fptr,
 }
 
 /**
-	@Function:		fappend
+	@Function:		append_file
 	@Access:		Public
 	@Description:
 		追加文件。
@@ -2418,16 +2418,16 @@ _fappend_unsafe(IN FILE * fptr,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-fappend(IN FILE * fptr, 
-		IN uint8 * buffer, 
-		IN uint32 len)
+append_file(IN FILE * fptr, 
+			IN uint8 * buffer, 
+			IN uint32 len)
 {
 	lock();
 	BOOL r = FALSE;
 	if(append_buffer_was_enabled)
-		r = _fappend_unsafe(fptr, buffer, len);
+		r = _append_file_unsafe(fptr, buffer, len);
 	else
-		r = _fappend_without_buffer_unsafe(fptr, buffer, len);
+		r = _append_file_without_buffer_unsafe(fptr, buffer, len);
 	unlock();
 	return r;
 }

@@ -407,7 +407,7 @@ _kill_task(IN int32 tid)
 	for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
 		if(task->opened_file_ptrs[ui] != NULL)
 		{
-			fclose(task->opened_file_ptrs[ui]);
+			close_file(task->opened_file_ptrs[ui]);
 			task->opened_file_ptrs[ui] = NULL;
 		}
 		
@@ -438,11 +438,11 @@ _kill_task(IN int32 tid)
 		system_call_fs_unlock_fs();
 
 	if(task->stdin != NULL)
-		fclose(task->stdin);
+		close_file(task->stdin);
 	if(task->stdout != NULL)
-		fclose(task->stdout);
+		close_file(task->stdout);
 	if(task->stderr != NULL)
-		fclose(task->stderr);
+		close_file(task->stderr);
 
 	if(tid == running_tid)
 		running_tid = -1;
@@ -657,19 +657,19 @@ _create_task_by_file(	IN int8 * filename,
 		|| working_dir == NULL)
 		return -1;
 	uint8 * app;
-	FILE * fptr = fopen(filename, FILE_MODE_READ);
+	FILE * fptr = open_file(filename, FILE_MODE_READ);
 	if(fptr == NULL)
 		return -1;
 	app = (uint8 *)alloc_memory(flen(fptr));
 	if(app == NULL)
 	{
-		fclose(fptr);
+		close_file(fptr);
 		return -1;
 	}
-	if(flen(fptr) <= 256 || !fread(fptr, app, flen(fptr)))
+	if(flen(fptr) <= 256 || !read_file(fptr, app, flen(fptr)))
 	{
 		free_memory(app);
-		fclose(fptr);
+		close_file(fptr);
 		return -1;
 	}
 
@@ -680,7 +680,7 @@ _create_task_by_file(	IN int8 * filename,
 		if(strcmp(file_symbol, "MTA32") != 0)
 		{
 			free_memory(app);
-			fclose(fptr);
+			close_file(fptr);
 			return -1;
 		}
 	}
@@ -689,7 +689,7 @@ _create_task_by_file(	IN int8 * filename,
 		if(strcmp(file_symbol, "SYS32") != 0)
 		{
 			free_memory(app);
-			fclose(fptr);
+			close_file(fptr);
 			return -1;
 		}
 	}
@@ -702,7 +702,7 @@ _create_task_by_file(	IN int8 * filename,
 								task_type,
 								task_attr);
 	free_memory(app);
-	fclose(fptr);
+	close_file(fptr);
 	return tid;
 }
 
@@ -966,11 +966,11 @@ _tasks_redirect_io(	IN OUT FILE ** v,
 {
 	if(v == NULL || path == NULL)
 		return FALSE;
-	FILE * new = fopen(path, mode);
+	FILE * new = open_file(path, mode);
 	if(new == NULL)
 		return FALSE;
 	if(*v != NULL)
-		fclose(*v);
+		close_file(*v);
 	*v = new;
 	return TRUE;
 }

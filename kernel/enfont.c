@@ -409,12 +409,12 @@ init_enfont(void)
 			enfontx = (uint8 *)alloc_memory(ENFONTX_BUFFER_SIZE);
 			if(enfontx == NULL)
 				enfont_die();
-			FILE * fptr = fopen(enfontx_file, FILE_MODE_READ);
+			FILE * fptr = open_file(enfontx_file, FILE_MODE_READ);
 			if(fptr == NULL)
 				enfont_die();
-			if(fread(fptr, enfontx, ENFONTX_BUFFER_SIZE) != ENFONTX_BUFFER_SIZE)
+			if(read_file(fptr, enfontx, ENFONTX_BUFFER_SIZE) != ENFONTX_BUFFER_SIZE)
 				enfont_die();
-			fclose(fptr);
+			close_file(fptr);
 		}
 		else
 		{
@@ -422,14 +422,14 @@ init_enfont(void)
 				enfont_die();
 			if(strcmp(enfont_file, "") != 0)
 			{
-				FILE * fptr = fopen(enfont_file, FILE_MODE_READ);
+				FILE * fptr = open_file(enfont_file, FILE_MODE_READ);
 				if(fptr == NULL && !enfont_builtin)
 					enfont_die();
-				if(fread(fptr, enfont, ENFONT_BUFFER_SIZE) != ENFONT_BUFFER_SIZE)
+				if(read_file(fptr, enfont, ENFONT_BUFFER_SIZE) != ENFONT_BUFFER_SIZE)
 					enfont_die();
 				if(strncmp(enfont, "ENFONT", 6) != 0)
 					enfont_die();
-				fclose(fptr);
+				close_file(fptr);
 			}
 		}
 	}

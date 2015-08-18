@@ -3148,11 +3148,11 @@ enter_system(void)
 	print_str("Checking system...\n");
 
 	//检查文件系统
-	FILE * fptr = fopen(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
+	FILE * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
 	if(fptr != NULL)
 		if(flen(fptr) != 0)
 		{
-			fclose(fptr);
+			close_file(fptr);
 			print_str("The file system has some error!\n");
 			if(get_disk_size("DA") != 0)
 				if(repair_ifs1("DA"))
@@ -3167,9 +3167,9 @@ enter_system(void)
 		}
 		else
 		{
-			fwrite(fptr, "1", 1);
+			write_file(fptr, "1", 1);
 			print_str("The file system is OK!\n");
-			fclose(fptr);
+			close_file(fptr);
 		}
 	else
 	{
@@ -3193,11 +3193,11 @@ static
 void
 leave_system(void)
 {
-	FILE * fptr = fopen(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
+	FILE * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
 	if(fptr != NULL)
 	{
-		fwrite(fptr, "", 0);
-		fclose(fptr);
+		write_file(fptr, "", 0);
+		close_file(fptr);
 	}
 	log(LOG_NORMAL, "Leave system.");
 	free_log();

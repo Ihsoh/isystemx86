@@ -182,38 +182,38 @@ exists_df(IN int8 * path);
 
 extern
 FILE *
-fopen(	IN int8 * path,
-		IN int32 mode);
+open_file(	IN int8 * path,
+			IN int32 mode);
 
 extern
 BOOL
-fclose(IN FILE * fptr);
+close_file(IN FILE * fptr);
 
 extern
 BOOL
-fwrite(	IN FILE * fptr,
-		IN uint8 * buffer,
-		IN uint32 len);
+write_file(	IN FILE * fptr,
+			IN uint8 * buffer,
+			IN uint32 len);
 
 extern
 uint32
-fread(	IN FILE * fptr,
-		OUT uint8 * buffer,
-		IN uint32 len);
+read_file(	IN FILE * fptr,
+			OUT uint8 * buffer,
+			IN uint32 len);
 
 extern
 void
-freset(IN FILE * fptr);
+reset_file(IN FILE * fptr);
 
 extern
 BOOL
-feof(IN FILE * fptr);
+is_eof(IN FILE * fptr);
 
 extern
 BOOL
-fappend(IN FILE * fptr,
-		IN uint8 * buffer,
-		IN uint32 len);
+append_file(IN FILE * fptr,
+			IN uint8 * buffer,
+			IN uint32 len);
 
 extern
 BOOL

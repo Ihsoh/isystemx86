@@ -1355,7 +1355,7 @@ static
 int32
 help(void)
 {
-	FILE * fptr = fopen(SYSTEM_HELP_FILE, FILE_MODE_READ);
+	FILE * fptr = open_file(SYSTEM_HELP_FILE, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		error("Cannot open file '"SYSTEM_HELP_FILE"'!");
@@ -1365,14 +1365,14 @@ help(void)
 	if(text == NULL)
 	{
 		error("No enough memory!");
-		fclose(fptr);
+		close_file(fptr);
 		return 0;
 	}
 	text[flen(fptr)] = '\0';
-	if(!fread(fptr, text, flen(fptr)))
+	if(!read_file(fptr, text, flen(fptr)))
 	{
 		error("Cannot read file '"SYSTEM_HELP_FILE"'!");
-		fclose(fptr);
+		close_file(fptr);
 		return 0;
 	}
 	int8 chr;
@@ -1402,7 +1402,7 @@ help(void)
 		if(chr == '\n')
 			line++;
 	}
-	fclose(fptr);
+	close_file(fptr);
 	return 1;
 }
 
@@ -1460,15 +1460,15 @@ vmode(IN int8 * mode)
 {
 	FILE * fptr = NULL;
 	if(strcmp(mode, "text") == 0)
-		fptr = fopen(KERNELLDR_TEXT, FILE_MODE_READ);
+		fptr = open_file(KERNELLDR_TEXT, FILE_MODE_READ);
 	else if(strcmp(mode, "vesa640_480") == 0)
-		fptr = fopen(KERNELLDR_VESA_640_480, FILE_MODE_READ);
+		fptr = open_file(KERNELLDR_VESA_640_480, FILE_MODE_READ);
 	else if(strcmp(mode, "vesa800_600") == 0)
-		fptr = fopen(KERNELLDR_VESA_800_600, FILE_MODE_READ);
+		fptr = open_file(KERNELLDR_VESA_800_600, FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1024_768") == 0)
-		fptr = fopen(KERNELLDR_VESA_1024_768, FILE_MODE_READ);
+		fptr = open_file(KERNELLDR_VESA_1024_768, FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1280_1024") == 0)
-		fptr = fopen(KERNELLDR_VESA_1280_1024, FILE_MODE_READ);
+		fptr = open_file(KERNELLDR_VESA_1280_1024, FILE_MODE_READ);
 	else
 	{
 		error(FORMAT("vmode {text|vesa640_480|vesa800_600|vesa1024_768|vesa1280_1024}"));
@@ -1481,13 +1481,13 @@ vmode(IN int8 * mode)
 	}
 	uint8 * buffer = alloc_memory((flen(fptr) / 512 + 1) * 512);
 	uint r;
-	if(buffer == NULL || !(r = fread(fptr, buffer, flen(fptr))) )
+	if(buffer == NULL || !(r = read_file(fptr, buffer, flen(fptr))) )
 	{
 		error("Failed to change video mode!");
-		fclose(fptr);
+		close_file(fptr);
 		return 0;
 	}
-	fclose(fptr);
+	close_file(fptr);
 	if(!write_sectors(SYSTEM_DISK, 1, flen(fptr) / 512 + 1, buffer))
 	{
 		error("Failed to change video mode!");
@@ -1813,7 +1813,7 @@ batch(IN int8 * path)
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	if(local_vars_s == NULL)
 		return 0;
-	FILE * fptr = fopen(temp, FILE_MODE_READ);
+	FILE * fptr = open_file(temp, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		free_vars(local_vars_s);
@@ -1823,12 +1823,12 @@ batch(IN int8 * path)
 	int8 * cmds = (int8 *)alloc_memory(file_len);
 	if(cmds == NULL)
 	{
-		fclose(fptr);
+		close_file(fptr);
 		free_vars(local_vars_s);
 		return 0;
 	}
-	fread(fptr, cmds, file_len);
-	fclose(fptr);
+	read_file(fptr, cmds, file_len);
+	close_file(fptr);
 	uint32 ui;
 	int8 cmd[BATCH_MAX_CMD_LEN];
 	int8 * lines = alloc_memory(BATCH_MAX_CMD_LINES * BATCH_MAX_CMD_LEN);

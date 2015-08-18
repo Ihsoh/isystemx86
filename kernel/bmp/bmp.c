@@ -77,7 +77,7 @@ imgl_bmp_create(IN CASCTEXT file)
 		return NULL;
 	}
 
-	bmpobj->imgfile_ptr = fopen(file, FILE_MODE_ALL);
+	bmpobj->imgfile_ptr = open_file(file, FILE_MODE_ALL);
 
 	if(bmpobj->imgfile_ptr == NULL)
 	{
@@ -92,7 +92,7 @@ imgl_bmp_create(IN CASCTEXT file)
 	uint8 head[0xe];
 	int32 actual_size, pixel_array_offset;
 
-	if((int32)fread(bmpobj->imgfile_ptr, head, 0xe) != 0xe)
+	if((int32)read_file(bmpobj->imgfile_ptr, head, 0xe) != 0xe)
 	{
 		imgl_bmp_destroy(bmpobj);
 		return NULL;
@@ -111,7 +111,7 @@ imgl_bmp_create(IN CASCTEXT file)
 		imgl_bmp_destroy(bmpobj);
 		return NULL;
 	}
-	if((int32)fread(bmpobj->imgfile_ptr, bmpobj->data_ptr, actual_size - 0xe) != actual_size - 0xe)
+	if((int32)read_file(bmpobj->imgfile_ptr, bmpobj->data_ptr, actual_size - 0xe) != actual_size - 0xe)
 	{
 		imgl_bmp_destroy(bmpobj);
 		return NULL;
@@ -210,7 +210,7 @@ imgl_bmp_destroy(IN IMGLBMPPtr bmpobj)
 	if(bmpobj->data_ptr != NULL)
 		free_memory(bmpobj->data_ptr);
 	if(bmpobj->imgfile_ptr != NULL)
-		fclose(bmpobj->imgfile_ptr);
+		close_file(bmpobj->imgfile_ptr);
 	if(bmpobj->palette_r != NULL)
 	{
 		dsl_lst_delete_all_value(bmpobj->palette_r);

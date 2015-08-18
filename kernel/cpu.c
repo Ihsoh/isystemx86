@@ -451,7 +451,7 @@ get_cpu_L3(OUT struct CacheInfo * cache_info)
 BOOL
 cpu_write_to_file(IN const int8 * path)
 {
-	FILE * fptr = fopen(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
+	FILE * fptr = open_file(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
 	if(fptr == NULL)
 		return FALSE;
 	int8 buffer[64 * 1024];
@@ -483,7 +483,7 @@ cpu_write_to_file(IN const int8 * path)
 				cpu_family,
 				cpu_model,
 				cpu_stepping);
-	fwrite(fptr, buffer, strlen(buffer));
-	fclose(fptr);
+	write_file(fptr, buffer, strlen(buffer));
+	close_file(fptr);
 	return TRUE;
 }
