@@ -89,6 +89,9 @@ WRITE_FILE	VA:/isystem/sys/pci.sys sys/pci/bin/pci.bin
 MAKE_FILE	VA:/isystem/sys/ screen.sys
 WRITE_FILE	VA:/isystem/sys/screen.sys sys/screen/bin/screen.bin
 
+MAKE_FILE	VA:/isystem/sys/ timer.sys
+WRITE_FILE	VA:/isystem/sys/timer.sys sys/timer/bin/timer.bin
+
 #System dump directory
 MAKE_DIR	VA:/isystem/ dump
 

@@ -11,7 +11,7 @@ main(	IN int argc,
 	if(vesa_is_valid())
 		for(;;)
 		{
-			flush_screen();
+			dispatch_tick();
 			delay();
 		}
 	return 0;

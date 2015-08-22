@@ -58,6 +58,7 @@ typedef struct
 #define	SCALL_EXEC				14
 #define	SCALL_WAIT				15
 #define	SCALL_MEMORY_BLOCK_SIZE	16
+#define	SCALL_DISPATCH_TICK		17
 
 extern void app_exit(void);
 #define	il_app_exit()	(app_exit())
@@ -137,5 +138,9 @@ extern uint32 memory_size(void * ptr);
 extern void console(void);
 #define	il_console()	(console())
 #define	ILConsole()	(console())
+
+extern void dispatch_tick(void);
+#define	il_dispatch_tick()	(dispatch_tick())
+#define	ILDispatchTick()	(dispatch_tick())
 
 #endif

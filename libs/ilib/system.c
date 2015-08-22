@@ -277,3 +277,9 @@ uint32 memory_size(void * ptr)
 	system_call(SCALL_SYSTEM, SCALL_MEMORY_BLOCK_SIZE, &sparams);
 	return UINT32_SPARAM(sparams.param0);
 }
+
+void dispatch_tick(void)
+{
+	struct SParams sparams;
+	system_call(SCALL_SYSTEM, SCALL_DISPATCH_TICK, &sparams);
+}

@@ -38,6 +38,7 @@ $(Target):	bin	\
 
 	cd sys/pci && make
 	cd sys/screen && make
+	cd sys/timer && make
 
 	cd test/test_jsonlib && make
 
@@ -125,6 +126,7 @@ clean:
 
 	cd sys/pci && make clean
 	cd sys/screen && make clean
+	cd sys/timer && make clean
 
 	cd test/test_jsonlib && make clean
 

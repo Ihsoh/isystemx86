@@ -9,6 +9,7 @@
 #include "timer.h"
 #include "types.h"
 #include "memory.h"
+#include "tasks.h"
 
 static uint32		_ticks;
 static TimerPtr		_timers[MAX_TIMER_COUNT];
@@ -90,7 +91,7 @@ timer_inc_ticks(void)
 {
 	_ticks++;
 	_timer_dispatch_tick();
-	timer_dispatch_tick();
+	//timer_dispatch_tick();
 }
 
 /**

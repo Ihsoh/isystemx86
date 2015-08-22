@@ -17,6 +17,8 @@
 #include "../paging.h"
 #include "../lock.h"
 #include "../mqueue.h"
+#include "../timer.h"
+
 #include <ilib/string.h>
 
 /**
@@ -408,6 +410,13 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			if(ptr != NULL)
 				r = get_memory_block_size(ptr);
 			sparams->param0 = SPARAM(r);
+			break;
+		}
+		//分派定时器事件。
+		//
+		case SCALL_DISPATCH_TICK:
+		{
+			timer_dispatch_tick();
 			break;
 		}
 	}
