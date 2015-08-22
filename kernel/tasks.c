@@ -227,7 +227,7 @@ _create_task(	IN int8 * name,
 		set_desc_to_gdt(data_seg_ring0_desc_index, (uint8 *)&data_seg_ring0_desc);
 
 		task->tss.back_link = 0;
-		task->tss.esp0 = 0x012ffffe;
+		task->tss.esp0 = 0x012ffff0;
 		task->tss.ss0 = data_seg_ring0_desc_index << 3 | RPL0;
 		task->tss.esp1 = 0;
 		task->tss.ss1 = 0;
@@ -240,7 +240,7 @@ _create_task(	IN int8 * name,
 		task->tss.ecx = 0;
 		task->tss.edx = 0;
 		task->tss.ebx = 0;
-		task->tss.esp = 0x011ffffe;
+		task->tss.esp = 0x011ffff0;
 		task->tss.ebp = 0;
 		task->tss.esi = 0;
 		task->tss.edi = 0;

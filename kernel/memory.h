@@ -75,6 +75,9 @@ extern
 void *
 alloc_memory(IN uint32 length);
 
+#define NEW(_t) 		((_t *)alloc_memory(sizeof(_t)))
+#define NEWC(_t, _c)	((_t *)alloc_memory(sizeof(_t) * (_c)))
+
 extern
 void *
 alloc_memory_unsafe(IN uint length);
@@ -82,6 +85,8 @@ alloc_memory_unsafe(IN uint length);
 extern
 BOOL
 free_memory(IN void * address);
+
+#define DELETE(_p)		(free_memory((_p)))
 
 extern
 uint32
