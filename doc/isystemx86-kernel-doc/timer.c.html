@@ -82,6 +82,33 @@
 	</div>
 </div>
 <div>
+	<a id="timer_dispatch_tick" name="timer_dispatch_tick" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">timer_dispatch_tick</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				执行各个定时器的事件。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
 	<a id="timer_inc_ticks" name="timer_inc_ticks" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Public</div>
@@ -233,7 +260,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		timer</span>,
 	<span style="color:#428cc7; font-weight:blod;"> TimerPtr</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
 	<p style="padding-left: 40px;">			指向定时器对象的指针。
 </p>
 </div>
@@ -275,7 +302,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		timer</span>,
 	<span style="color:#428cc7; font-weight:blod;"> TimerPtr</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
 	<p style="padding-left: 40px;">			指向定时器对象的指针。
 </p>
 </div>
@@ -310,7 +337,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		timer</span>,
 	<span style="color:#428cc7; font-weight:blod;"> TimerPtr</span>,
-	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
 	<p style="padding-left: 40px;">			指向定时器对象的指针。
 </p>
 </div>
@@ -378,6 +405,48 @@
 	<div style="padding-left: 40px;">
 		<span style="color:#428cc7; font-weight:blod;"></span>
 		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="timer_set_event" name="timer_set_event" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">timer_set_event</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置一个定时器的事件函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		timer</span>,
+	<span style="color:#428cc7; font-weight:blod;"> TimerPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向定时器对象的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		event</span>,
+	<span style="color:#428cc7; font-weight:blod;"> TimerEvent</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			新的时间函数。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
 	</div>
 </div>
 

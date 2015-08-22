@@ -29,6 +29,10 @@ timer_init(void);
 
 extern
 void
+timer_dispatch_tick(void);
+
+extern
+void
 timer_inc_ticks(void);
 
 extern
@@ -46,16 +50,16 @@ timer_delete(IN TimerPtr timer);
 
 extern
 BOOL
-timer_set_interval(	IN TimerPtr timer,
+timer_set_interval(	OUT TimerPtr timer,
 					IN uint32 interval);
 
 extern
 BOOL
-timer_start(IN TimerPtr timer);
+timer_start(OUT TimerPtr timer);
 
 extern
 BOOL
-timer_stop(IN TimerPtr timer);
+timer_stop(OUT TimerPtr timer);
 
 extern
 uint32
@@ -64,5 +68,10 @@ timer_count(void);
 extern
 void
 timer_clear(void);
+
+extern
+BOOL
+timer_set_event(OUT TimerPtr timer,
+				IN TimerEvent event);
 
 #endif

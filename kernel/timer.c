@@ -47,16 +47,34 @@ _timer_dispatch_tick(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TIMER_COUNT; ui++)
-		if(_timers[ui] != NULL && _timers[ui]->enabled)
-		{
-			TimerPtr timer = _timers[ui];
+	{
+		TimerPtr timer = _timers[ui];
+		if(timer != NULL && timer->enabled && timer->ticks != 0)
 			timer->ticks--;
-			if(timer->ticks == 0)
-			{
-				timer->event();
-				timer->ticks = timer->interval;
-			}
+	}
+}
+
+/**
+	@Function:		timer_dispatch_tick
+	@Access:		Public
+	@Description:
+		执行各个定时器的事件。
+	@Parameters:
+	@Return:
+*/
+void
+timer_dispatch_tick(void)
+{
+	uint32 ui;
+	for(ui = 0; ui < MAX_TIMER_COUNT; ui++)
+	{
+		TimerPtr timer = _timers[ui];
+		if(timer != NULL && timer->enabled && timer->ticks == 0)
+		{
+			timer->event();
+			timer->ticks = timer->interval;
 		}
+	}
 }
 
 /**
@@ -72,6 +90,7 @@ timer_inc_ticks(void)
 {
 	_ticks++;
 	_timer_dispatch_tick();
+	timer_dispatch_tick();
 }
 
 /**
@@ -162,7 +181,7 @@ timer_delete(IN TimerPtr timer)
 	@Description:
 		设置一个定时器的时间间隔。
 	@Parameters:
-		timer, TimerPtr, IN
+		timer, TimerPtr, OUT
 			指向定时器对象的指针。
 		interval, uint32, IN
 			新的时间间隔。
@@ -171,7 +190,7 @@ timer_delete(IN TimerPtr timer)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_set_interval(	IN TimerPtr timer,
+timer_set_interval(	OUT TimerPtr timer,
 					IN uint32 interval)
 {
 	if(timer == NULL || interval == 0)
@@ -186,14 +205,14 @@ timer_set_interval(	IN TimerPtr timer,
 	@Description:
 		开始一个定时器。
 	@Parameters:
-		timer, TimerPtr, IN
+		timer, TimerPtr, OUT
 			指向定时器对象的指针。
 	@Return:
 		BOOL
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_start(IN TimerPtr timer)
+timer_start(OUT TimerPtr timer)
 {
 	if(timer == NULL)
 		return FALSE;
@@ -207,14 +226,14 @@ timer_start(IN TimerPtr timer)
 	@Description:
 		停止一个定时器。
 	@Parameters:
-		timer, TimerPtr, IN
+		timer, TimerPtr, OUT
 			指向定时器对象的指针。
 	@Return:
 		BOOL
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_stop(IN TimerPtr timer)
+timer_stop(OUT TimerPtr timer)
 {
 	if(timer == NULL)
 		return FALSE;
@@ -261,4 +280,28 @@ timer_clear(void)
 			DELETE(_timers[ui]);
 			_timers[ui] = NULL;
 		}
+}
+
+/**
+	@Function:		timer_set_event
+	@Access:		Public
+	@Description:
+		设置一个定时器的事件函数。
+	@Parameters:
+		timer, TimerPtr, OUT
+			指向定时器对象的指针。
+		event, TimerEvent, IN
+			新的时间函数。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+timer_set_event(OUT TimerPtr timer,
+				IN TimerEvent event)
+{
+	if(timer == NULL || event == NULL)
+		return FALSE;
+	timer->event = event;
+	return TRUE;
 }

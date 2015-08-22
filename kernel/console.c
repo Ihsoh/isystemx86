@@ -1878,6 +1878,32 @@ batch(IN int8 * path)
 	return 1;
 }
 
+static uint32 _ticks = 0;
+
+static
+void
+_test_timer(IN WindowPtr window,
+			IN struct WindowEventParams * params)
+{
+	ASCCHAR buffer[256];
+	uitos(buffer, _ticks);
+	rect_common_image(params->screen, 0, 0, 200, 40, 0xffffffff);
+	text_common_image(	params->screen,
+						0, 
+						0, 
+						get_enfont_ptr(),
+						buffer,
+						strlen(buffer),
+						0xff000000);
+}
+
+static
+void
+_timer_event(void)
+{
+	_ticks++;
+}
+
 /**
 	@Function:		exec
 	@Access:		Private
@@ -2316,6 +2342,16 @@ exec(	IN int8 * cmd,
 		}
 		else if(strcmp(name, "t") == 0)
 		{
+			#include "timer.h"
+			WindowPtr win = NULL;
+			win = create_window(200,
+								20,
+								0xffffffff,
+								WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_CLOSE,
+								"Test Timer",
+								_test_timer);
+			win->state = WINDOW_STATE_SHOW;
+			timer_start(timer_new(1000, _timer_event));
 		}
 
 		//Batch
