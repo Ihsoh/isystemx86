@@ -25,6 +25,7 @@
 #include "windows/clock.h"
 #include "windows/console.h"
 #include "windows/sfunc.h"
+#include "windows/detail.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -735,6 +736,7 @@ init_screen(void)
 		init_sfunc_window();
 		init_console_window();
 		init_clock_window();
+		detail_window_init();
 	}
 }
 

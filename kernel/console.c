@@ -27,6 +27,7 @@
 #include "fs/ifs1/blocks.h"
 
 #include "windows/message.h"
+#include "windows/detail.h"
 
 #include <ilib/string.h>
 
@@ -2339,6 +2340,13 @@ exec(	IN int8 * cmd,
 								0,
 								0xff000000,
 								0xffffffff);
+		}
+		else if(strcmp(name, "detail") == 0)
+		{
+			ASCCHAR path[1024];
+			parse_cmd(NULL, path, 1023);
+			fix_path(path, current_path, path);
+			detail_window_show(path);
 		}
 		else if(strcmp(name, "t") == 0)
 		{
