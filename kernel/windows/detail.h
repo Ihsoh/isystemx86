@@ -11,6 +11,12 @@
 
 #include "../types.h"
 
+extern
+BOOL
+detail_window_init(void);
 
+extern
+BOOL
+detail_window_show(IN CASCTEXT path);
 
 #endif

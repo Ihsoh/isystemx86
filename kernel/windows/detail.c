@@ -19,8 +19,9 @@ static ASCCHAR path[1024];
 #define	_WIDTH		400
 #define	_HEIGHT		200
 
+static
 void
-detail_window_event(IN struct Window * window,
+_detail_window_event(IN struct Window * window,
 					IN struct WindowEventParams * params)
 {
 }
@@ -33,7 +34,7 @@ detail_window_init(void)
 							0xffffffff,
 							WINDOW_STYLE_MINIMIZE,
 							"Detail",
-							detail_window_event);
+							_detail_window_event);
 	if(_window == NULL)
 		return FALSE;
 	return TRUE;
