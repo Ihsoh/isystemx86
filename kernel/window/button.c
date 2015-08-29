@@ -3,10 +3,11 @@
 	@Author:		Ihsoh
 	@Date:			2015-08-30
 	@Description:
-		窗体控件 - 按钮。
+		窗体控件 - Button。
 */
 
 #include "button.h"
+#include "control.h"
 #include "../types.h"
 #include "../image.h"
 #include "../enfont.h"
@@ -40,7 +41,7 @@
 			鼠标在Button上方时，Button的文本的颜色。
 		bgcolorh, uint32, IN
 			鼠标在Button上方时，Button的背景颜色。
-		event, ButtonEvent, IN
+		event, ControlEvent, IN
 			Button的事件函数。
 		width, uint32, IN
 			Button的宽度。如果为0则不起作用。
@@ -60,7 +61,7 @@ button_init(OUT ButtonPtr button,
 			IN uint32 bgcolor,
 			IN uint32 colorh,
 			IN uint32 bgcolorh,
-			IN ButtonEvent event,
+			IN ControlEvent event,
 			IN uint32 width,
 			IN uint32 height)
 {
@@ -118,7 +119,7 @@ button(	IN OUT ButtonPtr button,
 	uint32 bgcolor = button->bgcolor;
 	uint32 colorh = button->colorh;
 	uint32 bgcolorh = button->bgcolorh;
-	ButtonEvent event = button->event;
+	ControlEvent event = button->event;
 	uint32 len = strlen(text);
 	uint32 width = 0;
 	if(button->width == 0)
@@ -199,4 +200,4 @@ button(	IN OUT ButtonPtr button,
 		button->rbdown = FALSE;
 	}
 	return TRUE;
-}	
+}

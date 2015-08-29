@@ -66,16 +66,6 @@ split_string(	OUT int8 * dest,
 	}
 }
 
-typedef uint8 * va_list;
-
-#define	_INTSIZEOF(t)	(sizeof(t) <= 4 ? 4 : 8)
-
-#define	va_start(vl, a) (vl = ((uint8 *)&a) + _INTSIZEOF(a))
-
-#define	va_arg(vl, t) (*(t *)((vl += _INTSIZEOF(t)) - _INTSIZEOF(t)))
-
-#define	va_end(vl)	(vl = NULL)
-
 /**
 	@Function:		vsprintf_s
 	@Access:		Public

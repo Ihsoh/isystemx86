@@ -3,17 +3,17 @@
 	@Author:		Ihsoh
 	@Date:			2015-08-30
 	@Description:
-		窗体控件 - 按钮。
+		窗体控件 - Button。
 */
 
 #ifndef	_WINDOW_BUTTON_H_
 #define	_WINDOW_BUTTON_H_
 
+#include "control.h"
+
 #include "../types.h"
 #include "../image.h"
 #include "../window.h"
-
-typedef void (* ButtonEvent)(int32 id, uint32 type, void * param);
 
 typedef struct
 {
@@ -25,7 +25,7 @@ typedef struct
 	uint32				bgcolor;
 	uint32				colorh;
 	uint32				bgcolorh;
-	ButtonEvent			event;
+	ControlEvent		event;
 	uint32				width;
 	uint32				height;
 	BOOL				lbdown;
@@ -64,7 +64,7 @@ button_init(OUT ButtonPtr button,
 			IN uint32 bgcolor,
 			IN uint32 colorh,
 			IN uint32 bgcolorh,
-			IN ButtonEvent event,
+			IN ControlEvent event,
 			IN uint32 width,
 			IN uint32 height);
 

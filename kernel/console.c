@@ -2351,7 +2351,13 @@ exec(	IN int8 * cmd,
 		else if(strcmp(name, "t") == 0)
 		{
 			#include "windows/explorer.h"
-			explorer_window_show();
+			uint32 row = 0, col = 0;
+			_max("abcd\n123456\n123", &row, &col);
+			printn(row);
+			print_str(", ");
+			printn(col);
+			print_str("\n");
+			//explorer_window_show();
 		}
 
 		//Batch
