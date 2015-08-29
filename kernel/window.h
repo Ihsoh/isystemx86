@@ -42,7 +42,6 @@ typedef struct WindowEventParams
 	int32					mouse_x;
 	int32					mouse_y;
 	int32					mouse_button;
-	uint8					key;
 	struct CommonImage *	screen;
 } * WindowEventParamsPtr;
 

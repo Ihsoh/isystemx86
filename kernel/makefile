@@ -23,18 +23,19 @@ bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
 BMPObjs=bmp/bin/bmp.obj
 UtilsObjs=utils/bin/img.obj
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
+WindowObjs=window/bin/button.obj
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
-windows/bin/detail.obj
+windows/bin/detail.obj windows/bin/explorer.obj
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj
 FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin windows/bin \
-$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1)
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin \
+$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs)	$(SyscallObjs) $(FS_IFS1)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs)	$(SyscallObjs) $(FS_IFS1)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -55,6 +56,9 @@ syscall/bin:
 
 utils/bin:
 	-mkdir utils/bin
+
+window/bin:
+	-mkdir window/bin
 
 windows/bin:
 	-mkdir windows/bin
@@ -211,6 +215,10 @@ dump/bin/msg.obj: dump/msg.c dump/msg.h
 	$(CC) $(CFlags) -c dump/msg.c -o dump/bin/msg.obj $(Include)
 
 
+window/bin/button.obj: window/button.c window/button.h
+	$(CC) $(CFlags) -c window/button.c -o window/bin/button.obj $(Include)
+
+
 windows/bin/clock.obj: windows/clock.c windows/clock.h
 	$(CC) $(CFlags) -c windows/clock.c -o windows/bin/clock.obj $(Include)
 
@@ -225,6 +233,9 @@ windows/bin/message.obj: windows/message.c windows/message.h
 
 windows/bin/detail.obj: windows/detail.c windows/detail.h
 	$(CC) $(CFlags) -c windows/detail.c -o windows/bin/detail.obj $(Include)
+
+windows/bin/explorer.obj: windows/explorer.c windows/explorer.h
+	$(CC) $(CFlags) -c windows/explorer.c -o windows/bin/explorer.obj $(Include)
 
 
 syscall/bin/fs.obj: syscall/fs.c syscall/fs.h

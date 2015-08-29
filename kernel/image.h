@@ -21,13 +21,13 @@
 
 #define	IMAGE_PIXEL_RGB(r, g, b) (0xff000000 + ((uint)r << 16) + ((uint)g << 8) + b)
 
-struct CommonImage
+typedef struct CommonImage
 {
 	int32	type;
 	uint32	width;
 	uint32	height;
 	uint8 *	data;
-};
+} Image, * ImagePtr;
 
 extern
 BOOL

@@ -26,6 +26,7 @@
 #include "windows/console.h"
 #include "windows/sfunc.h"
 #include "windows/detail.h"
+#include "windows/explorer.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -737,6 +738,7 @@ init_screen(void)
 		init_console_window();
 		init_clock_window();
 		detail_window_init();
+		explorer_window_init();
 	}
 }
 
@@ -1249,6 +1251,9 @@ flush_screen(void)
 					for(ui = 0; ui < window_count; ui++)
 					{
 						struct Window * window = windows[ui];
+						if(	window->state == WINDOW_STATE_HIDDEN ||
+							window->state == WINDOW_STATE_CLOSED)
+							continue;
 						if(point_in_rect(	mouse_x, 
 											mouse_y, 
 											window->x, 

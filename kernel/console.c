@@ -2350,16 +2350,8 @@ exec(	IN int8 * cmd,
 		}
 		else if(strcmp(name, "t") == 0)
 		{
-			#include "timer.h"
-			WindowPtr win = NULL;
-			win = create_window(200,
-								20,
-								0xffffffff,
-								WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_CLOSE,
-								"Test Timer",
-								_test_timer);
-			win->state = WINDOW_STATE_SHOW;
-			timer_start(timer_new(1000, _timer_event));
+			#include "windows/explorer.h"
+			explorer_window_show();
 		}
 
 		//Batch

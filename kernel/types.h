@@ -72,4 +72,18 @@ typedef	const int8 * _casctext;
 //		必须标注 OUT。
 #define	OUT
 
+typedef struct
+{
+	int32	x;
+	int32	y;
+} Point, * PointPtr;
+
+typedef	struct
+{
+	int32	x;
+	int32	y;
+	uint32	width;
+	uint32	height;
+} Rect, * RectPtr;
+
 #endif
