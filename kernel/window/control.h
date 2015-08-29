@@ -11,6 +11,12 @@
 
 #include "../types.h"
 
+#define	WINDOW_DEFBGCOLOR	0xffffffff
+
 typedef void (* ControlEvent)(int32 id, uint32 type, void * param);
+
+extern
+void
+__dummy_event(int32 id, uint32 type, void * param);
 
 #endif

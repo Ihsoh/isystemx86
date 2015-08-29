@@ -1174,3 +1174,61 @@ text_common_image(	OUT struct CommonImage * common_image,
 											color);
 	}
 }
+
+/**
+	@Function:		text_common_image_ml
+	@Access:		Public
+	@Description:
+		画文本到图片。支持换行的版本。
+	@Parameters:
+		common_image, struct CommonImage *, OUT
+			图片。
+		draw_x, int32, IN
+			起始位置 X 坐标。
+		draw_y, int32, IN
+			起始位置 Y 坐标。
+		enfont, uint8 *, IN
+			英文字体数据。
+		text, int8 *, IN
+			文本。
+		count, uint32, IN
+			文本中的字符数。
+		color, uint32, IN
+			文本颜色。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。			
+*/
+BOOL
+text_common_image_ml(	OUT struct CommonImage * common_image,
+						IN int32 draw_x,
+						IN int32 draw_y,
+						IN uint8 * enfont,
+						IN int8 * text,
+						IN uint32 count,
+						IN uint32 color)
+{
+	uint32 c = 0;
+	uint32 len = strlen(text);
+	uint32 ui;
+	int8 * s = text;
+	for(ui = 0; ui < len; ui++)
+		if(text[ui] != '\n')
+			c++;
+		else
+		{
+			if(!text_common_image(	common_image,
+									draw_x, draw_y,
+									enfont, s, c, color))
+				return FALSE;
+			s += c + 1;
+			draw_y += ENFONT_HEIGHT;
+			c = 0;
+		}
+	if(c != 0)
+		if(!text_common_image(	common_image,
+								draw_x, draw_y,
+								enfont, s, c, color))
+			return FALSE;
+	return TRUE;
+}

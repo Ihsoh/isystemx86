@@ -31,6 +31,10 @@ typedef struct
 	BOOL				lbdown;
 	BOOL				rbdown;
 	BOOL				hover;
+	uint32				len;
+	BOOL				clean;
+	uint32				old_len;
+	BOOL				enabled;
 } Button, * ButtonPtr;
 
 #define	BUTTON_LPADDING	6
@@ -48,10 +52,20 @@ typedef struct
 #define	BUTTON_OUT			7
 
 #define	INIT_BUTTON(_button, _id, _x, _y, _text, _event)	\
-	(button_init(_button, _id, _x, _y, _text, 0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb, _event, 0, 0))
+	(button_init((_button), (_id), (_x), (_y), (_text),		\
+		0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb, (_event), 0, 0))
 
 #define	BUTTON(_button, _image, _params, _top)	\
-	(button(_button, _image, _params, _top))
+	(button((_button), (_image), (_params), (_top)))
+
+#define	SET_BUTTON_TEXT(_button, _text)	\
+	(button_set_text((_button), (_text)))
+
+#define	ENABLED_BUTTON(_button)	\
+	((_button)->enabled = TRUE)
+
+#define	DISABLE_BUTTON(_button)	\
+	((_button)->enabled = FALSE)
 
 extern
 BOOL
@@ -74,5 +88,10 @@ button(	IN OUT ButtonPtr button,
 		OUT ImagePtr image,
 		IN WindowEventParamsPtr params,
 		BOOL top);
+
+extern
+BOOL
+button_set_text(OUT ButtonPtr button,
+				IN CASCTEXT text);
 
 #endif

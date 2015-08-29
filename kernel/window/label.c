@@ -17,8 +17,24 @@
 
 #include <ilib/string.h>
 
-//static
-uint32
+/**
+	@Function:		_max
+	@Access:		Private
+	@Description:
+		获取文本的行数和最大列数。
+	@Parameters:
+		text, CASCTEXT, IN
+			指向文本的指针。
+		row, uint32 *, OUT
+			指向用于储存文本行数的缓冲区的指针。
+		col, uint32 *, OUT
+			指向用于储存文本最大列数的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+static
+void
 _max(	IN CASCTEXT text,
 		OUT uint32 * row,
 		OUT uint32 * col)
@@ -98,7 +114,7 @@ label_init(	OUT LabelPtr label,
 			IN uint32 width,
 			IN uint32 height)
 {
-	if(label == NULL)
+	if(label == NULL || text == NULL)
 		return FALSE;
 	label->id = id;
 	label->x = x;
@@ -114,6 +130,11 @@ label_init(	OUT LabelPtr label,
 	label->lbdown = FALSE;
 	label->rbdown = FALSE;
 	label->hover = FALSE;
+	_max(text, &label->max_row, &label->max_col);
+	label->clean = FALSE;
+	label->old_max_row = 0;
+	label->old_max_col = 0;
+	label->enabled = FALSE;
 	return TRUE;
 }
 
@@ -152,29 +173,47 @@ label(	IN OUT LabelPtr label,
 	uint32 bgcolor = label->bgcolor;
 	uint32 colorh = label->colorh;
 	uint32 bgcolorh = label->bgcolorh;
-	ControlEvent event = label->event;
+	ControlEvent event = NULL;
+	if(label->enabled)
+		event = label->event;
+	else
+		event = __dummy_event;
 	uint32 len = strlen(text);
 	uint32 width = 0;
 	if(label->width == 0)
-		width = LABEL_LPADDING + len * ENFONT_WIDTH + LABEL_RPADDING;
+		width = LABEL_LPADDING + label->max_col * ENFONT_WIDTH + LABEL_RPADDING;
 	else
 		width = label->width;
 	uint32 height = 0;
 	if(label->height == 0)
-		height = LABEL_TPADDING + ENFONT_HEIGHT + LABEL_BPADDING;
+		height = LABEL_TPADDING + label->max_row * ENFONT_HEIGHT + LABEL_BPADDING;
 	else
 		height = label->height;
-	if(point_in_rect(	params->mouse_x, params->mouse_y,
+	if(label->clean)
+	{
+		uint32 old_width = LABEL_LPADDING + label->old_max_col * ENFONT_WIDTH + LABEL_RPADDING;
+		uint32 old_height = LABEL_TPADDING + label->old_max_row * ENFONT_HEIGHT + LABEL_BPADDING;
+		if(old_width > width || old_height > height)
+			rect_common_image(	image,
+								x, y,
+								old_width, old_height,
+								WINDOW_DEFBGCOLOR);
+		label->clean = FALSE;
+		label->old_max_row = 0;
+		label->old_max_col = 0;
+	}
+	if(	point_in_rect(	params->mouse_x, params->mouse_y,
 						x, y,
-						width, height))
+						width, height)
+		&& label->enabled)
 	{
 		rect_common_image(	image,
 							x, y,
 							width, height,
 							bgcolorh);
-		text_common_image(	image,
-							x + LABEL_LPADDING, y + LABEL_TPADDING,
-							enfont, text, len, colorh);
+		text_common_image_ml(	image,
+								x + LABEL_LPADDING, y + LABEL_TPADDING,
+								enfont, text, len, colorh);
 		
 		// LABEL_IN。
 		if(!label->hover)
@@ -197,8 +236,7 @@ label(	IN OUT LabelPtr label,
 		else
 			if(label->lbdown && top)
 			{
-				if(event != NULL)
-					event(id, LABEL_LBUP, NULL);
+				event(id, LABEL_LBUP, NULL);
 				label->lbdown = FALSE;
 			}
 		if(is_mouse_right_button_down())
@@ -210,17 +248,16 @@ label(	IN OUT LabelPtr label,
 		else
 			if(label->rbdown && top)
 			{
-				if(event != NULL)
-					event(id, LABEL_RBUP, NULL);
+				event(id, LABEL_RBUP, NULL);
 				label->rbdown = FALSE;
 			}
 	}
 	else
 	{
 		rect_common_image(	image, x, y, width, height, bgcolor);
-		text_common_image(	image,
-							x + LABEL_LPADDING, y + LABEL_TPADDING,
-							enfont, text, len, color);
+		text_common_image_ml(	image,
+								x + LABEL_LPADDING, y + LABEL_TPADDING,
+								enfont, text, len, color);
 
 		// LABEL_OUT。
 		if(label->hover)
@@ -232,5 +269,33 @@ label(	IN OUT LabelPtr label,
 		label->lbdown = FALSE;
 		label->rbdown = FALSE;
 	}
+	return TRUE;
+}
+
+/**
+	@Function:		label_set_text
+	@Access:		Public
+	@Description:
+		设置Label的文本。
+	@Parameters:
+		label, LabelPtr, IN OUT
+			指向Label对象的指针。
+		text, CASCTEXT, IN
+			Label的文本。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+label_set_text(	OUT LabelPtr label,
+				IN CASCTEXT text)
+{
+	if(label == NULL || text == NULL)
+		return FALSE;
+	label->text = text;
+	label->old_max_row = label->max_row;
+	label->old_max_col = label->max_col;
+	_max(text, &label->max_row, &label->max_col);
+	label->clean = TRUE;
 	return TRUE;
 }

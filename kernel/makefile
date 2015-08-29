@@ -23,7 +23,7 @@ bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj
 BMPObjs=bmp/bin/bmp.obj
 UtilsObjs=utils/bin/img.obj
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
-WindowObjs=window/bin/button.obj window/bin/label.obj
+WindowObjs=window/bin/control.obj window/bin/button.obj window/bin/label.obj
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
 windows/bin/detail.obj windows/bin/explorer.obj
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
@@ -214,6 +214,9 @@ dump/bin/dump.obj: dump/dump.c dump/dump.h
 dump/bin/msg.obj: dump/msg.c dump/msg.h
 	$(CC) $(CFlags) -c dump/msg.c -o dump/bin/msg.obj $(Include)
 
+
+window/bin/control.obj: window/control.c window/control.h
+	$(CC) $(CFlags) -c window/control.c -o window/bin/control.obj $(Include)
 
 window/bin/button.obj: window/button.c window/button.h
 	$(CC) $(CFlags) -c window/button.c -o window/bin/button.obj $(Include)

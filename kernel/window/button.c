@@ -65,7 +65,7 @@ button_init(OUT ButtonPtr button,
 			IN uint32 width,
 			IN uint32 height)
 {
-	if(button == NULL)
+	if(button == NULL || text == NULL)
 		return FALSE;
 	button->id = id;
 	button->x = x;
@@ -81,6 +81,10 @@ button_init(OUT ButtonPtr button,
 	button->lbdown = FALSE;
 	button->rbdown = FALSE;
 	button->hover = FALSE;
+	button->len = strlen(text);
+	button->clean = FALSE;
+	button->old_len = 0;
+	button->enabled = TRUE;
 	return TRUE;
 }
 
@@ -119,8 +123,12 @@ button(	IN OUT ButtonPtr button,
 	uint32 bgcolor = button->bgcolor;
 	uint32 colorh = button->colorh;
 	uint32 bgcolorh = button->bgcolorh;
-	ControlEvent event = button->event;
-	uint32 len = strlen(text);
+	ControlEvent event = NULL;
+	if(button->enabled)
+		event = button->event;
+	else
+		event = __dummy_event;
+	uint32 len = button->len;
 	uint32 width = 0;
 	if(button->width == 0)
 		width = BUTTON_LPADDING + len * ENFONT_WIDTH + BUTTON_RPADDING;
@@ -131,9 +139,21 @@ button(	IN OUT ButtonPtr button,
 		height = BUTTON_TPADDING + ENFONT_HEIGHT + BUTTON_BPADDING;
 	else
 		height = button->height;
-	if(point_in_rect(	params->mouse_x, params->mouse_y,
+	if(button->clean)
+	{
+		uint32 old_width = BUTTON_LPADDING + button->old_len * ENFONT_WIDTH + BUTTON_RPADDING;
+		if(old_width > width)
+			rect_common_image(	image,
+								x, y,
+								old_width, height,
+								WINDOW_DEFBGCOLOR);
+		button->clean = FALSE;
+		button->old_len = 0;
+	}
+	if(	point_in_rect(	params->mouse_x, params->mouse_y,
 						x, y,
-						width, height))
+						width, height)
+		&& button->enabled)
 	{
 		rect_common_image(	image,
 							x, y,
@@ -164,8 +184,7 @@ button(	IN OUT ButtonPtr button,
 		else
 			if(button->lbdown && top)
 			{
-				if(event != NULL)
-					event(id, BUTTON_LBUP, NULL);
+				event(id, BUTTON_LBUP, NULL);
 				button->lbdown = FALSE;
 			}
 		if(is_mouse_right_button_down())
@@ -177,8 +196,7 @@ button(	IN OUT ButtonPtr button,
 		else
 			if(button->rbdown && top)
 			{
-				if(event != NULL)
-					event(id, BUTTON_RBUP, NULL);
+				event(id, BUTTON_RBUP, NULL);
 				button->rbdown = FALSE;
 			}
 	}
@@ -199,5 +217,32 @@ button(	IN OUT ButtonPtr button,
 		button->lbdown = FALSE;
 		button->rbdown = FALSE;
 	}
+	return TRUE;
+}
+
+/**
+	@Function:		button_set_text
+	@Access:		Public
+	@Description:
+		设置Button的文本。
+	@Parameters:
+		button, ButtonPtr, IN OUT
+			指向Button对象的指针。
+		text, CASCTEXT, IN
+			Button的文本。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+button_set_text(OUT ButtonPtr button,
+				IN CASCTEXT text)
+{
+	if(button == NULL || text == NULL)
+		return FALSE;
+	button->text = text;
+	button->old_len = button->len;
+	button->len = strlen(text);
+	button->clean = TRUE;
 	return TRUE;
 }

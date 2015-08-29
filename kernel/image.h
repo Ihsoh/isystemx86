@@ -130,4 +130,14 @@ text_common_image(	OUT struct CommonImage * common_image,
 					IN uint32 count,
 					IN uint32 color);
 
+extern
+BOOL
+text_common_image_ml(	OUT struct CommonImage * common_image,
+						IN int32 draw_x,
+						IN int32 draw_y,
+						IN uint8 * enfont,
+						IN int8 * text,
+						IN uint32 count,
+						IN uint32 color);
+
 #endif

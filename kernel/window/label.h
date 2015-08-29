@@ -33,6 +33,10 @@ typedef	struct
 	BOOL				hover;
 	uint32				max_row;
 	uint32				max_col;
+	BOOL				clean;
+	uint32				old_max_row;
+	uint32				old_max_col;
+	BOOL				enabled;
 } Label, * LabelPtr;
 
 #define	LABEL_LPADDING	6
@@ -48,6 +52,22 @@ typedef	struct
 #define	LABEL_HOVER		5
 #define	LABEL_IN 		6
 #define	LABEL_OUT		7
+
+#define	INIT_LABEL(_label, _id, _x, _y, _text, _event)	\
+	(label_init((_label), (_id), (_x), (_y), (_text),	\
+		0xff000000, WINDOW_DEFBGCOLOR, 0xff000000, WINDOW_DEFBGCOLOR, (_event), 0, 0))
+
+#define	LABEL(_label, _image, _params, _top)	\
+	(label((_label), (_image), (_params), (_top)))
+
+#define	SET_LABEL_TEXT(_label, _text)	\
+	(label_set_text((_label), (_text)))
+
+#define	ENABLE_LABEL(_label)	\
+	((_label)->enabled = TRUE)
+
+#define	DISABLE_LABEL(_label)	\
+	((_label)->enabled = FALSE)
 
 extern
 BOOL
@@ -70,5 +90,10 @@ label(	IN OUT LabelPtr label,
 		OUT ImagePtr image,
 		IN WindowEventParamsPtr params,
 		BOOL top);
+
+extern
+BOOL
+label_set_text(	OUT LabelPtr label,
+				IN CASCTEXT text);
 
 #endif

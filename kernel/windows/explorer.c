@@ -14,6 +14,7 @@
 #include "../klib.h"
 
 #include "../window/button.h"
+#include "../window/label.h"
 
 #include <ilib/string.h>
 
@@ -22,6 +23,9 @@
 
 static struct Window * _window = NULL;
 
+Button btn1, btn2;
+Label lbl1;
+
 static
 void
 _f(int32 id, uint32 type, void * param)
@@ -29,24 +33,19 @@ _f(int32 id, uint32 type, void * param)
 	if(id == 1)
 	{
 		if(type == BUTTON_LBUP)
-			print_str("<BUTTON1 UP>\n");
+			SET_LABEL_TEXT(&lbl1, "<BUTTON1 UP>\n");
 		else if(type == BUTTON_LBDOWN)
-			print_str("<BUTTON1 DOWN>\n");
-		else if(type == BUTTON_IN)
-			print_str("<BUTTON1 IN>\n");
-		else if(type == BUTTON_OUT)
-			print_str("<BUTTON1 OUT>\n");
+			SET_LABEL_TEXT(&lbl1, "<BUTTON1 DOWN>\n");
+		btn2.enabled = FALSE;
 	}
 	else if(id == 2)
 	{
 		if(type == BUTTON_RBUP)
-			print_str("<BUTTON2 UP>\n");
+			SET_LABEL_TEXT(&lbl1, "<BUTTON2 UP>\n");
 		else if(type == BUTTON_RBDOWN)
-			print_str("<BUTTON2 DOWN>\n");
+			SET_LABEL_TEXT(&lbl1, "<BUTTON2 DOWN>\n");
 	}
 }
-
-Button btn1, btn2;
 
 static
 void
@@ -56,6 +55,7 @@ _window_event(	IN struct Window * window,
 	BOOL top = get_top_window() == window;
 	BUTTON(&btn1, &window->workspace, params, top);
 	BUTTON(&btn2, &window->workspace, params, top);
+	LABEL(&lbl1, &window->workspace, params, top);
 }
 
 BOOL
@@ -72,7 +72,7 @@ explorer_window_init(void)
 		return FALSE;
 	INIT_BUTTON(&btn1, 1, 10, 10, "Test1", _f);
 	INIT_BUTTON(&btn2, 2, 100, 10, "Test2", _f);
-	btn2.width = 200;
+	INIT_LABEL(&lbl1, 3, 10, 100, "This\nis\nTest Label!", _f);
 	return TRUE;
 }
 
