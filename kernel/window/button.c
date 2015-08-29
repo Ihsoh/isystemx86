@@ -25,7 +25,7 @@
 	@Parameters:
 		button, ButtonPtr, IN
 			指向Button对象的指针。
-		id, int32, IN
+		id, uint32, IN
 			Button的ID。
 		x, uint32, IN
 			Button的X坐标。
@@ -53,7 +53,7 @@
 */
 BOOL
 button_init(OUT ButtonPtr button,
-			IN int32 id,
+			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
 			IN CASCTEXT text,
@@ -65,12 +65,18 @@ button_init(OUT ButtonPtr button,
 			IN uint32 width,
 			IN uint32 height)
 {
-	if(button == NULL || text == NULL)
+	if(	button == NULL
+		|| text == NULL
+		|| strlen(text) > MAX_BUTTON_TEXT_LEN)
 		return FALSE;
-	button->id = id;
+	if(id == 0)
+		button->id = (uint32)button;
+	else
+		button->id = id;
+	button->type = CONTROL_BUTTON;
 	button->x = x;
 	button->y = y;
-	button->text = text;
+	strcpy(button->text, text);
 	button->color = color;
 	button->bgcolor = bgcolor;
 	button->colorh = colorh;
@@ -85,6 +91,7 @@ button_init(OUT ButtonPtr button,
 	button->clean = FALSE;
 	button->old_len = 0;
 	button->enabled = TRUE;
+	button->vpext = NULL;
 	return TRUE;
 }
 
@@ -114,6 +121,8 @@ button(	IN OUT ButtonPtr button,
 {
 	if(button == NULL || image == NULL || params == NULL)
 		return FALSE;
+	if(!top)
+		return TRUE;
 	uint8 * enfont = get_enfont_ptr();
 	uint32 id = button->id;
 	uint32 x = button->x;
@@ -136,7 +145,7 @@ button(	IN OUT ButtonPtr button,
 		width = button->width;
 	uint32 height = 0;
 	if(button->height == 0)
-		height = BUTTON_TPADDING + ENFONT_HEIGHT + BUTTON_BPADDING;
+		height = BUTTON_HEIGHT;
 	else
 		height = button->height;
 	if(button->clean)
@@ -238,9 +247,11 @@ BOOL
 button_set_text(OUT ButtonPtr button,
 				IN CASCTEXT text)
 {
-	if(button == NULL || text == NULL)
+	if(	button == NULL
+		|| text == NULL
+		|| strlen(text) > MAX_BUTTON_TEXT_LEN)
 		return FALSE;
-	button->text = text;
+	strcpy(button->text, text);
 	button->old_len = button->len;
 	button->len = strlen(text);
 	button->clean = TRUE;

@@ -8,7 +8,17 @@
 
 #include "control.h"
 
+#include "../types.h"
+
+static int32 _count = 0;
+
 void
-__dummy_event(int32 id, uint32 type, void * param)
+__dummy_event(uint32 id, uint32 type, void * param)
 {
+}
+
+int32
+__new_control_id(void)
+{
+	return _count++;
 }

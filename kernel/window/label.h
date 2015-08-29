@@ -15,12 +15,15 @@
 #include "../image.h"
 #include "../window.h"
 
+#define	MAX_LABEL_TEXT_LEN	65536
+
 typedef	struct
 {
-	int32				id;
+	uint32				id;
+	int32				type;
 	uint32				x;
 	uint32				y;
-	CASCTEXT			text;
+	ASCCHAR				text[MAX_LABEL_TEXT_LEN + 1];
 	uint32				color;
 	uint32				bgcolor;
 	uint32				colorh;
@@ -53,8 +56,8 @@ typedef	struct
 #define	LABEL_IN 		6
 #define	LABEL_OUT		7
 
-#define	INIT_LABEL(_label, _id, _x, _y, _text, _event)	\
-	(label_init((_label), (_id), (_x), (_y), (_text),	\
+#define	INIT_LABEL(_label, _x, _y, _text, _event)	\
+	(label_init((_label), 0, (_x), (_y), (_text),	\
 		0xff000000, WINDOW_DEFBGCOLOR, 0xff000000, WINDOW_DEFBGCOLOR, (_event), 0, 0))
 
 #define	LABEL(_label, _image, _params, _top)	\
@@ -72,7 +75,7 @@ typedef	struct
 extern
 BOOL
 label_init(	OUT LabelPtr label,
-			IN int32 id,
+			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
 			IN CASCTEXT text,

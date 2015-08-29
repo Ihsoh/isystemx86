@@ -15,12 +15,15 @@
 #include "../image.h"
 #include "../window.h"
 
+#define	MAX_BUTTON_TEXT_LEN		1023
+
 typedef struct
 {
 	int32				id;
+	int32				type;
 	uint32				x;
 	uint32				y;
-	CASCTEXT			text;
+	ASCCHAR				text[MAX_BUTTON_TEXT_LEN + 1];
 	uint32				color;
 	uint32				bgcolor;
 	uint32				colorh;
@@ -35,12 +38,15 @@ typedef struct
 	BOOL				clean;
 	uint32				old_len;
 	BOOL				enabled;
+	void *				vpext;
 } Button, * ButtonPtr;
 
 #define	BUTTON_LPADDING	6
 #define	BUTTON_RPADDING	6
 #define	BUTTON_TPADDING	4
 #define	BUTTON_BPADDING	4
+
+#define	BUTTON_HEIGHT	(BUTTON_TPADDING + ENFONT_HEIGHT + BUTTON_BPADDING)
 
 #define	BUTTON_LBDOWN		1
 #define	BUTTON_LBUP			2
@@ -51,8 +57,8 @@ typedef struct
 #define	BUTTON_IN 			6
 #define	BUTTON_OUT			7
 
-#define	INIT_BUTTON(_button, _id, _x, _y, _text, _event)	\
-	(button_init((_button), (_id), (_x), (_y), (_text),		\
+#define	INIT_BUTTON(_button, _x, _y, _text, _event)	\
+	(button_init((_button), 0, (_x), (_y), (_text),		\
 		0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb, (_event), 0, 0))
 
 #define	BUTTON(_button, _image, _params, _top)	\
@@ -70,7 +76,7 @@ typedef struct
 extern
 BOOL
 button_init(OUT ButtonPtr button,
-			IN int32 id,
+			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
 			IN CASCTEXT text,

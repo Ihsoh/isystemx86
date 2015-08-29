@@ -74,7 +74,7 @@ _max(	IN CASCTEXT text,
 	@Parameters:
 		label, LabelPtr, IN
 			指向Label对象的指针。
-		id, int32, IN
+		id, uint32, IN
 			Label的ID。
 		x, uint32, IN
 			Label的X坐标。
@@ -102,7 +102,7 @@ _max(	IN CASCTEXT text,
 */
 BOOL
 label_init(	OUT LabelPtr label,
-			IN int32 id,
+			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
 			IN CASCTEXT text,
@@ -114,12 +114,18 @@ label_init(	OUT LabelPtr label,
 			IN uint32 width,
 			IN uint32 height)
 {
-	if(label == NULL || text == NULL)
+	if(	label == NULL
+		|| text == NULL
+		|| strlen(text) > MAX_LABEL_TEXT_LEN)
 		return FALSE;
-	label->id = id;
+	if(id == 0)
+		label->id = (uint32)label;
+	else
+		label->id = id;
+	label->type = CONTROL_LABEL;
 	label->x = x;
 	label->y = y;
-	label->text = text;
+	strcpy(label->text, text);
 	label->color = color;
 	label->bgcolor = bgcolor;
 	label->colorh = colorh;
@@ -164,6 +170,8 @@ label(	IN OUT LabelPtr label,
 {
 	if(label == NULL || image == NULL || params == NULL)
 		return FALSE;
+	if(!top)
+		return TRUE;
 	uint8 * enfont = get_enfont_ptr();
 	uint32 id = label->id;
 	uint32 x = label->x;
@@ -290,9 +298,11 @@ BOOL
 label_set_text(	OUT LabelPtr label,
 				IN CASCTEXT text)
 {
-	if(label == NULL || text == NULL)
+	if(	label == NULL
+		|| text == NULL
+		|| strlen(text) > MAX_LABEL_TEXT_LEN)
 		return FALSE;
-	label->text = text;
+	strcpy(label->text, text);
 	label->old_max_row = label->max_row;
 	label->old_max_col = label->max_col;
 	_max(text, &label->max_row, &label->max_col);
