@@ -35,6 +35,15 @@ typedef	struct
 #define	LIST(_list, _image, _params, _top)	\
 	(list((_list), (_image), (_params), (_top)))
 
+#define	SET_LIST_TEXT(_list, _index, _text)	\
+	(list_set_text((_list), (_index), (_text)))
+
+#define	ENABLE_LIST(_list)	\
+	(list_enable((_list)))
+
+#define	DISABLE_LIST(_list)	\
+	(list_disable((_list)))
+
 extern
 BOOL
 list_init(	OUT ListPtr list,
@@ -55,5 +64,19 @@ list(	IN OUT ListPtr list,
 		OUT ImagePtr image,
 		IN WindowEventParamsPtr params,
 		BOOL top);
+
+extern
+BOOL
+list_set_text(	IN OUT ListPtr list,
+				IN uint32 index,
+				IN CASCTEXT text);
+
+extern
+BOOL
+list_enable(IN OUT ListPtr list);
+
+extern
+BOOL
+list_disable(IN OUT ListPtr list);
 
 #endif

@@ -42,7 +42,11 @@ _list_event(	IN uint32 id,
 	{
 		ButtonPtr button = (ButtonPtr)id;
 		ListPtr list = (ListPtr)button->vpext;
+		if(list == NULL)
+			return;
 		ControlEvent event = list->event;
+		if(event == NULL)
+			return;
 		uint32 ui;
 		for(ui = 0; ui < list->count; ui++)
 			if(button == &list->buttons[ui])
@@ -98,7 +102,9 @@ list_init(	OUT ListPtr list,
 			IN uint32 bgcolorh,
 			IN ControlEvent event)
 {
-	if(list == NULL || count > MAX_LIST_ITEM_COUNT || text == NULL)
+	if(	list == NULL
+		|| count > MAX_LIST_ITEM_COUNT
+		|| text == NULL)
 		return FALSE;
 	if(id == 0)
 		list->id = (uint32)list;
@@ -156,6 +162,83 @@ list(	IN OUT ListPtr list,
 	uint32 ui;
 	for(ui = 0; ui < list->count; ui++)
 		if(!button(&list->buttons[ui], image, params, top))
+			return FALSE;
+	return TRUE;
+}
+
+/**
+	@Function:		list_set_text
+	@Access:		Public
+	@Description:
+		设置List的项的文本。
+	@Parameters:
+		list, ListPtr, IN OUT
+			指向List对象的指针。
+		index, uint32, IN
+			项的索引。
+		text, CASCTEXT, IN
+			需要设置的文本。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+list_set_text(	IN OUT ListPtr list,
+				IN uint32 index,
+				IN CASCTEXT text)
+{
+	if(	list == NULL
+		|| index >= list->count
+		|| text == NULL)
+		return FALSE;
+	ButtonPtr button = &list->buttons[index];
+	return button_set_text(button, text);
+}
+
+/**
+	@Function:		list_enable
+	@Access:		Public
+	@Description:
+		启用List。
+	@Parameters:
+		list, ListPtr, IN OUT
+			指向List对象的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+list_enable(IN OUT ListPtr list)
+{
+	if(list == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < list->count; ui++)
+		if(!ENABLED_BUTTON(&list->buttons[ui]))
+			return FALSE;
+	return TRUE;
+}
+
+/**
+	@Function:		list_disable
+	@Access:		Public
+	@Description:
+		禁用List。
+	@Parameters:
+		list, ListPtr, IN OUT
+			指向List对象的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+list_disable(IN OUT ListPtr list)
+{
+	if(list == NULL)
+		return FALSE;
+	uint32 ui;
+	for(ui = 0; ui < list->count; ui++)
+		if(!DISABLE_BUTTON(&list->buttons[ui]))
 			return FALSE;
 	return TRUE;
 }
