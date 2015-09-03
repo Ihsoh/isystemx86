@@ -23,7 +23,7 @@
 	@Description:
 		初始化Button。
 	@Parameters:
-		button, ButtonPtr, IN
+		button, ButtonPtr, OUT
 			指向Button对象的指针。
 		id, uint32, IN
 			Button的ID。

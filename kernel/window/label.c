@@ -72,7 +72,7 @@ _max(	IN CASCTEXT text,
 	@Description:
 		初始化Label。
 	@Parameters:
-		label, LabelPtr, IN
+		label, LabelPtr, OUT
 			指向Label对象的指针。
 		id, uint32, IN
 			Label的ID。

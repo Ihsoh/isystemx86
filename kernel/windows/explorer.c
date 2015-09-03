@@ -17,6 +17,7 @@
 #include "../window/button.h"
 #include "../window/label.h"
 #include "../window/list.h"
+#include "../window/progress.h"
 
 #include <ilib/string.h>
 
@@ -29,6 +30,7 @@ ButtonPtr btn1 = NULL;
 ButtonPtr btn2 = NULL;
 LabelPtr lbl1 = NULL;
 ListPtr lst1 = NULL;
+ProgressPtr prgr1 = NULL;
 
 static
 void
@@ -53,7 +55,10 @@ _f(uint32 id, uint32 type, void * param)
 	{
 		ASCCHAR buffer[1024];
 		if(type == BUTTON_LBUP)
+		{
+			progress_set_percent(prgr1, *(uint32 *)param * 10);
 			SET_LABEL_TEXT(lbl1, uitos(buffer, *(uint32 *)param));
+		}
 	}
 }
 
@@ -67,6 +72,7 @@ _window_event(	IN struct Window * window,
 	BUTTON(btn2, &window->workspace, params, top);
 	LABEL(lbl1, &window->workspace, params, top);
 	LIST(lst1, &window->workspace, params, top);
+	PROGRESS(prgr1, &window->workspace, params, top);
 }
 
 BOOL
@@ -85,6 +91,7 @@ explorer_window_init(void)
 	btn2 = NEW(Button);
 	lbl1 = NEW(Label);
 	lst1 = NEW(List);
+	prgr1 = NEW(Progress);
 	INIT_BUTTON(btn1, 10, 10, "Test1", _f);
 	INIT_BUTTON(btn2, 100, 10, "Test2", _f);
 	INIT_LABEL(lbl1, 10, 100, "This\nis\nTest Label!", _f);
@@ -93,6 +100,13 @@ explorer_window_init(void)
 				10, 200,
 				"#----------#",
 				_f);
+	progress_init(	prgr1,
+					0,
+					50,
+					10, 350,
+					300, 40,
+					0xffaaaaaa, 0xff555555,
+					_f);
 	return TRUE;
 }
 

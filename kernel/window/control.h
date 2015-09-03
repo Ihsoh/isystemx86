@@ -14,12 +14,14 @@
 #define	CONTROL_BUTTON		1
 #define	CONTROL_LABEL		2
 #define	CONTROL_LIST		3
+#define	CONTROL_PROGRESS	4
 
 #define	CONTROL_ID_LIMIT	0x0000ffff
 
 #define	IS_CONTROL_ID(_cid)	((_cid) <= CONTROL_ID_LIMIT)
 
 #define	WINDOW_DEFBGCOLOR	0xffffffff
+#define	WINDOW_BORDERCOLOR	0xff000000
 
 typedef void (* ControlEvent)(uint32 id, uint32 type, void * param);
 
