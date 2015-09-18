@@ -1062,13 +1062,14 @@ create_window(	IN uint32		width,
 	{
 		free_window(window);
 		return NULL;
-	}	
-	if(!new_empty_image0(&window->image, width, TITLE_BAR_HEIGHT + height))
-	{
-		destroy_common_image(&window->workspace);
-		free_window(window);
-		return NULL;
 	}
+	if(!(style & WINDOW_STYLE_NO_TITLE))
+		if(!new_empty_image0(&window->title_bar, width, TITLE_BAR_HEIGHT))
+		{
+			destroy_common_image(&window->workspace);
+			free_window(window);
+			return NULL;
+		}
 	window->key_count = 0;
 	return window;
 }
@@ -1093,7 +1094,7 @@ destroy_window(IN struct Window * window)
 	free_window(window);
 	disable_memory_lock();
 	destroy_common_image(&window->workspace);
-	destroy_common_image(&window->image);
+	destroy_common_image(&window->title_bar);
 	enable_memory_lock();	
 	return TRUE;
 }
@@ -1187,22 +1188,26 @@ flush_screen(void)
 	{
 		struct Window * top_window = windows[0];
 		uint32 wstyle = top_window->style;
-		if(point_in_rect(	mouse_x, mouse_y, 
-							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH),
-							top_window->y, 
-							CLOSE_BUTTON_WIDTH, 
-							CLOSE_BUTTON_HEIGHT))
-			top_window->over_close_button = 1;
-		else
-			top_window->over_close_button = 0;
-		if(point_in_rect(	mouse_x, mouse_y, 
-							top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH),
-							top_window->y, 
-							HIDDEN_BUTTON_WIDTH, 
-							HIDDEN_BUTTON_HEIGHT))
-			top_window->over_hidden_button = 1;
-		else
-			top_window->over_hidden_button = 0;
+		BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
+		if(has_title_bar)
+		{
+			if(point_in_rect(	mouse_x, mouse_y, 
+								top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH),
+								top_window->y, 
+								CLOSE_BUTTON_WIDTH, 
+								CLOSE_BUTTON_HEIGHT))
+				top_window->over_close_button = 1;
+			else
+				top_window->over_close_button = 0;
+			if(point_in_rect(	mouse_x, mouse_y, 
+								top_window->x + (top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH),
+								top_window->y, 
+								HIDDEN_BUTTON_WIDTH, 
+								HIDDEN_BUTTON_HEIGHT))
+				top_window->over_hidden_button = 1;
+			else
+				top_window->over_hidden_button = 0;
+		}
 	}
 	mouse_left_button_down = is_mouse_left_button_down();
 	if(mouse_left_button_down)
@@ -1211,49 +1216,72 @@ flush_screen(void)
 		{
 			struct Window * top_window = windows[0];
 			uint32 wstyle = top_window->style;
+			BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
 			if(!move_window)
-				if(	wstyle & WINDOW_STYLE_CLOSE
-					&& point_in_rect(	mouse_x, 
-										mouse_y, 
-										top_window->x + top_window->width - CLOSE_BUTTON_WIDTH, 
-										top_window->y, 
-										CLOSE_BUTTON_WIDTH, 
-										CLOSE_BUTTON_HEIGHT))
+			{
+				if(has_title_bar)
 				{
-					destroy_window(top_window);
-					return;
-				}
-				else if(wstyle & WINDOW_STYLE_MINIMIZE
+					if(	wstyle & WINDOW_STYLE_CLOSE
 						&& point_in_rect(	mouse_x, 
 											mouse_y, 
-											top_window->x + top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 
+											top_window->x + top_window->width - CLOSE_BUTTON_WIDTH, 
 											top_window->y, 
 											CLOSE_BUTTON_WIDTH, 
 											CLOSE_BUTTON_HEIGHT))
-				{
-					top_window->state = WINDOW_STATE_HIDDEN;
-					for(ui = 0; ui < window_count - 1; ui++)
-						windows[ui] = windows[ui + 1];
-					windows[window_count - 1] = top_window;
-				}
-				else if(point_in_rect(	mouse_x, 
-										mouse_y, 
-										top_window->x, 
-										top_window->y, 
-										top_window->width, 
-										TITLE_BAR_HEIGHT))
-				{
-					old_mouse_x = mouse_x;
-					old_mouse_y = mouse_y;
-					move_window = TRUE;
-				}				
-				else
-					for(ui = 0; ui < window_count; ui++)
 					{
-						struct Window * window = windows[ui];
-						if(	window->state == WINDOW_STATE_HIDDEN ||
-							window->state == WINDOW_STATE_CLOSED)
-							continue;
+						destroy_window(top_window);
+						return;
+					}
+					else if(wstyle & WINDOW_STYLE_MINIMIZE
+							&& point_in_rect(	mouse_x, 
+												mouse_y, 
+												top_window->x + top_window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH, 
+												top_window->y, 
+												CLOSE_BUTTON_WIDTH, 
+												CLOSE_BUTTON_HEIGHT))
+					{
+						top_window->state = WINDOW_STATE_HIDDEN;
+						for(ui = 0; ui < window_count - 1; ui++)
+							windows[ui] = windows[ui + 1];
+						windows[window_count - 1] = top_window;
+					}
+					else if(point_in_rect(	mouse_x, 
+											mouse_y, 
+											top_window->x, 
+											top_window->y, 
+											top_window->width, 
+											TITLE_BAR_HEIGHT))
+					{
+						old_mouse_x = mouse_x;
+						old_mouse_y = mouse_y;
+						move_window = TRUE;
+					}
+				}
+				
+				// 切换窗体到最顶层。
+				for(ui = 0; ui < window_count; ui++)
+				{
+					struct Window * window = windows[ui];
+					uint32 wstyle = window->style;
+					BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
+					if(	window->state == WINDOW_STATE_HIDDEN ||
+						window->state == WINDOW_STATE_CLOSED)
+						continue;
+					if(wstyle & WINDOW_STYLE_NO_TITLE)
+					{
+						if(point_in_rect(	mouse_x, 
+											mouse_y, 
+											window->x, 
+											window->y, 
+											window->width, 
+											window->height))
+						{
+							windows[ui] = windows[0];
+							windows[0] = window;
+							break;
+						}
+					}
+					else
 						if(point_in_rect(	mouse_x, 
 											mouse_y, 
 											window->x, 
@@ -1265,7 +1293,8 @@ flush_screen(void)
 							windows[0] = window;
 							break;
 						}
-					}
+				}
+			}
 		}
 	}
 	else if(move_window)
@@ -1284,17 +1313,38 @@ flush_screen(void)
 	for(i = window_count - 1; i >= 0; i--)
 	{
 		struct Window * window = windows[i];
+		uint32 wstyle = window->style;
+		BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
 		if(window->state == WINDOW_STATE_HIDDEN)
 			continue;
 		if(window->state == WINDOW_STATE_CLOSED)
 			continue;
-		if(render_window(window, &window->image, i == 0 ? TRUE : FALSE))
-			draw_common_image(	&screen_buffer, 
-								&window->image, 
-								window->x, 
-								window->y, 
-								window->image.width, 
-								window->image.height);
+		if(has_title_bar)
+		{
+			if(render_window(window, i == 0 ? TRUE : FALSE))
+			{
+				draw_common_image(	&screen_buffer,
+									&window->title_bar,
+									window->x,
+									window->y,
+									window->title_bar.width,
+									window->title_bar.height);
+				draw_common_image(	&screen_buffer,
+									&window->workspace,
+									window->x,
+									window->y + TITLE_BAR_HEIGHT,
+									window->workspace.width,
+									window->workspace.height);
+			}
+		}
+		else
+			if(render_window(window, i == 0 ? TRUE : FALSE))
+				draw_common_image(	&screen_buffer,
+									&window->workspace,
+									window->x,
+									window->y,
+									window->workspace.width,
+									window->workspace.height);
 	}
 
 	draw_common_image_t(&screen_buffer, 

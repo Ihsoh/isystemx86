@@ -156,8 +156,6 @@ destroy_window_resources(void)
 	@Parameters:
 		window, struct Window *, IN
 			指向窗体结构体的指针。
-		image, struct CommonImage *, OUT
-			指向图片缓冲区。
 		top, BOOL, IN
 			TRUE 则为置顶窗体，否则不是。
 	@Return:
@@ -166,113 +164,121 @@ destroy_window_resources(void)
 */
 BOOL
 render_window(	IN struct Window * window,
-				OUT struct CommonImage * image,
 				IN BOOL top)
 {
-	if(window == NULL || image == NULL)
+	if(window == NULL)
 		return FALSE;
-	uint32 title_bar_bgcolor = top ? TITLE_BAR_BGCOLOR : TITLE_BAR_BGCOLOR_NT;
-	rect_common_image(image, 0, 0, window->width, TITLE_BAR_HEIGHT, title_bar_bgcolor);
 
 	uint32 wstyle = window->style;
+	BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
 
-	//关闭按钮
-	if(wstyle & WINDOW_STYLE_CLOSE)
-		if(top)
-			if(window->over_close_button)
-				draw_common_image(	image, 
-									&close_button_hover, 
+	if(has_title_bar)
+	{
+		ImagePtr title_bar = &window->title_bar;
+
+		// 填充标题栏。
+		uint32 title_bar_bgcolor = top ? TITLE_BAR_BGCOLOR : TITLE_BAR_BGCOLOR_NT;
+		rect_common_image(title_bar, 0, 0, window->width, TITLE_BAR_HEIGHT, title_bar_bgcolor);
+
+		//关闭按钮
+		if(wstyle & WINDOW_STYLE_CLOSE)
+			if(top)
+				if(window->over_close_button)
+					draw_common_image(	title_bar, 
+										&close_button_hover, 
+										window->width - CLOSE_BUTTON_WIDTH, 
+										0, 
+										CLOSE_BUTTON_WIDTH, 
+										CLOSE_BUTTON_HEIGHT);
+				else		
+					draw_common_image(	title_bar, 
+										&close_button,
+										window->width - CLOSE_BUTTON_WIDTH, 
+										0, 
+										CLOSE_BUTTON_WIDTH, 
+										CLOSE_BUTTON_HEIGHT);
+			else
+				draw_common_image(	title_bar, 
+									&close_button_blur, 
 									window->width - CLOSE_BUTTON_WIDTH, 
 									0, 
 									CLOSE_BUTTON_WIDTH, 
 									CLOSE_BUTTON_HEIGHT);
-			else		
-				draw_common_image(	image, 
+		else
+			if(top)
+				draw_common_image(	title_bar, 
 									&close_button, 
-									window->width - CLOSE_BUTTON_WIDTH, 
+									window->width - CLOSE_BUTTON_WIDTH,
 									0, 
-									CLOSE_BUTTON_WIDTH, 
+									CLOSE_BUTTON_WIDTH,
 									CLOSE_BUTTON_HEIGHT);
-		else
-			draw_common_image(	image, 
-								&close_button_blur, 
-								window->width - CLOSE_BUTTON_WIDTH, 
-								0, 
-								CLOSE_BUTTON_WIDTH, 
-								CLOSE_BUTTON_HEIGHT);
-	else
-		if(top)
-			draw_common_image(	image, 
-								&close_button, 
-								window->width - CLOSE_BUTTON_WIDTH,
-								0, 
-								CLOSE_BUTTON_WIDTH,
-								CLOSE_BUTTON_HEIGHT);
-		else
-			draw_common_image(	image, 
-								&close_button_blur, 
-								window->width - CLOSE_BUTTON_WIDTH,
-								0, 
-								CLOSE_BUTTON_WIDTH,
-								CLOSE_BUTTON_HEIGHT);
+			else
+				draw_common_image(	title_bar, 
+									&close_button_blur, 
+									window->width - CLOSE_BUTTON_WIDTH,
+									0, 
+									CLOSE_BUTTON_WIDTH,
+									CLOSE_BUTTON_HEIGHT);
 
-	//隐藏按钮
-	if(wstyle & WINDOW_STYLE_MINIMIZE)
-		if(top)
-			if(window->over_hidden_button)
-				draw_common_image(	image,
-									&hidden_button_hover,
+		//隐藏按钮
+		if(wstyle & WINDOW_STYLE_MINIMIZE)
+			if(top)
+				if(window->over_hidden_button)
+					draw_common_image(	title_bar,
+										&hidden_button_hover,
+										window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+										0,
+										HIDDEN_BUTTON_WIDTH,
+										HIDDEN_BUTTON_HEIGHT);
+				else	
+					draw_common_image(	title_bar,
+										&hidden_button,
+										window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+										0,
+										HIDDEN_BUTTON_WIDTH,
+										HIDDEN_BUTTON_HEIGHT);
+			else
+				draw_common_image(	title_bar,
+									&hidden_button_blur,
 									window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
 									0,
 									HIDDEN_BUTTON_WIDTH,
 									HIDDEN_BUTTON_HEIGHT);
-			else	
-				draw_common_image(	image,
+		else
+			if(top)
+				draw_common_image(	title_bar,
 									&hidden_button,
 									window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
 									0,
 									HIDDEN_BUTTON_WIDTH,
 									HIDDEN_BUTTON_HEIGHT);
-		else
-			draw_common_image(	image,
-								&hidden_button_blur,
-								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
-								0,
-								HIDDEN_BUTTON_WIDTH,
-								HIDDEN_BUTTON_HEIGHT);
-	else
-		if(top)
-			draw_common_image(	image,
-								&hidden_button,
-								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
-								0,
-								HIDDEN_BUTTON_WIDTH,
-								HIDDEN_BUTTON_HEIGHT);
-		else
-			draw_common_image(	image,
-								&hidden_button_blur,
-								window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
-								0,
-								HIDDEN_BUTTON_WIDTH,
-								HIDDEN_BUTTON_HEIGHT);
+			else
+				draw_common_image(	title_bar,
+									&hidden_button_blur,
+									window->width - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH,
+									0,
+									HIDDEN_BUTTON_WIDTH,
+									HIDDEN_BUTTON_HEIGHT);
 
-	//画标题
-	text_common_image(	image,
-						10,
-						TITLE_BAR_HEIGHT / 2 - ENFONT_HEIGHT / 2,
-						get_enfont_ptr(),
-						window->title,
-						(window->width - 10 - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH) / ENFONT_WIDTH,
-						0xff000000);
-	
-	/*rect_common_image(&window->workspace, 0, 0, window->width, window->height, window->bgcolor);*/
-	
+		//画标题
+		text_common_image(	title_bar,
+							10,
+							TITLE_BAR_HEIGHT / 2 - ENFONT_HEIGHT / 2,
+							get_enfont_ptr(),
+							window->title,
+							(window->width - 10 - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH) / ENFONT_WIDTH,
+							0xff000000);
+	}
+
 	if(window->event != NULL)
 	{
 		int32 x, y;
 		get_mouse_position(&x, &y);
 		x = x - window->x;
-		y = y - window->y - TITLE_BAR_HEIGHT;
+		if(has_title_bar)
+			y = y - window->y - TITLE_BAR_HEIGHT;
+		else
+			y = y - window->y;
 		struct WindowEventParams params;
 		params.wid = window->id;
 		params.mouse_x = x;
@@ -284,7 +290,6 @@ render_window(	IN struct Window * window,
 		window->event(window, &params);
 	}
 
-	draw_common_image(image, &window->workspace, 0, TITLE_BAR_HEIGHT, window->width, window->height);
 	return TRUE;	
 }
 

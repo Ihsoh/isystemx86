@@ -29,6 +29,7 @@
 #define	WINDOW_STYLE_CLOSE				0x00000001
 #define	WINDOW_STYLE_MINIMIZE			0x00000002
 #define	WINDOW_STYLE_MAXIMIZE			0x00000004
+#define	WINDOW_STYLE_NO_TITLE			0x00000008
 
 #define	WINDOW_EVENT_PAINT		1
 #define	WINDOW_EVENT_KEYDOWN	2
@@ -49,22 +50,22 @@ typedef void (* WindowEvent)(struct Window * window, struct WindowEventParams * 
 
 typedef struct Window
 {
-	uint32				id;
-	int32				x;
-	int32				y;
-	uint32				width;
-	uint32				height;
-	ASCCHAR				title[1024];
-	uint32				bgcolor;
-	int32				state;
-	uint32				style;
-	int32				over_close_button;
-	int32				over_hidden_button;
-	WindowEvent			event;
-	struct CommonImage	workspace;
-	struct CommonImage	image;
-	uint8				key_buffer[WINDOW_KEY_BUFFER_SIZE];
-	uint32				key_count;
+	uint32				id;										// 窗体ID。
+	int32				x;										// 窗体X坐标。
+	int32				y;										// 窗体Y坐标。
+	uint32				width;									// 窗体宽度。
+	uint32				height;									// 窗体高度。
+	ASCCHAR				title[1024];							// 窗体标题。
+	uint32				bgcolor;								// 窗体工作区背景色。
+	int32				state;									// 窗体状态。
+	uint32				style;									// 窗体样式。
+	int32				over_close_button;						// 鼠标是否悬于关闭按钮之上。
+	int32				over_hidden_button;						// 鼠标是否悬于隐藏按钮之上。
+	WindowEvent			event;									// 窗体的事件函数。
+	struct CommonImage	workspace;								// 窗体的工作区的画布。
+	struct CommonImage	title_bar;								// 窗体的标题栏的画布。
+	uint8				key_buffer[WINDOW_KEY_BUFFER_SIZE];		// 窗体的按键缓冲区。
+	uint32				key_count;								// 窗体的按键缓冲区的按键数量。
 } * WindowPtr;
 
 extern
@@ -78,7 +79,6 @@ destroy_window_resources(void);
 extern
 BOOL
 render_window(	IN struct Window * window,
-				OUT struct CommonImage * image,
 				IN BOOL top);
 
 extern
