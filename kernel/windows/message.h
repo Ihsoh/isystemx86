@@ -12,6 +12,9 @@
 #include "../types.h"
 #include "../window.h"
 
+#define	MESSAGE_BOX_MAX_CHAR			40
+#define	MESSAGE_BOX_MAX_LINE			4
+
 #define	MESSAGE_WINDOW_STYLE_NONE		0x00000000
 #define	MESSAGE_WINDOW_STYLE_CENTER		0x00000001
 #define	MESSAGE_WINDOW_STYLE_TOP		0x00000002

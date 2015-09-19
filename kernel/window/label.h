@@ -40,6 +40,7 @@ typedef	struct
 	uint32				old_max_row;
 	uint32				old_max_col;
 	BOOL				enabled;
+	uint32				style;
 } Label, * LabelPtr;
 
 #define	LABEL_LPADDING	6
@@ -55,6 +56,8 @@ typedef	struct
 #define	LABEL_HOVER		5
 #define	LABEL_IN 		6
 #define	LABEL_OUT		7
+
+#define	LABEL_STYLE_REFRESH		0x00000001
 
 #define	INIT_LABEL(_label, _x, _y, _text, _event)	\
 	(label_init((_label), 0, (_x), (_y), (_text),	\

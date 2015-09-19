@@ -17,8 +17,8 @@
 #define	_BPADDING	20
 #define	_LPADDING	20
 #define	_RPADDING	20
-#define	_MAX_CHAR	40
-#define	_MAX_LINE	4
+#define	_MAX_CHAR	MESSAGE_BOX_MAX_CHAR
+#define	_MAX_LINE	MESSAGE_BOX_MAX_LINE
 #define	_WIDTH		(_MAX_CHAR * ENFONT_WIDTH + _LPADDING + _RPADDING) 
 #define	_HEIGHT		(_MAX_LINE * ENFONT_HEIGHT + _TPADDING + _BPADDING)
 
@@ -155,6 +155,46 @@ message_window_show(IN CASCTEXT title,
 							enfont,
 							line2,
 							len - _MAX_CHAR * 2,
+							color);
+	}
+	else if(len <= _MAX_CHAR * 4)
+	{
+		ASCCHAR line0[_MAX_CHAR];
+		ASCCHAR line1[_MAX_CHAR];
+		ASCCHAR line2[_MAX_CHAR];
+		ASCCHAR line3[_MAX_CHAR];
+		strncpy(line0, text, _MAX_CHAR);
+		strncpy(line1, text + _MAX_CHAR, _MAX_CHAR);
+		strncpy(line2, text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
+		strncpy(line3, text + _MAX_CHAR * 3, len - _MAX_CHAR * 3);
+		uint8 * enfont = get_enfont_ptr();
+		text_common_image(	workspace,
+							_LPADDING, 
+							_TPADDING, 
+							enfont,
+							line0,
+							_MAX_CHAR,
+							color);
+		text_common_image(	workspace,
+							_LPADDING, 
+							_TPADDING + ENFONT_HEIGHT, 
+							enfont,
+							line1,
+							_MAX_CHAR,
+							color);
+		text_common_image(	workspace,
+							_LPADDING, 
+							_TPADDING + ENFONT_HEIGHT * 2, 
+							enfont,
+							line2,
+							_MAX_CHAR,
+							color);
+		text_common_image(	workspace,
+							_LPADDING, 
+							_TPADDING + ENFONT_HEIGHT * 3, 
+							enfont,
+							line3,
+							_MAX_CHAR,
 							color);
 	}
 	else

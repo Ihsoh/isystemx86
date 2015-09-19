@@ -39,6 +39,7 @@ typedef struct
 	uint32				old_len;
 	BOOL				enabled;
 	void *				vpext;
+	uint32				style;
 } Button, * ButtonPtr;
 
 #define	BUTTON_LPADDING	6
@@ -56,6 +57,8 @@ typedef struct
 #define	BUTTON_HOVER		5
 #define	BUTTON_IN 			6
 #define	BUTTON_OUT			7
+
+#define	BUTTON_STYLE_REFRESH	0x00000001
 
 #define	INIT_BUTTON(_button, _x, _y, _text, _event)	\
 	(button_init((_button), 0, (_x), (_y), (_text),		\

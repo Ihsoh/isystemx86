@@ -121,7 +121,7 @@ button(	IN OUT ButtonPtr button,
 {
 	if(button == NULL || image == NULL || params == NULL)
 		return FALSE;
-	if(!top)
+	if(!top && !(button->style & BUTTON_STYLE_REFRESH))
 		return TRUE;
 	uint8 * enfont = get_enfont_ptr();
 	uint32 id = button->id;

@@ -27,6 +27,8 @@
 #include "windows/sfunc.h"
 #include "windows/detail.h"
 #include "windows/explorer.h"
+#include "windows/taskbar.h"
+#include "windows/start.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -52,11 +54,9 @@ static int32 flush_cbuffer = 1;
 
 struct CommonImage * target_screen = NULL;
 
-/*
-	============================== 窗体 ==============================
-*/
+
 #define	TCOLOR				0xffffffff
-#define	MAX_WINDOW_COUNT	64
+#define	MAX_WINDOW_COUNT	256
 
 static struct Window * windows[MAX_WINDOW_COUNT];
 static uint32 window_count = 0;
@@ -734,6 +734,8 @@ init_screen(void)
 			windows[ui]->id = 0;
 		}
 
+		taskbar_window_init();
+		start_window_init();
 		init_sfunc_window();
 		init_console_window();
 		init_clock_window();

@@ -42,8 +42,18 @@ $(Target):	bin	\
 
 	cd test/test_jsonlib && make
 
-	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
-	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
+	# 文本模式。
+	# tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
+	# tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
+	
+	# 800*600分辨率的GUI模式。
+	# tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrgm_800_600.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
+	# tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrgm_800_600.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
+	
+	# 1024*768分辨率的GUI模式。
+	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrgm_1024_768.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
+	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrgm_1024_768.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
+
 	cd tools/idoc/ && python idoc.py ../../kernel ../../doc/isystemx86-kernel-doc
 	cd tools/idoc/ && python idoc.py ../../libs/mempoollib ../../doc/libs/mempoollib-doc
 

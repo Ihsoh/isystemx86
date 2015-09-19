@@ -26,7 +26,7 @@ DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
 WindowObjs=window/bin/control.obj window/bin/button.obj window/bin/label.obj window/bin/list.obj 	\
 window/bin/progress.obj window/bin/scroll.obj
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
-windows/bin/detail.obj windows/bin/explorer.obj
+windows/bin/detail.obj windows/bin/explorer.obj windows/bin/taskbar.obj windows/bin/start.obj
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj
 FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
@@ -252,6 +252,12 @@ windows/bin/detail.obj: windows/detail.c windows/detail.h
 
 windows/bin/explorer.obj: windows/explorer.c windows/explorer.h
 	$(CC) $(CFlags) -c windows/explorer.c -o windows/bin/explorer.obj $(Include)
+
+windows/bin/taskbar.obj: windows/taskbar.c windows/taskbar.h
+	$(CC) $(CFlags) -c windows/taskbar.c -o windows/bin/taskbar.obj $(Include)
+
+windows/bin/start.obj: windows/start.c windows/start.h
+	$(CC) $(CFlags) -c windows/start.c -o windows/bin/start.obj $(Include)
 
 
 syscall/bin/fs.obj: syscall/fs.c syscall/fs.h

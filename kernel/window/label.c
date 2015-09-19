@@ -170,7 +170,7 @@ label(	IN OUT LabelPtr label,
 {
 	if(label == NULL || image == NULL || params == NULL)
 		return FALSE;
-	if(!top)
+	if(!top && !(label->style & LABEL_STYLE_REFRESH))
 		return TRUE;
 	uint8 * enfont = get_enfont_ptr();
 	uint32 id = label->id;
