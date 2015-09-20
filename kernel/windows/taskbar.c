@@ -15,8 +15,9 @@
 #include "../window.h"
 #include "../vesa.h"
 #include "../memory.h"
+#include "../timer.h"
 
-#include "start.h";
+#include "start.h"
 
 #include <ilib/string.h>
 
@@ -30,8 +31,10 @@
 
 static WindowPtr _window	= NULL;
 
-static ButtonPtr btn_start	= NULL;
-static ButtonPtr btn_time	= NULL;
+static ButtonPtr _btn_start	= NULL;
+static ButtonPtr _btn_time	= NULL;
+
+static TimerPtr _timer 		= NULL;
 
 static int8 weeks[][10] 	= {	"Sunday", 
 								"Monday", 
@@ -61,7 +64,7 @@ _control_event(	IN uint32 id,
 				IN uint32 type,
 				IN void * param)
 {
-	if(id == btn_start->id)
+	if(id == _btn_start->id)
 	{
 		if(type == BUTTON_LBUP)
 		{
@@ -87,6 +90,23 @@ void
 _window_event(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
+	BOOL top = get_top_window() == window;
+	BUTTON(_btn_start, &window->workspace, params, top);
+	BUTTON(_btn_time, &window->workspace, params, top);
+}
+
+/**
+	@Function:		_timer_event
+	@Access:		Private
+	@Description:
+		定时器事件函数。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_timer_event(void)
+{
 	struct CMOSDateTime dt;
 	get_cmos_date_time(&dt);
 	ASCCHAR buffer[1024] = "";
@@ -104,11 +124,7 @@ _window_event(	IN struct Window * window,
 	strcat(buffer, itos(temp, dt.minute));
 	strcat(buffer, ":");
 	strcat(buffer, itos(temp, dt.second));
-	SET_BUTTON_TEXT(btn_time, buffer);
-
-	BOOL top = get_top_window() == window;
-	BUTTON(btn_start, &window->workspace, params, top);
-	BUTTON(btn_time, &window->workspace, params, top);
+	SET_BUTTON_TEXT(_btn_time, buffer);
 }
 
 /**
@@ -134,22 +150,25 @@ taskbar_window_init(void)
 	rect_common_image(&_window->workspace, 0, 0, w, _HEIGHT, 0xff222222);
 	_window->y = h - _HEIGHT;
 
-	btn_start = NEW(Button);
-	button_init(btn_start, 0,
+	_btn_start = NEW(Button);
+	button_init(_btn_start, 0,
 				0, 0,
 				"ISystem",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event,
 				0, _HEIGHT);
-	btn_start->style = BUTTON_STYLE_REFRESH;
-	btn_time = NEW(Button);
-	button_init(btn_time, 0,
+	_btn_start->style = BUTTON_STYLE_REFRESH;
+	_btn_time = NEW(Button);
+	button_init(_btn_time, 0,
 				w - _BTN_TIME_WIDTH, 0,
 				"Time",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event,
 				_BTN_TIME_WIDTH, 0);
-	btn_time->style = BUTTON_STYLE_REFRESH;
+	_btn_time->style = BUTTON_STYLE_REFRESH;
+
+	_timer = timer_new(800, _timer_event);
+	timer_start(_timer);
 
 	_window->state = WINDOW_STATE_SHOW;
 	return TRUE;

@@ -46,6 +46,7 @@ void
 clock_window_event(	IN struct Window * window, 
 					IN struct WindowEventParams * params)
 {
+	/*
 	struct CommonImage * screen = params->screen;	
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
@@ -81,6 +82,7 @@ clock_window_event(	IN struct Window * window,
 							strlen(buffer),
 							0xff000000);
 	}
+	*/
 }
 
 /**
@@ -110,7 +112,7 @@ init_clock_window(void)
 	clock_window->x = screen_width - WINDOW_WIDTH;
 	clock_window->y = 0;
 
-	clock_window->state = WINDOW_STATE_SHOW;
+	//clock_window->state = WINDOW_STATE_SHOW;
 	return TRUE;
 }
 

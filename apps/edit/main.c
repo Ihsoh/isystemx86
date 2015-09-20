@@ -215,6 +215,13 @@ static void edit(void)
 					else if(chr == 27)
 					{
 						clear_screen();
+						if(!is_changed)
+						{
+							clear_screen();
+							set_clock(1);
+							release_resource();
+							exit(0);
+						}
 						BOOL b = TRUE;
 						while(b)
 						{

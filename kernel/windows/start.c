@@ -34,7 +34,7 @@
 
 static WindowPtr _window	= NULL;
 
-static ListPtr lst_start	= NULL;
+static ListPtr _lst_start	= NULL;
 
 /**
 	@Function:		_pad
@@ -77,7 +77,7 @@ _control_event(	IN uint32 id,
 				IN uint32 type,
 				IN void * param)
 {
-	if(id == lst_start->id)
+	if(id == _lst_start->id)
 	{
 		if(type == BUTTON_LBUP)
 			switch(*(uint32 *)param)
@@ -135,7 +135,7 @@ _window_event(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
-	LIST(lst_start, &window->workspace, params, TRUE);
+	LIST(_lst_start, &window->workspace, params, TRUE);
 }
 
 /**
@@ -157,21 +157,21 @@ start_window_init(void)
 							"Start",
 							_window_event);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
-	lst_start = NEW(List);
-	list_init(	lst_start, 0,
+	_lst_start = NEW(List);
+	list_init(	_lst_start, 0,
 				_ITEM_COUNT,
 				0, 0,
 				"",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event);
-	SET_LIST_TEXT(lst_start, _ITEM_ID_SETTING, 	"Setting           > ");
-	SET_LIST_TEXT(lst_start, _ITEM_ID_EXPLORER, "Explorer          > ");
-	SET_LIST_TEXT(lst_start, _ITEM_ID_POWER, 	"Power             > ");
-	SET_LIST_TEXT(lst_start, _ITEM_ID_ABOUT, 	"About             > ");
-	SET_LIST_TEXT(lst_start, _ITEM_ID_CLOSE, 	"Close               ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_SETTING, 	"Setting           > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_EXPLORER, "Explorer          > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_POWER, 	"Power             > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_ABOUT, 	"About             > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_CLOSE, 	"Close               ");
 	uint32 ui;
-	for(ui = 0; ui < lst_start->count; ui++)
-		lst_start->buttons[ui].style = BUTTON_STYLE_REFRESH;
+	for(ui = 0; ui < _lst_start->count; ui++)
+		_lst_start->buttons[ui].style = BUTTON_STYLE_REFRESH;
 }
 
 /**

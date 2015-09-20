@@ -30,7 +30,7 @@
 
 static WindowPtr _window	= NULL;
 
-static ListPtr lst_power	= NULL;
+static ListPtr _lst_power	= NULL;
 
 /**
 	@Function:		_control_event
@@ -52,7 +52,7 @@ _control_event(	IN uint32 id,
 				IN uint32 type,
 				IN void * param)
 {
-	if(id == lst_power->id)
+	if(id == _lst_power->id)
 	{
 		if(type == BUTTON_LBUP)
 			switch(*(uint32 *)param)
@@ -88,7 +88,7 @@ _window_event(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
-	LIST(lst_power, &window->workspace, params, TRUE);
+	LIST(_lst_power, &window->workspace, params, TRUE);
 }
 
 /**
@@ -110,19 +110,19 @@ power_window_init(void)
 							"Power",
 							_window_event);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
-	lst_power = NEW(List);
-	list_init(	lst_power, 0,
+	_lst_power = NEW(List);
+	list_init(	_lst_power, 0,
 				_ITEM_COUNT,
 				0, 0,
 				"",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event);
-	SET_LIST_TEXT(lst_power, _ITEM_ID_SHUTDOWN,	"      Shutdown      ");
-	SET_LIST_TEXT(lst_power, _ITEM_ID_REBOOT,	"      Reboot        ");
-	SET_LIST_TEXT(lst_power, _ITEM_ID_CANCEL,	"      Cancel        ");
+	SET_LIST_TEXT(_lst_power, _ITEM_ID_SHUTDOWN,	"      Shutdown      ");
+	SET_LIST_TEXT(_lst_power, _ITEM_ID_REBOOT,	"      Reboot        ");
+	SET_LIST_TEXT(_lst_power, _ITEM_ID_CANCEL,	"      Cancel        ");
 	uint32 ui;
-	for(ui = 0; ui < lst_power->count; ui++)
-		lst_power->buttons[ui].style = BUTTON_STYLE_REFRESH;
+	for(ui = 0; ui < _lst_power->count; ui++)
+		_lst_power->buttons[ui].style = BUTTON_STYLE_REFRESH;
 	return TRUE;
 }
 
