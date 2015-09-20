@@ -29,6 +29,7 @@
 #include "windows/explorer.h"
 #include "windows/taskbar.h"
 #include "windows/start.h"
+#include "windows/power.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -736,6 +737,7 @@ init_screen(void)
 
 		taskbar_window_init();
 		start_window_init();
+		power_window_init();
 		init_sfunc_window();
 		init_console_window();
 		init_clock_window();

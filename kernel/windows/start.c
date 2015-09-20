@@ -14,6 +14,7 @@
 #include <ilib/string.h>
 
 #include "message.h"
+#include "power.h"
 
 #include "../window/control.h"
 #include "../window/button.h"
@@ -35,6 +36,17 @@ static WindowPtr _window	= NULL;
 
 static ListPtr lst_start	= NULL;
 
+/**
+	@Function:		_pad
+	@Access:		Private
+	@Description:
+		如果字符串的长度小于MESSAGE_BOX_MAX_CHAR，
+		则用空格填充字符串使其长度等于MESSAGE_BOX_MAX_CHAR。
+	@Parameters:
+		text, ASCTEXT, IN OUT
+			指向需要填充空格的字符串的缓冲区的指针。
+	@Return:
+*/
 static
 void
 _pad(IN OUT ASCTEXT text)
@@ -95,6 +107,9 @@ _control_event(	IN uint32 id,
 										0xff000000, 0xffffffff);
 					break;
 				}
+				case _ITEM_ID_POWER:
+					power_window_show();
+					break;
 				case _ITEM_ID_CLOSE:
 					start_window_hide();
 					break;		
