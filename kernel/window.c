@@ -10,6 +10,7 @@
 #include "memory.h"
 #include "image.h"
 #include "enfont.h"
+#include "mouse.h"
 
 #include "bmp/bmp.h"
 
@@ -270,25 +271,7 @@ render_window(	IN struct Window * window,
 							0xff000000);
 	}
 
-	if(window->event != NULL)
-	{
-		int32 x, y;
-		get_mouse_position(&x, &y);
-		x = x - window->x;
-		if(has_title_bar)
-			y = y - window->y - TITLE_BAR_HEIGHT;
-		else
-			y = y - window->y;
-		struct WindowEventParams params;
-		params.wid = window->id;
-		params.mouse_x = x;
-		params.mouse_y = y;
-		params.screen = &window->workspace;
-		
-		//Paint Event
-		params.event_type = WINDOW_EVENT_PAINT;
-		window->event(window, &params);
-	}
+	window_dispatch_event(window, WINDOW_EVENT_PAINT, NULL);
 
 	return TRUE;	
 }
@@ -316,4 +299,54 @@ window_get_key(IN struct Window * window)
 		window->key_buffer[ui] = window->key_buffer[ui + 1];
 	window->key_count--;
 	return key;
+}
+
+/**
+	@Function:		window_dispatch_event
+	@Access:		Public
+	@Description:
+		分发窗体事件。
+	@Parameters:
+		window, WindowPtr, IN
+			指向窗体结构体的指针。
+		type, int32, IN
+			消息类型。
+		data, void *, IN
+			事件附加数据。
+	@Return:
+		uint8
+			键值。		
+*/
+void
+window_dispatch_event(	IN WindowPtr window,
+						IN int32 type,
+						IN void * data)
+{
+	if(	window == NULL
+		|| window->state == WINDOW_STATE_HIDDEN
+		|| window->event == NULL)
+		return;
+	uint32 wstyle = window->style;
+	BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
+	int32 x, y;
+	get_mouse_position(&x, &y);
+	x = x - window->x;
+	if(has_title_bar)
+		y = y - window->y - TITLE_BAR_HEIGHT;
+	else
+		y = y - window->y;
+	uint32 mouse_button = MOUSE_BUTTON_NONE;
+	if(is_mouse_left_button_down())
+		mouse_button |= MOUSE_BUTTON_LEFT;
+	if(is_mouse_right_button_down())
+		mouse_button |= MOUSE_BUTTON_RIGHT;
+	struct WindowEventParams params;
+	params.wid = window->id;
+	params.event_type = type;
+	params.mouse_x = x;
+	params.mouse_y = y;
+	params.mouse_button = 0;
+	params.screen = &window->workspace;
+	params.data = data;
+	window->event(window, &params);
 }

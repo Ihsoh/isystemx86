@@ -30,9 +30,11 @@
 #define	WINDOW_STYLE_MINIMIZE			0x00000002
 #define	WINDOW_STYLE_MAXIMIZE			0x00000004
 #define	WINDOW_STYLE_NO_TITLE			0x00000008
+#define	WINDOW_STYLE_NO_WMGR			0x00000010
 
-#define	WINDOW_EVENT_PAINT		1
-#define	WINDOW_EVENT_KEYDOWN	2
+#define	WINDOW_EVENT_PAINT			1
+#define	WINDOW_EVENT_FOCUS			2
+#define	WINDOW_EVENT_UNFOCUS		3
 
 #define	WINDOW_KEY_BUFFER_SIZE	16
 
@@ -44,6 +46,7 @@ typedef struct WindowEventParams
 	int32					mouse_y;
 	int32					mouse_button;
 	struct CommonImage *	screen;
+	void *					data;
 } * WindowEventParamsPtr;
 
 typedef void (* WindowEvent)(struct Window * window, struct WindowEventParams * params);
@@ -86,5 +89,11 @@ uint8
 window_get_key(IN struct Window * window);
 
 #define	window_has_key(window)	((window) == NULL ? 0 : (window)->key_count)
+
+extern
+void
+window_dispatch_event(	IN WindowPtr window,
+						IN int32 type,
+						IN void * data);
 
 #endif

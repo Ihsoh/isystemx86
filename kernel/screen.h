@@ -206,6 +206,9 @@ extern struct CommonImage * target_screen;
 
 
 //Window Mode
+
+#define	MAX_WINDOW_COUNT	256
+
 extern uint32 console_screen_width, console_screen_height;
 extern struct CommonImage console_screen_buffer;
 
@@ -233,5 +236,9 @@ destroy_window(IN struct Window * window);
 extern
 struct Window *
 get_top_window(void);
+
+extern
+WindowPtr *
+get_windows(OUT uint32 * count);
 
 #endif

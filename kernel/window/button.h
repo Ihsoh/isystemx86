@@ -70,7 +70,7 @@ typedef struct
 #define	SET_BUTTON_TEXT(_button, _text)	\
 	(button_set_text((_button), (_text)))
 
-#define	ENABLED_BUTTON(_button)	\
+#define	ENABLE_BUTTON(_button)	\
 	((_button)->enabled = TRUE)
 
 #define	DISABLE_BUTTON(_button)	\

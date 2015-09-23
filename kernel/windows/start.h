@@ -18,7 +18,7 @@ start_window_init(void);
 
 extern
 BOOL
-start_window_show(	IN int32 taskbar_x,
+start_window_show(	IN int32 x,
 					IN int32 taskbar_y);
 
 extern

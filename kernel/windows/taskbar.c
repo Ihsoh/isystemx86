@@ -33,10 +33,11 @@ static WindowPtr _window	= NULL;
 
 static ButtonPtr _btn_start	= NULL;
 static ButtonPtr _btn_time	= NULL;
+static ButtonPtr _btn_wmgr	= NULL;
 
 static TimerPtr _timer 		= NULL;
 
-static int8 weeks[][10] 	= {	"Sunday", 
+static int8 _weeks[][10] 	= {	"Sunday", 
 								"Monday", 
 								"Tuesday",
 								"Wednesday",
@@ -68,7 +69,14 @@ _control_event(	IN uint32 id,
 	{
 		if(type == BUTTON_LBUP)
 		{
-			start_window_show(_window->x, _window->y);
+			start_window_show(_btn_start->x, _window->y);
+		}
+	}
+	else if(id == _btn_wmgr->id)
+	{
+		if(type == BUTTON_LBUP)
+		{
+			wmgr_window_show(_btn_wmgr->x, _window->y);
 		}
 	}
 }
@@ -91,8 +99,12 @@ _window_event(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
-	BUTTON(_btn_start, &window->workspace, params, top);
-	BUTTON(_btn_time, &window->workspace, params, top);
+	if(params->event_type == WINDOW_EVENT_PAINT)
+	{
+		BUTTON(_btn_start, &window->workspace, params, top);
+		BUTTON(_btn_wmgr, &window->workspace, params, top);
+		BUTTON(_btn_time, &window->workspace, params, top);
+	}
 }
 
 /**
@@ -117,7 +129,7 @@ _timer_event(void)
 	strcat(buffer, "-");
 	strcat(buffer, itos(temp, dt.day));
 	strcat(buffer, " ");
-	strcat(buffer, weeks[dt.day_of_week]);
+	strcat(buffer, _weeks[dt.day_of_week]);
 	strcat(buffer, " ");
 	strcat(buffer, itos(temp, dt.hour));
 	strcat(buffer, ":");
@@ -144,7 +156,7 @@ taskbar_window_init(void)
 	uint32 h = vesa_get_height();
 	_window = create_window(w, _HEIGHT,
 							0xff000000,
-							WINDOW_STYLE_NO_TITLE,
+							WINDOW_STYLE_NO_TITLE | WINDOW_STYLE_NO_WMGR,
 							"Taskbar",
 							_window_event);
 	rect_common_image(&_window->workspace, 0, 0, w, _HEIGHT, 0xff222222);
@@ -158,6 +170,16 @@ taskbar_window_init(void)
 				_control_event,
 				0, _HEIGHT);
 	_btn_start->style = BUTTON_STYLE_REFRESH;
+
+	_btn_wmgr = NEW(Button);
+	button_init(_btn_wmgr, 0,
+				_btn_start->width, 0,
+				"Window",
+				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
+				_control_event,
+				0, _HEIGHT);
+	_btn_wmgr->style = BUTTON_STYLE_REFRESH;
+
 	_btn_time = NEW(Button);
 	button_init(_btn_time, 0,
 				w - _BTN_TIME_WIDTH, 0,

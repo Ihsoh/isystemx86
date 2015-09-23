@@ -39,7 +39,10 @@ void
 _message_window_event(	IN WindowPtr window,
 						IN struct WindowEventParams * params)
 {
-	return;
+	if(params->event_type == WINDOW_EVENT_PAINT)
+	{
+		
+	}
 }
 
 /**

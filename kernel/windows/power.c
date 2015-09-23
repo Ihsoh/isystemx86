@@ -88,7 +88,10 @@ _window_event(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
-	LIST(_lst_power, &window->workspace, params, TRUE);
+	if(params->event_type == WINDOW_EVENT_PAINT)
+	{
+		LIST(_lst_power, &window->workspace, params, TRUE);
+	}
 }
 
 /**
@@ -106,7 +109,7 @@ power_window_init(void)
 {
 	_window = create_window(_WIDTH, _HEIGHT,
 							0xff222222,
-							WINDOW_STYLE_NO_TITLE,
+							WINDOW_STYLE_NO_TITLE | WINDOW_STYLE_NO_WMGR,
 							"Power",
 							_window_event);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
@@ -118,8 +121,8 @@ power_window_init(void)
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event);
 	SET_LIST_TEXT(_lst_power, _ITEM_ID_SHUTDOWN,	"      Shutdown      ");
-	SET_LIST_TEXT(_lst_power, _ITEM_ID_REBOOT,	"      Reboot        ");
-	SET_LIST_TEXT(_lst_power, _ITEM_ID_CANCEL,	"      Cancel        ");
+	SET_LIST_TEXT(_lst_power, _ITEM_ID_REBOOT,		"      Reboot        ");
+	SET_LIST_TEXT(_lst_power, _ITEM_ID_CANCEL,		"      Cancel        ");
 	uint32 ui;
 	for(ui = 0; ui < _lst_power->count; ui++)
 		_lst_power->buttons[ui].style = BUTTON_STYLE_REFRESH;

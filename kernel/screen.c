@@ -30,6 +30,7 @@
 #include "windows/taskbar.h"
 #include "windows/start.h"
 #include "windows/power.h"
+#include "windows/wmgr.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -57,7 +58,6 @@ struct CommonImage * target_screen = NULL;
 
 
 #define	TCOLOR				0xffffffff
-#define	MAX_WINDOW_COUNT	256
 
 static struct Window * windows[MAX_WINDOW_COUNT];
 static uint32 window_count = 0;
@@ -738,6 +738,7 @@ init_screen(void)
 		taskbar_window_init();
 		start_window_init();
 		power_window_init();
+		wmgr_window_init();
 		init_sfunc_window();
 		init_console_window();
 		init_clock_window();
@@ -1282,6 +1283,15 @@ flush_screen(void)
 						{
 							windows[ui] = windows[0];
 							windows[0] = window;
+							if(ui != 0)
+							{
+								window_dispatch_event(	windows[ui],
+														WINDOW_EVENT_UNFOCUS,
+														NULL);
+								window_dispatch_event(	windows[0],
+														WINDOW_EVENT_FOCUS,
+														NULL);
+							}
 							break;
 						}
 					}
@@ -1295,6 +1305,15 @@ flush_screen(void)
 						{
 							windows[ui] = windows[0];
 							windows[0] = window;
+							if(ui != 0)
+							{
+								window_dispatch_event(	windows[ui],
+														WINDOW_EVENT_UNFOCUS,
+														NULL);
+								window_dispatch_event(	windows[0],
+														WINDOW_EVENT_FOCUS,
+														NULL);
+							}
 							break;
 						}
 				}
@@ -1372,4 +1391,23 @@ flush_screen(void)
 							0, 
 							screen_width, 
 							screen_height);
+}
+
+/**
+	@Function:		get_windows
+	@Access:		Public
+	@Description:
+		获取指向所有窗体数组的指针。
+	@Parameters:
+		count, uint32 *, OUT
+			窗体的数量。
+	@Return:
+		WindowPtr *
+			指向所有窗体数组的指针。
+*/
+WindowPtr *
+get_windows(OUT uint32 * count)
+{
+	*count = window_count;
+	return windows;
 }

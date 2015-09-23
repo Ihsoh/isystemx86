@@ -24,6 +24,9 @@ void
 _detail_window_event(IN struct Window * window,
 					IN struct WindowEventParams * params)
 {
+	if(params->event_type == WINDOW_EVENT_PAINT)
+	{
+	}
 }
 
 BOOL
@@ -32,7 +35,7 @@ detail_window_init(void)
 	_window = create_window(_WIDTH,
 							_HEIGHT,
 							0xffffffff,
-							WINDOW_STYLE_MINIMIZE,
+							WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_NO_WMGR,
 							"Detail",
 							_detail_window_event);
 	if(_window == NULL)

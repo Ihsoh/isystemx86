@@ -17,6 +17,8 @@
 
 #include <ilib/string.h>
 
+#define	_BUTTON_WIDTH(_btn) (BUTTON_LPADDING + (_btn)->len * ENFONT_WIDTH + BUTTON_RPADDING)
+
 /**
 	@Function:		button_init
 	@Access:		Public
@@ -92,6 +94,8 @@ button_init(OUT ButtonPtr button,
 	button->old_len = 0;
 	button->enabled = TRUE;
 	button->vpext = NULL;
+	if(button->width == 0)
+		button->width = _BUTTON_WIDTH(button);
 	return TRUE;
 }
 
@@ -140,7 +144,7 @@ button(	IN OUT ButtonPtr button,
 	uint32 len = button->len;
 	uint32 width = 0;
 	if(button->width == 0)
-		width = BUTTON_LPADDING + len * ENFONT_WIDTH + BUTTON_RPADDING;
+		width = _BUTTON_WIDTH(button);
 	else
 		width = button->width;
 	uint32 height = 0;
@@ -254,6 +258,7 @@ button_set_text(OUT ButtonPtr button,
 	strcpy(button->text, text);
 	button->old_len = button->len;
 	button->len = strlen(text);
+	button->width = _BUTTON_WIDTH(button);
 	button->clean = TRUE;
 	return TRUE;
 }

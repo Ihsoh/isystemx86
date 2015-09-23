@@ -135,7 +135,12 @@ _window_event(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
-	LIST(_lst_start, &window->workspace, params, TRUE);
+	if(params->event_type == WINDOW_EVENT_PAINT)
+	{
+		LIST(_lst_start, &window->workspace, params, TRUE);
+	}
+	else if(params->event_type == WINDOW_EVENT_UNFOCUS)
+		start_window_hide();
 }
 
 /**
@@ -153,7 +158,7 @@ start_window_init(void)
 {
 	_window = create_window(_WIDTH, _HEIGHT,
 							0xff222222,
-							WINDOW_STYLE_NO_TITLE,
+							WINDOW_STYLE_NO_TITLE | WINDOW_STYLE_NO_WMGR,
 							"Start",
 							_window_event);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
@@ -165,10 +170,10 @@ start_window_init(void)
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event);
 	SET_LIST_TEXT(_lst_start, _ITEM_ID_SETTING, 	"Setting           > ");
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_EXPLORER, "Explorer          > ");
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_POWER, 	"Power             > ");
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_ABOUT, 	"About             > ");
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_CLOSE, 	"Close               ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_EXPLORER,	"Explorer          > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_POWER, 		"Power             > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_ABOUT, 		"About             > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_CLOSE, 		"Close               ");
 	uint32 ui;
 	for(ui = 0; ui < _lst_start->count; ui++)
 		_lst_start->buttons[ui].style = BUTTON_STYLE_REFRESH;
@@ -180,15 +185,19 @@ start_window_init(void)
 	@Description:
 		显示开始菜单。
 	@Parameters:
+		x, int32, IN
+			开始菜单显示的X坐标。
+		taskbar_y, int32, IN
+			任务栏的Y坐标。
 	@Return:
 		BOOL
 			返回TRUE则成功，否则失败。
 */
 BOOL
-start_window_show(	IN int32 taskbar_x,
+start_window_show(	IN int32 x,
 					IN int32 taskbar_y)
 {
-	_window->x = taskbar_x;
+	_window->x = x;
 	_window->y = taskbar_y - _HEIGHT;
 	_window->state = WINDOW_STATE_SHOW;
 	set_top_window(_window);

@@ -11,6 +11,11 @@
 
 #include "types.h"
 
+#define	MOUSE_BUTTON_NONE	0x00000000
+#define	MOUSE_BUTTON_LEFT	0x00000001
+#define	MOUSE_BUTTON_RIGHT	0x00000002
+#define	MOUSE_BUTTON_MIDDLE	0x00000004
+
 extern
 BOOL
 mouse_init(void);

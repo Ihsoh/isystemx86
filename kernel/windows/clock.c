@@ -46,6 +46,10 @@ void
 clock_window_event(	IN struct Window * window, 
 					IN struct WindowEventParams * params)
 {
+	if(params->event_type == WINDOW_EVENT_PAINT)
+	{
+		
+	}
 	/*
 	struct CommonImage * screen = params->screen;	
 	if(params->event_type == WINDOW_EVENT_PAINT)

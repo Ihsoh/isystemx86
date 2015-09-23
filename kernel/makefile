@@ -27,7 +27,7 @@ WindowObjs=window/bin/control.obj window/bin/button.obj window/bin/label.obj win
 window/bin/progress.obj window/bin/scroll.obj
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
 windows/bin/detail.obj windows/bin/explorer.obj windows/bin/taskbar.obj windows/bin/start.obj 	\
-windows/bin/power.obj
+windows/bin/power.obj windows/bin/wmgr.obj
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj
 FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
@@ -262,6 +262,9 @@ windows/bin/start.obj: windows/start.c windows/start.h
 
 windows/bin/power.obj: windows/power.c windows/power.h
 	$(CC) $(CFlags) -c windows/power.c -o windows/bin/power.obj $(Include)
+
+windows/bin/wmgr.obj: windows/wmgr.c windows/wmgr.h
+	$(CC) $(CFlags) -c windows/wmgr.c -o windows/bin/wmgr.obj $(Include)
 
 
 syscall/bin/fs.obj: syscall/fs.c syscall/fs.h

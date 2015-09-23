@@ -68,11 +68,14 @@ _window_event(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
-	BUTTON(btn1, &window->workspace, params, top);
-	BUTTON(btn2, &window->workspace, params, top);
-	LABEL(lbl1, &window->workspace, params, top);
-	LIST(lst1, &window->workspace, params, top);
-	PROGRESS(prgr1, &window->workspace, params, top);
+	if(params->event_type == WINDOW_EVENT_PAINT)
+	{
+		BUTTON(btn1, &window->workspace, params, top);
+		BUTTON(btn2, &window->workspace, params, top);
+		LABEL(lbl1, &window->workspace, params, top);
+		LIST(lst1, &window->workspace, params, top);
+		PROGRESS(prgr1, &window->workspace, params, top);
+	}
 }
 
 BOOL
