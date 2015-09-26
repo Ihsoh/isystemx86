@@ -141,6 +141,11 @@ _create_task(	IN int8 * name,
 	}
 	if(tid != -1)
 	{
+		struct Desc tss_desc;
+		get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+		tss_desc.attr = AT386TSS + DPL3;
+		set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+
 		task->used = 1;
 		task->on_exit = NULL;
 		task->retvalue = 0;
@@ -335,13 +340,16 @@ create_task(IN int8 * name,
 			IN uint32 app_len,
 			IN int8 * working_dir)
 {
-	return _create_task(name, 
-						param, 
-						app, 
-						app_len, 
-						working_dir, 
-						TASK_TYPE_USER,
-						TASK_ATTR_NONE);
+	lock();
+	int32 tid = _create_task(name, 
+							param, 
+							app, 
+							app_len, 
+							working_dir, 
+							TASK_TYPE_USER,
+							TASK_ATTR_NONE);
+	unlock();
+	return tid;
 }
 
 /**
@@ -371,13 +379,16 @@ create_sys_task(IN int8 * name,
 				IN uint32 app_len,
 				IN int8 * working_dir)
 {
-	return _create_task(name, 
-						param, 
-						app, 
-						app_len, 
-						working_dir, 
-						TASK_TYPE_SYSTEM,
-						TASK_ATTR_NONE);
+	lock();
+	int32 tid = _create_task(name, 
+							param, 
+							app, 
+							app_len, 
+							working_dir, 
+							TASK_TYPE_SYSTEM,
+							TASK_ATTR_NONE);
+	unlock();
+	return tid;
 }
 
 /**
@@ -469,12 +480,17 @@ _kill_task(IN int32 tid)
 BOOL
 kill_task(IN int32 tid)
 {
-	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT
+		|| !tasks[tid].used)
 		return FALSE;
 	struct Task * task = tasks + tid;
 	if(task->type != TASK_TYPE_USER)
 		return FALSE;
-	return _kill_task(tid);
+	lock();
+	BOOL r = _kill_task(tid);
+	unlock();
+	return r;
 }
 
 /**
@@ -492,9 +508,14 @@ kill_task(IN int32 tid)
 BOOL
 kill_sys_task(IN int32 tid)
 {
-	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT
+		|| !tasks[tid].used)
 		return FALSE;
-	return _kill_task(tid);
+	lock();
+	BOOL r = _kill_task(tid);
+	unlock();
+	return r;
 }
 
 /**
@@ -511,7 +532,7 @@ kill_all_tasks(void)
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
 		if(tasks[ui].used)
-			kill_task(ui);
+			kill_sys_task(ui);
 }
 
 /**
@@ -532,9 +553,13 @@ BOOL
 get_task_info(	IN int32 tid,
 				OUT struct Task * task)
 {
-	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT
+		|| !tasks[tid].used)
 		return FALSE;
+	lock();
 	memcpy(task, tasks + tid, sizeof(struct Task));
+	unlock();
 	return TRUE;
 }
 
@@ -556,9 +581,13 @@ BOOL
 set_task_info(	IN int32 tid,
 				IN struct Task * task)
 {
-	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT
+		|| !tasks[tid].used)
 		return FALSE;
+	lock();
 	memcpy(tasks + tid, task, sizeof(struct Task));
+	unlock();
 	return TRUE;
 }
 
@@ -577,7 +606,9 @@ set_task_info(	IN int32 tid,
 struct Task *
 get_task_info_ptr(IN int32 tid)
 {
-	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT
+		|| !tasks[tid].used)
 		return NULL;
 	return tasks + tid;
 }
@@ -597,7 +628,8 @@ get_task_info_ptr(IN int32 tid)
 struct Task *
 get_task_info_ptr_unsafe(IN int32 tid)
 {
-	if(tid < 0 || tid >= MAX_TASK_COUNT)
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT)
 		return NULL;
 	return tasks + tid;
 }
@@ -727,11 +759,14 @@ create_task_by_file(	IN int8 * filename,
 						IN int8 * param,
 						IN int8 * working_dir)
 {
-	return _create_task_by_file(filename,
-								param,
-								working_dir,
-								TASK_TYPE_USER,
-								TASK_ATTR_NONE);
+	lock();
+	int32 tid = _create_task_by_file(	filename,
+										param,
+										working_dir,
+										TASK_TYPE_USER,
+										TASK_ATTR_NONE);
+	unlock();
+	return tid;
 }
 
 /**
@@ -755,11 +790,14 @@ create_sys_task_by_file(IN int8 * filename,
 						IN int8 * param,
 						IN int8 * working_dir)
 {
-	return _create_task_by_file(filename,
-								param,
-								working_dir,
-								TASK_TYPE_SYSTEM,
-								TASK_ATTR_NONE);
+	lock();
+	int32 tid = _create_task_by_file(	filename,
+										param,
+										working_dir,
+										TASK_TYPE_SYSTEM,
+										TASK_ATTR_NONE);
+	unlock();
+	return tid;
 }
 
 /**
@@ -792,11 +830,16 @@ create_task_by_file_wait(	IN int8 * filename,
 		|| working_dir == NULL
 		|| retvalue == NULL)
 		return FALSE;
+	lock();
 	int32 tid = create_task_by_file(filename, param, working_dir);
 	if(tid == -1)
+	{
+		unlock();
 		return FALSE;
+	}
 	tasks[tid].allocable = FALSE;
 	task_ready(tid);
+	unlock();
 	while(tasks[tid].used)
 		asm volatile ("pause");
 	*retvalue = tasks[tid].retvalue;

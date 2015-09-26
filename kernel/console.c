@@ -2612,9 +2612,21 @@ exec(	IN int8 * cmd,
 				r = run_wait(name, cmd, NULL, NULL, NULL) == -1 ? 0 : 1;
 		}
 	}
+
+	// 等待一个程序运行结束。当wait_app_tid为-1时，代表等待的程序已结束，则退出等待。
 	while(wait_app_tid != -1)
-		if(get_task_info_ptr(wait_app_tid) == NULL)
+	{
+		// 这里加锁是因为检测任务是否还可用时不被打断，否则总是会出奇怪的问题。
+		lock();
+		struct Task * task = get_task_info_ptr(wait_app_tid);
+		if(task == NULL)
 			wait_app_tid = -1;
+		unlock();
+		uint32 ui;
+		for(ui = 0; ui < 0x000fffff; ui++)
+			asm volatile ("pause");
+	}
+
 	return r;
 }
 

@@ -10,7 +10,7 @@
 #include "../types.h"
 
 void
-dump(CASCTEXT file, uint32 line, uint32 code)
+dump(void)
 {
 
 

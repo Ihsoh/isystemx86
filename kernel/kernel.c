@@ -51,6 +51,7 @@
 #include <mempoollib/mempoollib.h>
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
+#define SYSCALL_PROCEDURE_STACK_SIZE	(KB(64))
 
 static uint32	gdt_addr		= 0;	//GDT的物理地址。
 static uint32	idt_addr		= 0;	//IDT的物理地址。
@@ -105,6 +106,8 @@ static BOOL		mouse_loop_was_enabled 		= FALSE;	//!!!警告!!!
 static BOOL 	keyboard_loop_was_enabled	= FALSE;
 static BOOL		use_rtc_for_task_scheduler	= FALSE;
 static uint8	rtc_rate					= 15;
+
+static CASCTEXT	_func_name					= "N/A";
 
 #include "knlstatic.h"
 
@@ -674,6 +677,8 @@ fill_tss(	OUT struct TSS * tss,
 	tss->iobase = sizeof(struct TSS);
 }
 
+static uint32 _timer_stack = 0;
+
 /**
 	@Function:		init_timer
 	@Access:		Private
@@ -689,6 +694,7 @@ init_timer(void)
 	struct die_info info;
 	struct TSS * tss = &timer_tss;
 	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	_timer_stack = (uint32)stack;
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_TIMER, DI_INIT_TIMER);
@@ -982,6 +988,8 @@ timer_int(void)
 	{
 		lock();
 
+		_func_name = __FUNCTION__;
+
 		timer_inc_ticks();
 
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
@@ -1035,11 +1043,15 @@ timer_int(void)
 
 			kernel_task_ran = TRUE;
 
+			// 释放内核的TSS。
 			struct Desc kernel_tss_desc;
 			get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
 			kernel_tss_desc.attr = AT386TSS + DPL0; 
 			set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
+
+			// 释放所有系统调用的TSS。
 			free_system_call_tss();
+
 			if(!use_rtc_for_task_scheduler && apic_is_enable())
 				apic_start_timer();
 			end_of_rtc();
@@ -1099,8 +1111,8 @@ timer_int(void)
 			if(task.is_system_call)
 			{
 				#define SYSTEM_CALL(tid_s)	\
-					asm volatile (	".set TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
-									"ljmp	$TARGET"tid_s", $0\n\t");
+					asm volatile (	".set _TMR_TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
+									"ljmp	$_TMR_TARGET"tid_s", $0\n\t");
 
 				#define SYSTEM_CALL_CASE(tid, tid_s)	\
 					case tid:	\
@@ -1423,7 +1435,7 @@ init_system_call(void)
 		struct die_info info;
 		struct TSS * tss = &(scall_tss[ui]);
 		scall_tsses[ui] = tss;
-		uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+		uint8 * stack = (uint8 *)alloc_memory(SYSCALL_PROCEDURE_STACK_SIZE);
 		if(tss == NULL)
 		{
 			fill_info(info, DC_INIT_SCALL, DI_INIT_SCALL);
@@ -1480,6 +1492,8 @@ system_call(void)
 		"popl	%2\n\t"
 		:
 		:"m"(edx), "m"(ecx), "m"(eax));
+
+	_func_name = __FUNCTION__;
 
 	struct Task * task = get_task_info_ptr(ecx);
 	task->is_system_call = TRUE;
@@ -1539,7 +1553,14 @@ system_call_int(void)
 {
 	uint32 edx, ecx, eax;
 	asm volatile (
-		"pushw	%%si\n\t"
+		"pushl	%%eax\n\t"
+		"pushl	%%ecx\n\t"
+		"pushl	%%edx\n\t"
+		"popl	%0\n\t"
+		"popl	%1\n\t"
+		"popl	%2\n\t"
+
+		/*"pushw	%%si\n\t"
 		"pushw	%%ds\n\t"
 		"pushw	%%es\n\t"
 		"pushw	%%fs\n\t"
@@ -1548,15 +1569,8 @@ system_call_int(void)
 		"movw	%%si, %%ds\n\t"
 		"movw	%%si, %%es\n\t"
 		"movw	%%si, %%fs\n\t"
-		"movw	%%si, %%gs\n\t"
-		"pushl	%%eax\n\t"
-		"pushl	%%ecx\n\t"
-		"pushl	%%edx\n\t"
-		"popl	%0\n\t"
-		"popl	%1\n\t"
-		"popl	%2\n\t"
-		:
-		:"m"(edx), "m"(ecx), "m"(eax));
+		"movw	%%si, %%gs\n\t"*/
+		:"=m"(edx), "=m"(ecx), "=m"(eax));
 
 	//获取指定的TSS和Stack。
 	struct TSS * system_call_tss = scall_tsses[ecx];
@@ -1564,33 +1578,23 @@ system_call_int(void)
 
 	//重置System Call的TSS。
 	system_call_tss->eip = (uint32)system_call;
-	system_call_tss->esp0 = (uint32)(system_call_stack + 0xffffe);
-	system_call_tss->esp = (uint32)(system_call_stack + 0xffffe);
-	//system_call_tss->flags = 0x200;
+	system_call_tss->esp0 = (uint32)(system_call_stack + SYSCALL_PROCEDURE_STACK_SIZE);
+	system_call_tss->esp = (uint32)(system_call_stack + SYSCALL_PROCEDURE_STACK_SIZE);
+	system_call_tss->flags = 0x0;
 	system_call_tss->edx = edx;
 	system_call_tss->ecx = ecx;
 	system_call_tss->eax = eax;
 
-	asm volatile (
+	/*asm volatile (
 		"popw	%gs\n\t"
 		"popw	%fs\n\t"
 		"popw	%es\n\t"
 		"popw	%ds\n\t"
-		"popw	%si\n\t");
-	
-	/*
-	????BUG????
-
-	uint16 address[3];
-	address[0] = 0;
-	address[1] = 0;
-	address[2] = (uint16)(((30 + ecx * 2 + 1) << 3) | RPL3);
-	asm volatile ("lcall	%0\n\t"::"m"(address));
-	*/
+		"popw	%si\n\t");*/
 
 	#define SYSTEM_CALL(tid_s)	\
-		asm volatile (	".set TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
-						"lcall	$TARGET"tid_s", $0\n\t");
+		asm volatile (	".set _SYSCALL_TARGET"tid_s", (((30 + "tid_s" * 2 + 1) << 3) | 3)\n\t"	\
+						"lcall	$_SYSCALL_TARGET"tid_s", $0\n\t");
 
 	#define SYSTEM_CALL_CASE(tid, tid_s)	\
 		case tid:	\
@@ -1716,12 +1720,13 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 		get_task_info_ptr(sys_pci_tid)->priority = TASK_PRIORITY_LOW;
 		task_ready(sys_pci_tid);
 	}
-	
-	kill_sys_task(tid);
 
 	int32 wait_app_tid = get_wait_app_tid();
 	if(tid == wait_app_tid)
 		set_wait_app_tid(-1);
+	
+	kill_sys_task(tid);
+
 	switch_to_kernel = TRUE;			//强制让任务调度器执行内核任务。
 	kt_jk_lock = TRUE;					//unlock()之后等待任务调度器的执行。
 	will_reset_all_exceptions = TRUE;	//需要重设所有异常处理程序的状态。
@@ -2496,15 +2501,22 @@ gp_int(void)
 			if(!use_rtc_for_task_scheduler)
 				apic_stop_timer();
 			struct Task * task = get_task_info_ptr(current_tid);
+			struct TSS * syscall_tss = scall_tss + current_tid;
+			struct Desc syscall_tss_desc;
+			get_desc_from_gdt(30 + current_tid * 2, &syscall_tss_desc);
 
 			uint32 errcode = 0;
 			GET_ERROR_CODE(&errcode);
 			uint32 ext = 0, idt = 0, ti = 0, selector = 0;
 			PARSE_ERROR_CODE(errcode, &ext, &idt, &ti, &selector);
 
-			int8 buffer[1024];
+			int8 buffer[KB(64)];
+			int8 buffer00[KB(64)];
 			sprintf_s(	buffer,
 						1024,
+						"Application Crash\n"
+						"######################################################################"
+						"\n"
 						"A task causes a global protected exception"
 						"(Selector: %X, Table: %s, EXT: %s)"
 						", the id is %d, the name is '%s'\n",
@@ -2513,6 +2525,56 @@ gp_int(void)
 						ext ? "True" : "False",
 						current_tid,
 						task->name);
+
+			sprintf_s(	buffer00,
+						1024,
+						"Task infomation:\n"
+						"    System Call: %s\n"
+						"    Function: %s\n"
+						"    Timer Stack: %X\n"
+						"    Timer Stack Bottom: %X\n"
+						"TSS infomation:\n"
+						"    ES: %X SS: %X DS: %X\n"
+						"    DS: %X FS: %X GS: %X\n"
+						"    CS: %X EIP: %X\n"
+						"    ESP: %X\n"
+						"System Call TSS infomation:\n"
+						"    TSS Descriptor Attr: %X\n"
+						"    Link: %X\n"
+						"    ES: %X SS: %X DS: %X\n"
+						"    DS: %X FS: %X GS: %X\n"
+						"    CS: %X EIP: %X\n"
+						"    ESP: %X\n"
+						"Timer TSS infomation:\n"
+						"    Link: %X\n"
+						"    ES: %X SS: %X DS: %X\n"
+						"    DS: %X FS: %X GS: %X\n"
+						"    CS: %X EIP: %X\n"
+						"    ESP: %X\n"
+						"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+						task->is_system_call ? "True" : "False",
+						_func_name,
+						_timer_stack,
+						_timer_stack + INTERRUPT_PROCEDURE_STACK_SIZE,
+
+						task->tss.es, task->tss.ss, task->tss.ds,
+						task->tss.ds, task->tss.fs, task->tss.gs,
+						task->tss.cs, task->tss.eip,
+						task->tss.esp,
+
+						syscall_tss_desc.attr,
+						syscall_tss->back_link,
+						syscall_tss->es, syscall_tss->ss, syscall_tss->ds,
+						syscall_tss->ds, syscall_tss->fs, syscall_tss->gs,
+						syscall_tss->cs, syscall_tss->eip,
+						syscall_tss->esp,
+
+						timer_tss.back_link,
+						timer_tss.es, timer_tss.ss, timer_tss.ds,
+						timer_tss.ds, timer_tss.fs, timer_tss.gs,
+						timer_tss.cs, timer_tss.eip,
+						timer_tss.esp);
+			strcat(buffer, buffer00);
 			log(LOG_ERROR, buffer);
 
 			print_str_p(buffer, CC_RED);
