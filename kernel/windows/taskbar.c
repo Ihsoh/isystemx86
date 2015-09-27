@@ -29,6 +29,8 @@
 
 #define	_BTN_TIME_WIDTH		250
 
+#define	_MAX_TIME_STR_LEN	26
+
 static WindowPtr _window	= NULL;
 
 static ButtonPtr _btn_start	= NULL;
@@ -136,6 +138,10 @@ _timer_event(void)
 	strcat(buffer, itos(temp, dt.minute));
 	strcat(buffer, ":");
 	strcat(buffer, itos(temp, dt.second));
+	uint32 ui;
+	uint32 len = strlen(buffer);
+	for(ui = 0; ui < _MAX_TIME_STR_LEN - len; ui++)
+		strcat(buffer, " ");
 	SET_BUTTON_TEXT(_btn_time, buffer);
 }
 
