@@ -45,6 +45,14 @@ extern
 void
 reboot_system(void);
 
+extern
+BOOL
+reset_syscall(IN int32 tid);
+
+extern
+void
+free_syscall(IN int32 tid);
+
 DEFINE_LOCK_EXTERN(kernel)
 
 #endif

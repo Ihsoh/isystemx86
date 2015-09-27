@@ -16,6 +16,7 @@
 #include "lock.h"
 #include "mqueue.h"
 #include "kmpool.h"
+#include "kernel.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -145,6 +146,10 @@ _create_task(	IN int8 * name,
 		get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 		tss_desc.attr = AT386TSS + DPL3;
 		set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+
+		// 重置与这个任务对应的系统调用。
+		if(!reset_syscall(tid))
+			return -1;
 
 		task->used = 1;
 		task->on_exit = NULL;
@@ -454,6 +459,9 @@ _kill_task(IN int32 tid)
 		close_file(task->stdout);
 	if(task->stderr != NULL)
 		close_file(task->stderr);
+
+	// 释放与这个任务对应的系统调用。
+	free_syscall(tid);
 
 	if(tid == running_tid)
 		running_tid = -1;

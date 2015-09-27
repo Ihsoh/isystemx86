@@ -51,7 +51,7 @@
 #include <mempoollib/mempoollib.h>
 
 #define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
-#define SYSCALL_PROCEDURE_STACK_SIZE	(KB(64))
+#define SYSCALL_PROCEDURE_STACK_SIZE	(MB(1))
 
 static uint32	gdt_addr		= 0;	//GDT的物理地址。
 static uint32	idt_addr		= 0;	//IDT的物理地址。
@@ -1414,14 +1414,13 @@ fpu_int(void)
 	}
 }
 
-static struct TSS * scall_tsses[MAX_TASK_COUNT];
 static uint8 * scall_stacks[MAX_TASK_COUNT];
 
 /**
 	@Function:		init_system_call
 	@Access:		Private
 	@Description:
-		初始化系统调用的中断程序。
+		初始化系统调用。
 	@Parameters:
 	@Return:
 */
@@ -1431,41 +1430,73 @@ init_system_call(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
-	{
-		struct die_info info;
-		struct TSS * tss = &(scall_tss[ui]);
-		scall_tsses[ui] = tss;
-		uint8 * stack = (uint8 *)alloc_memory(SYSCALL_PROCEDURE_STACK_SIZE);
-		if(tss == NULL)
-		{
-			fill_info(info, DC_INIT_SCALL, DI_INIT_SCALL);
-			die(&info);
-		}
-		scall_stacks[ui] = stack;
-		struct Desc tss_desc;
-		struct Gate task_gate;
+		scall_stacks[ui] = NULL;
+}
 
-		uint32 temp = (uint32)tss;
-		tss_desc.limitl = sizeof(struct TSS) - 1;
-		tss_desc.basel = (uint16)(temp & 0xFFFF);
-		tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
-		tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
-		tss_desc.attr = AT386TSS + DPL3;
-		set_desc_to_gdt(30 + ui * 2 + 0, (uint8 *)&tss_desc);
+/**
+	@Function:		reset_syscall
+	@Access:		Public
+	@Description:
+		重置系统调用。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+reset_syscall(IN int32 tid)
+{
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT)
+		return FALSE;
+	struct TSS * tss = &(scall_tss[tid]);
+	uint8 * stack = (uint8 *)alloc_memory(SYSCALL_PROCEDURE_STACK_SIZE);
+	if(stack == NULL)
+		return FALSE;
+	scall_stacks[tid] = stack;
 
-		task_gate.offsetl = 0;
-		task_gate.offseth = 0;
-		task_gate.dcount = 0;
-		task_gate.selector = ((30 + ui * 2 + 0) << 3) | RPL3;
-		task_gate.attr = ATTASKGATE | DPL3;
-		set_desc_to_gdt(30 + ui * 2 + 1, (uint8 *)&task_gate);
+	struct Desc tss_desc;
+	struct Gate task_gate;
 
-		fill_tss(tss, (uint32)system_call, (uint32)stack);
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL3;
+	set_desc_to_gdt(30 + tid * 2 + 0, (uint8 *)&tss_desc);
 
-		//System Call的任务开中断的原因是如果关闭中断且用户程序调用SCALL_GET_CHAR, SCALL_GET_STR_N等
-		//功能时会导致等待按键队列有数据, 由于关闭了中断, 键盘驱动程序永远不会被启动, 所以导致无限等待.
-		//tss->flags = 0x200;
-	}
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = ((30 + tid * 2 + 0) << 3) | RPL3;
+	task_gate.attr = ATTASKGATE | DPL3;
+	set_desc_to_gdt(30 + tid * 2 + 1, (uint8 *)&task_gate);
+
+	fill_tss(tss, (uint32)system_call, (uint32)stack);
+
+	return TRUE;
+}
+
+/**
+	@Function:		free_syscall
+	@Access:		Public
+	@Description:
+		释放系统调用。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+	@Return:
+*/
+void
+free_syscall(IN int32 tid)
+{
+	if(	tid < 0
+		|| tid >= MAX_TASK_COUNT)
+		return;
+	free_memory(scall_stacks[tid]);
 }
 
 /**
@@ -1573,7 +1604,7 @@ system_call_int(void)
 		:"=m"(edx), "=m"(ecx), "=m"(eax));
 
 	//获取指定的TSS和Stack。
-	struct TSS * system_call_tss = scall_tsses[ecx];
+	struct TSS * system_call_tss = &(scall_tss[ecx]);
 	uint8 * system_call_stack = scall_stacks[ecx];
 
 	//重置System Call的TSS。
