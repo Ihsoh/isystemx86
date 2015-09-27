@@ -97,5 +97,6 @@ void * realloc(void * mem_address, unsigned int newsize)
 void exit(int status)
 {
 	__set_retvalue(status);
+	__destroy_mempool();
 	app_exit();
 }

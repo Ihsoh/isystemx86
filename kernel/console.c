@@ -2348,12 +2348,6 @@ exec(	IN int8 * cmd,
 			fix_path(path, current_path, path);
 			detail_window_show(path);
 		}
-		else if(strcmp(name, "t") == 0)
-		{
-			#include "windows/explorer.h"
-			explorer_window_show();
-		}
-
 		//Batch
 		else if(strcmp(name, "goto") == 0)
 		{

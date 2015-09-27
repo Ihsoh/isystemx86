@@ -1800,7 +1800,10 @@ _open_file_unsafe(	IN int8 * path,
 	int8 symbol[3];
 	uint32 id = parse_path(path, symbol, &type);
 	if(type != BLOCK_TYPE_FILE || id == INVALID_BLOCK_ID)
+	{
+		free_memory(fptr);
 		return NULL;
+	}
 	fptr->mode = mode;
 	strcpy(fptr->symbol, symbol);
 	fptr->file_block_id = id;
