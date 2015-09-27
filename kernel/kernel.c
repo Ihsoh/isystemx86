@@ -50,7 +50,7 @@
 #include <pathlib/pathlib.h>
 #include <mempoollib/mempoollib.h>
 
-#define	INTERRUPT_PROCEDURE_STACK_SIZE	(KB(64))
+#define	INTERRUPT_PROCEDURE_STACK_SIZE	(MB(1))
 #define SYSCALL_PROCEDURE_STACK_SIZE	(MB(1))
 
 static uint32	gdt_addr		= 0;	//GDT的物理地址。
