@@ -281,7 +281,7 @@ static void flush(void)
 	for(ui = top_row; ui < top_row + row; ui++)
 	{
 		// 输出行号。
-		uint32 ln = 1 + top_row + ui;
+		uint32 ln = 1 + ui;
 		uint32 lnoff = (ui - top_row) * scr_column * 2;
 		screen_buffer[lnoff + 0] = ' ';
 		screen_buffer[lnoff + 1] = CC_GRAYWHITE | CBGC_BLUE;
