@@ -49,6 +49,8 @@ static int8 promptns[32]						= "#";
 static int8 prompts[32]							= "%s";
 static uint8 promptns_color						= 7;
 static uint8 prompts_color 						= 7;
+static BOOL _exit_batch							= FALSE;
+static BOOL _run_in_batch						= FALSE;
 
 #define	parse_cmd(cmd, word, n) (_parse_cmd(cmd, word, n, 1, local_vars_s))
 #define	parse_cmd_nv(cmd, word, n) (_parse_cmd(cmd, word, n, 0, NULL))
@@ -1789,7 +1791,7 @@ static int exec(char * cmd, char * lines, uint * pointer, uint line, struct Vars
 #define	BATCH_MAX_VARS_COUNT	1024	//脚本的变量的最大数量
 
 /**
-	@Function:		batch
+	@Function:		_batch
 	@Access:		Private
 	@Description:
 		运行脚本。
@@ -1802,7 +1804,7 @@ static int exec(char * cmd, char * lines, uint * pointer, uint line, struct Vars
 */
 static
 int32
-batch(IN int8 * path)
+_batch(IN int8 * path)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!fix_path(path, current_path, temp))
@@ -1861,6 +1863,13 @@ batch(IN int8 * path)
 	uint32 pointer = 0;
 	for(; pointer < line; pointer++)
 	{
+		// 检测是否退出批处理。
+		if(_exit_batch)
+		{
+			_exit_batch = FALSE;
+			break;
+		}
+
 		int8 * current_cmd = lines + pointer * BATCH_MAX_CMD_LEN;
 		if(!exec(current_cmd, lines, &pointer, line, local_vars_s))
 		{
@@ -1872,11 +1881,41 @@ batch(IN int8 * path)
 			free_vars(local_vars_s);
 			return 0;
 		}
+
+		// 检测是否退出批处理。
+		if(_exit_batch)
+		{
+			_exit_batch = FALSE;
+			break;
+		}
 	}
 	free_memory(cmds);
 	free_memory(lines);
 	free_vars(local_vars_s);
 	return 1;
+}
+
+/**
+	@Function:		batch
+	@Access:		Private
+	@Description:
+		运行脚本。
+	@Parameters:
+		path, int8 *, IN
+			脚本文件的路径。
+			这个函数会设置_run_in_batch全局静态变量。
+	@Return:
+		int32
+			返回0则失败，否则成功。
+*/
+static
+int32
+batch(IN int8 * path)
+{
+	_run_in_batch = TRUE;
+	int32 r = _batch(path);
+	_run_in_batch = FALSE;
+	return r;
 }
 
 static uint32 _ticks = 0;
@@ -2840,4 +2879,19 @@ console_init(void)
 	config_system_console_get_number("PromptColorWhenDirIsSelected", &dv);
 	prompts_color = (uint8)dv;
 	return TRUE;
+}
+
+/**
+	@Function:		exit_batch
+	@Access:		Public
+	@Description:
+		退出批处理。
+	@Parameters:
+	@Return:	
+*/
+void
+exit_batch(void)
+{
+	if(_run_in_batch)
+		_exit_batch = TRUE;
 }

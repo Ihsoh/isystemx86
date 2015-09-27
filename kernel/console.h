@@ -39,6 +39,10 @@ extern
 BOOL
 console_init(void);
 
+extern
+void
+exit_batch(void);
+
 DEFINE_LOCK_EXTERN(console)
 
 #endif

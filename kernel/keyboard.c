@@ -14,6 +14,7 @@
 #include "kernel.h"
 #include "vesa.h"
 #include "window.h"
+#include "console.h"
 
 #include "windows/sfunc.h"
 #include "windows/clock.h"
@@ -540,6 +541,12 @@ tran_key(IN uint8 scan_code)
 				}
 				else if(alt)
 					set_wait_app_tid(-1);
+				break;
+			}
+			case KEY_F5:
+			{
+				if(alt)
+					exit_batch();
 				break;
 			}
 		}
