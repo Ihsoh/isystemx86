@@ -44,4 +44,11 @@
 BOOL
 atapi_init(void);
 
+extern
+int32
+atapi_read_sector(	IN uint32 bus,
+					IN uint32 drive,
+					IN uint32 lba,
+					OUT uint8 * buffer);
+
 #endif

@@ -19,7 +19,10 @@ atapi_init(void)
 /* Use the ATAPI protocol to read a single sector from the given
  * bus/drive into the buffer using logical block address lba. */
 int32
-atapi_read_sector(uint32 bus, uint32 drive, uint32 lba, uint8 * buffer)
+atapi_read_sector(	IN uint32 bus,
+					IN uint32 drive,
+					IN uint32 lba,
+					OUT uint8 * buffer)
 {
 	/* 0xA8 is READ SECTORS command byte. */
 	uint8 read_cmd[12] = { 0xA8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -28,18 +31,23 @@ atapi_read_sector(uint32 bus, uint32 drive, uint32 lba, uint8 * buffer)
 	
 	/* Tell the scheduler that this process is using the ATA subsystem. */
 	//??? ata_grab();
-	
+
 	/* Select drive (only the slave-bit is set) */
-	outb(drive & (1 << 4), ATA_DRIVE_SELECT(bus));      
+	outb(ATA_DRIVE_SELECT(bus), drive & (1 << 4));      
+
 	ATA_SELECT_DELAY(bus);       /* 400ns delay */
-	outb(0x0, ATA_FEATURES(bus));       /* PIO mode */
-	outb(ATAPI_SECTOR_SIZE & 0xFF, ATA_ADDRESS2(bus));
-	outb(ATAPI_SECTOR_SIZE >> 8, ATA_ADDRESS3(bus));
-	outb(0xA0, ATA_COMMAND(bus));       /* ATA PACKET command */
+
+	outb(ATA_FEATURES(bus), 0x0);       /* PIO mode */
+	outb(ATA_ADDRESS2(bus), ATAPI_SECTOR_SIZE & 0xFF);
+	outb(ATA_ADDRESS3(bus), ATAPI_SECTOR_SIZE >> 8);
+	outb(ATA_COMMAND(bus), 0xA0);       /* ATA PACKET command */
+
 	while((status = inb(ATA_COMMAND(bus))) & 0x80)     /* BUSY */
 		asm volatile ("pause");
+
 	while (!((status = inb(ATA_COMMAND(bus))) & 0x8) && !(status & 0x1))
 		asm volatile ("pause");
+
 	/* DRQ or ERROR set */
 	if(status & 0x1)
 	{
@@ -75,8 +83,8 @@ atapi_read_sector(uint32 bus, uint32 drive, uint32 lba, uint8 * buffer)
 	//???schedule();
 	
 	/* Wait for BSY and DRQ to clear, indicating Command Finished */
-	while((status = inb(ATA_COMMAND(bus))) & 0x88) 
-		asm volatile ("pause");
+	//while((status = inb(ATA_COMMAND(bus))) & 0x88) 
+	//	asm volatile ("pause");
 
 cleanup:
 	
