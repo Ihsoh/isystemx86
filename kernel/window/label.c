@@ -17,6 +17,8 @@
 
 #include <ilib/string.h>
 
+#define	_LABEL_WIDTH(_lbl) (LABEL_LPADDING + (_lbl)->max_col * ENFONT_WIDTH + LABEL_RPADDING)
+
 /**
 	@Function:		_max
 	@Access:		Private
@@ -141,6 +143,8 @@ label_init(	OUT LabelPtr label,
 	label->old_max_row = 0;
 	label->old_max_col = 0;
 	label->enabled = FALSE;
+	if(label->width == 0)
+		label->width = _LABEL_WIDTH(label);
 	return TRUE;
 }
 
@@ -189,7 +193,7 @@ label(	IN OUT LabelPtr label,
 	uint32 len = strlen(text);
 	uint32 width = 0;
 	if(label->width == 0)
-		width = LABEL_LPADDING + label->max_col * ENFONT_WIDTH + LABEL_RPADDING;
+		width = _LABEL_WIDTH(label);
 	else
 		width = label->width;
 	uint32 height = 0;
@@ -306,6 +310,7 @@ label_set_text(	OUT LabelPtr label,
 	label->old_max_row = label->max_row;
 	label->old_max_col = label->max_col;
 	_max(text, &label->max_row, &label->max_col);
+	label->width = _LABEL_WIDTH(label);
 	label->clean = TRUE;
 	return TRUE;
 }

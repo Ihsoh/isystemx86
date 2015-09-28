@@ -345,7 +345,7 @@ window_dispatch_event(	IN WindowPtr window,
 	params.event_type = type;
 	params.mouse_x = x;
 	params.mouse_y = y;
-	params.mouse_button = 0;
+	params.mouse_button = mouse_button;
 	params.screen = &window->workspace;
 	params.data = data;
 	window->event(window, &params);

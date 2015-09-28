@@ -18,6 +18,7 @@
 #include "../window/label.h"
 #include "../window/list.h"
 #include "../window/progress.h"
+#include "../window/scroll.h"
 
 #include <ilib/string.h>
 
@@ -31,6 +32,7 @@ ButtonPtr btn2 = NULL;
 LabelPtr lbl1 = NULL;
 ListPtr lst1 = NULL;
 ProgressPtr prgr1 = NULL;
+ScrollPtr scrl1 = NULL;
 
 static
 void
@@ -60,6 +62,15 @@ _f(uint32 id, uint32 type, void * param)
 			SET_LABEL_TEXT(lbl1, uitos(buffer, *(uint32 *)param));
 		}
 	}
+	else if(id == scrl1->id)
+	{
+		ASCCHAR buffer[1024];
+		if(type == SCROLL_CHANGED)
+		{
+			progress_set_percent(prgr1, scrl1->value);
+			SET_LABEL_TEXT(lbl1, uitos(buffer, scrl1->value));
+		}
+	}
 }
 
 static
@@ -75,6 +86,7 @@ _window_event(	IN struct Window * window,
 		LABEL(lbl1, &window->workspace, params, top);
 		LIST(lst1, &window->workspace, params, top);
 		PROGRESS(prgr1, &window->workspace, params, top);
+		SCROLL(scrl1, &window->workspace, params, top);
 	}
 }
 
@@ -95,6 +107,7 @@ explorer_window_init(void)
 	lbl1 = NEW(Label);
 	lst1 = NEW(List);
 	prgr1 = NEW(Progress);
+	scrl1 = NEW(Scroll);
 	INIT_BUTTON(btn1, 10, 10, "Test1", _f);
 	INIT_BUTTON(btn2, 100, 10, "Test2", _f);
 	INIT_LABEL(lbl1, 10, 100, "This\nis\nTest Label!", _f);
@@ -110,6 +123,13 @@ explorer_window_init(void)
 					300, 40,
 					0xffaaaaaa, 0xff555555,
 					_f);
+	scroll_init(scrl1,
+				0,
+				10, 0, 100,
+				10, 400,
+				300, 30,
+				0xffaaaaaa, 0xff555555,
+				_f);
 	return TRUE;
 }
 

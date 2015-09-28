@@ -15,6 +15,7 @@
 #define	CONTROL_LABEL		2
 #define	CONTROL_LIST		3
 #define	CONTROL_PROGRESS	4
+#define	CONTROL_SCROLL		5
 
 #define	CONTROL_ID_LIMIT	0x0000ffff
 

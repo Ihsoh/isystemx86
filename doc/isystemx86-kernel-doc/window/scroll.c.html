@@ -26,7 +26,175 @@
 		<div>
 			<h2>函数</h2>
 			<div>
-				
+				<div>
+	<a id="scroll_init" name="scroll_init" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">scroll_init</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化Scroll。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		scroll</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ScrollPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向Scroll的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		id</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		value</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件值，应该min <= value <= max。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		min</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			最小值。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		max</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			最大值。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		width</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的宽度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		height</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的高度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		color</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的前景色。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		bgcolor</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的背景色。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		event</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ControlEvent</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件的事件函数。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="scroll" name="scroll" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">scroll</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				Scroll的渲染、事件处理函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		scroll</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ScrollPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			指向Scroll对象的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		image</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ImagePtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向目标图片对象的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		params</span>,
+	<span style="color:#428cc7; font-weight:blod;"> WindowEventParamsPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向窗口事件参数的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		top</span>,
+	<span style="color:#428cc7; font-weight:blod;"> BOOL</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指示Scroll所在的窗体是否在最顶层。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+
 			</div>
 		</div>
 	</body>

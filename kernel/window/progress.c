@@ -27,6 +27,8 @@
 			指向Progress的指针。
 		id, uint32, IN
 			Progress的ID。
+		percent, uint32, IN
+			百分比值，范围为0 ~ 100。
 		x, uint32, IN
 			Progress的X坐标。
 		y, uint32, IN
@@ -63,6 +65,7 @@ progress_init(	OUT ProgressPtr progress,
 		progress->id = (uint32)progress;
 	else
 		progress->id = id;
+	progress->type = CONTROL_PROGRESS;
 	progress->percent = percent;
 	progress->x = x;
 	progress->y = y;
