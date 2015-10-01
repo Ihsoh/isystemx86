@@ -145,6 +145,6 @@ _irq14:
 .globl  _irq15
 .type   _irq15, @function
 _irq15:
-	// ..........
+	lcall	$0x533, $0
 	clear_nt
 	iret

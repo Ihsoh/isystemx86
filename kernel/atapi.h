@@ -41,8 +41,13 @@
 #define ATA_SELECT_DELAY(bus) \
   {inb(ATA_DCR(bus));inb(ATA_DCR(bus));inb(ATA_DCR(bus));inb(ATA_DCR(bus));}
 
+extern
 BOOL
 atapi_init(void);
+
+extern
+BOOL
+atapi_locked(void);
 
 extern
 int32

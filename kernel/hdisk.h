@@ -11,6 +11,10 @@
 #include "types.h"
 
 extern
+BOOL
+hdisk_locked(void);
+
+extern
 uint32
 init_hdisk(void);
 

@@ -85,6 +85,10 @@ init_ide(void);
 
 static
 void
+init_ide1(void);
+
+static
+void
 init_fpu(void);
 
 static
@@ -110,6 +114,10 @@ keyboard_int(void);
 static
 void
 ide_int(void);
+
+static
+void
+ide1_int(void);
 
 static
 void

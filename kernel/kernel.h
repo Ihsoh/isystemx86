@@ -53,6 +53,18 @@ extern
 void
 free_syscall(IN int32 tid);
 
+extern
+BOOL
+get_ide_signal(IN BOOL primary);
+
+#define GET_ALL_IDE_SIGNAL() (get_ide_signal(TRUE) || get_ide_signal(FALSE))
+
+extern
+void
+clear_ide_signal(IN BOOL primary);
+
+#define CLEAR_ALL_IDE_SIGNAL() { clear_ide_signal(TRUE); clear_ide_signal(FALSE); }
+
 DEFINE_LOCK_EXTERN(kernel)
 
 #endif

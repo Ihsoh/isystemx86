@@ -10,6 +10,7 @@
 #include "types.h"
 #include "386.h"
 #include "log.h"
+#include "atapi.h"
 
 #include <ilib/string.h>
 
@@ -69,7 +70,7 @@ static BOOL lock = FALSE;
 
 /**
 	@Function:		lock_hdisk
-	@Access:		Public
+	@Access:		Private
 	@Description:
 		锁住硬盘。
 	@Parameters:
@@ -89,7 +90,7 @@ lock_hdisk(void)
 
 /**
 	@Function:		lock_hdisk
-	@Access:		Public
+	@Access:		Private
 	@Description:
 		解锁硬盘。
 	@Parameters:
@@ -100,6 +101,21 @@ void
 unlock_hdisk(void)
 {
 	lock = FALSE;
+}
+
+/**
+	@Function:		hdisk_locked
+	@Access:		Public
+	@Description:
+		获取ATA驱动的锁的状态。
+	@Parameters:
+	@Return:
+		返回TRUE则代表ATA驱动的锁被锁定中。
+*/
+BOOL
+hdisk_locked(void)
+{
+	return lock;
 }
 
 /**
@@ -383,6 +399,8 @@ read_sector_h(	IN int8 * symbol,
 				IN uint32 pos, 
 				OUT uint8 * buffer)
 {
+	if(atapi_locked())
+		return FALSE;
 	if(!lock_hdisk())
 		return FALSE;
 	uint32 ui;
@@ -470,6 +488,8 @@ write_sector_h(	IN int8 * symbol,
 				IN uint32 pos, 
 				IN uint8 * buffer)
 {
+	if(atapi_locked())
+		return FALSE;
 	if(!lock_hdisk())
 		return FALSE;
 	uint32 ui;
@@ -569,6 +589,8 @@ read_sectors_h(	IN int8 * symbol,
 				IN uint8 count,
 				OUT uint8 * buffer)
 {
+	if(atapi_locked())
+		return FALSE;
 	if(!lock_hdisk())
 		return FALSE;
 	uint32 ui;
@@ -668,6 +690,8 @@ write_sectors_h(IN int8 * symbol,
 				IN uint8 count, 
 				IN uint8 * buffer)
 {
+	if(atapi_locked())
+		return FALSE;
 	if(!lock_hdisk())
 		return FALSE;
 	uint32 ui;

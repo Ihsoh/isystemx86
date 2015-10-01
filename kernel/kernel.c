@@ -77,7 +77,8 @@ static struct TSS xf_tss;			//处理SIMD浮点异常的任务的TSS。
 static struct TSS timer_tss;					//定时器的任务的TSS。
 static struct TSS mouse_tss;					//鼠标的任务的TSS。
 static struct TSS keyboard_tss;					//键盘的任务的TSS。
-static struct TSS ide_tss;						//IDE的任务的TSS。
+static struct TSS ide_tss;						//第一IDE的任务的TSS。
+static struct TSS ide1_tss;						//第二IDE的任务的TSS。
 static struct TSS fpu_tss;						//FPU的任务的TSS。
 static struct TSS scall_tss[MAX_TASK_COUNT];	//各个系统调用的任务的TSS。
 
@@ -108,6 +109,9 @@ static BOOL		use_rtc_for_task_scheduler	= FALSE;
 static uint8	rtc_rate					= 15;
 
 static CASCTEXT	_func_name					= "N/A";
+
+static BOOL		_ide0_signal				= FALSE;	// 第一IDE的信号。
+static BOOL		_ide1_signal				= FALSE;	// 第二IDE的信号。
 
 #include "knlstatic.h"
 
@@ -194,6 +198,7 @@ main(void)
 	init_disk("VB");
 	init_disk("HD");
 	init_ide();
+	init_ide1();
 
 	ahci_init();
 
@@ -826,7 +831,7 @@ init_keyboard(void)
 	@Function:		init_ide
 	@Access:		Private
 	@Description:
-		初始化 IDE 的中断程序。
+		初始化第一IDE的中断程序。
 	@Parameters:
 	@Return:	
 */
@@ -866,6 +871,52 @@ init_ide(void)
 	set_int_intrgate(0x76, _irq14);
 
 	fill_tss(tss, (uint32)ide_int, (uint32)stack);
+}
+
+/**
+	@Function:		init_ide1
+	@Access:		Private
+	@Description:
+		初始化第二IDE的中断程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+init_ide1(void)
+{
+	struct die_info info;
+	struct TSS * tss = &ide1_tss;
+	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_IDE, DI_INIT_IDE);
+		die(&info);
+	}
+	struct Desc tss_desc;
+	struct Gate task_gate;		
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	set_desc_to_gdt(14, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (14 << 3) | RPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
+	
+	// IRQ15
+	//set_gate_to_idt(0x77, (uint8 *)&task_gate);
+	set_desc_to_gdt(166, (uint8 *)&task_gate);
+	set_int_intrgate(0x77, _irq15);
+
+	fill_tss(tss, (uint32)ide1_int, (uint32)stack);
 }
 
 /**
@@ -1370,7 +1421,7 @@ keyboard_int(void)
 	@Function:		ide_int
 	@Access:		Private
 	@Description:
-		IDE 的中断程序。
+		第一IDE的中断程序。
 	@Parameters:
 	@Return:	
 */
@@ -1382,10 +1433,34 @@ ide_int(void)
 	{
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
-		// 在这里插入代码。。。
+		_ide0_signal = TRUE;
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
 		irq_ack(14);
+		asm volatile ("iret;");
+	}
+}
+
+/**
+	@Function:		ide1_int
+	@Access:		Private
+	@Description:
+		第二IDE的中断程序。
+	@Parameters:
+	@Return:	
+*/
+static
+void
+ide1_int(void)
+{
+	while(1)
+	{
+		if(!use_rtc_for_task_scheduler && apic_is_enable())
+			apic_stop_timer();
+		_ide1_signal = TRUE;
+		if(!use_rtc_for_task_scheduler && apic_is_enable())
+			apic_start_timer();
+		irq_ack(15);
 		asm volatile ("iret;");
 	}
 }
@@ -3313,4 +3388,44 @@ leave_system(void)
 	}
 	log(LOG_NORMAL, "Leave system.");
 	free_log();
+}
+
+/**
+	@Function:		get_ide_signal
+	@Access:		Public
+	@Description:
+		检查IDE是否有信号到达。
+	@Parameters:
+		primary, BOOL, IN
+			TRUE时表示第一IDE，FALSE时表示第二IDE。
+	@Return:
+		BOOL
+			返回TRUE则表示有信号到达。
+*/
+BOOL
+get_ide_signal(IN BOOL primary)
+{
+	if(primary)
+		return _ide0_signal;
+	else
+		return _ide1_signal;
+}
+
+/**
+	@Function:		clear_ide_signal
+	@Access:		Public
+	@Description:
+		清除IDE的信号。
+	@Parameters:
+		primary, BOOL, IN
+			TRUE时表示第一IDE，FALSE时表示第二IDE。
+	@Return:
+*/
+void
+clear_ide_signal(IN BOOL primary)
+{
+	if(primary)
+		_ide0_signal = FALSE;
+	else
+		_ide1_signal = FALSE;
 }

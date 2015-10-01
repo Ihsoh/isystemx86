@@ -2387,6 +2387,29 @@ exec(	IN int8 * cmd,
 			fix_path(path, current_path, path);
 			detail_window_show(path);
 		}
+		else if(strcmp(name, "t0") == 0)
+		{
+			FileObject * fo = open_file("DA:/isystem/init.bat", FILE_MODE_READ);
+			close_file(fo);
+		}
+		else if(strcmp(name, "t1") == 0)
+		{
+			#include "atapi.h"
+			uint8 buffer[2048];
+			int32 size = atapi_read_sector(	ATA_BUS_SECONDARY,
+											ATA_DRIVE_SLAVE,
+											1000,
+											buffer);
+			printn(size);
+			uint32 ui;
+			print_str("\n");
+			for(ui = 0; ui < 16; ui++)
+			{
+				printuchex(buffer[ui]);
+				print_str(" ");
+			}
+			print_str("\n");
+		}
 		//Batch
 		else if(strcmp(name, "goto") == 0)
 		{
