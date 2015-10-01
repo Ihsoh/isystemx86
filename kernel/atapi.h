@@ -41,6 +41,10 @@
 #define ATA_SELECT_DELAY(bus) \
   {inb(ATA_DCR(bus));inb(ATA_DCR(bus));inb(ATA_DCR(bus));inb(ATA_DCR(bus));}
 
+#define	ATAPI_MAX_SIZE			(MB(700))
+#define	ATAPI_SECTOR_COUNT 		(ATAPI_MAX_SIZE / ATAPI_SECTOR_SIZE)
+#define	ATAPI_SECTOR512_COUNT	(ATAPI_MAX_SIZE / 512)
+
 extern
 BOOL
 atapi_init(void);
@@ -61,6 +65,14 @@ BOOL
 atapi_read_sector512(	IN uint32 bus,
 						IN uint32 drive,
 						IN uint32 pos, 
+						OUT uint8 * buffer);
+
+extern
+BOOL
+atapi_read_sector512s(	IN uint32 bus,
+						IN uint32 drive,
+						IN uint32 pos,
+						IN uint32 count,
 						OUT uint8 * buffer);
 
 #endif

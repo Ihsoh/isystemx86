@@ -110,8 +110,8 @@ static uint8	rtc_rate					= 15;
 
 static CASCTEXT	_func_name					= "N/A";
 
-static BOOL		_ide0_signal				= FALSE;	// 第一IDE的信号。
-static BOOL		_ide1_signal				= FALSE;	// 第二IDE的信号。
+static uint32 _ide0_signal				= 0;	// 第一IDE的信号。
+static uint32 _ide1_signal				= 0;	// 第二IDE的信号。
 
 #include "knlstatic.h"
 
@@ -1433,7 +1433,7 @@ ide_int(void)
 	{
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
-		_ide0_signal = TRUE;
+		_ide0_signal++;
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
 		irq_ack(14);
@@ -1457,7 +1457,7 @@ ide1_int(void)
 	{
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
-		_ide1_signal = TRUE;
+		_ide1_signal++;
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
 		irq_ack(15);
@@ -3406,9 +3406,9 @@ BOOL
 get_ide_signal(IN BOOL primary)
 {
 	if(primary)
-		return _ide0_signal;
+		return _ide0_signal != 0;
 	else
-		return _ide1_signal;
+		return _ide1_signal != 0;
 }
 
 /**
@@ -3425,7 +3425,32 @@ void
 clear_ide_signal(IN BOOL primary)
 {
 	if(primary)
-		_ide0_signal = FALSE;
+	{
+		if(_ide0_signal != 0)
+			_ide0_signal--;
+	}
 	else
-		_ide1_signal = FALSE;
+	{
+		if(_ide1_signal != 0)
+			_ide1_signal--;
+	}
+}
+
+/**
+	@Function:		reset_ide_signal
+	@Access:		Public
+	@Description:
+		重置IDE的信号。
+	@Parameters:
+		primary, BOOL, IN
+			TRUE时表示第一IDE，FALSE时表示第二IDE。
+	@Return:
+*/
+void
+reset_ide_signal(IN BOOL primary)
+{
+	if(primary)
+		_ide0_signal = 0;
+	else
+		_ide1_signal = 0;
 }

@@ -2395,20 +2395,27 @@ exec(	IN int8 * cmd,
 		else if(strcmp(name, "t1") == 0)
 		{
 			#include "atapi.h"
-			uint8 buffer[512];
-			int32 size = atapi_read_sector512(	ATA_BUS_SECONDARY,
-												ATA_DRIVE_SLAVE,
-												1,
-												buffer);
-			printn(size);
-			uint32 ui;
-			print_str("\n");
-			for(ui = 0; ui < 16; ui++)
+			uint32 ui1;
+			for(ui1 = 0; ui1 < 10000; ui1++)
 			{
-				printuchex(buffer[ui]);
-				print_str(" ");
+				uint8 buffer[512];
+				int32 size = atapi_read_sector512(	ATA_BUS_SECONDARY,
+													ATA_DRIVE_MASTER,
+													0x00000000,
+													buffer);
+				printn(size);
+				uint32 ui;
+				print_str("\n");
+				for(ui = 0; ui < 16; ui++)
+				{
+					printuchex(buffer[ui]);
+					print_str(" ");
+				}
+				print_str("\n");
+				print_str("==========");
+				printn(ui1);
+				print_str("==========\n");
 			}
-			print_str("\n");
 		}
 		//Batch
 		else if(strcmp(name, "goto") == 0)

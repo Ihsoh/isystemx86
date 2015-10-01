@@ -10,6 +10,7 @@
 #include "types.h"
 #include "vdisk.h"
 #include "hdisk.h"
+#include "atapi.h"
 #include <ilib/string.h>
 
 static int8 disk_list[MAX_DISK_COUNT][3] = {{0, 0, 0},
@@ -83,6 +84,11 @@ get_disk_size(IN int8 * symbol)
 		return get_hdisk_size("DA");
 	else if(strcmp(symbol, "DB") == 0)
 		return get_hdisk_size("DB");
+	else if(strcmp(symbol, "CA") == 0
+			|| strcmp(symbol, "CB") == 0
+			|| strcmp(symbol, "CC") == 0
+			|| strcmp(symbol, "CD") == 0)
+		return ATAPI_MAX_SIZE / 1024;
 	else
 		return 0;
 }
@@ -181,6 +187,11 @@ sector_count(IN int8 * symbol)
 		return sector_count_v();
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
 		return sector_count_h(symbol);
+	else if(strcmp(symbol, "CA") == 0
+			|| strcmp(symbol, "CB") == 0
+			|| strcmp(symbol, "CC") == 0
+			|| strcmp(symbol, "CD") == 0)
+		return ATAPI_SECTOR512_COUNT;
 	else 
 		return 0;
 }
@@ -210,6 +221,26 @@ read_sector(IN int8 * symbol,
 		return read_sector_v(symbol, pos, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
 		return read_sector_h(symbol, pos, buffer);
+	else if(strcmp(symbol, "CA") == 0)
+		return atapi_read_sector512(ATA_BUS_PRIMARY,
+									ATA_DRIVE_MASTER,
+									pos,
+									buffer);
+	else if(strcmp(symbol, "CB") == 0)
+		return atapi_read_sector512(ATA_BUS_PRIMARY,
+									ATA_DRIVE_SLAVE,
+									pos,
+									buffer);
+	else if(strcmp(symbol, "CC") == 0)
+		return atapi_read_sector512(ATA_BUS_SECONDARY,
+									ATA_DRIVE_MASTER,
+									pos,
+									buffer);
+	else if(strcmp(symbol, "CD") == 0)
+		return atapi_read_sector512(ATA_BUS_SECONDARY,
+									ATA_DRIVE_SLAVE,
+									pos,
+									buffer);
 	else
 		return FALSE;
 }
@@ -271,6 +302,30 @@ read_sectors(	IN int8 * symbol,
 		return read_sectors_v(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
 		return read_sectors_h(symbol, pos, count, buffer);
+	else if(strcmp(symbol, "CA") == 0)
+		return atapi_read_sector512s(	ATA_BUS_PRIMARY,
+										ATA_DRIVE_MASTER,
+										pos,
+										count,
+										buffer);
+	else if(strcmp(symbol, "CB") == 0)
+		return atapi_read_sector512s(	ATA_BUS_PRIMARY,
+										ATA_DRIVE_SLAVE,
+										pos,
+										count,
+										buffer);
+	else if(strcmp(symbol, "CC") == 0)
+		return atapi_read_sector512s(	ATA_BUS_SECONDARY,
+										ATA_DRIVE_MASTER,
+										pos,
+										count,
+										buffer);
+	else if(strcmp(symbol, "CD") == 0)
+		return atapi_read_sector512s(	ATA_BUS_SECONDARY,
+										ATA_DRIVE_SLAVE,
+										pos,
+										count,
+										buffer);
 	else 
 		return FALSE;
 }

@@ -65,6 +65,12 @@ clear_ide_signal(IN BOOL primary);
 
 #define CLEAR_ALL_IDE_SIGNAL() { clear_ide_signal(TRUE); clear_ide_signal(FALSE); }
 
+extern
+void
+reset_ide_signal(IN BOOL primary);
+
+#define RESET_ALL_IDE_SIGNAL() { reset_ide_signal(TRUE); reset_ide_signal(FALSE); }
+
 DEFINE_LOCK_EXTERN(kernel)
 
 #endif

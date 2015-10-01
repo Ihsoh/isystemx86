@@ -114,7 +114,7 @@ _atapi_read_sector(	IN uint32 bus,
 	int32 size;
 
 	// 清除IDE信号。
-	CLEAR_ALL_IDE_SIGNAL();
+	RESET_ALL_IDE_SIGNAL();
 
 	// 选择驱动器，并且选择是Master还是Slave。
 	outb(ATA_DRIVE_SELECT(bus), drive & (1 << 4));      
@@ -154,7 +154,7 @@ _atapi_read_sector(	IN uint32 bus,
 	outsw(ATA_DATA(bus), (uint16 *)read_cmd, 6);
 
 	// 等待驱动器发送IRQ命令。
-	while(GET_ALL_IDE_SIGNAL())
+	while(!GET_ALL_IDE_SIGNAL())
 		asm volatile ("pause");
 	CLEAR_ALL_IDE_SIGNAL();
 	
@@ -181,9 +181,9 @@ _atapi_read_sector(	IN uint32 bus,
 	/* The controller will send another IRQ even though we've read all
 	* the data we want.  Wait for it -- so it doesn't interfere with
 	* subsequent operations: */
-	/*while(GET_ALL_IDE_SIGNAL())
+	while(!GET_ALL_IDE_SIGNAL())
 		asm volatile ("pause");
-	CLEAR_ALL_IDE_SIGNAL();*/
+	CLEAR_ALL_IDE_SIGNAL();
 	
 	// 等待BUSY和DRQ标志被清除，表示命令结束。
 	while((status = inb(ATA_COMMAND(bus))) & 0x88)
@@ -265,5 +265,40 @@ atapi_read_sector512(	IN uint32 bus,
 	if(atapi_read_sector(bus, drive, lba, tmp) != ATAPI_SECTOR_SIZE)
 		return FALSE;
 	memcpy(buffer, tmp + part * 512, 512);
+	return TRUE;
+}
+
+/**
+	@Function:		atapi_read_sector512s
+	@Access:		Public
+	@Description:
+		从ATAPI设备读取指定数量的模拟扇区的数据。
+		把一个2048字节的扇区分成4个512字节的模拟扇区。
+	@Parameters:
+		bus, uint32, IN
+			总线。ATA_BUS_PRIMARY或ATA_BUS_SECONDARY。
+		drive, uint32, IN
+			驱动器。ATA_DRIVE_MASTER或ATA_DRIVE_SLAVE。
+		pos, uint32, IN
+			模拟扇区的地址。
+		count, uint32, IN
+			模拟扇区的数量。
+		buffer, uint8 *, OUT
+			指向用于储存从ATAPI设备读取的数据的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+atapi_read_sector512s(	IN uint32 bus,
+						IN uint32 drive,
+						IN uint32 pos,
+						IN uint32 count,
+						OUT uint8 * buffer)
+{
+	uint32 ui;
+	for(ui = 0; ui < count; ui++, pos++, buffer += 512)
+		if(!atapi_read_sector512(bus, drive, pos, buffer))
+			return FALSE;
 	return TRUE;
 }
