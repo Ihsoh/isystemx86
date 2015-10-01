@@ -116,11 +116,11 @@ _atapi_read_sector(	IN uint32 bus,
 	// 清除IDE信号。
 	CLEAR_ALL_IDE_SIGNAL();
 
-	/* Select drive (only the slave-bit is set) */
-	// 选择驱动器（）。
+	// 选择驱动器，并且选择是Master还是Slave。
 	outb(ATA_DRIVE_SELECT(bus), drive & (1 << 4));      
 
-	ATA_SELECT_DELAY(bus);       /* 400ns delay */
+	// 延迟400ns。
+	ATA_SELECT_DELAY(bus);
 
 	// PIO模式.
 	outb(ATA_FEATURES(bus), 0x0);
