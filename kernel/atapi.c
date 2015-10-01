@@ -233,3 +233,37 @@ atapi_read_sector(	IN uint32 bus,
 	_atapi_unlock();
 	return -1;
 }
+
+/**
+	@Function:		atapi_read_sector512
+	@Access:		Public
+	@Description:
+		从ATAPI设备读取512字节的数据，模拟一个扇区为512字节。
+		把一个2048字节的扇区分成4个512字节的模拟扇区。
+	@Parameters:
+		bus, uint32, IN
+			总线。ATA_BUS_PRIMARY或ATA_BUS_SECONDARY。
+		drive, uint32, IN
+			驱动器。ATA_DRIVE_MASTER或ATA_DRIVE_SLAVE。
+		pos, uint32, IN
+			模拟扇区的地址。
+		buffer, uint8 *, OUT
+			指向用于储存从ATAPI设备读取的数据的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+atapi_read_sector512(	IN uint32 bus,
+						IN uint32 drive,
+						IN uint32 pos, 
+						OUT uint8 * buffer)
+{
+	uint32 lba = pos / 4;
+	uint32 part = pos % 4;
+	uint8 tmp[ATAPI_SECTOR_SIZE];
+	if(atapi_read_sector(bus, drive, lba, tmp) != ATAPI_SECTOR_SIZE)
+		return FALSE;
+	memcpy(buffer, tmp + part * 512, 512);
+	return TRUE;
+}

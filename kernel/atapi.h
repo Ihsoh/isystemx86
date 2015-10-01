@@ -56,4 +56,11 @@ atapi_read_sector(	IN uint32 bus,
 					IN uint32 lba,
 					OUT uint8 * buffer);
 
+extern
+BOOL
+atapi_read_sector512(	IN uint32 bus,
+						IN uint32 drive,
+						IN uint32 pos, 
+						OUT uint8 * buffer);
+
 #endif

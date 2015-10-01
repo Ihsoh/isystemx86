@@ -2395,11 +2395,11 @@ exec(	IN int8 * cmd,
 		else if(strcmp(name, "t1") == 0)
 		{
 			#include "atapi.h"
-			uint8 buffer[2048];
-			int32 size = atapi_read_sector(	ATA_BUS_SECONDARY,
-											ATA_DRIVE_SLAVE,
-											1000,
-											buffer);
+			uint8 buffer[512];
+			int32 size = atapi_read_sector512(	ATA_BUS_SECONDARY,
+												ATA_DRIVE_SLAVE,
+												1,
+												buffer);
 			printn(size);
 			uint32 ui;
 			print_str("\n");
