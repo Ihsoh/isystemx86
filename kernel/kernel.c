@@ -274,7 +274,7 @@ main(void)
 	enable_kernel_lock();
 	enable_tasks_lock();
 	enable_console_lock();
-	enable_ifs1_lock();
+	//enable_ifs1_lock();
 
 	dma_init();
 	pci_init();

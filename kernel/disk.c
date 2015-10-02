@@ -270,6 +270,11 @@ write_sector(	IN int8 * symbol,
 		return write_sector_v(symbol, pos, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
 		return write_sector_h(symbol, pos, buffer);
+	else if(strcmp(symbol, "CA") == 0
+			|| strcmp(symbol, "CB") == 0
+			|| strcmp(symbol, "CC") == 0
+			|| strcmp(symbol, "CD") == 0)
+		return TRUE;
 	else
 		return FALSE;
 }
@@ -358,6 +363,11 @@ write_sectors(	IN int8 * symbol,
 		return write_sectors_v(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
 		return write_sectors_h(symbol, pos, count, buffer);
+	else if(strcmp(symbol, "CA") == 0
+			|| strcmp(symbol, "CB") == 0
+			|| strcmp(symbol, "CC") == 0
+			|| strcmp(symbol, "CD") == 0)
+		return TRUE;
 	else
 		return FALSE;
 }
