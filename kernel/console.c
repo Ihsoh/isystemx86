@@ -1463,18 +1463,37 @@ vmode(IN int8 * mode)
 {
 	FileObject * fptr = NULL;
 	if(strcmp(mode, "text") == 0)
-		fptr = open_file(KERNELLDR_TEXT, FILE_MODE_READ);
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrtm.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa320_200") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_320_200.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa640_400") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_640_400.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa640_480") == 0)
-		fptr = open_file(KERNELLDR_VESA_640_480, FILE_MODE_READ);
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_640_480.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa800_500") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_800_500.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa800_600") == 0)
-		fptr = open_file(KERNELLDR_VESA_800_600, FILE_MODE_READ);
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_800_600.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa896_672") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_896_672.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa1024_640") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1024_640.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1024_768") == 0)
-		fptr = open_file(KERNELLDR_VESA_1024_768, FILE_MODE_READ);
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1024_768.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa1152_720") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1152_720.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1280_1024") == 0)
-		fptr = open_file(KERNELLDR_VESA_1280_1024, FILE_MODE_READ);
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1280_1024.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa1440_900") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1440_900.bin", FILE_MODE_READ);
+	else if(strcmp(mode, "vesa1600_1200") == 0)
+		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1600_1200.bin", FILE_MODE_READ);
 	else
 	{
-		error(FORMAT("vmode {text|vesa640_480|vesa800_600|vesa1024_768|vesa1280_1024}"));
+		error(FORMAT(	"vmode {text"
+						"|vesa320_200|vesa640_400|vesa640_480|vesa800_500"
+						"|vesa800_600|vesa896_672|vesa1024_640|vesa1024_768"
+						"|vesa1152_720|vesa1280_1024|vesa1440_900|vesa1600_1200}"));
 		return 0;
 	}
 	if(fptr == NULL)

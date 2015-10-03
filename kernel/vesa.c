@@ -12,6 +12,19 @@
 #include "types.h"
 #include <ilib/string.h>
 
+#define	_MODE_320_200		0x10f
+#define	_MODE_640_400		0x123
+#define	_MODE_640_480		0x112
+#define	_MODE_800_500		0x172
+#define	_MODE_800_600		0x115
+#define	_MODE_896_672		0x132
+#define	_MODE_1024_640		0x16d
+#define	_MODE_1024_768		0x118
+#define	_MODE_1152_720		0x168
+#define	_MODE_1280_1024		0x11b
+#define	_MODE_1440_900		0x163
+#define	_MODE_1600_1200		0x11f
+
 static BOOL use_vesa = FALSE;
 static uint8 vesa_info[512];
 static uint32 vesa_addr = 0;
@@ -38,24 +51,57 @@ init_vesa(void)
 		memcpy(vesa_info, ucptr, 512);
 		switch(mode)
 		{
-			case 0x112:
+			case _MODE_320_200:
+				vesa_width = 320;
+				vesa_height = 200;
+				break;
+			case _MODE_640_400:
+				vesa_width = 640;
+				vesa_height = 400;
+				break;
+			case _MODE_640_480:
 				vesa_width = 640;
 				vesa_height = 480;
 				break;
-			case 0x115:
+			case _MODE_800_500:
+				vesa_width = 800;
+				vesa_height = 500;
+				break;
+			case _MODE_800_600:
 				vesa_width = 800;
 				vesa_height = 600;
 				break;
-			case 0x118:
+			case _MODE_896_672:
+				vesa_width = 896;
+				vesa_height = 672;
+				break;
+			case _MODE_1024_640:
+				vesa_width = 1024;
+				vesa_height = 640;
+				break;
+			case _MODE_1024_768:
 				vesa_width = 1024;
 				vesa_height = 768;
 				break;
-			case 0x11b:
+			case _MODE_1152_720:
+				vesa_width = 1152;
+				vesa_height = 720;
+				break;
+			case _MODE_1280_1024:
 				vesa_width = 1280;
 				vesa_height = 1024;
 				break;
+			case _MODE_1440_900:
+				vesa_width = 1440;
+				vesa_height = 900;
+				break;
+			case _MODE_1600_1200:
+				vesa_width = 1600;
+				vesa_height = 1200;
+				break;
 			default:
 				asm volatile ("cli; hlt;");
+				break;
 		}
 		vesa_addr = *((uint32 *)(vesa_info + 40));
 		vesa_addr_ptr = (uint8 *)vesa_addr;

@@ -3,16 +3,46 @@ MAKE_DIR 	VA:/ isystem
 
 #Kernel loader directory
 MAKE_DIR	VA:/isystem/ kernelldrs
+
 MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrtm.bin
 WRITE_FILE	VA:/isystem/kernelldrs/kernelldrtm.bin kernelldr/bin/kernelldrtm.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_320_200.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_320_200.bin kernelldr/bin/kernelldrgm_320_200.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_640_400.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_640_400.bin kernelldr/bin/kernelldrgm_640_400.bin
+
 MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_640_480.bin
 WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_640_480.bin kernelldr/bin/kernelldrgm_640_480.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_800_500.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_800_500.bin kernelldr/bin/kernelldrgm_800_600.bin
+
 MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_800_600.bin
 WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_800_600.bin kernelldr/bin/kernelldrgm_800_600.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_896_672.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_896_672.bin kernelldr/bin/kernelldrgm_896_672.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1024_640.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1024_640.bin kernelldr/bin/kernelldrgm_1024_640.bin
+
 MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1024_768.bin
 WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1024_768.bin kernelldr/bin/kernelldrgm_1024_768.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1152_720.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1152_720.bin kernelldr/bin/kernelldrgm_1152_720.bin
+
 MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1280_1024.bin
 WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1280_1024.bin kernelldr/bin/kernelldrgm_1280_1024.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1440_900.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1440_900.bin kernelldr/bin/kernelldrgm_1440_900.bin
+
+MAKE_FILE	VA:/isystem/kernelldrs/ kernelldrgm_1600_1200.bin
+WRITE_FILE	VA:/isystem/kernelldrs/kernelldrgm_1600_1200.bin kernelldr/bin/kernelldrgm_1600_1200.bin
+
 
 #System window application directory
 MAKE_DIR	VA:/isystem/ wbins

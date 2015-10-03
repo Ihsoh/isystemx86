@@ -3,25 +3,20 @@
 #Date:			2014-1-25
 #Descriptor:	Make kernel loader
 
-TargetDir=bin
-TMOut=kernelldrtm.bin
-TMTarget=$(TargetDir)/$(TMOut)
-GMOut_640_480=kernelldrgm_640_480.bin
-GMTarget_640_480=$(TargetDir)/$(GMOut_640_480)
-GMOut_800_600=kernelldrgm_800_600.bin
-GMTarget_800_600=$(TargetDir)/$(GMOut_800_600)
-GMOut_1024_768=kernelldrgm_1024_768.bin
-GMTarget_1024_768=$(TargetDir)/$(GMOut_1024_768)
-GMOut_1280_1024=kernelldrgm_1280_1024.bin
-GMTarget_1280_1024=$(TargetDir)/$(GMOut_1280_1024)
-ASM=nasm
-
-$(TMTarget): bin kernelldr.asm
-	nasm -f bin kernelldr.asm -o $(TMTarget)
-	nasm -f bin kernelldr.asm -o $(GMTarget_640_480) -DVESA -DSIZE_640_480
-	nasm -f bin kernelldr.asm -o $(GMTarget_800_600) -DVESA -DSIZE_800_600
-	nasm -f bin kernelldr.asm -o $(GMTarget_1024_768) -DVESA -DSIZE_1024_768
-	nasm -f bin kernelldr.asm -o $(GMTarget_1280_1024) -DVESA -DSIZE_1280_1024
+all: bin kernelldr.asm
+	nasm -f bin kernelldr.asm -o bin/kernelldrtm.bin
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_320_200.bin -DVESA -DSIZE_320_200
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_640_400.bin -DVESA -DSIZE_640_400
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_640_480.bin -DVESA -DSIZE_640_480
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_800_500.bin -DVESA -DSIZE_800_500
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_800_600.bin -DVESA -DSIZE_800_600
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_896_672.bin -DVESA -DSIZE_896_672
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_1024_640.bin -DVESA -DSIZE_1024_640
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_1024_768.bin -DVESA -DSIZE_1024_768
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_1152_720.bin -DVESA -DSIZE_1152_720
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_1280_1024.bin -DVESA -DSIZE_1280_1024
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_1440_900.bin -DVESA -DSIZE_1440_900
+	nasm -f bin kernelldr.asm -o bin/kernelldrgm_1600_1200.bin -DVESA -DSIZE_1600_1200
 
 bin:
 	-mkdir bin
@@ -29,5 +24,4 @@ bin:
 .PHONY:clean
 
 clean:
-	-rm -f $(TargetDir)/$(TMOut) $(TargetDir)/$(GMOut)
-
+	-rm bin/*
