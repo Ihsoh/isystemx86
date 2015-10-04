@@ -15,6 +15,7 @@
 #define	SCALL_FS			2
 #define	SCALL_SYSTEM		3
 #define	SCALL_MOUSE			4
+#define SCALL_GUI			5
 
 extern
 BOOL

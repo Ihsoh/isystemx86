@@ -93,6 +93,7 @@ scroll_init(OUT ScrollPtr scroll,
 	scroll->bgcolor = bgcolor;
 	scroll->event = event;
 	scroll->updated = FALSE;
+	scroll->enabled = TRUE;
 	return TRUE;
 }
 
@@ -124,52 +125,88 @@ scroll(	IN OUT ScrollPtr scroll,
 		return FALSE;
 	if(!top)
 		return TRUE;
-	if(	point_in_rect(	params->mouse_x, params->mouse_y,
-						scroll->x + 1, scroll->y + 1,
-						scroll->width - 2, scroll->height - 2)
-		&& (params->mouse_button & MOUSE_BUTTON_LEFT))
-	{
-		uint32 p = params->mouse_x - scroll->x;
-		double sp = (double)p / (double)(scroll->width - 2);
-		scroll->value = scroll->min + (uint32)(sp * (scroll->max - scroll->min));
-		if(scroll->event != NULL)
-			scroll->event(scroll->id, SCROLL_CHANGED, NULL);
-		scroll->updated = FALSE;
-	}
+	if(scroll->enabled)
+		if(	point_in_rect(	params->mouse_x, params->mouse_y,
+							scroll->x + SCROLL_BORDER_WIDTH,
+							scroll->y + SCROLL_BORDER_WIDTH,
+							scroll->width - SCROLL_BORDER_WIDTH2X,
+							scroll->height - SCROLL_BORDER_WIDTH2X)
+			&& (params->mouse_button & MOUSE_BUTTON_LEFT))
+		{
+			uint32 p = params->mouse_x - scroll->x;
+			double sp = (double)p / (double)(scroll->width - SCROLL_BORDER_WIDTH2X);
+			scroll->value = scroll->min + (uint32)(sp * (scroll->max - scroll->min));
+			if(scroll->event != NULL)
+				scroll->event(scroll->id, SCROLL_CHANGED, NULL);
+			scroll->updated = FALSE;
+		}
 	if(!scroll->updated)
 	{
 		rect_common_image(	image,
-							scroll->x + 1, scroll->y + 1,
-							scroll->width - 2, scroll->height - 2,
+							scroll->x + SCROLL_BORDER_WIDTH,
+							scroll->y + SCROLL_BORDER_WIDTH,
+							scroll->width - SCROLL_BORDER_WIDTH2X,
+							scroll->height - SCROLL_BORDER_WIDTH2X,
 							scroll->bgcolor);
 		double sp = (double)scroll->value / (double)(scroll->max - scroll->min);	// 方块在滚动条上的比值。
 		double sw = 1.0 / (double)(scroll->max - scroll->min);						// 方块的宽度的比值。
-		double p = sp * (double)(scroll->width - 2);
-		double w = sw * (double)(scroll->width - 2);
+		double p = sp * (double)(scroll->width - SCROLL_BORDER_WIDTH2X);
+		double w = sw * (double)(scroll->width - SCROLL_BORDER_WIDTH2X);
 		// 画方块。
 		rect_common_image(	image,
-							scroll->x + 1 + (uint32)p, scroll->y + 1,
-							(uint32)w, scroll->height - 2,
+							scroll->x + SCROLL_BORDER_WIDTH + (uint32)p,
+							scroll->y + SCROLL_BORDER_WIDTH,
+							(uint32)w, scroll->height - SCROLL_BORDER_WIDTH2X,
 							scroll->color);
 
 		// 画四条边。
 		hline_common_image(	image,
-							scroll->x, scroll->y,
+							scroll->x,
+							scroll->y,
 							scroll->width,
 							WINDOW_BORDERCOLOR);
 		hline_common_image(	image,
-							scroll->x, scroll->y + scroll->height - 1,
+							scroll->x,
+							scroll->y + scroll->height - SCROLL_BORDER_WIDTH,
 							scroll->width,
 							WINDOW_BORDERCOLOR);
 		vline_common_image(	image,
-							scroll->x, scroll->y + 1,
-							scroll->height - 2,
+							scroll->x,
+							scroll->y + SCROLL_BORDER_WIDTH,
+							scroll->height - SCROLL_BORDER_WIDTH2X,
 							WINDOW_BORDERCOLOR);
 		vline_common_image(	image,
-							scroll->x + scroll->width - 1, scroll->y + 1,
-							scroll->height - 2,
+							scroll->x + scroll->width - SCROLL_BORDER_WIDTH,
+							scroll->y + SCROLL_BORDER_WIDTH,
+							scroll->height - SCROLL_BORDER_WIDTH2X,
 							WINDOW_BORDERCOLOR);
 
 		scroll->updated = TRUE;
 	}
+}
+
+/**
+	@Function:		scroll_set_value
+	@Access:		Public
+	@Description:
+		设置Scroll的值。
+	@Parameters:
+		scroll, ScrollPtr, IN OUT
+			指向Scroll的对象的指针。
+		value, uint32, IN
+			该值应该大于等于min并且小于等于max。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+scroll_set_value(	IN OUT ScrollPtr scroll,
+					IN uint32 value)
+{
+	if(	scroll == NULL
+		|| value < scroll->min
+		|| value > scroll->max)
+		return FALSE;
+	scroll->value = value;
+	return TRUE;
 }

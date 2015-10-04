@@ -31,6 +31,7 @@ extern "C"
 #include "types.h"
 #include "mouse.h"
 #include "image.h"
+#include "gui.h"
 
 #ifdef __cplusplus
 }

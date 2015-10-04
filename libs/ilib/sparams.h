@@ -31,6 +31,8 @@ struct SParams
 #define	UINT16_SPARAM(sp)	((ushort)sp)
 #define	UINT32_SPARAM(sp)	((uint)sp)
 
+#define	BOOL_SPARAM(sp)		(*((BOOL *)&(sp)))
+
 #define	INT8_PTR_SPARAM(sp)		((char *)sp)
 #define	INT16_PTR_SPARAM(sp)	((short *)sp)
 #define	INT32_PTR_SPARAM(sp)	((int *)sp)

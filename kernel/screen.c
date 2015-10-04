@@ -938,7 +938,7 @@ free_window(OUT struct Window * window)
 			for(ui1 = ui; ui1 < MAX_WINDOW_COUNT - 1; ui1++)
 				windows[ui1] = windows[ui1 + 1];
 			windows[MAX_WINDOW_COUNT - 1] = window;
-			window->id = NULL;
+			window->id = 0;
 			window_count--;
 			return TRUE;
 		}
@@ -1063,6 +1063,7 @@ create_window(	IN uint32		width,
 	window->style = style;
 	strcpy(window->title, title);
 	window->event = event;
+	window->cb_key_press = NULL;
 	if(!new_empty_image0(&window->workspace, width, height))
 	{
 		free_window(window);
@@ -1094,7 +1095,7 @@ create_window(	IN uint32		width,
 BOOL
 destroy_window(IN struct Window * window)
 {
-	if(window == NULL)
+	if(window == NULL || window->id == 0)
 		return FALSE;
 	free_window(window);
 	disable_memory_lock();

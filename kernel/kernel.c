@@ -36,6 +36,7 @@
 #include "knlldr.h"
 #include "sse.h"
 #include "timer.h"
+#include "gui.h"
 
 #include "syscall/fs.h"
 #include "syscall/keyboard.h"
@@ -156,6 +157,7 @@ main(void)
 	disable_tasks_lock();
 	disable_console_lock();
 	disable_ifs1_lock();
+	disable_gui_lock();
 
 	// 启用SSE。
 	// In order to allow SSE instructions to be executed without generating a #UD, 
@@ -234,6 +236,7 @@ main(void)
 	mqueue_init();
 	acpi_init();
 	serial_init();
+	gui_init();
 
 	//检测 APIC 是否初始化成功。
 	//如果初始化失败则使用 PIC。
@@ -275,6 +278,7 @@ main(void)
 	enable_tasks_lock();
 	enable_console_lock();
 	//enable_ifs1_lock();
+	enable_gui_lock();
 
 	dma_init();
 	pci_init();
@@ -1629,6 +1633,9 @@ system_call(void)
 			break;
 		case SCALL_MOUSE:
 			system_call_mouse(eax & 0xffff, base, sparams);
+			break;
+		case SCALL_GUI:
+			system_call_gui(eax & 0xffff, base, sparams);
 			break;
 	}
 	// }

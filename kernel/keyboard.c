@@ -87,8 +87,10 @@ add_key(IN uint8 key)
 				buffer[++bpos] = key;
 		}
 		else if(top_window != NULL)
-			if(top_window->key_count < WINDOW_KEY_BUFFER_SIZE)
-				top_window->key_buffer[top_window->key_count++] = key;
+			if(	top_window->cb_key_press == NULL
+				|| top_window->cb_key_press(top_window, key))
+				if(top_window->key_count < WINDOW_KEY_BUFFER_SIZE)
+					top_window->key_buffer[top_window->key_count++] = key;
 	}		
 	else if(bpos + 1 < IBUFFER_SIZE)
 		buffer[++bpos] = key;

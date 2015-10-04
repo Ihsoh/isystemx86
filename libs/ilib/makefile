@@ -13,7 +13,7 @@ ASFlags=--32 -march=i386 -mtune=i386
 
 Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
 bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj 	\
-bin/setjmp.obj bin/longjmp.obj bin/ctype.obj bin/errno.obj bin/strtod.obj
+bin/setjmp.obj bin/longjmp.obj bin/ctype.obj bin/errno.obj bin/strtod.obj bin/gui.obj
 
 StdlibObjs=bin/strtol.obj bin/strtoul.obj bin/atoi.obj bin/atol.obj bin/mbstowcs.obj 	\
 bin/mbtowc.obj bin/wctomb.obj bin/wcstombs.obj bin/strtod.obj bin/atof.obj bin/abs.obj 	\
@@ -92,6 +92,9 @@ bin/errno.obj: errno.c errno.h
 
 bin/strtod.obj: strtod.c
 	$(CC) $(CFlags) -c strtod.c -o bin/strtod.obj $(Include)
+
+bin/gui.obj: gui.c
+	$(CC) $(CFlags) -c gui.c -o bin/gui.obj $(Include)
 
 
 #==============================Stdlib==============================

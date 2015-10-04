@@ -62,6 +62,12 @@ dsl_lst_get(IN DSLListPtr list,
 
 extern
 BOOL
+dsl_lst_set(IN DSLListPtr list,
+			IN int32 index,
+			IN DSLValuePtr value);
+
+extern
+BOOL
 dsl_lst_clear(IN DSLListPtr list);
 
 extern

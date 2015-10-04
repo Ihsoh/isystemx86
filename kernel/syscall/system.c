@@ -65,13 +65,20 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			uint32 len = UINT32_SPARAM(sparams->param0);
 			uint32 start;
 			uint32 ui;
-			for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT && task->memory_block_ptrs[ui] != NULL; ui++);
-			if(ui < MAX_TASK_MEMORY_BLOCK_COUNT && find_free_pages((uint32 *)task->real_pagedt_addr, len, &start))
+			for(ui = 0;
+				ui < MAX_TASK_MEMORY_BLOCK_COUNT && task->memory_block_ptrs[ui] != NULL;
+				ui++);
+			if(	ui < MAX_TASK_MEMORY_BLOCK_COUNT
+				&& find_free_pages((uint32 *)task->real_pagedt_addr, len, &start))
 			{
 				void * ptr = alloc_memory(len);
 				if(ptr != NULL)
 				{
-					map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, start, len, (uint32)ptr, RW_RWE);
+					map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
+											start,
+											len,
+											(uint32)ptr,
+											RW_RWE);
 					task->memory_block_ptrs[ui] = ptr;
 					task->used_memory_size += align_4kb(len);
 					sparams->param0 = SPARAM(start);

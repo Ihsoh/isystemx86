@@ -87,7 +87,7 @@ int32
 dsl_lst_find_value(	IN DSLListPtr list,
 					IN DSLValuePtr value)
 {
-	if(list == NULL || value == NULL)
+	if(list == NULL)
 		return -1;
 	int32 i;
 	for(i = 0; i < list->count; i++)
@@ -133,6 +133,19 @@ dsl_lst_get(IN DSLListPtr list,
 		|| index >= list->count)
 		return NULL;
 	return list->values[index];
+}
+
+BOOL
+dsl_lst_set(IN DSLListPtr list,
+			IN int32 index,
+			IN DSLValuePtr value)
+{
+	if(	list == NULL
+		|| index < 0
+		|| index >= list->count)
+		return FALSE;
+	list->values[index] = value;
+	return TRUE;
 }
 
 BOOL

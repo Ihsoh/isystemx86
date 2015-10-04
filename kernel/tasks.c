@@ -17,6 +17,7 @@
 #include "mqueue.h"
 #include "kmpool.h"
 #include "kernel.h"
+#include "gui.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -462,6 +463,8 @@ _kill_task(IN int32 tid)
 
 	// 释放与这个任务对应的系统调用。
 	free_syscall(tid);
+
+	gui_close_windows(tid);
 
 	if(tid == running_tid)
 		running_tid = -1;
@@ -1118,4 +1121,56 @@ int32
 tasks_get_count(void)
 {
 	return task_count;
+}
+
+/**
+	@Function:		tasks_alloc_memory
+	@Access:		Public
+	@Description:
+		分配一段指定任务可以访问的内存。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		size, uint32, IN
+			请求的内存的大小。
+		phyaddr, void **, OUT
+			指向用于储存分配的内存的物理地址的缓冲区的指针。
+	@Return:
+		int32
+			当前任务数量。
+*/
+void *
+tasks_alloc_memory(	IN int32 tid,
+					IN uint32 size,
+					OUT void ** phyaddr)
+{
+	struct Task * task = get_task_info_ptr(tid);
+	if(task == NULL || phyaddr == NULL)
+		return NULL;
+	uint32 start;
+	uint32 ui;
+	for(ui = 0;
+		ui < MAX_TASK_MEMORY_BLOCK_COUNT && task->memory_block_ptrs[ui] != NULL;
+		ui++);
+	if(	ui < MAX_TASK_MEMORY_BLOCK_COUNT
+		&& find_free_pages((uint32 *)task->real_pagedt_addr, size, &start))
+	{
+		void * ptr = alloc_memory(size);
+		if(ptr != NULL)
+		{
+			*phyaddr = ptr;
+			map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
+									start,
+									size,
+									(uint32)ptr,
+									RW_RWE);
+			task->memory_block_ptrs[ui] = ptr;
+			task->used_memory_size += align_4kb(size);
+			return (void *)start;
+		}
+		else
+			return NULL;
+	}
+	else
+		return NULL;
 }

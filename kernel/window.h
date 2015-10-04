@@ -49,26 +49,32 @@ typedef struct WindowEventParams
 	void *					data;
 } * WindowEventParamsPtr;
 
-typedef void (* WindowEvent)(struct Window * window, struct WindowEventParams * params);
+typedef void (* WindowEvent)(	struct Window * window,
+								struct WindowEventParams * params);
+
+typedef BOOL (* WindowKeyPressCallback)(struct Window * window,
+										uint32 key);
 
 typedef struct Window
 {
-	uint32				id;										// 窗体ID。
-	int32				x;										// 窗体X坐标。
-	int32				y;										// 窗体Y坐标。
-	uint32				width;									// 窗体宽度。
-	uint32				height;									// 窗体高度。
-	ASCCHAR				title[1024];							// 窗体标题。
-	uint32				bgcolor;								// 窗体工作区背景色。
-	int32				state;									// 窗体状态。
-	uint32				style;									// 窗体样式。
-	int32				over_close_button;						// 鼠标是否悬于关闭按钮之上。
-	int32				over_hidden_button;						// 鼠标是否悬于隐藏按钮之上。
-	WindowEvent			event;									// 窗体的事件函数。
-	struct CommonImage	workspace;								// 窗体的工作区的画布。
-	struct CommonImage	title_bar;								// 窗体的标题栏的画布。
-	uint8				key_buffer[WINDOW_KEY_BUFFER_SIZE];		// 窗体的按键缓冲区。
-	uint32				key_count;								// 窗体的按键缓冲区的按键数量。
+	uint32					id;										// 窗体ID。
+	int32					x;										// 窗体X坐标。
+	int32					y;										// 窗体Y坐标。
+	uint32					width;									// 窗体宽度。
+	uint32					height;									// 窗体高度。
+	ASCCHAR					title[1024];							// 窗体标题。
+	uint32					bgcolor;								// 窗体工作区背景色。
+	int32					state;									// 窗体状态。
+	uint32					style;									// 窗体样式。
+	int32					over_close_button;						// 鼠标是否悬于关闭按钮之上。
+	int32					over_hidden_button;						// 鼠标是否悬于隐藏按钮之上。
+	WindowEvent				event;									// 窗体的事件函数。
+	struct CommonImage		workspace;								// 窗体的工作区的画布。
+	struct CommonImage		title_bar;								// 窗体的标题栏的画布。
+	uint8					key_buffer[WINDOW_KEY_BUFFER_SIZE];		// 窗体的按键缓冲区。
+	uint32					key_count;								// 窗体的按键缓冲区的按键数量。
+	WindowKeyPressCallback	cb_key_press;							// 窗体获取焦点并且有按键被按下时，会调用该函数。
+																	// 如果该函数返回FALSE，则表示不要把按键添加到key_buffer中。
 } * WindowPtr;
 
 extern

@@ -58,7 +58,7 @@ _f(uint32 id, uint32 type, void * param)
 		ASCCHAR buffer[1024];
 		if(type == BUTTON_LBUP)
 		{
-			progress_set_percent(prgr1, *(uint32 *)param * 10);
+			SET_PROGRESS_PERCENT(prgr1, *(uint32 *)param * 10);
 			SET_LABEL_TEXT(lbl1, uitos(buffer, *(uint32 *)param));
 		}
 	}
@@ -67,7 +67,7 @@ _f(uint32 id, uint32 type, void * param)
 		ASCCHAR buffer[1024];
 		if(type == SCROLL_CHANGED)
 		{
-			progress_set_percent(prgr1, scrl1->value);
+			SET_PROGRESS_PERCENT(prgr1, scrl1->value);
 			SET_LABEL_TEXT(lbl1, uitos(buffer, scrl1->value));
 		}
 	}
@@ -116,20 +116,8 @@ explorer_window_init(void)
 				10, 200,
 				"#----------#",
 				_f);
-	progress_init(	prgr1,
-					0,
-					50,
-					10, 350,
-					300, 40,
-					0xffaaaaaa, 0xff555555,
-					_f);
-	scroll_init(scrl1,
-				0,
-				10, 0, 100,
-				10, 400,
-				300, 30,
-				0xffaaaaaa, 0xff555555,
-				_f);
+	INIT_PROGRESS(prgr1, 10, 350, 300, 40, 50, _f);
+	INIT_SCROLL(scrl1, 10, 400, 300, 30, 10, 0, 100, _f);
 	return TRUE;
 }
 

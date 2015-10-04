@@ -197,6 +197,12 @@ extern
 int32
 tasks_get_count(void);
 
+extern
+void *
+tasks_alloc_memory(	IN int32 tid,
+					IN uint32 size,
+					OUT void ** phyaddr);
+
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()
 

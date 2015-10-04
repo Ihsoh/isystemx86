@@ -33,6 +33,24 @@ static void save(void);
 
 int32 main(int32 argc, ASCCHAR * argv[])
 {
+	int32 wid = ILGCreateWindow(300, 200,
+								0xffffffff,
+								WINDOW_STYLE_CLOSE | WINDOW_STYLE_MINIMIZE,
+								"Edit");
+	printn(wid);
+	print_str("\n");
+	ILGSetWindowState(wid, WINDOW_STATE_SHOW);
+	get_char();
+	ILGSetWindowPosition(wid, 100, 100);
+	get_char();
+	int32 x, y;
+	ILGGetWindowPosition(wid, &x, &y);
+	printf("%d, %d\n", x, y);
+	get_char();
+	ILGSetWindowTitle(wid, "MyEditor");
+	get_char();
+	ILGCloseWindow(wid);
+	return 0;
 	if(argc != 2)
 	{
 		printf("Format:\n\tedit {file}\n");

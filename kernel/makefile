@@ -11,6 +11,7 @@ AS=as
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 ASFlags=--32 -march=i386 -mtune=i386
 StringObj=../libs/ilib/bin/string.obj
+
 Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
 bin/console.obj bin/disk.obj bin/vdisk.obj bin/memory.obj \
@@ -19,18 +20,27 @@ bin/vesa.obj bin/enfont.obj bin/vars.obj bin/image.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.obj bin/rsdp.obj	\
 bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
-bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj bin/timer.obj
+bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj bin/timer.obj	\
+bin/gui.obj
+
 BMPObjs=bmp/bin/bmp.obj
+
 UtilsObjs=utils/bin/img.obj
+
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
+
 WindowObjs=window/bin/control.obj window/bin/button.obj window/bin/label.obj window/bin/list.obj 	\
 window/bin/progress.obj window/bin/scroll.obj
+
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
 windows/bin/detail.obj windows/bin/explorer.obj windows/bin/taskbar.obj windows/bin/start.obj 	\
 windows/bin/power.obj windows/bin/wmgr.obj
+
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
-syscall/bin/system.obj
+syscall/bin/system.obj syscall/bin/gui.obj
+
 FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
+
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
@@ -200,6 +210,8 @@ bin/irq.obj: irq.s
 bin/timer.obj: timer.c timer.h
 	$(CC) $(CFlags) -c timer.c -o bin/timer.obj $(Include)
 
+bin/gui.obj: gui.c gui.h
+	$(CC) $(CFlags) -c gui.c -o bin/gui.obj $(Include)
 
 
 bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
@@ -281,6 +293,9 @@ syscall/bin/screen.obj: syscall/screen.c syscall/screen.h
 
 syscall/bin/system.obj: syscall/system.c syscall/system.h
 	$(CC) $(CFlags) -c syscall/system.c -o syscall/bin/system.obj $(Include)
+
+syscall/bin/gui.obj: syscall/gui.c syscall/gui.h
+	$(CC) $(CFlags) -c syscall/gui.c -o syscall/bin/gui.obj $(Include)
 
 
 fs/ifs1/bin/blocks.obj: fs/ifs1/blocks.c fs/ifs1/blocks.h
