@@ -13,6 +13,12 @@
 #include "screen.h"
 #include "vesa.h"
 #include "lock.h"
+#include "kernel.h"
+#include "mouse.h"
+#include "keyboard.h"
+#include "window.h"
+#include "image.h"
+#include "enfont.h"
 
 #include <dslib/list.h>
 #include <dslib/linked_list.h>
@@ -261,4 +267,191 @@ gui_get_window_title(	IN int32 tid,
 		return FALSE;
 	strcpy(title, winstance->window->title);
 	return TRUE;
+}
+
+BOOL
+gui_has_key(IN int32 tid,
+			IN int32 wid,
+			OUT uint32 * key)
+{
+	_WINSTANCE_FALSE
+	int32 count = window_has_key(winstance->window);
+	if(count > 0)
+	{
+		if(key != NULL)
+			*key = window_peek_key(winstance->window);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+BOOL
+gui_get_key(IN int32 tid,
+			IN int32 wid,
+			OUT uint32 * key)
+{
+	_WINSTANCE_FALSE
+	if(key == NULL)
+		return FALSE;
+	int32 count = window_has_key(winstance->window);
+	if(count > 0)
+	{
+		*key = window_get_key(winstance->window);
+		return TRUE;
+	}
+	else
+		return FALSE;
+}
+
+BOOL
+gui_get_mouse(	IN int32 tid,
+				IN int32 wid,
+				OUT int32 * x,
+				OUT int32 * y,
+				OUT uint32 * button)
+{
+	_WINSTANCE_FALSE
+	if(x == NULL || y == NULL || button == NULL)
+		return FALSE;
+	WindowPtr window = winstance->window;
+	uint32 wstyle = window->style;
+	BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
+	get_mouse_position(x, y);
+	*x = *x - window->x;
+	if(has_title_bar)
+		*y = *y - window->y - TITLE_BAR_HEIGHT;
+	else
+		*y = *y - window->y;
+	*button = MOUSE_BUTTON_NONE;
+	if(is_mouse_left_button_down())
+		*button |= MOUSE_BUTTON_LEFT;
+	if(is_mouse_right_button_down())
+		*button |= MOUSE_BUTTON_RIGHT;
+	return TRUE;
+}
+
+BOOL
+gui_focused(IN int32 tid,
+			IN int32 wid)
+{
+	_WINSTANCE_FALSE
+	if(get_top_window() == winstance->window)
+		return TRUE;
+	else
+		return FALSE;
+}
+
+BOOL
+gui_focus(	IN int32 tid,
+			IN int32 wid)
+{
+	_WINSTANCE_FALSE
+	return set_top_window(winstance->window);
+}
+
+BOOL
+gui_set_pixel(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN uint32 pixel)
+{
+	_WINSTANCE_FALSE
+	return set_pixel_common_image(	&winstance->window->workspace,
+									x,
+									y,
+									pixel);
+}
+
+BOOL
+gui_get_pixel(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				OUT uint32 * pixel)
+{
+	_WINSTANCE_FALSE
+	if(pixel == NULL)
+		return FALSE;
+	*pixel = get_pixel_common_image(&winstance->window->workspace,
+									x,
+									y);
+	return TRUE;
+}
+
+BOOL
+gui_draw_rect(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN int32 width,
+				IN int32 height,
+				IN uint32 pixel)
+{
+	_WINSTANCE_FALSE
+	return rect_common_image(	&winstance->window->workspace,
+								x,
+								y,
+								width,
+								height,
+								pixel);
+}
+
+BOOL
+gui_draw_image(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN int32 width,
+				IN int32 height,
+				IN ImagePtr image)
+{
+	_WINSTANCE_FALSE
+	if(image == NULL)
+		return FALSE;
+	return draw_common_image(	&winstance->window->workspace,
+								image,
+								x,
+								y,
+								width,
+								height);
+}
+
+BOOL
+gui_draw_text(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				IN uint32 color)
+{
+	_WINSTANCE_FALSE
+	if(text == NULL)
+		return FALSE;
+	return text_common_image_ml(&winstance->window->workspace,
+								x,
+								y,
+								get_enfont_ptr(),
+								text,
+								strlen(text),
+								color);
+}
+
+BOOL
+gui_draw_line(	IN int32 tid,
+				IN int32 wid,
+				IN int32 startx,
+				IN int32 starty,
+				IN int32 endx,
+				IN int32 endy,
+				IN uint32 color)
+{
+	_WINSTANCE_FALSE
+	return line_common_image(	&winstance->window->workspace,
+								startx,
+								starty,
+								endx,
+								endy,
+								color);
 }

@@ -293,11 +293,33 @@ window_get_key(IN struct Window * window)
 {
 	if(window == NULL || !window_has_key(window))
 		return 0;
-	uint8 key = window->key_buffer[0];	
+	uint8 key = window->key_buffer[0];
 	uint32 ui;
 	for(ui = 0; ui < window->key_count - 1; ui++)
 		window->key_buffer[ui] = window->key_buffer[ui + 1];
 	window->key_count--;
+	return key;
+}
+
+/**
+	@Function:		window_peek_key
+	@Access:		Public
+	@Description:
+		获取指定窗体的按键缓冲区的按键。
+		但不从按键缓冲区中取出按键。
+	@Parameters:
+		window, struct Window *, IN
+			指向窗体结构体的指针。
+	@Return:
+		uint8
+			键值。		
+*/
+uint8
+window_peek_key(IN struct Window * window)
+{
+	if(window == NULL || !window_has_key(window))
+		return 0;
+	uint8 key = window->key_buffer[0];
 	return key;
 }
 

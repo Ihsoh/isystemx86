@@ -12,6 +12,7 @@
 #include "../window.h"
 #include "../memory.h"
 #include "../gui.h"
+#include "../image.h"
 
 void
 system_call_gui(IN uint32 func,
@@ -118,6 +119,128 @@ system_call_gui(IN uint32 func,
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
 			ASCTEXT title = (ASCTEXT)get_physical_address(tid, vptr);
 			BOOL r = gui_get_window_title(tid, wid, title);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_HAS_KEY:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			void * vptr = VOID_PTR_SPARAM(sparams->param1);
+			uint32 * key = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_has_key(tid, wid, key);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_GET_KEY:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			void * vptr = VOID_PTR_SPARAM(sparams->param1);
+			uint32 * key = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_get_key(tid, wid, key);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_GET_MOUSE:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param1);
+			int32 * x = (int32 *)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param2);
+			int32 * y = (int32 *)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			uint32 * button = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_get_mouse(tid, wid, x, y, button);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_FOCUSED:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			BOOL r = gui_focused(tid, wid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_FOCUS:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			BOOL r = gui_focus(tid, wid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_SET_PIXEL:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			uint32 pixel = UINT32_SPARAM(sparams->param3);
+			BOOL r = gui_set_pixel(tid, wid, x, y, pixel);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_GET_PIXEL:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			uint32 * pixel = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_get_pixel(tid, wid, x, y, pixel);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_DRAW_RECT:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			int32 width = INT32_SPARAM(sparams->param3);
+			int32 height = INT32_SPARAM(sparams->param4);
+			uint32 pixel = UINT32_SPARAM(sparams->param5);
+			BOOL r = gui_draw_rect(tid, wid, x, y, width, height, pixel);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_DRAW_IMAGE:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			int32 width = INT32_SPARAM(sparams->param3);
+			int32 height = INT32_SPARAM(sparams->param4);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param5);
+			vptr = get_physical_address(tid, vptr);
+			Image img;
+			memcpy(&img, vptr, sizeof(Image));
+			img.data = (uint8 *)get_physical_address(tid, img.data);
+			BOOL r = gui_draw_image(tid, wid, x, y, width, height, &img);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_DRAW_TEXT:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			uint32 color = UINT32_SPARAM(sparams->param4);
+			BOOL r = gui_draw_text(tid, wid, x, y, text, color);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_DRAW_LINE:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 startx = INT32_SPARAM(sparams->param1);
+			int32 starty = INT32_SPARAM(sparams->param2);
+			int32 endx = INT32_SPARAM(sparams->param3);
+			int32 endy = INT32_SPARAM(sparams->param4);
+			uint32 color = UINT32_SPARAM(sparams->param5);
+			BOOL r = gui_draw_line(tid, wid, startx, starty, endx, endy, color);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

@@ -94,6 +94,10 @@ extern
 uint8
 window_get_key(IN struct Window * window);
 
+extern
+uint8
+window_peek_key(IN struct Window * window);
+
 #define	window_has_key(window)	((window) == NULL ? 0 : (window)->key_count)
 
 extern
