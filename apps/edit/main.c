@@ -33,50 +33,6 @@ static void save(void);
 
 int32 main(int32 argc, ASCCHAR * argv[])
 {
-	int32 wid = ILGCreateWindow(300, 200,
-								0xffffffff,
-								WINDOW_STYLE_CLOSE | WINDOW_STYLE_MINIMIZE,
-								"Edit");
-	ILGSetWindowState(wid, WINDOW_STATE_SHOW);
-	ILGDrawRect(wid, 0, 0, 300, 200, 0xffffffff);
-	Image brush;
-	uint32 key = 0;
-	uint32 btn_id = 0xffffffff;
-	new_empty_image0(&brush, 5, 5);
-	rect_common_image(&brush, 0, 0, 5, 5, 0xffff0000);
-	ILGDrawText(wid, 0, 0, "Ihsoh Software", 0xff000000);
-	ILGNewButton(wid, 100, 100, "Test Button", &btn_id);
-	uint32 cid;
-	uint32 etype;
-	while(TRUE)
-	{
-		while(ILGGetMessage(wid, &cid, &etype, NULL))
-			if(cid == btn_id && etype == BUTTON_LBUP)
-				printf("Yahoo~~\n");
-		if(ILGGetKey(wid, &key))
-			switch(key)
-			{
-				case 'q':
-					rect_common_image(&brush, 0, 0, 5, 5, 0xffff0000);
-					break;
-				case 'w':
-					rect_common_image(&brush, 0, 0, 5, 5, 0xff00ff00);
-					break;
-				case 'e':
-					rect_common_image(&brush, 0, 0, 5, 5, 0xff0000ff);
-					break;
-				case 27:
-					goto end;
-			}
-		int32 x, y;
-		uint32 button;
-		ILGGetMouse(wid, &x, &y, &button);
-		if(button & MOUSE_BUTTON_LEFT)
-			ILGDrawImage(wid, x - 2, y - 2, 5, 5, &brush);
-	}
-end:
-	ILGCloseWindow(wid);
-	return 0;
 	if(argc != 2)
 	{
 		printf("Format:\n\tedit {file}\n");
