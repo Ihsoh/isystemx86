@@ -58,6 +58,7 @@ typedef BOOL (* WindowKeyPressCallback)(struct Window * window,
 typedef struct Window
 {
 	uint32					id;										// 窗体ID。
+	int32					uwid;									// User Window ID。
 	int32					x;										// 窗体X坐标。
 	int32					y;										// 窗体Y坐标。
 	uint32					width;									// 窗体宽度。

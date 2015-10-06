@@ -48,15 +48,6 @@ typedef	struct
 #define	LABEL_TPADDING	4
 #define	LABEL_BPADDING	4
 
-#define	LABEL_LBDOWN	1
-#define	LABEL_LBUP		2
-#define	LABEL_CLICK		LABEL_LBUP
-#define	LABEL_RBDOWN	3
-#define	LABEL_RBUP		4
-#define	LABEL_HOVER		5
-#define	LABEL_IN 		6
-#define	LABEL_OUT		7
-
 #define	LABEL_STYLE_REFRESH		0x00000001
 
 #define	INIT_LABEL(_label, _x, _y, _text, _event)	\

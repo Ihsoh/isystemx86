@@ -1052,6 +1052,7 @@ create_window(	IN uint32		width,
 				IN WindowEvent	event)
 {
 	struct Window * window = new_window();
+	window->uwid = -1;
 	window->x = 0;
 	window->y = 0;
 	window->width = width;

@@ -10,12 +10,13 @@
 #define	_WINDOW_CONTROL_H_
 
 #include "../types.h"
+#include "event.h"
 
-#define	CONTROL_BUTTON		1
-#define	CONTROL_LABEL		2
-#define	CONTROL_LIST		3
-#define	CONTROL_PROGRESS	4
-#define	CONTROL_SCROLL		5
+#define	CONTROL_BUTTON		0x00000001
+#define	CONTROL_LABEL		0x00000002
+#define	CONTROL_LIST		0x00000003
+#define	CONTROL_PROGRESS	0x00000004
+#define	CONTROL_SCROLL		0x00000005
 
 #define	CONTROL_ID_LIMIT	0x0000ffff
 

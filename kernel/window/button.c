@@ -76,6 +76,8 @@ button_init(OUT ButtonPtr button,
 	else
 		button->id = id;
 	button->type = CONTROL_BUTTON;
+	button->uwid = -1;
+	button->uwcid = -1;
 	button->x = x;
 	button->y = y;
 	strcpy(button->text, text);

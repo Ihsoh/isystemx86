@@ -8,11 +8,7 @@
 
 #include "types.h"
 
-#define	SCALL_MOUSE			4
-
-#define	SCALL_GET_MPOSITION		0
-#define	SCALL_GET_MLBSTATE		1
-#define	SCALL_GET_MRBSTATE		2
+#include "../../kernel/syscall/syscall.h"
 
 extern void get_mouse_position(int * x, int * y);
 #define	il_get_mouse_position(x, y)	(get_mouse_position((x), (y)))

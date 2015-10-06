@@ -9,30 +9,13 @@
 #include "types.h"
 #include "image.h"
 
-#define SCALL_GUI			5
+#define	CONTROL_BUTTON		0x00000001
+#define	CONTROL_LABEL		0x00000002
+#define	CONTROL_LIST		0x00000003
+#define	CONTROL_PROGRESS	0x00000004
+#define	CONTROL_SCROLL		0x00000005
 
-#define	SCALL_GUI_IS_VALID				0x00000001
-#define	SCALL_GUI_CREATE_WINDOW			0x00000002
-#define	SCALL_GUI_CLOSE_WINDOW			0x00000003
-#define	SCALL_GUI_SET_WINDOW_STATE		0x00000004
-#define	SCALL_GUI_GET_WINDOW_STATE		0x00000005
-#define	SCALL_GUI_SET_WINDOW_POSITION	0x00000006
-#define	SCALL_GUI_GET_WINDOW_POSITION	0x00000007
-#define	SCALL_GUI_SET_WINDOW_SIZE		0x00000008
-#define	SCALL_GUI_GET_WINDOW_SIZE		0x00000009
-#define	SCALL_GUI_SET_WINDOW_TITLE		0x0000000a
-#define	SCALL_GUI_GET_WINDOW_TITLE		0x0000000b
-#define	SCALL_GUI_HAS_KEY				0x0000000c
-#define	SCALL_GUI_GET_KEY				0x0000000d
-#define	SCALL_GUI_GET_MOUSE				0x0000000e
-#define	SCALL_GUI_FOCUSED				0x0000000f
-#define	SCALL_GUI_FOCUS					0x00000010
-#define	SCALL_GUI_SET_PIXEL				0x00000011
-#define	SCALL_GUI_GET_PIXEL				0x00000012
-#define	SCALL_GUI_DRAW_RECT				0x00000013
-#define	SCALL_GUI_DRAW_IMAGE			0x00000014
-#define	SCALL_GUI_DRAW_TEXT				0x00000015
-#define	SCALL_GUI_DRAW_LINE				0x00000016
+#include "../../kernel/syscall/syscall.h"
 
 #define	WINDOW_STYLE_NONE				0x00000000
 #define	WINDOW_STYLE_CLOSE				0x00000001
@@ -49,6 +32,8 @@
 #define	MOUSE_BUTTON_LEFT	0x00000001
 #define	MOUSE_BUTTON_RIGHT	0x00000002
 #define	MOUSE_BUTTON_MIDDLE	0x00000004
+
+#include "../../kernel/window/event.h"
 
 extern
 BOOL
@@ -175,5 +160,20 @@ ILGDrawLine(IN int32 wid,
 			IN int32 endx,
 			IN int32 endy,
 			IN uint32 color);
+
+extern
+BOOL
+ILGGetMessage(	IN int32 wid,
+				OUT int32 * cid,
+				OUT uint32 * type,
+				OUT void ** data);
+
+extern
+BOOL
+ILGNewButton(	IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT uint32 * id);
 
 #endif

@@ -214,7 +214,7 @@ list_enable(IN OUT ListPtr list)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < list->count; ui++)
-		if(!ENABLED_BUTTON(&list->buttons[ui]))
+		if(!ENABLE_BUTTON(&list->buttons[ui]))
 			return FALSE;
 	return TRUE;
 }

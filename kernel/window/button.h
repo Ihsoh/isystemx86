@@ -21,6 +21,8 @@ typedef struct
 {
 	int32				id;
 	int32				type;
+	int32				uwid;	// User Window ID
+	int32				uwcid;	// User Window Control ID
 	uint32				x;
 	uint32				y;
 	ASCCHAR				text[MAX_BUTTON_TEXT_LEN + 1];
@@ -48,15 +50,6 @@ typedef struct
 #define	BUTTON_BPADDING	4
 
 #define	BUTTON_HEIGHT	(BUTTON_TPADDING + ENFONT_HEIGHT + BUTTON_BPADDING)
-
-#define	BUTTON_LBDOWN		1
-#define	BUTTON_LBUP			2
-#define	BUTTON_CLICK		BUTTON_LBUP
-#define	BUTTON_RBDOWN		3
-#define	BUTTON_RBUP			4
-#define	BUTTON_HOVER		5
-#define	BUTTON_IN 			6
-#define	BUTTON_OUT			7
 
 #define	BUTTON_STYLE_REFRESH	0x00000001
 

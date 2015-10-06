@@ -296,3 +296,35 @@ ILGDrawLine(IN int32 wid,
 	system_call(SCALL_GUI, SCALL_GUI_DRAW_LINE, &sparams);
 	return BOOL_SPARAM(sparams.param0);
 }
+
+BOOL
+ILGGetMessage(	IN int32 wid,
+				OUT int32 * cid,
+				OUT uint32 * type,
+				OUT void ** data)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	sparams.param2 = SPARAM(type);
+	sparams.param3 = SPARAM(data);
+	system_call(SCALL_GUI, SCALL_GUI_GET_MESSAGE, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGNewButton(	IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT uint32 * id)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(x);
+	sparams.param2 = SPARAM(y);
+	sparams.param3 = SPARAM(text);
+	sparams.param4 = SPARAM(id);
+	system_call(SCALL_GUI, SCALL_GUI_NEW_BUTTON, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}

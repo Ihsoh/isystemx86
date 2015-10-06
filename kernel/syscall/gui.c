@@ -244,5 +244,33 @@ system_call_gui(IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+		case SCALL_GUI_NEW_BUTTON:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param4);
+			uint32 * id = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_new_button(tid, wid, x, y, text, id);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_GET_MESSAGE:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param1);
+			int32 * cid = (int32 *)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param2);
+			uint32 * type = (uint32 *)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			void ** data = (void **)get_physical_address(tid, vptr);
+			BOOL r = gui_pop_message(tid, wid, cid, type, data);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }

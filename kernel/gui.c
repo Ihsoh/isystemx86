@@ -20,6 +20,8 @@
 #include "image.h"
 #include "enfont.h"
 
+#include "window/button.h"
+
 #include <dslib/list.h>
 #include <dslib/linked_list.h>
 #include <dslib/value.h>
@@ -61,7 +63,34 @@ void
 _window_event(	struct Window * window,
 				struct WindowEventParams * params)
 {
-
+	BOOL top = get_top_window() == window;
+	switch(params->event_type)
+	{
+		case WINDOW_EVENT_PAINT:
+		{
+			int32 wid = window->uwid;
+			DSLValuePtr v = dsl_lst_get(_winstances, wid);
+			if(v != NULL)
+			{
+				WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
+				uint32 ui;
+				for(ui = 0; ui < winstance->controls->count; ui++)
+				{
+					v = dsl_lst_get(winstance->controls, ui);
+					ControlPtr control = (ControlPtr)DSL_OBJECTVAL(v);
+					switch(control->type)
+					{
+						case CONTROL_BUTTON:
+						{
+							BUTTON(control, &window->workspace, params, top);
+							break;
+						}
+					}
+				}
+			}
+			break;
+		}
+	}
 }
 
 int32
@@ -72,6 +101,7 @@ gui_create_window(	IN int32		tid,
 					IN uint32		style,
 					IN CASCTEXT		title)
 {
+	lock();
 	WindowPtr window = NULL;
 	DSLLinkedListPtr messages = NULL;
 	DSLListPtr controls = NULL;
@@ -98,21 +128,20 @@ gui_create_window(	IN int32		tid,
 	winstance->messages = messages;
 	winstance->controls = controls;
 	DSLValuePtr v = dsl_val_object(winstance);
-	lock();
+	if(v == NULL)
+		goto err;
 	int32 wid = dsl_lst_find_value(_winstances, NULL);
 	if(wid == -1)
 	{
 		if(!dsl_lst_add_value(_winstances, v))
 			goto err;
-		unlock();
-		return dsl_lst_find_value(_winstances, v);
+		wid = dsl_lst_find_value(_winstances, v);
 	}
 	else
-	{
 		dsl_lst_set(_winstances, wid, v);
-		unlock();
-		return wid;
-	}
+	window->uwid = wid;
+	unlock();
+	return wid;
 err:
 	if(window != NULL)
 		free_memory(window);
@@ -127,10 +156,10 @@ err:
 }
 
 #define _WINSTANCE_FALSE	\
-	DSLValuePtr v = dsl_lst_get(_winstances, wid);	\
-	if(v == NULL)	\
+	DSLValuePtr __v = dsl_lst_get(_winstances, wid);	\
+	if(__v == NULL)	\
 		return FALSE;	\
-	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);	\
+	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(__v);	\
 	if(winstance == NULL || winstance->tid != tid)	\
 		return FALSE;
 
@@ -144,7 +173,7 @@ gui_close_window(	IN int32 tid,
 	dsl_lst_delete_all_object_value(winstance->controls);
 	dsl_lst_set(_winstances, wid, NULL);
 	free_memory(winstance);
-	free_memory(v);
+	free_memory(__v);
 	return TRUE;
 }
 
@@ -454,4 +483,123 @@ gui_draw_line(	IN int32 tid,
 								endx,
 								endy,
 								color);
+}
+
+BOOL
+gui_push_message(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid,
+					IN uint32 type,
+					IN void * data)
+{
+	_WINSTANCE_FALSE
+	if(winstance->messages->count >= GUI_MAX_MESSAGE_COUNT)
+		return FALSE;
+	lock();
+	WindowMessagePtr msg = NULL;
+	DSLLinkedListNodePtr node = NULL;
+	msg = NEW(WindowMessage);
+	if(msg == NULL)
+		goto err;
+	msg->wid = wid;
+	msg->cid = cid;
+	msg->type = type;
+	msg->data = data;
+	node = dsl_lnklst_new_object_node(msg);
+	if(node == NULL)
+		goto err;
+	dsl_lnklst_add_node(winstance->messages, node);
+	unlock();
+	return TRUE;
+err:
+	if(msg != NULL)
+		DELETE(msg);
+	if(node != NULL)
+		DELETE(node);
+	unlock();
+	return FALSE;
+}
+
+BOOL
+gui_pop_message(IN int32 tid,
+				IN int32 wid,
+				OUT int32 * cid,
+				OUT uint32 * type,
+				OUT void ** data)
+{
+	_WINSTANCE_FALSE
+	if(winstance->messages->count == 0)
+		return FALSE;
+	DSLLinkedListNodePtr node = dsl_lnklst_shift_node(winstance->messages);
+	if(node == NULL)
+		return FALSE;
+	WindowMessagePtr msg = node->value.value.object_value;
+	if(cid != NULL)
+		*cid = msg->cid;
+	if(type != NULL)
+		*type = msg->type;
+	if(data != NULL)
+		*data = msg->data;
+	DELETE(msg);
+	DELETE(node);
+	return TRUE;
+}
+
+static
+void
+_button_event(	IN uint32 id,
+				IN uint32 type,
+				IN void * param)
+{
+	ButtonPtr button = (ButtonPtr)id;
+	int32 wid = button->uwid;
+	int32 cid = button->uwcid;
+	DSLValuePtr v = dsl_lst_get(_winstances, wid);
+	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
+	int32 tid = winstance->tid;
+	gui_push_message(tid, wid, cid, type, NULL);
+}
+
+BOOL
+gui_new_button(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT uint32 * id)
+{
+	_WINSTANCE_FALSE
+	lock();
+	ButtonPtr btn = NULL;
+	DSLValuePtr val = NULL;
+	if(id == NULL)
+		goto err;
+	btn = NEW(Button);
+	if(btn == NULL)
+		goto err;
+	INIT_BUTTON(btn, x, y, text, _button_event);
+	btn->uwid = wid;
+	val = dsl_val_object(btn);
+	if(val == NULL)
+		goto err;
+	int32 cid = dsl_lst_find_value(winstance->controls, NULL);
+	if(cid == -1)
+	{
+		if(!dsl_lst_add_value(winstance->controls, val))
+			goto err;
+		cid = dsl_lst_find_value(winstance->controls, val);
+	}
+	else
+		dsl_lst_set(winstance->controls, cid, val);
+	btn->uwcid = cid;
+	*id = cid;
+	unlock();
+	return TRUE;
+err:
+	if(btn != NULL)
+		DELETE(btn);
+	if(val != NULL)
+		DELETE(val);
+	unlock();
+	return FALSE;
 }

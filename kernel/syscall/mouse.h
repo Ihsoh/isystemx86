@@ -8,12 +8,10 @@
 #ifndef	_SYSCALL_MOUSE_
 #define	_SYSCALL_MOUSE_
 
+#include "syscall.h"
+
 #include "../types.h"
 #include "../sparams.h"
-
-#define	SCALL_GET_MPOSITION		0
-#define	SCALL_GET_MLBSTATE		1
-#define	SCALL_GET_MRBSTATE		2
 
 extern
 void

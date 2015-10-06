@@ -37,8 +37,6 @@ typedef struct
 
 } Scroll, * ScrollPtr;
 
-#define	SCROLL_CHANGED	1
-
 #define	INIT_SCROLL(_scroll, _x, _y, _width, _height, _value, _min, _max, _event)	\
 	(scroll_init((_scroll), 0, (_value), (_min), (_max), (_x), (_y), (_width), (_height), 0xffaaaaaa, 0xff555555, (_event)))
 

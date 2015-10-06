@@ -12,17 +12,15 @@
 #include "types.h"
 #include "lock.h"
 
+#define GUI_MAX_MESSAGE_COUNT	16
+
 typedef struct
 {
 	int32		wid;
+	int32		cid;
 	uint32		type;
-	uint32		mouse_x;
-	uint32		mouse_y;
-	uint32		mouse_btn;
-	uint32		key;
 	void *		data;
 } WindowMessage, * WindowMessagePtr;
-
 
 extern
 BOOL
@@ -178,6 +176,31 @@ gui_draw_line(	IN int32 tid,
 				IN int32 endx,
 				IN int32 endy,
 				IN uint32 color);
+
+extern
+BOOL
+gui_push_message(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid,
+					IN uint32 type,
+					IN void * data);
+
+extern
+BOOL
+gui_pop_message(IN int32 tid,
+				IN int32 wid,
+				OUT int32 * cid,
+				OUT uint32 * type,
+				OUT void ** data);
+
+extern
+BOOL
+gui_new_button(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT uint32 * id);
 
 DEFINE_LOCK_EXTERN(gui)
 

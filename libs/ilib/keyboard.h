@@ -8,15 +8,7 @@
 
 #include "types.h"
 
-#define	SCALL_KEYBOARD	1
-
-#define	SCALL_GET_CHAR			0
-#define	SCALL_GET_STR_N			1
-#define	SCALL_GET_SHIFT			2
-#define	SCALL_GET_CONTROL		3
-#define	SCALL_GET_ALT			4
-#define	SCALL_GET_KEY_STATUS	5
-#define	SCALL_HAS_KEY			6
+#include "../../kernel/syscall/syscall.h"
 
 #define KEY_L1 			0x4F  
 #define KEY_L2 			0x50

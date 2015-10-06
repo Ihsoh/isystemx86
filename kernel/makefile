@@ -309,4 +309,4 @@ fs/ifs1/bin/fs.obj: fs/ifs1/fs.c fs/ifs1/fs.h
 .PHONY:clean
 
 clean:
-	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowsObjs) $(SyscallObjs) $(Target)
+	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(Target)
