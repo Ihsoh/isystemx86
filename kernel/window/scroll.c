@@ -76,6 +76,8 @@ scroll_init(OUT ScrollPtr scroll,
 	else
 		scroll->id = id;
 	scroll->type = CONTROL_SCROLL;
+	scroll->uwid = -1;
+	scroll->uwcid = -1;
 	scroll->value = value;
 	scroll->min = min;
 	scroll->max = max;

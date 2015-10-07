@@ -65,7 +65,9 @@
 #define	SCALL_GUI_DRAW_TEXT				0x00000015
 #define	SCALL_GUI_DRAW_LINE				0x00000016
 #define	SCALL_GUI_GET_MESSAGE			0x00000017
-#define	SCALL_GUI_NEW_BUTTON			((CONTROL_BUTTON << 8) | 0x00000001)
+#define	SCALL_GUI_SET_TEXT				0x00000018
+#define	SCALL_GUI_GET_TEXT				0x00000019
+#define	SCALL_GUI_NEW_BUTTON			((CONTROL_BUTTON << 8) | 0x00000001)	
 
 // ============================== Keyboard ==============================
 #define	SCALL_GET_CHAR			0

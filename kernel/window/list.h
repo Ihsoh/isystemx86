@@ -22,6 +22,8 @@ typedef	struct
 {
 	uint32				id;
 	int32				type;
+	int32				uwid;							// User Window ID。
+	int32				uwcid;							// User Window Control ID。
 	uint32				x;
 	uint32				y;
 	Button 				buttons[MAX_LIST_ITEM_COUNT];

@@ -31,6 +31,8 @@ typedef struct
 {
 	uint32	id;
 	int32	type;
+	int32	uwid;							// User Window ID。
+	int32	uwcid;							// User Window Control ID。
 } Control, * ControlPtr;
 
 extern

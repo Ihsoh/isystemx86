@@ -66,6 +66,8 @@ progress_init(	OUT ProgressPtr progress,
 	else
 		progress->id = id;
 	progress->type = CONTROL_PROGRESS;
+	progress->uwid = -1;
+	progress->uwcid = -1;
 	progress->percent = percent;
 	progress->x = x;
 	progress->y = y;

@@ -125,6 +125,8 @@ label_init(	OUT LabelPtr label,
 	else
 		label->id = id;
 	label->type = CONTROL_LABEL;
+	label->uwid = -1;
+	label->uwcid = -1;
 	label->x = x;
 	label->y = y;
 	strcpy(label->text, text);

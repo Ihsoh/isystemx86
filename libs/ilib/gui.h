@@ -170,10 +170,23 @@ ILGGetMessage(	IN int32 wid,
 
 extern
 BOOL
+ILGSetText(	IN int32 wid,
+			IN int32 cid,
+			IN CASCTEXT text);
+
+extern
+BOOL
+ILGGetText(	IN int32 wid,
+			IN int32 cid,
+			OUT ASCTEXT text,
+			IN uint32 bufsz);
+
+extern
+BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
 				IN int32 y,
 				IN CASCTEXT text,
-				OUT uint32 * id);
+				OUT uint32 * cid);
 
 #endif

@@ -244,20 +244,6 @@ system_call_gui(IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
-		case SCALL_GUI_NEW_BUTTON:
-		{
-			int32 wid = INT32_SPARAM(sparams->param0);
-			int32 x = INT32_SPARAM(sparams->param1);
-			int32 y = INT32_SPARAM(sparams->param2);
-			void * vptr = NULL;
-			vptr = VOID_PTR_SPARAM(sparams->param3);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
-			vptr = VOID_PTR_SPARAM(sparams->param4);
-			uint32 * id = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_new_button(tid, wid, x, y, text, id);
-			sparams->param0 = SPARAM(r);
-			break;
-		}
 		case SCALL_GUI_GET_MESSAGE:
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
@@ -269,6 +255,45 @@ system_call_gui(IN uint32 func,
 			vptr = VOID_PTR_SPARAM(sparams->param3);
 			void ** data = (void **)get_physical_address(tid, vptr);
 			BOOL r = gui_pop_message(tid, wid, cid, type, data);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_SET_TEXT:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param2);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			BOOL r = gui_set_text(tid, wid, cid, text);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_GET_TEXT:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param2);
+			ASCTEXT text = (ASCTEXT)get_physical_address(tid, vptr);
+			uint32 bufsz = UINT32_SPARAM(sparams->param3);
+			BOOL r = gui_get_text(tid, wid, cid, text, bufsz);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+
+		// ============================== Button ==============================
+		case SCALL_GUI_NEW_BUTTON:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param4);
+			uint32 * cid = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_new_button(tid, wid, x, y, text, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

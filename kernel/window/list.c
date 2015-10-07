@@ -111,6 +111,8 @@ list_init(	OUT ListPtr list,
 	else
 		list->id = id;
 	list->type = CONTROL_LIST;
+	list->uwid = -1;
+	list->uwcid = -1;
 	list->x = x;
 	list->y = y;
 	list->count = count;

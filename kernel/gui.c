@@ -561,18 +561,76 @@ _button_event(	IN uint32 id,
 }
 
 BOOL
+gui_set_text(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				IN CASCTEXT text)
+{
+	_WINSTANCE_FALSE
+	if(text == NULL)
+		return FALSE;
+	DSLValuePtr v = dsl_lst_get(winstance->controls, cid);
+	ControlPtr control = (ControlPtr)DSL_OBJECTVAL(v);
+	switch(control->type)
+	{
+		case CONTROL_BUTTON:
+		{
+			if(strlen(text) > MAX_BUTTON_TEXT_LEN)
+				return FALSE;
+			ButtonPtr button = (ButtonPtr)control;
+			strcpy(button->text, text);
+			break;
+		}
+	}
+	return TRUE;
+}
+
+BOOL
+gui_get_text(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				OUT ASCTEXT text,
+				IN uint32 bufsz)
+{
+	_WINSTANCE_FALSE
+	if(text == NULL)
+		return FALSE;
+	DSLValuePtr v = dsl_lst_get(winstance->controls, cid);
+	ControlPtr control = (ControlPtr)DSL_OBJECTVAL(v);
+	CASCTEXT ctl_text = NULL;
+	switch(control->type)
+	{
+		case CONTROL_BUTTON:
+		{
+			ButtonPtr button = (ButtonPtr)control;
+			ctl_text = button->text;
+			break;
+		}
+	}
+	if(ctl_text != NULL)
+		if(strlen(ctl_text) < bufsz)
+			strcpy(text, ctl_text);
+		else
+		{
+			strncpy(text, ctl_text, bufsz - 1);
+			text[bufsz - 1] = '\0';
+		}
+	return TRUE;
+}
+
+BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,
 				IN int32 y,
 				IN CASCTEXT text,
-				OUT uint32 * id)
+				OUT uint32 * cid)
 {
 	_WINSTANCE_FALSE
 	lock();
 	ButtonPtr btn = NULL;
 	DSLValuePtr val = NULL;
-	if(id == NULL)
+	if(cid == NULL)
 		goto err;
 	btn = NEW(Button);
 	if(btn == NULL)
@@ -582,17 +640,17 @@ gui_new_button(	IN int32 tid,
 	val = dsl_val_object(btn);
 	if(val == NULL)
 		goto err;
-	int32 cid = dsl_lst_find_value(winstance->controls, NULL);
-	if(cid == -1)
+	int32 _cid = dsl_lst_find_value(winstance->controls, NULL);
+	if(_cid == -1)
 	{
 		if(!dsl_lst_add_value(winstance->controls, val))
 			goto err;
-		cid = dsl_lst_find_value(winstance->controls, val);
+		_cid = dsl_lst_find_value(winstance->controls, val);
 	}
 	else
-		dsl_lst_set(winstance->controls, cid, val);
-	btn->uwcid = cid;
-	*id = cid;
+		dsl_lst_set(winstance->controls, _cid, val);
+	btn->uwcid = _cid;
+	*cid = _cid;
 	unlock();
 	return TRUE;
 err:

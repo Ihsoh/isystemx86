@@ -195,12 +195,27 @@ gui_pop_message(IN int32 tid,
 
 extern
 BOOL
+gui_set_text(	IN int32 tid,
+				IN int32 wid,
+				IN int32 id,
+				IN CASCTEXT text);
+
+extern
+BOOL
+gui_get_text(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				OUT ASCTEXT text,
+				IN uint32 bufsz);
+
+extern
+BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,
 				IN int32 y,
 				IN CASCTEXT text,
-				OUT uint32 * id);
+				OUT uint32 * cid);
 
 DEFINE_LOCK_EXTERN(gui)
 
