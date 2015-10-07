@@ -254,7 +254,7 @@ system_call_gui(IN uint32 func,
 			uint32 * type = (uint32 *)get_physical_address(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param3);
 			void ** data = (void **)get_physical_address(tid, vptr);
-			BOOL r = gui_pop_message(tid, wid, cid, type, data);
+			BOOL r = gui_pop_message(tid, wid, cid, type, data, NULL);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -281,6 +281,13 @@ system_call_gui(IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+		case SCALL_GUI_UPDATE:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			BOOL r = gui_update(tid, wid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 
 		// ============================== Button ==============================
 		case SCALL_GUI_NEW_BUTTON:
@@ -292,8 +299,24 @@ system_call_gui(IN uint32 func,
 			vptr = VOID_PTR_SPARAM(sparams->param3);
 			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param4);
-			uint32 * cid = (uint32 *)get_physical_address(tid, vptr);
+			int32 * cid = (int32 *)get_physical_address(tid, vptr);
 			BOOL r = gui_new_button(tid, wid, x, y, text, cid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+
+		// ============================== Label ==============================
+		case SCALL_GUI_NEW_LABEL:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param4);
+			int32 * cid = (int32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_new_label(tid, wid, x, y, text, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

@@ -183,10 +183,22 @@ ILGGetText(	IN int32 wid,
 
 extern
 BOOL
+ILGUpdate(IN int32 wid);
+
+extern
+BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
 				IN int32 y,
 				IN CASCTEXT text,
-				OUT uint32 * cid);
+				OUT int32 * cid);
+
+extern
+BOOL
+ILGNewLabel(IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN CASCTEXT text,
+			OUT int32 * cid);
 
 #endif

@@ -9,6 +9,8 @@
 #ifndef	_WINDOW_EVENT_H_
 #define	_WINDOW_EVENT_H_
 
+#define	WINDOW_WILL_CLOSE	1
+
 #define	BUTTON_LBDOWN		1
 #define	BUTTON_LBUP			2
 #define	BUTTON_CLICK		BUTTON_LBUP

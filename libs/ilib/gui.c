@@ -341,11 +341,20 @@ ILGGetText(	IN int32 wid,
 }
 
 BOOL
+ILGUpdate(	IN int32 wid)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	system_call(SCALL_GUI, SCALL_GUI_UPDATE, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
 				IN int32 y,
 				IN CASCTEXT text,
-				OUT uint32 * cid)
+				OUT int32 * cid)
 {
 	struct SParams sparams;
 	sparams.param0 = SPARAM(wid);
@@ -354,5 +363,22 @@ ILGNewButton(	IN int32 wid,
 	sparams.param3 = SPARAM(text);
 	sparams.param4 = SPARAM(cid);
 	system_call(SCALL_GUI, SCALL_GUI_NEW_BUTTON, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGNewLabel(IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN CASCTEXT text,
+			OUT int32 * cid)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(x);
+	sparams.param2 = SPARAM(y);
+	sparams.param3 = SPARAM(text);
+	sparams.param4 = SPARAM(cid);
+	system_call(SCALL_GUI, SCALL_GUI_NEW_LABEL, &sparams);
 	return BOOL_SPARAM(sparams.param0);
 }

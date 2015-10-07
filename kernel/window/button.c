@@ -157,11 +157,10 @@ button(	IN OUT ButtonPtr button,
 	if(button->clean)
 	{
 		uint32 old_width = BUTTON_LPADDING + button->old_len * ENFONT_WIDTH + BUTTON_RPADDING;
-		if(old_width > width)
-			rect_common_image(	image,
-								x, y,
-								old_width, height,
-								WINDOW_DEFBGCOLOR);
+		rect_common_image(	image,
+							x, y,
+							old_width, height,
+							WINDOW_DEFBGCOLOR);
 		button->clean = FALSE;
 		button->old_len = 0;
 	}

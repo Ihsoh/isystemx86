@@ -51,6 +51,10 @@ MAKE_DIR	VA:/isystem/ wbins
 MAKE_FILE	VA:/isystem/wbins/ image
 WRITE_FILE	VA:/isystem/wbins/image wapps/image/bin/image.bin
 
+#Window application 'calc'
+MAKE_FILE	VA:/isystem/wbins/ calc
+WRITE_FILE	VA:/isystem/wbins/calc wapps/calc/bin/calc.bin
+
 
 #System commands directory
 MAKE_DIR	VA:/isystem/ bins

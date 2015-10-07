@@ -19,7 +19,8 @@ typedef struct
 	int32		wid;
 	int32		cid;
 	uint32		type;
-	void *		data;
+	void *		data;			// 用户态的内存地址，为NULL无效。
+	void *		phyaddr_data;	// 内核态的内存地址，为NULL无效。
 } WindowMessage, * WindowMessagePtr;
 
 extern
@@ -38,6 +39,11 @@ gui_create_window(	IN int32		tid,
 					IN uint32		bgcolor,
 					IN uint32		style,
 					IN CASCTEXT		title);
+
+extern
+BOOL
+gui_clear_messages(	IN int32 tid,
+					IN int32 wid);
 
 extern
 BOOL
@@ -183,7 +189,8 @@ gui_push_message(	IN int32 tid,
 					IN int32 wid,
 					IN int32 cid,
 					IN uint32 type,
-					IN void * data);
+					IN void * data,
+					IN void * phyaddr_data);
 
 extern
 BOOL
@@ -191,7 +198,8 @@ gui_pop_message(IN int32 tid,
 				IN int32 wid,
 				OUT int32 * cid,
 				OUT uint32 * type,
-				OUT void ** data);
+				OUT void ** data,
+				OUT void ** phyaddr_data);
 
 extern
 BOOL
@@ -210,12 +218,26 @@ gui_get_text(	IN int32 tid,
 
 extern
 BOOL
+gui_update(	IN int32 tid,
+			IN int32 wid);
+
+extern
+BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,
 				IN int32 y,
 				IN CASCTEXT text,
-				OUT uint32 * cid);
+				OUT int32 * cid);
+
+extern
+BOOL
+gui_new_label(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT int32 * cid);
 
 DEFINE_LOCK_EXTERN(gui)
 

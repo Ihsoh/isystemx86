@@ -21,6 +21,7 @@
 #include "enfont.h"
 
 #include "window/button.h"
+#include "window/label.h"
 
 #include <dslib/list.h>
 #include <dslib/linked_list.h>
@@ -85,9 +86,31 @@ _window_event(	struct Window * window,
 							BUTTON(control, &window->workspace, params, top);
 							break;
 						}
+						case CONTROL_LABEL:
+						{
+							LABEL(control, &window->workspace, params, top);
+							break;
+						}
 					}
 				}
 			}
+			break;
+		}
+		case WINDOW_EVENT_WILL_CLOSE:
+		{
+			DSLValuePtr v = dsl_lst_get(_winstances, window->uwid);
+			if(v == NULL)
+				return;
+			WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
+			if(winstance == NULL)
+				return;
+			gui_clear_messages(winstance->tid, window->uwid);
+			gui_push_message(	winstance->tid,
+								window->uwid,
+								-1,
+								WINDOW_WILL_CLOSE,
+								NULL,
+								NULL);
 			break;
 		}
 	}
@@ -164,16 +187,34 @@ err:
 		return FALSE;
 
 BOOL
+gui_clear_messages(	IN int32 tid,
+					IN int32 wid)
+{
+	_WINSTANCE_FALSE
+	lock();
+	void * phyaddr_data = NULL;
+	while(gui_pop_message(tid, wid, NULL, NULL, NULL, &phyaddr_data))
+		if(phyaddr_data != NULL)
+			free_memory(phyaddr_data);
+	unlock();
+	return TRUE;
+}
+
+BOOL
 gui_close_window(	IN int32 tid,
 					IN int32 wid)
 {
 	_WINSTANCE_FALSE
+	lock();
 	destroy_window(winstance->window);
-	dsl_lnklst_delete_all_object_node(winstance->messages);
+	gui_clear_messages(tid, wid);
+	dsl_lnklst_free(winstance->messages);
 	dsl_lst_delete_all_object_value(winstance->controls);
+	dsl_lst_free(winstance->controls);
 	dsl_lst_set(_winstances, wid, NULL);
 	free_memory(winstance);
 	free_memory(__v);
+	unlock();
 	return TRUE;
 }
 
@@ -490,7 +531,8 @@ gui_push_message(	IN int32 tid,
 					IN int32 wid,
 					IN int32 cid,
 					IN uint32 type,
-					IN void * data)
+					IN void * data,
+					IN void * phyaddr_data)
 {
 	_WINSTANCE_FALSE
 	if(winstance->messages->count >= GUI_MAX_MESSAGE_COUNT)
@@ -505,6 +547,7 @@ gui_push_message(	IN int32 tid,
 	msg->cid = cid;
 	msg->type = type;
 	msg->data = data;
+	msg->phyaddr_data = phyaddr_data;
 	node = dsl_lnklst_new_object_node(msg);
 	if(node == NULL)
 		goto err;
@@ -525,7 +568,8 @@ gui_pop_message(IN int32 tid,
 				IN int32 wid,
 				OUT int32 * cid,
 				OUT uint32 * type,
-				OUT void ** data)
+				OUT void ** data,
+				OUT void ** phyaddr_data)
 {
 	_WINSTANCE_FALSE
 	if(winstance->messages->count == 0)
@@ -540,24 +584,11 @@ gui_pop_message(IN int32 tid,
 		*type = msg->type;
 	if(data != NULL)
 		*data = msg->data;
+	if(phyaddr_data != NULL)
+		*phyaddr_data = msg->phyaddr_data;
 	DELETE(msg);
 	DELETE(node);
 	return TRUE;
-}
-
-static
-void
-_button_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
-{
-	ButtonPtr button = (ButtonPtr)id;
-	int32 wid = button->uwid;
-	int32 cid = button->uwcid;
-	DSLValuePtr v = dsl_lst_get(_winstances, wid);
-	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
-	int32 tid = winstance->tid;
-	gui_push_message(tid, wid, cid, type, NULL);
 }
 
 BOOL
@@ -578,9 +609,19 @@ gui_set_text(	IN int32 tid,
 			if(strlen(text) > MAX_BUTTON_TEXT_LEN)
 				return FALSE;
 			ButtonPtr button = (ButtonPtr)control;
-			strcpy(button->text, text);
+			SET_BUTTON_TEXT(button, text);
 			break;
 		}
+		case CONTROL_LABEL:
+		{
+			if(strlen(text) > MAX_LABEL_TEXT_LEN)
+				return FALSE;
+			LabelPtr label = (LabelPtr)control;
+			SET_LABEL_TEXT(label, text);
+			break;
+		}
+		default:
+			return FALSE;
 	}
 	return TRUE;
 }
@@ -606,6 +647,14 @@ gui_get_text(	IN int32 tid,
 			ctl_text = button->text;
 			break;
 		}
+		case CONTROL_LABEL:
+		{
+			LabelPtr label = (LabelPtr)control;
+			ctl_text = label->text;
+			break;
+		}
+		default:
+			return FALSE;
 	}
 	if(ctl_text != NULL)
 		if(strlen(ctl_text) < bufsz)
@@ -615,7 +664,33 @@ gui_get_text(	IN int32 tid,
 			strncpy(text, ctl_text, bufsz - 1);
 			text[bufsz - 1] = '\0';
 		}
+	else
+		return FALSE;
 	return TRUE;
+}
+
+BOOL
+gui_update(	IN int32 tid,
+			IN int32 wid)
+{
+	_WINSTANCE_FALSE
+	window_dispatch_event(winstance->window, WINDOW_EVENT_PAINT, NULL);
+	return TRUE;
+}
+
+static
+void
+_no_data_event(	IN uint32 id,
+				IN uint32 type,
+				IN void * param)
+{
+	ControlPtr ctrl = (ControlPtr)id;
+	int32 wid = ctrl->uwid;
+	int32 cid = ctrl->uwcid;
+	DSLValuePtr v = dsl_lst_get(_winstances, wid);
+	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
+	int32 tid = winstance->tid;
+	gui_push_message(tid, wid, cid, type, NULL, NULL);
 }
 
 BOOL
@@ -624,7 +699,7 @@ gui_new_button(	IN int32 tid,
 				IN int32 x,
 				IN int32 y,
 				IN CASCTEXT text,
-				OUT uint32 * cid)
+				OUT int32 * cid)
 {
 	_WINSTANCE_FALSE
 	lock();
@@ -635,7 +710,7 @@ gui_new_button(	IN int32 tid,
 	btn = NEW(Button);
 	if(btn == NULL)
 		goto err;
-	INIT_BUTTON(btn, x, y, text, _button_event);
+	INIT_BUTTON(btn, x, y, text, _no_data_event);
 	btn->uwid = wid;
 	val = dsl_val_object(btn);
 	if(val == NULL)
@@ -656,6 +731,50 @@ gui_new_button(	IN int32 tid,
 err:
 	if(btn != NULL)
 		DELETE(btn);
+	if(val != NULL)
+		DELETE(val);
+	unlock();
+	return FALSE;
+}
+
+BOOL
+gui_new_label(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT int32 * cid)
+{
+	_WINSTANCE_FALSE
+	lock();
+	LabelPtr lbl = NULL;
+	DSLValuePtr val = NULL;
+	if(cid == NULL)
+		goto err;
+	lbl = NEW(Label);
+	if(lbl == NULL)
+		goto err;
+	INIT_LABEL(lbl, x, y, text, _no_data_event);
+	lbl->uwid = wid;
+	val = dsl_val_object(lbl);
+	if(val == NULL)
+		goto err;
+	int32 _cid = dsl_lst_find_value(winstance->controls, NULL);
+	if(_cid == -1)
+	{
+		if(!dsl_lst_add_value(winstance->controls, val))
+			goto err;
+		_cid = dsl_lst_find_value(winstance->controls, val);
+	}
+	else
+		dsl_lst_set(winstance->controls, _cid, val);
+	lbl->uwcid = _cid;
+	*cid = _cid;
+	unlock();
+	return TRUE;
+err:
+	if(lbl != NULL)
+		DELETE(lbl);
 	if(val != NULL)
 		DELETE(val);
 	unlock();

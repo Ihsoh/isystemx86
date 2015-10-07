@@ -207,11 +207,10 @@ label(	IN OUT LabelPtr label,
 	{
 		uint32 old_width = LABEL_LPADDING + label->old_max_col * ENFONT_WIDTH + LABEL_RPADDING;
 		uint32 old_height = LABEL_TPADDING + label->old_max_row * ENFONT_HEIGHT + LABEL_BPADDING;
-		if(old_width > width || old_height > height)
-			rect_common_image(	image,
-								x, y,
-								old_width, old_height,
-								WINDOW_DEFBGCOLOR);
+		rect_common_image(	image,
+							x, y,
+							old_width, old_height,
+							WINDOW_DEFBGCOLOR);
 		label->clean = FALSE;
 		label->old_max_row = 0;
 		label->old_max_col = 0;

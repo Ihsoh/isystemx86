@@ -35,6 +35,7 @@ $(Target):	bin	\
 	cd apps/lua2 && make
 
 	cd wapps/image && make
+	cd wapps/calc && make
 
 	cd sys/pci && make
 	cd sys/screen && make
@@ -135,6 +136,7 @@ clean:
 	cd apps/lua2 && make clean
 
 	cd wapps/image && make clean
+	cd wapps/calc && make clean
 
 	cd sys/pci && make clean
 	cd sys/screen && make clean
