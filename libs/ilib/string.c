@@ -178,6 +178,10 @@ char * dtos(char * str, double n)
 	uitos(s + len + 1, d);
 	s[len + 1] = ' ';
 	ltrim(s + len + 1);
+	rtrimex(str, '0');
+	len = strlen(s);
+	if(str[len - 1] == '.')
+		str[len - 1] = '\0';
 	return str;
 }
 
@@ -295,6 +299,30 @@ void trim(char * str)
 {
 	ltrim(str);
 	rtrim(str);
+}
+
+void ltrimex(char * str, char chr)
+{
+	unsigned int start;	
+	unsigned int ui;
+	unsigned int len = strlen(str);
+	for(start = 0; start < len && str[start] == chr; start++);
+	len = len - start + 1;
+	for(ui = 0; ui < len; ui++, start++)
+		str[ui] = str[start];
+}
+
+void rtrimex(char * str, char chr)
+{
+	int start;
+	for(start = strlen(str) - 1; start >= 0 && str[start] == chr; start--);
+	str[start + 1] = '\0';
+}
+
+void trimex(char * str, char chr)
+{
+	ltrimex(str, chr);
+	rtrimex(str, chr);
 }
 
 int is_valid_uint(char * str)

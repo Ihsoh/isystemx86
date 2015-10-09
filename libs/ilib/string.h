@@ -52,6 +52,10 @@ extern double stod(char * str);
 extern void ltrim(char * str);
 extern void rtrim(char * str);
 extern void trim(char * str);
+extern void ltrimex(char * str, char chr);
+extern void rtrimex(char * str, char chr);
+extern void trimex(char * str, char chr);
+
 extern int is_valid_uint(char * str);
 
 #include "string/string.h"
