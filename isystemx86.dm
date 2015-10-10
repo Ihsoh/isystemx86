@@ -55,6 +55,10 @@ WRITE_FILE	VA:/isystem/wbins/image wapps/image/bin/image.bin
 MAKE_FILE	VA:/isystem/wbins/ calc
 WRITE_FILE	VA:/isystem/wbins/calc wapps/calc/bin/calc.bin
 
+#Window application 'wedit'
+MAKE_FILE	VA:/isystem/wbins/ wedit
+WRITE_FILE	VA:/isystem/wbins/wedit wapps/wedit/bin/wedit.bin
+
 
 #System commands directory
 MAKE_DIR	VA:/isystem/ bins

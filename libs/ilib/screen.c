@@ -272,3 +272,22 @@ int write_console_buffer(uint8 * buffer, uint32 size)
 	system_call(SCALL_SCREEN, SCALL_WRITE_CONSOLE_BUFFER, &sparams);
 	return INT32_SPARAM(sparams.param0);
 }
+
+BOOL
+ILRenderTextBuffer(	IN OUT ImagePtr image,
+					IN uint8 * txtbuf,
+					IN uint32 row,
+					IN uint32 column,
+					IN uint32 curx,
+					IN uint32 cury)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(image);
+	sparams.param1 = SPARAM(txtbuf);
+	sparams.param2 = SPARAM(row);
+	sparams.param3 = SPARAM(column);
+	sparams.param4 = SPARAM(curx);
+	sparams.param5 = SPARAM(cury);
+	system_call(SCALL_SCREEN, SCALL_RENDER_TEXT_BUFFER, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}

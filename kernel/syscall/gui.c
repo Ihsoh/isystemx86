@@ -288,6 +288,20 @@ system_call_gui(IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+		case SCALL_GUI_RENDER_TEXT_BUFFER:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param1);
+			uint8 * txtbuf = (uint8 *)get_physical_address(tid, vptr);
+			uint32 row = UINT32_SPARAM(sparams->param2);
+			uint32 column = UINT32_SPARAM(sparams->param3);
+			uint32 curx = UINT32_SPARAM(sparams->param4);
+			uint32 cury = UINT32_SPARAM(sparams->param5);
+			BOOL r = gui_render_text_buffer(tid, wid, txtbuf, row, column, curx, cury);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 
 		// ============================== Button ==============================
 		case SCALL_GUI_NEW_BUTTON:

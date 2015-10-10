@@ -106,6 +106,10 @@ ILGGetKey(	IN int32 wid,
 			OUT uint32 * key);
 
 extern
+uint32
+ILGGetKeyWait(IN int32 wid);
+
+extern
 BOOL
 ILGGetMouse(IN int32 wid,
 			OUT int32 * x,
@@ -184,6 +188,15 @@ ILGGetText(	IN int32 wid,
 extern
 BOOL
 ILGUpdate(IN int32 wid);
+
+extern
+BOOL
+ILGRenderTextBuffer(IN int32 wid,
+					IN uint8 * txtbuf,
+					IN uint32 row,
+					IN uint32 column,
+					IN uint32 curx,
+					IN uint32 cury);
 
 extern
 BOOL

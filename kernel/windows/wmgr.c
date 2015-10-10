@@ -171,7 +171,9 @@ wmgr_window_init(void)
 {
 	_window = create_window(_WIDTH, _HEIGHT,
 							0xff222222,
-							WINDOW_STYLE_NO_TITLE | WINDOW_STYLE_NO_WMGR,
+							WINDOW_STYLE_NO_TITLE
+								| WINDOW_STYLE_NO_WMGR
+								| WINDOW_STYLE_NO_BORDER,
 							"Window Manager",
 							_window_event);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);

@@ -557,12 +557,12 @@ hline_common_image(	IN OUT struct CommonImage * common_image,
 					IN int32 length,
 					IN uint32 pixel)
 {
-	if(common_image == NULL || start_y >= common_image->height)
+	if(common_image == NULL || start_y >= (int32)common_image->height)
 		return FALSE;
 	int32 x;
 	uint32 * data_ptr = common_image->data;
-	for(x = 0; x < length && x + start_x < common_image->width; x++)
-		if(start_x + x >= 0)
+	for(x = 0; x < length && x + start_x < (int32)common_image->width; x++)
+		if(start_x + x >= 0 && start_y >= 0)
 			data_ptr[start_y * common_image->width + start_x + x] = pixel;
 	return TRUE;
 }
@@ -594,12 +594,12 @@ vline_common_image(	IN OUT struct CommonImage * common_image,
 					IN int32 length,
 					IN uint32 pixel)
 {
-	if(common_image == NULL || start_x >= common_image->width)
+	if(common_image == NULL || start_x >= (int32)common_image->width)
 		return FALSE;
 	int32 y;
 	uint32 * data_ptr = common_image->data;
-	for(y = 0; y < length && y + start_y < common_image->height; y++)
-		if(start_y + y >= 0)
+	for(y = 0; y < length && y + start_y < (int32)common_image->height; y++)
+		if(start_y + y >= 0 && start_x >= 0)
 			data_ptr[(start_y + y) * common_image->width + start_x] = pixel;
 	return TRUE;
 }

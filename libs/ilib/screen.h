@@ -12,6 +12,8 @@
 
 #include "../../kernel/syscall/syscall.h"
 
+#define	CURSOR_HEIGHT	2
+
 #define	CC_BLACK		0
 #define	CC_BLUE			1
 #define	CC_GREEN		2
@@ -145,6 +147,14 @@ extern int write_console_buffer(uint8 * buffer, uint32 size);
 #define	il_write_console_buffer(buffer, size)	(write_console_buffer((buffer), (size)))
 #define	ILWriteConsoleBuffer(buffer, size)	(write_console_buffer((buffer), (size)))
 
+extern
+BOOL
+ILRenderTextBuffer(	IN OUT ImagePtr image,
+					IN uint8 * txtbuf,
+					IN uint32 row,
+					IN uint32 column,
+					IN uint32 curx,
+					IN uint32 cury);
 
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\

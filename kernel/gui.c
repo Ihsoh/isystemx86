@@ -678,6 +678,35 @@ gui_update(	IN int32 tid,
 	return TRUE;
 }
 
+BOOL
+gui_render_text_buffer(	IN int32 tid,
+						IN int32 wid,
+						IN uint8 * txtbuf,
+						IN uint32 row,
+						IN uint32 column,
+						IN uint32 curx,
+						IN uint32 cury)
+{
+	_WINSTANCE_FALSE
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//
+	// 这里渲染文本缓冲区不lock()/unlock()的话会，窗体工作区闪烁。
+	// 即使设定了渲染期间不发送WINDOW_EVENT_PAINT，但是不起作用，原因不明。
+	// 
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	lock();
+	winstance->window->locked = TRUE;
+	render_text_buffer(	&winstance->window->workspace,
+						txtbuf,
+						row,
+						column,
+						curx,
+						cury);
+	winstance->window->locked = FALSE;
+	unlock();
+	return TRUE;
+}
+
 static
 void
 _no_data_event(	IN uint32 id,

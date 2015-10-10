@@ -223,6 +223,16 @@ gui_update(	IN int32 tid,
 
 extern
 BOOL
+gui_render_text_buffer(	IN int32 tid,
+						IN int32 wid,
+						IN uint8 * txtbuf,
+						IN uint32 row,
+						IN uint32 column,
+						IN uint32 curx,
+						IN uint32 cury);
+
+extern
+BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,

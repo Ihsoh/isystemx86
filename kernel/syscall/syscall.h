@@ -68,6 +68,7 @@
 #define	SCALL_GUI_SET_TEXT				0x00000018
 #define	SCALL_GUI_GET_TEXT				0x00000019
 #define	SCALL_GUI_UPDATE				0x0000001a
+#define	SCALL_GUI_RENDER_TEXT_BUFFER	0x0000001b
 
 #define	SCALL_GUI_NEW_BUTTON			((CONTROL_BUTTON << 8) | 0x00000001)
 
@@ -122,6 +123,7 @@
 #define	SCALL_FLUSH_SCREEN 			28
 
 #define	SCALL_WRITE_CONSOLE_BUFFER	29
+#define	SCALL_RENDER_TEXT_BUFFER	30
 
 // ============================== System ==============================
 #define	SCALL_EXIT				0

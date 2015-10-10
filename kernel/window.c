@@ -271,7 +271,8 @@ render_window(	IN struct Window * window,
 							0xff000000);
 	}
 
-	window_dispatch_event(window, WINDOW_EVENT_PAINT, NULL);
+	if(!window->locked)
+		window_dispatch_event(window, WINDOW_EVENT_PAINT, NULL);
 
 	return TRUE;	
 }

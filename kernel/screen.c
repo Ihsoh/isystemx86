@@ -1065,6 +1065,7 @@ create_window(	IN uint32		width,
 	strcpy(window->title, title);
 	window->event = event;
 	window->cb_key_press = NULL;
+	window->locked = FALSE;
 	if(!new_empty_image0(&window->workspace, width, height))
 	{
 		free_window(window);
@@ -1123,6 +1124,79 @@ get_top_window(void)
 		return NULL;
 	else
 		return windows[0];
+}
+
+/**
+	@Function:		render_text_buffer
+	@Access:		Public
+	@Description:
+		渲染文本缓冲区。
+	@Parameters:
+		image, ImagePtr, IN OUT
+			指向保存渲染结果的图片对象的指针。
+		txtbuf, uint8 *, IN
+			指向文本缓冲区的指针。
+		row, uint32, IN
+			文本缓冲区的行数。
+		col, uint32, IN
+			文本缓冲区的列数。
+		curx, uint32, IN
+			光标的X坐标。
+		cury, uint32, IN
+			光标的Y坐标。
+	@Return:
+		struct Window *
+			顶层窗体的结构体的指针。		
+*/
+BOOL
+render_text_buffer(	IN OUT ImagePtr image,
+					IN uint8 * txtbuf,
+					IN uint32 row,
+					IN uint32 column,
+					IN uint32 curx,
+					IN uint32 cury)
+{
+	if(image == NULL || txtbuf == NULL)
+		return FALSE;
+	uint32 x, y;
+	for(y = 0; y < row; y++)
+		for(x = 0; x < column; x++)
+		{
+			uint8 * offset = txtbuf + (y * column + x) * 2;
+			int8 chr = *offset;
+			uint8 p = *(offset + 1);
+			uint32 color = property_to_real_color(p & 0x0F);
+			uint32 bg_color = property_to_real_color((p >> 4) & 0x0F);
+			rect_common_image(	image, 
+								x * ENFONT_WIDTH, 
+								y * (ENFONT_HEIGHT + CURSOR_HEIGHT), 
+								ENFONT_WIDTH, 
+								ENFONT_HEIGHT + CURSOR_HEIGHT, 
+								bg_color);
+			uint8 * font = get_enfont_ptr();
+
+			if(font != NULL)
+				text_common_image(	image,
+									x * ENFONT_WIDTH,
+									y * (ENFONT_HEIGHT + CURSOR_HEIGHT),
+									font,
+									&chr,
+									1,
+									color);
+		}
+	uint32 cursor_real_color = property_to_real_color(cursor_color);
+	uint32 c_x = curx, c_y = cury;
+	for(x = 0; x < ENFONT_WIDTH; x++)
+		for(y = 0; y < CURSOR_HEIGHT; y++)
+		{
+			uint32 index = 	c_y * (ENFONT_HEIGHT + CURSOR_HEIGHT) * console_screen_width
+							+ ENFONT_HEIGHT * console_screen_width
+							+ y * console_screen_width 
+							+ (uint32)c_x * ENFONT_WIDTH
+							+ x;
+			((uint32 *)image->data)[index] = cursor_real_color;
+		}
+	return TRUE;
 }
 
 /**
@@ -1342,6 +1416,8 @@ flush_screen(void)
 	int32 i;
 	for(i = window_count - 1; i >= 0; i--)
 	{
+		BOOL top = i == 0;
+		uint32 border_color = top ? TITLE_BAR_BGCOLOR : TITLE_BAR_BGCOLOR_NT;
 		struct Window * window = windows[i];
 		uint32 wstyle = window->style;
 		BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
@@ -1351,7 +1427,7 @@ flush_screen(void)
 			continue;
 		if(has_title_bar)
 		{
-			if(render_window(window, i == 0 ? TRUE : FALSE))
+			if(render_window(window, top))
 			{
 				draw_common_image(	&screen_buffer,
 									&window->title_bar,
@@ -1365,16 +1441,64 @@ flush_screen(void)
 									window->y + TITLE_BAR_HEIGHT,
 									window->workspace.width,
 									window->workspace.height);
+				if(!(wstyle & WINDOW_STYLE_NO_BORDER))
+				{
+					hline_common_image( &screen_buffer,
+										window->x - 1,
+										window->y - 1,
+										window->width + 2,
+										border_color);
+					hline_common_image(	&screen_buffer,
+										window->x - 1,
+										window->y + TITLE_BAR_HEIGHT + window->height,
+										window->width + 2,
+										border_color);
+					vline_common_image(	&screen_buffer,
+										window->x - 1,
+										window->y,
+										TITLE_BAR_HEIGHT + window->height,
+										border_color);
+					vline_common_image(	&screen_buffer,
+										window->x + window->width,
+										window->y,
+										TITLE_BAR_HEIGHT + window->height,
+										border_color);
+				}
 			}
 		}
 		else
-			if(render_window(window, i == 0 ? TRUE : FALSE))
+			if(render_window(window, top))
+			{
 				draw_common_image(	&screen_buffer,
 									&window->workspace,
 									window->x,
 									window->y,
 									window->workspace.width,
 									window->workspace.height);
+				if(!(wstyle & WINDOW_STYLE_NO_BORDER))
+				{
+					hline_common_image( &screen_buffer,
+										window->x - 1,
+										window->y - 1,
+										window->width + 2,
+										border_color);
+					hline_common_image(	&screen_buffer,
+										window->x - 1,
+										window->y + window->height,
+										window->width + 2,
+										border_color);
+					vline_common_image(	&screen_buffer,
+										window->x - 1,
+										window->y,
+										window->height,
+										border_color);
+					vline_common_image(	&screen_buffer,
+										window->x + window->width,
+										window->y,
+										window->height,
+										border_color);
+				}
+			}
 	}
 
 	draw_common_image_t(&screen_buffer, 

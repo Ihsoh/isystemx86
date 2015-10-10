@@ -342,5 +342,23 @@ system_call_screen(	IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+		case SCALL_RENDER_TEXT_BUFFER:
+		{
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param0);
+			vptr = get_physical_address(sparams->tid, vptr);
+			Image image;
+			memcpy(&image, vptr, sizeof(Image));
+			image.data = (uint8 *)get_physical_address(sparams->tid, image.data);
+			vptr = VOID_PTR_SPARAM(sparams->param1);
+			uint8 * txtbuf = (uint8 *)get_physical_address(sparams->tid, vptr);
+			uint32 row = UINT32_SPARAM(sparams->param2);
+			uint32 column = UINT32_SPARAM(sparams->param3);
+			uint32 curx = UINT32_SPARAM(sparams->param4);
+			uint32 cury = UINT32_SPARAM(sparams->param5);
+			BOOL r = render_text_buffer(&image, txtbuf, row, column, curx, cury);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }

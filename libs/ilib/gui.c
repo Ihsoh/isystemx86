@@ -160,6 +160,16 @@ ILGGetKey(	IN int32 wid,
 	return BOOL_SPARAM(sparams.param0);
 }
 
+uint32
+ILGGetKeyWait(IN int32 wid)
+{
+	while(!ILGHasKey(wid, NULL))
+		asm volatile("pause");
+	uint32 key = 0;
+	ILGGetKey(wid, &key);
+	return key;
+}
+
 BOOL
 ILGGetMouse(IN int32 wid,
 			OUT int32 * x,
@@ -346,6 +356,25 @@ ILGUpdate(	IN int32 wid)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(wid);
 	system_call(SCALL_GUI, SCALL_GUI_UPDATE, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGRenderTextBuffer(IN int32 wid,
+					IN uint8 * txtbuf,
+					IN uint32 row,
+					IN uint32 column,
+					IN uint32 curx,
+					IN uint32 cury)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(txtbuf);
+	sparams.param2 = SPARAM(row);
+	sparams.param3 = SPARAM(column);
+	sparams.param4 = SPARAM(curx);
+	sparams.param5 = SPARAM(cury);
+	system_call(SCALL_GUI, SCALL_GUI_RENDER_TEXT_BUFFER, &sparams);
 	return BOOL_SPARAM(sparams.param0);
 }
 

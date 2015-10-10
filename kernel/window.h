@@ -31,6 +31,7 @@
 #define	WINDOW_STYLE_MAXIMIZE			0x00000004
 #define	WINDOW_STYLE_NO_TITLE			0x00000008
 #define	WINDOW_STYLE_NO_WMGR			0x00000010
+#define	WINDOW_STYLE_NO_BORDER			0x00000020
 
 #define	WINDOW_EVENT_PAINT			1
 #define	WINDOW_EVENT_FOCUS			2
@@ -77,6 +78,7 @@ typedef struct Window
 	uint32					key_count;								// 窗体的按键缓冲区的按键数量。
 	WindowKeyPressCallback	cb_key_press;							// 窗体获取焦点并且有按键被按下时，会调用该函数。
 																	// 如果该函数返回FALSE，则表示不要把按键添加到key_buffer中。
+	BOOL					locked;									// 如果该值为TRUE，则锁住窗体，不把工作区的内容更新到显存。
 } * WindowPtr;
 
 extern

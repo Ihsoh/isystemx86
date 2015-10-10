@@ -36,6 +36,7 @@ $(Target):	bin	\
 
 	cd wapps/image && make
 	cd wapps/calc && make
+	cd wapps/wedit && make
 
 	cd sys/pci && make
 	cd sys/screen && make
@@ -137,6 +138,7 @@ clean:
 
 	cd wapps/image && make clean
 	cd wapps/calc && make clean
+	cd wapps/wedit && make clean
 
 	cd sys/pci && make clean
 	cd sys/screen && make clean

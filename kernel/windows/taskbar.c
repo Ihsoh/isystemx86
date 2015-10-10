@@ -162,7 +162,9 @@ taskbar_window_init(void)
 	uint32 h = vesa_get_height();
 	_window = create_window(w, _HEIGHT,
 							0xff000000,
-							WINDOW_STYLE_NO_TITLE | WINDOW_STYLE_NO_WMGR,
+							WINDOW_STYLE_NO_TITLE 
+								| WINDOW_STYLE_NO_WMGR
+								| WINDOW_STYLE_NO_BORDER,
 							"Taskbar",
 							_window_event);
 	rect_common_image(&_window->workspace, 0, 0, w, _HEIGHT, 0xff222222);
