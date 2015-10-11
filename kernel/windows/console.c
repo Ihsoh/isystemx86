@@ -42,6 +42,10 @@ console_window_event(	IN struct Window * window,
 							0, 
 							console_screen_buffer.width, 
 							console_screen_buffer.height);
+	else if(params->event_type == WINDOW_EVENT_HIDDEN)
+		no_flush_char_buffer();
+	else if(params->event_type == WINDOW_EVENT_SHOW)
+		flush_char_buffer();
 }
 
 /**

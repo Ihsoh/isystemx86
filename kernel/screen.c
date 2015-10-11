@@ -52,7 +52,7 @@ static struct CommonImage screen_buffer;
 static struct CommonImage bg_image;
 static struct CommonImage pointer_image;
 static uint8 * screen_char_buffer;
-static int32 flush_cbuffer = 1;
+static BOOL flush_cbuffer = TRUE;
 
 struct CommonImage * target_screen = NULL;
 
@@ -107,7 +107,7 @@ screen_write_console_buffer(IN const uint8 * buffer,
 void
 flush_char_buffer(void)
 {
-	flush_cbuffer = 1;
+	flush_cbuffer = TRUE;
 }
 
 /**
@@ -121,7 +121,7 @@ flush_char_buffer(void)
 void
 no_flush_char_buffer(void)
 {
-	flush_cbuffer = 0;
+	flush_cbuffer = FALSE;
 }
 
 /**
@@ -1066,6 +1066,7 @@ create_window(	IN uint32		width,
 	window->event = event;
 	window->cb_key_press = NULL;
 	window->locked = FALSE;
+	window->old_state = WINDOW_STATE_NONE;
 	if(!new_empty_image0(&window->workspace, width, height))
 	{
 		free_window(window);
@@ -1224,6 +1225,7 @@ flush_screen(void)
 
 	//绘制控制台
 	if(flush_cbuffer)
+	{
 		for(y = 0; y < ROW; y++)
 			for(x = 0; x < COLUMN; x++)
 			{
@@ -1249,18 +1251,19 @@ flush_screen(void)
 										1,
 										color);
 			}
-	uint32 cursor_real_color = property_to_real_color(cursor_color);
-	uint32 c_x = cursor_x, c_y = cursor_y;
-	for(x = 0; x < ENFONT_WIDTH; x++)
-		for(y = 0; y < CURSOR_HEIGHT; y++)
-		{
-			uint32 index = 	c_y * (ENFONT_HEIGHT + CURSOR_HEIGHT) * console_screen_width
-							+ ENFONT_HEIGHT * console_screen_width
-							+ y * console_screen_width 
-							+ (uint32)c_x * ENFONT_WIDTH
-							+ x;
-			console_screen_buffer_data_ptr[index] = cursor_real_color;
-		}
+		uint32 cursor_real_color = property_to_real_color(cursor_color);
+		uint32 c_x = cursor_x, c_y = cursor_y;
+		for(x = 0; x < ENFONT_WIDTH; x++)
+			for(y = 0; y < CURSOR_HEIGHT; y++)
+			{
+				uint32 index = 	c_y * (ENFONT_HEIGHT + CURSOR_HEIGHT) * console_screen_width
+								+ ENFONT_HEIGHT * console_screen_width
+								+ y * console_screen_width 
+								+ (uint32)c_x * ENFONT_WIDTH
+								+ x;
+				console_screen_buffer_data_ptr[index] = cursor_real_color;
+			}
+	}
 
 	//绘制窗体
 	int32 mouse_x, mouse_y;
@@ -1417,14 +1420,12 @@ flush_screen(void)
 	for(i = window_count - 1; i >= 0; i--)
 	{
 		BOOL top = i == 0;
-		uint32 border_color = top ? TITLE_BAR_BGCOLOR : TITLE_BAR_BGCOLOR_NT;
+		uint32 border_color = WINDOW_BORDER_COLOR_NT;
+		if(top)
+			border_color = WINDOW_BORDER_COLOR;
 		struct Window * window = windows[i];
 		uint32 wstyle = window->style;
 		BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
-		if(window->state == WINDOW_STATE_HIDDEN)
-			continue;
-		if(window->state == WINDOW_STATE_CLOSED)
-			continue;
 		if(has_title_bar)
 		{
 			if(render_window(window, top))

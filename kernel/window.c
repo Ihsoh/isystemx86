@@ -170,6 +170,21 @@ render_window(	IN struct Window * window,
 	if(window == NULL)
 		return FALSE;
 
+	// 从隐藏的状态过渡到显示的状态时引发WINDOW_EVENT_SHOW事件。
+	if(	window->old_state == WINDOW_STATE_HIDDEN
+		&& window->state == WINDOW_STATE_SHOW)
+		window_dispatch_event(window, WINDOW_EVENT_SHOW, NULL);
+	// 从显示的状态过渡到隐藏的状态时引发WINDOW_EVENT_HIDDEN事件。
+	else if(window->old_state == WINDOW_STATE_SHOW
+			&& window->state == WINDOW_STATE_HIDDEN)
+		window_dispatch_event(window, WINDOW_EVENT_HIDDEN, NULL);
+	// 更新旧状态。
+	window->old_state = window->state;
+
+	if(	window->state == WINDOW_STATE_CLOSED
+		|| window->state == WINDOW_STATE_HIDDEN)
+		return FALSE;
+
 	uint32 wstyle = window->style;
 	BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
 
@@ -271,6 +286,7 @@ render_window(	IN struct Window * window,
 							0xff000000);
 	}
 
+	// 如果窗体被锁定，则不发送WINDOW_EVENT_PAINT事件。
 	if(!window->locked)
 		window_dispatch_event(window, WINDOW_EVENT_PAINT, NULL);
 
@@ -346,7 +362,6 @@ window_dispatch_event(	IN WindowPtr window,
 						IN void * data)
 {
 	if(	window == NULL
-		|| window->state == WINDOW_STATE_HIDDEN
 		|| window->event == NULL)
 		return;
 	uint32 wstyle = window->style;

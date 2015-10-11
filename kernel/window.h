@@ -14,7 +14,10 @@
 #define	TITLE_BAR_HEIGHT		30
 #define	TITLE_BAR_BGCOLOR		0xff8e70c9
 #define	TITLE_BAR_BGCOLOR_NT	0xffcccccc
+#define	WINDOW_BORDER_COLOR		0xff8e70c9
+#define	WINDOW_BORDER_COLOR_NT	0xffcccccc
 
+#define	WINDOW_STATE_NONE		0
 #define	WINDOW_STATE_SHOW		1
 #define	WINDOW_STATE_HIDDEN		2
 #define	WINDOW_STATE_CLOSED		3
@@ -37,6 +40,8 @@
 #define	WINDOW_EVENT_FOCUS			2
 #define	WINDOW_EVENT_UNFOCUS		3
 #define	WINDOW_EVENT_WILL_CLOSE		4
+#define	WINDOW_EVENT_HIDDEN			5
+#define	WINDOW_EVENT_SHOW			6
 
 #define	WINDOW_KEY_BUFFER_SIZE	16
 
@@ -79,6 +84,7 @@ typedef struct Window
 	WindowKeyPressCallback	cb_key_press;							// 窗体获取焦点并且有按键被按下时，会调用该函数。
 																	// 如果该函数返回FALSE，则表示不要把按键添加到key_buffer中。
 	BOOL					locked;									// 如果该值为TRUE，则锁住窗体，不把工作区的内容更新到显存。
+	int32					old_state;								// 旧的状态。
 } * WindowPtr;
 
 extern

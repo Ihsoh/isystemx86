@@ -123,6 +123,18 @@ static void edit(void)
 	flush();
 	while(1)
 	{
+		while(!ILGHasKey(_wid, NULL))
+		{
+			int32 cid = -1;
+			uint32 type = 0;
+			void * data = NULL;
+			if(ILGGetMessage(_wid, &cid, &type, &data))
+			if(cid == -1 && type == WINDOW_WILL_CLOSE)
+			{
+				release_resource();
+				exit(0);
+			}
+		}
 		uint8 chr = ILGGetKeyWait(_wid);
 		uint8 chr1;
 		if(chr == KEY_EXT)
