@@ -22,6 +22,7 @@
 
 #include "window/button.h"
 #include "window/label.h"
+#include "window/list.h"
 
 #include <dslib/list.h>
 #include <dslib/linked_list.h>
@@ -89,6 +90,11 @@ _window_event(	struct Window * window,
 						case CONTROL_LABEL:
 						{
 							LABEL(control, &window->workspace, params, top);
+							break;
+						}
+						case CONTROL_LIST:
+						{
+							LIST(control, &window->workspace, params, top);
 							break;
 						}
 					}
@@ -707,6 +713,18 @@ gui_render_text_buffer(	IN int32 tid,
 	return TRUE;
 }
 
+void
+gui_free_msgdata(	IN int32 tid,
+					IN void * data)
+{
+	if(data == NULL)
+		return;
+	void * phyaddr_data = get_physical_address(tid, data);
+	if(phyaddr_data == NULL)
+		return;
+	free_memory(phyaddr_data);
+}
+
 static
 void
 _no_data_event(	IN uint32 id,
@@ -714,12 +732,46 @@ _no_data_event(	IN uint32 id,
 				IN void * param)
 {
 	ControlPtr ctrl = (ControlPtr)id;
+	if(	ctrl->type != CONTROL_BUTTON
+		&& ctrl->type != CONTROL_LABEL)
+		return;
 	int32 wid = ctrl->uwid;
 	int32 cid = ctrl->uwcid;
 	DSLValuePtr v = dsl_lst_get(_winstances, wid);
 	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
 	int32 tid = winstance->tid;
 	gui_push_message(tid, wid, cid, type, NULL, NULL);
+}
+
+static
+void
+_has_data_event(IN uint32 id,
+				IN uint32 type,
+				IN void * param)
+{
+	ControlPtr ctrl = (ControlPtr)id;
+	if(ctrl->type != CONTROL_LIST)
+		return;
+	int32 wid = ctrl->uwid;
+	int32 cid = ctrl->uwcid;
+	DSLValuePtr v = dsl_lst_get(_winstances, wid);
+	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
+	int32 tid = winstance->tid;
+	void * data = NULL;
+	void * phyaddr_data = NULL;
+	switch(ctrl->type)
+	{
+		case CONTROL_LIST:
+		{
+			uint32 index = *(uint32 *)param;
+			data = tasks_alloc_memory(tid, sizeof(index), &phyaddr_data);
+			memcpy(phyaddr_data, &index, sizeof(index));
+			break;
+		}
+		default:
+			return;
+	}
+	gui_push_message(tid, wid, cid, type, data, phyaddr_data);
 }
 
 BOOL
@@ -808,4 +860,66 @@ err:
 		DELETE(val);
 	unlock();
 	return FALSE;
+}
+
+BOOL
+gui_new_list(	IN int32 tid,
+				IN int32 wid,
+				IN uint32 count,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT int32 * cid)
+{
+	_WINSTANCE_FALSE
+	lock();
+	ListPtr lst = NULL;
+	DSLValuePtr val = NULL;
+	if(cid == NULL)
+		goto err;
+	lst = NEW(List);
+	if(lst == NULL)
+		goto err;
+	INIT_LIST(lst, count, x, y, text, _has_data_event);
+	lst->uwid = wid;
+	val = dsl_val_object(lst);
+	if(val == NULL)
+		goto err;
+	int32 _cid = dsl_lst_find_value(winstance->controls, NULL);
+	if(_cid == -1)
+	{
+		if(!dsl_lst_add_value(winstance->controls, val))
+			goto err;
+		_cid = dsl_lst_find_value(winstance->controls, val);
+	}
+	else
+		dsl_lst_set(winstance->controls, _cid, val);
+	lst->uwcid = _cid;
+	*cid = _cid;
+	unlock();
+	return TRUE;
+err:
+	if(lst != NULL)
+		DELETE(lst);
+	if(val != NULL)
+		DELETE(val);
+	unlock();
+	return FALSE;
+}
+
+BOOL
+gui_set_list_text(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid,
+					IN uint32 index,
+					IN CASCTEXT text)
+{
+	_WINSTANCE_FALSE
+	if(text == NULL)
+		return FALSE;
+	DSLValuePtr v = dsl_lst_get(winstance->controls, cid);
+	ControlPtr control = (ControlPtr)DSL_OBJECTVAL(v);
+	if(control->type != CONTROL_LIST)
+		return FALSE;
+	return SET_LIST_TEXT(control, index, text);
 }

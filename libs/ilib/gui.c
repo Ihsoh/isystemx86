@@ -378,6 +378,15 @@ ILGRenderTextBuffer(IN int32 wid,
 	return BOOL_SPARAM(sparams.param0);
 }
 
+void
+ILGFreeMsgData(IN void * data)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(data);
+	system_call(SCALL_GUI, SCALL_GUI_FREE_MSGDATA, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
 BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
@@ -409,5 +418,39 @@ ILGNewLabel(IN int32 wid,
 	sparams.param3 = SPARAM(text);
 	sparams.param4 = SPARAM(cid);
 	system_call(SCALL_GUI, SCALL_GUI_NEW_LABEL, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGNewList(	IN int32 wid,
+			IN uint32 count,
+			IN int32 x,
+			IN int32 y,
+			IN CASCTEXT text,
+			OUT int32 * cid)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(count);
+	sparams.param2 = SPARAM(x);
+	sparams.param3 = SPARAM(y);
+	sparams.param4 = SPARAM(text);
+	sparams.param5 = SPARAM(cid);
+	system_call(SCALL_GUI, SCALL_GUI_NEW_LIST, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGSetListText(	IN int32 wid,
+				IN int32 cid,
+				IN uint32 index,
+				IN CASCTEXT text)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	sparams.param2 = SPARAM(index);
+	sparams.param3 = SPARAM(text);
+	system_call(SCALL_GUI, SCALL_GUI_SET_LIST_TEXT, &sparams);
 	return BOOL_SPARAM(sparams.param0);
 }

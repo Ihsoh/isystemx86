@@ -199,6 +199,10 @@ ILGRenderTextBuffer(IN int32 wid,
 					IN uint32 cury);
 
 extern
+void
+ILGFreeMsgData(IN void * data);
+
+extern
 BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
@@ -213,5 +217,21 @@ ILGNewLabel(IN int32 wid,
 			IN int32 y,
 			IN CASCTEXT text,
 			OUT int32 * cid);
+
+extern
+BOOL
+ILGNewList(	IN int32 wid,
+			IN uint32 count,
+			IN int32 x,
+			IN int32 y,
+			IN CASCTEXT text,
+			OUT int32 * cid);
+
+extern
+BOOL
+ILGSetListText(	IN int32 wid,
+				IN int32 cid,
+				IN uint32 index,
+				IN CASCTEXT text);
 
 #endif

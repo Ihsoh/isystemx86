@@ -1136,8 +1136,8 @@ tasks_get_count(void)
 		phyaddr, void **, OUT
 			指向用于储存分配的内存的物理地址的缓冲区的指针。
 	@Return:
-		int32
-			当前任务数量。
+		void *
+			任务可以访问的内存的指针。
 */
 void *
 tasks_alloc_memory(	IN int32 tid,

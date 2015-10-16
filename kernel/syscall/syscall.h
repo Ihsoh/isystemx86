@@ -69,10 +69,14 @@
 #define	SCALL_GUI_GET_TEXT				0x00000019
 #define	SCALL_GUI_UPDATE				0x0000001a
 #define	SCALL_GUI_RENDER_TEXT_BUFFER	0x0000001b
+#define	SCALL_GUI_FREE_MSGDATA			0x0000001c
 
 #define	SCALL_GUI_NEW_BUTTON			((CONTROL_BUTTON << 8) | 0x00000001)
 
 #define	SCALL_GUI_NEW_LABEL				((CONTROL_LABEL << 8) | 0x00000001)
+
+#define	SCALL_GUI_NEW_LIST				((CONTROL_LIST << 8) | 0x00000001)
+#define	SCALL_GUI_SET_LIST_TEXT			((CONTROL_LIST << 8) | 0x00000002)
 
 // ============================== Keyboard ==============================
 #define	SCALL_GET_CHAR			0

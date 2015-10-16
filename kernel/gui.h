@@ -232,6 +232,11 @@ gui_render_text_buffer(	IN int32 tid,
 						IN uint32 cury);
 
 extern
+void
+gui_free_msgdata(	IN int32 tid,
+					IN void * data);
+
+extern
 BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
@@ -248,6 +253,24 @@ gui_new_label(	IN int32 tid,
 				IN int32 y,
 				IN CASCTEXT text,
 				OUT int32 * cid);
+
+extern
+BOOL
+gui_new_list(	IN int32 tid,
+				IN int32 wid,
+				IN uint32 count,
+				IN int32 x,
+				IN int32 y,
+				IN CASCTEXT text,
+				OUT int32 * cid);
+
+extern
+BOOL
+gui_set_list_text(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid,
+					IN uint32 index,
+					IN CASCTEXT text);
 
 DEFINE_LOCK_EXTERN(gui)
 

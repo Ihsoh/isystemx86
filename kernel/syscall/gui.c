@@ -302,6 +302,12 @@ system_call_gui(IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+		case SCALL_GUI_FREE_MSGDATA:
+		{
+			void * data = VOID_PTR_SPARAM(sparams->param0);
+			gui_free_msgdata(tid, data);
+			break;
+		}
 
 		// ============================== Button ==============================
 		case SCALL_GUI_NEW_BUTTON:
@@ -331,6 +337,35 @@ system_call_gui(IN uint32 func,
 			vptr = VOID_PTR_SPARAM(sparams->param4);
 			int32 * cid = (int32 *)get_physical_address(tid, vptr);
 			BOOL r = gui_new_label(tid, wid, x, y, text, cid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+
+		// ============================== List ==============================
+		case SCALL_GUI_NEW_LIST:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			uint32 count = UINT32_SPARAM(sparams->param1);
+			int32 x = INT32_SPARAM(sparams->param2);
+			int32 y = INT32_SPARAM(sparams->param3);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param4);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			vptr = VOID_PTR_SPARAM(sparams->param5);
+			int32 * cid = (int32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_new_list(tid, wid, count, x, y, text, cid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_SET_LIST_TEXT:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			uint32 index = UINT32_SPARAM(sparams->param2);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param3);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			BOOL r = gui_set_list_text(tid, wid, cid, index, text);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
