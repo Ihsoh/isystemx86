@@ -26,7 +26,2178 @@
 		<div>
 			<h2>函数</h2>
 			<div>
-				
+				<div>
+	<a id="gui_init" name="gui_init" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_init</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				初始化用户GUI模块。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_is_valid" name="gui_is_valid" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_is_valid</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				检测用户GUI是否可用。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则可用，否则不可用。
+</p>
+	</div>
+</div>
+<div>
+	<a id="_window_event" name="_window_event" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Private</div>
+		<div style="float:left; margin-left:20px;">_window_event</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				用户GUI的窗体的事件函数。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		window</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct Window *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向窗体对象的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		params</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct WindowEventParams *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向窗体事件参数对象的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="gui_create_window" name="gui_create_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_create_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				创建用户GUI的窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			用户任务的ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		width</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体宽度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		height</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体高度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		bgcolor</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体背景色。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		style</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体样式。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		title</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体标题。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		int32</span>
+		<p style="padding-left: 40px;">			用户GUI的窗体的ID。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_clear_messages" name="gui_clear_messages" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_clear_messages</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				清除指定窗体的消息队列。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_close_window" name="gui_close_window" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_close_window</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				关闭指定窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_close_windows" name="gui_close_windows" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_close_windows</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				关闭指定任务的所有窗体。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="gui_set_window_state" name="gui_set_window_state" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_set_window_state</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置窗体的状态。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		state</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			状态。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_window_state" name="gui_get_window_state" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_window_state</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取窗体的状态。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		state</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			状态。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_set_window_position" name="gui_set_window_position" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_set_window_position</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置窗体的位置。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体的X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体的Y坐标。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_window_position" name="gui_get_window_position" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_window_position</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取窗体的位置。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向储存窗体的X坐标的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向储存窗体的Y坐标的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_set_window_size" name="gui_set_window_size" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_set_window_size</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置窗体的大小。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		width</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			宽度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		height</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			高度。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_window_size" name="gui_get_window_size" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_window_size</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取窗体的大小。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		width</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向储存宽度的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		height</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向储存高度的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_set_window_title" name="gui_set_window_title" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_set_window_title</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置窗体标题。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		title</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			标题文本。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_window_title" name="gui_get_window_title" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_window_title</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取窗体标题。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		title</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存窗体标题的缓冲区。
+			该缓冲区大小必须大于或等于WINDOW_TITLE_SIZE。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_has_key" name="gui_has_key" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_has_key</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				检测窗体按键队列里是否包含按键。<br />		这个操作不会弹出按键队列中的按键。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		key</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存按键值的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则代表按键队列有按键。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_key" name="gui_get_key" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_key</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取窗体按键队列里的按键。<br />		这个操作会弹出按键队列中的按键。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		key</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存按键值的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则代表按键队列有按键。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_mouse" name="gui_get_mouse" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_mouse</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取鼠标信息。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存光标在窗体内的X坐标的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存光标在窗体内的Y坐标的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		button</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存鼠标当前状态的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则代表按键队列有按键。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_focused" name="gui_focused" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_focused</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				检测窗体是否获得了焦点。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则获得了焦点。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_focus" name="gui_focus" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_focus</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				使窗体获得焦点。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_set_pixel" name="gui_set_pixel" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_set_pixel</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				使设置窗体工作区的像素。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		pixel</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			像素值。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_pixel" name="gui_get_pixel" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_pixel</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取窗体工作区的像素。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		pixel</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存窗体工作区的像素的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_draw_rect" name="gui_draw_rect" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_draw_rect</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				在工作区内绘制矩形。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		width</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			宽度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		height</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			高度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		pixel</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			矩形填充的像素值。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_draw_image" name="gui_draw_image" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_draw_image</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				在工作区内绘制图片。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		width</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			宽度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		height</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			高度。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		image</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ImagePtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向图片对象的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_draw_text" name="gui_draw_text" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_draw_text</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				在工作区内绘制文本。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		color</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本颜色。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_draw_line" name="gui_draw_line" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_draw_line</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				在工作区内绘制一条线。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		startx</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			起始点的X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		starty</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			起始点的Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		endx</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			结束点的X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		endy</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			结束点的Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		color</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			线条的颜色。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_push_message" name="gui_push_message" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_push_message</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				往指定窗口的消息队列里压入一条消息。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		type</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			事件类型。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		data</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向事件的附加数据的指针，用户态时可访问。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		phyaddr_data</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向事件的附加数据的指针，内核态时可访问。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_pop_message" name="gui_pop_message" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_pop_message</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				从指定窗口的消息队列里弹出一条消息。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存控件ID的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		type</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存事件类型的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		data</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void **</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存“事件的附加数据的指针（用户态）”的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		phyaddr_data</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void **</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存“事件的附加数据的指针（内核态）”的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_set_text" name="gui_set_text" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_set_text</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置控件的文本。<br />		该函数支持的控件为：<br />		* BUTTON<br />		* TEXT<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_get_text" name="gui_get_text" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_get_text</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取控件的文本。<br />		该函数支持的控件为：<br />		* BUTTON<br />		* TEXT<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存文本的缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		bufsz</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			缓冲区大小。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_update" name="gui_update" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_update</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				向窗体发送绘制事件。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_render_text_buffer" name="gui_render_text_buffer" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_render_text_buffer</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				渲染文本缓冲区。<br />		把指定的文本缓冲区的内容显示在指定窗体上。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		txtbuf</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向文本缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		row</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			行。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		column</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			列。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		curx</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			光标当前X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cury</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			光标当前Y坐标。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="gui_free_msgdata" name="gui_free_msgdata" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_free_msgdata</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				释放事件附加数据。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		data</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向事件的附加数据的指针，用户态时可访问。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="_no_data_event" name="_no_data_event" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">_no_data_event</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				无附加数据的控件事件。<br />		使用了该控件事件函数的控件有：<br />		* BUTTON<br />		* LABEL<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		id</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			引发事件的控件的ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		type</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			事件类型。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		param</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向事件附加参数的指针。
+			理论上永远为NULL。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="_has_data_event" name="_has_data_event" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">_has_data_event</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				有附加数据的控件事件。<br />		使用了该控件事件函数的控件有：<br />		* LIST<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		id</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			引发事件的控件的ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		type</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			事件类型。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		param</span>,
+	<span style="color:#428cc7; font-weight:blod;"> void *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向事件附加参数的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="gui_new_button" name="gui_new_button" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_new_button</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				新建一个BUTTON。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存控件ID的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		返回TRUE则成功，否则失败。</span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="gui_new_label" name="gui_new_label" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_new_label</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				新建一个LABEL。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存控件ID的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		返回TRUE则成功，否则失败。</span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="gui_new_list" name="gui_new_list" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_new_list</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				新建一个LIST。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		count</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			列表项的数量。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			所有列表项的初始化文本。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<p style="padding-left: 40px;">			指向用于储存控件ID的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		返回TRUE则成功，否则失败。</span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
+	<a id="gui_set_list_text" name="gui_set_list_text" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">gui_set_list_text</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				设置LIST的列表项的文本。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		wid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			窗体ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			控件ID。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		index</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			列表项的索引。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		返回TRUE则成功，否则失败。</span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+
 			</div>
 		</div>
 	</body>

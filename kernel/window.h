@@ -43,7 +43,9 @@
 #define	WINDOW_EVENT_HIDDEN			5
 #define	WINDOW_EVENT_SHOW			6
 
-#define	WINDOW_KEY_BUFFER_SIZE	16
+#define	WINDOW_KEY_BUFFER_SIZE		16
+
+#define	WINDOW_TITLE_SIZE			1024
 
 typedef struct WindowEventParams
 {
@@ -70,7 +72,7 @@ typedef struct Window
 	int32					y;										// 窗体Y坐标。
 	uint32					width;									// 窗体宽度。
 	uint32					height;									// 窗体高度。
-	ASCCHAR					title[1024];							// 窗体标题。
+	ASCCHAR					title[WINDOW_TITLE_SIZE];				// 窗体标题。
 	uint32					bgcolor;								// 窗体工作区背景色。
 	int32					state;									// 窗体状态。
 	uint32					style;									// 窗体样式。

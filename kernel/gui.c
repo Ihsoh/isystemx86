@@ -42,6 +42,16 @@ typedef struct
 
 static DSLListPtr		_winstances = NULL;
 
+/**
+	@Function:		gui_init
+	@Access:		Public
+	@Description:
+		初始化用户GUI模块。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_init(void)
 {
@@ -51,6 +61,16 @@ gui_init(void)
 	return TRUE;
 }
 
+/**
+	@Function:		gui_is_valid
+	@Access:		Public
+	@Description:
+		检测用户GUI是否可用。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则可用，否则不可用。
+*/
 BOOL
 gui_is_valid(void)
 {
@@ -60,10 +80,22 @@ gui_is_valid(void)
 		return FALSE;
 }
 
+/**
+	@Function:		_window_event
+	@Access:		Private
+	@Description:
+		用户GUI的窗体的事件函数。
+	@Parameters:
+		window, struct Window *, IN
+			指向窗体对象的指针。
+		params, struct WindowEventParams *, IN
+			指向窗体事件参数对象的指针。
+	@Return:
+*/
 static
 void
-_window_event(	struct Window * window,
-				struct WindowEventParams * params)
+_window_event(	IN struct Window * window,
+				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
 	switch(params->event_type)
@@ -122,6 +154,28 @@ _window_event(	struct Window * window,
 	}
 }
 
+/**
+	@Function:		gui_create_window
+	@Access:		Public
+	@Description:
+		创建用户GUI的窗体。
+	@Parameters:
+		tid, int32, IN
+			用户任务的ID。
+		width, uint32, IN
+			窗体宽度。
+		height, uint32, IN
+			窗体高度。
+		bgcolor, uint32, IN
+			窗体背景色。
+		style, uint32, IN
+			窗体样式。
+		title, CASCTEXT, IN
+			窗体标题。
+	@Return:
+		int32
+			用户GUI的窗体的ID。
+*/
 int32
 gui_create_window(	IN int32		tid,
 					IN uint32		width,
@@ -192,6 +246,20 @@ err:
 	if(winstance == NULL || winstance->tid != tid)	\
 		return FALSE;
 
+/**
+	@Function:		gui_clear_messages
+	@Access:		Public
+	@Description:
+		清除指定窗体的消息队列。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_clear_messages(	IN int32 tid,
 					IN int32 wid)
@@ -206,6 +274,20 @@ gui_clear_messages(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_close_window
+	@Access:		Public
+	@Description:
+		关闭指定窗体。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_close_window(	IN int32 tid,
 					IN int32 wid)
@@ -224,6 +306,16 @@ gui_close_window(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_close_windows
+	@Access:		Public
+	@Description:
+		关闭指定任务的所有窗体。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+	@Return:
+*/
 void
 gui_close_windows(IN int32 tid)
 {
@@ -243,6 +335,22 @@ gui_close_windows(IN int32 tid)
 	unlock();
 }
 
+/**
+	@Function:		gui_set_window_state
+	@Access:		Public
+	@Description:
+		设置窗体的状态。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		state, uint32, IN
+			状态。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_set_window_state(	IN int32 tid,
 						IN int32 wid,
@@ -253,10 +361,26 @@ gui_set_window_state(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_get_window_state
+	@Access:		Public
+	@Description:
+		获取窗体的状态。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		state, uint32 *, OUT
+			状态。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_get_window_state(	IN int32 tid,
 						IN int32 wid,
-						IN uint32 * state)
+						OUT uint32 * state)
 {
 	_WINSTANCE_FALSE
 	if(state == NULL)
@@ -265,6 +389,24 @@ gui_get_window_state(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_set_window_position
+	@Access:		Public
+	@Description:
+		设置窗体的位置。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			窗体的X坐标。
+		y, int32, IN
+			窗体的Y坐标。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_set_window_position(IN int32 tid,
 						IN int32 wid,
@@ -277,11 +419,29 @@ gui_set_window_position(IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_get_window_position
+	@Access:		Public
+	@Description:
+		获取窗体的位置。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32 *, OUT
+			指向储存窗体的X坐标的缓冲区的指针。
+		y, int32 *, OUT
+			指向储存窗体的Y坐标的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_get_window_position(IN int32 tid,
 						IN int32 wid,
-						IN int32 * x,
-						IN int32 * y)
+						OUT int32 * x,
+						OUT int32 * y)
 {
 	_WINSTANCE_FALSE
 	if(x == NULL || y == NULL)
@@ -291,6 +451,24 @@ gui_get_window_position(IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_set_window_size
+	@Access:		Public
+	@Description:
+		设置窗体的大小。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		width, uint32, IN
+			宽度。
+		height, uint32, IN
+			高度。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_set_window_size(IN int32 tid,
 					IN int32 wid,
@@ -305,11 +483,29 @@ gui_set_window_size(IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_get_window_size
+	@Access:		Public
+	@Description:
+		获取窗体的大小。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		width, uint32 *, OUT
+			指向储存宽度的缓冲区的指针。
+		height, uint32 *, OUT
+			指向储存高度的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_get_window_size(IN int32 tid,
 					IN int32 wid,
-					IN uint32 * width,
-					IN uint32 * height)
+					OUT uint32 * width,
+					OUT uint32 * height)
 {
 	_WINSTANCE_FALSE
 	if(width == NULL || height == NULL)
@@ -319,6 +515,22 @@ gui_get_window_size(IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_set_window_title
+	@Access:		Public
+	@Description:
+		设置窗体标题。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		title, CASCTEXT, IN
+			标题文本。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_set_window_title(	IN int32 tid,
 						IN int32 wid,
@@ -333,6 +545,23 @@ gui_set_window_title(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_get_window_title
+	@Access:		Public
+	@Description:
+		获取窗体标题。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		title, ASCTEXT, OUT
+			指向用于储存窗体标题的缓冲区。
+			该缓冲区大小必须大于或等于WINDOW_TITLE_SIZE。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_get_window_title(	IN int32 tid,
 						IN int32 wid,
@@ -345,6 +574,23 @@ gui_get_window_title(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_has_key
+	@Access:		Public
+	@Description:
+		检测窗体按键队列里是否包含按键。
+		这个操作不会弹出按键队列中的按键。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		key, uint32 *, OUT
+			指向用于储存按键值的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则代表按键队列有按键。
+*/
 BOOL
 gui_has_key(IN int32 tid,
 			IN int32 wid,
@@ -362,6 +608,23 @@ gui_has_key(IN int32 tid,
 		return FALSE;
 }
 
+/**
+	@Function:		gui_get_key
+	@Access:		Public
+	@Description:
+		获取窗体按键队列里的按键。
+		这个操作会弹出按键队列中的按键。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		key, uint32 *, OUT
+			指向用于储存按键值的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则代表按键队列有按键。
+*/
 BOOL
 gui_get_key(IN int32 tid,
 			IN int32 wid,
@@ -380,6 +643,26 @@ gui_get_key(IN int32 tid,
 		return FALSE;
 }
 
+/**
+	@Function:		gui_get_mouse
+	@Access:		Public
+	@Description:
+		获取鼠标信息。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32 *, OUT
+			指向用于储存光标在窗体内的X坐标的缓冲区的指针。
+		y, int32 *, OUT
+			指向用于储存光标在窗体内的Y坐标的缓冲区的指针。
+		button, uint32 *, OUT
+			指向用于储存鼠标当前状态的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则代表按键队列有按键。
+*/
 BOOL
 gui_get_mouse(	IN int32 tid,
 				IN int32 wid,
@@ -407,6 +690,20 @@ gui_get_mouse(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_focused
+	@Access:		Public
+	@Description:
+		检测窗体是否获得了焦点。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+	@Return:
+		BOOL
+			返回TRUE则获得了焦点。
+*/
 BOOL
 gui_focused(IN int32 tid,
 			IN int32 wid)
@@ -418,6 +715,20 @@ gui_focused(IN int32 tid,
 		return FALSE;
 }
 
+/**
+	@Function:		gui_focus
+	@Access:		Public
+	@Description:
+		使窗体获得焦点。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_focus(	IN int32 tid,
 			IN int32 wid)
@@ -426,6 +737,26 @@ gui_focus(	IN int32 tid,
 	return set_top_window(winstance->window);
 }
 
+/**
+	@Function:		gui_set_pixel
+	@Access:		Public
+	@Description:
+		使设置窗体工作区的像素。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		pixel, uint32, IN
+			像素值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_set_pixel(	IN int32 tid,
 				IN int32 wid,
@@ -440,6 +771,26 @@ gui_set_pixel(	IN int32 tid,
 									pixel);
 }
 
+/**
+	@Function:		gui_get_pixel
+	@Access:		Public
+	@Description:
+		获取窗体工作区的像素。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		pixel, uint32 *, OUT
+			指向用于储存窗体工作区的像素的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_get_pixel(	IN int32 tid,
 				IN int32 wid,
@@ -456,6 +807,30 @@ gui_get_pixel(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_draw_rect
+	@Access:		Public
+	@Description:
+		在工作区内绘制矩形。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		width, int32, IN
+			宽度。
+		height, int32, IN
+			高度。
+		pixel, uint32, IN
+			矩形填充的像素值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_draw_rect(	IN int32 tid,
 				IN int32 wid,
@@ -474,6 +849,30 @@ gui_draw_rect(	IN int32 tid,
 								pixel);
 }
 
+/**
+	@Function:		gui_draw_image
+	@Access:		Public
+	@Description:
+		在工作区内绘制图片。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		width, int32, IN
+			宽度。
+		height, int32, IN
+			高度。
+		image, ImagePtr, IN
+			指向图片对象的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_draw_image(	IN int32 tid,
 				IN int32 wid,
@@ -494,6 +893,28 @@ gui_draw_image(	IN int32 tid,
 								height);
 }
 
+/**
+	@Function:		gui_draw_text
+	@Access:		Public
+	@Description:
+		在工作区内绘制文本。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		text, CASCTEXT, IN
+			文本。
+		color, uint32, IN
+			文本颜色。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_draw_text(	IN int32 tid,
 				IN int32 wid,
@@ -514,6 +935,30 @@ gui_draw_text(	IN int32 tid,
 								color);
 }
 
+/**
+	@Function:		gui_draw_line
+	@Access:		Public
+	@Description:
+		在工作区内绘制一条线。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		startx, int32, IN
+			起始点的X坐标。
+		starty, int32, IN
+			起始点的Y坐标。
+		endx, int32, IN
+			结束点的X坐标。
+		endy, int32, IN
+			结束点的Y坐标。
+		color, uint32, IN
+			线条的颜色。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_draw_line(	IN int32 tid,
 				IN int32 wid,
@@ -532,6 +977,28 @@ gui_draw_line(	IN int32 tid,
 								color);
 }
 
+/**
+	@Function:		gui_push_message
+	@Access:		Public
+	@Description:
+		往指定窗口的消息队列里压入一条消息。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		type, uint32, IN
+			事件类型。
+		data, void *, IN
+			指向事件的附加数据的指针，用户态时可访问。
+		phyaddr_data, void *, IN
+			指向事件的附加数据的指针，内核态时可访问。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_push_message(	IN int32 tid,
 					IN int32 wid,
@@ -569,6 +1036,28 @@ err:
 	return FALSE;
 }
 
+/**
+	@Function:		gui_pop_message
+	@Access:		Public
+	@Description:
+		从指定窗口的消息队列里弹出一条消息。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32 *, OUT
+			指向用于储存控件ID的缓冲区的指针。
+		type, uint32 *, OUT
+			指向用于储存事件类型的缓冲区的指针。
+		data, void **, OUT
+			指向用于储存“事件的附加数据的指针（用户态）”的缓冲区的指针。
+		phyaddr_data, void **, OUT
+			指向用于储存“事件的附加数据的指针（内核态）”的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_pop_message(IN int32 tid,
 				IN int32 wid,
@@ -597,6 +1086,27 @@ gui_pop_message(IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_set_text
+	@Access:		Public
+	@Description:
+		设置控件的文本。
+		该函数支持的控件为：
+		* BUTTON
+		* TEXT
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		text, CASCTEXT, IN
+			文本。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_set_text(	IN int32 tid,
 				IN int32 wid,
@@ -632,6 +1142,29 @@ gui_set_text(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_get_text
+	@Access:		Public
+	@Description:
+		获取控件的文本。
+		该函数支持的控件为：
+		* BUTTON
+		* TEXT
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		text, ASCTEXT, OUT
+			指向用于储存文本的缓冲区的指针。
+		bufsz, uint32, IN
+			缓冲区大小。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_get_text(	IN int32 tid,
 				IN int32 wid,
@@ -675,6 +1208,20 @@ gui_get_text(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_update
+	@Access:		Public
+	@Description:
+		向窗体发送绘制事件。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_update(	IN int32 tid,
 			IN int32 wid)
@@ -684,6 +1231,31 @@ gui_update(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_render_text_buffer
+	@Access:		Public
+	@Description:
+		渲染文本缓冲区。
+		把指定的文本缓冲区的内容显示在指定窗体上。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		txtbuf, uint8 *, IN
+			指向文本缓冲区的指针。
+		row, uint32, IN
+			行。
+		column, uint32, IN
+			列。
+		curx, uint32, IN
+			光标当前X坐标。
+		cury, uint32, IN
+			光标当前Y坐标。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_render_text_buffer(	IN int32 tid,
 						IN int32 wid,
@@ -713,6 +1285,20 @@ gui_render_text_buffer(	IN int32 tid,
 	return TRUE;
 }
 
+/**
+	@Function:		gui_free_msgdata
+	@Access:		Public
+	@Description:
+		释放事件附加数据。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		data, void *, IN
+			指向事件的附加数据的指针，用户态时可访问。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 void
 gui_free_msgdata(	IN int32 tid,
 					IN void * data)
@@ -725,6 +1311,24 @@ gui_free_msgdata(	IN int32 tid,
 	free_memory(phyaddr_data);
 }
 
+/**
+	@Function:		_no_data_event
+	@Access:		Public
+	@Description:
+		无附加数据的控件事件。
+		使用了该控件事件函数的控件有：
+		* BUTTON
+		* LABEL
+	@Parameters:
+		id, uint32, IN
+			引发事件的控件的ID。
+		type, uint32, IN
+			事件类型。
+		param, void *, IN
+			指向事件附加参数的指针。
+			理论上永远为NULL。
+	@Return:
+*/
 static
 void
 _no_data_event(	IN uint32 id,
@@ -743,6 +1347,22 @@ _no_data_event(	IN uint32 id,
 	gui_push_message(tid, wid, cid, type, NULL, NULL);
 }
 
+/**
+	@Function:		_has_data_event
+	@Access:		Public
+	@Description:
+		有附加数据的控件事件。
+		使用了该控件事件函数的控件有：
+		* LIST
+	@Parameters:
+		id, uint32, IN
+			引发事件的控件的ID。
+		type, uint32, IN
+			事件类型。
+		param, void *, IN
+			指向事件附加参数的指针。
+	@Return:
+*/
 static
 void
 _has_data_event(IN uint32 id,
@@ -774,6 +1394,27 @@ _has_data_event(IN uint32 id,
 	gui_push_message(tid, wid, cid, type, data, phyaddr_data);
 }
 
+/**
+	@Function:		gui_new_button
+	@Access:		Public
+	@Description:
+		新建一个BUTTON。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		text, CASCTEXT, IN
+			文本。
+		cid, int32 *, OUT
+			指向用于储存控件ID的缓冲区的指针。
+	@Return:
+		返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
@@ -818,6 +1459,27 @@ err:
 	return FALSE;
 }
 
+/**
+	@Function:		gui_new_label
+	@Access:		Public
+	@Description:
+		新建一个LABEL。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		text, CASCTEXT, IN
+			文本。
+		cid, int32 *, OUT
+			指向用于储存控件ID的缓冲区的指针。
+	@Return:
+		返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_new_label(	IN int32 tid,
 				IN int32 wid,
@@ -862,6 +1524,29 @@ err:
 	return FALSE;
 }
 
+/**
+	@Function:		gui_new_list
+	@Access:		Public
+	@Description:
+		新建一个LIST。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		count, uint32, IN
+			列表项的数量。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		text, CASCTEXT, IN
+			所有列表项的初始化文本。
+		cid, int32 *, OUT
+			指向用于储存控件ID的缓冲区的指针。
+	@Return:
+		返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_new_list(	IN int32 tid,
 				IN int32 wid,
@@ -907,6 +1592,25 @@ err:
 	return FALSE;
 }
 
+/**
+	@Function:		gui_set_list_text
+	@Access:		Public
+	@Description:
+		设置LIST的列表项的文本。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		index, uint32, IN
+			列表项的索引。
+		text, CASCTEXT, IN
+			文本。
+	@Return:
+		返回TRUE则成功，否则失败。
+*/
 BOOL
 gui_set_list_text(	IN int32 tid,
 					IN int32 wid,

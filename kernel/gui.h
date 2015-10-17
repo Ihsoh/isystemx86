@@ -64,7 +64,7 @@ extern
 BOOL
 gui_get_window_state(	IN int32 tid,
 						IN int32 wid,
-						IN uint32 * state);
+						OUT uint32 * state);
 
 extern
 BOOL
@@ -77,8 +77,8 @@ extern
 BOOL
 gui_get_window_position(IN int32 tid,
 						IN int32 wid,
-						IN int32 * x,
-						IN int32 * y);
+						OUT int32 * x,
+						OUT int32 * y);
 
 extern
 BOOL
@@ -91,8 +91,8 @@ extern
 BOOL
 gui_get_window_size(IN int32 tid,
 					IN int32 wid,
-					IN uint32 * width,
-					IN uint32 * height);
+					OUT uint32 * width,
+					OUT uint32 * height);
 
 extern
 BOOL
