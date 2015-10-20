@@ -388,6 +388,28 @@ ILGFreeMsgData(IN void * data)
 }
 
 BOOL
+ILGEnableControl(	IN int32 wid,
+					IN int32 cid)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	system_call(SCALL_GUI, SCALL_GUI_ENABLE_CONTROL, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGDisableControl(	IN int32 wid,
+					IN int32 cid)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	system_call(SCALL_GUI, SCALL_GUI_DISABLE_CONTROL, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
 				IN int32 y,
@@ -452,5 +474,31 @@ ILGSetListText(	IN int32 wid,
 	sparams.param2 = SPARAM(index);
 	sparams.param3 = SPARAM(text);
 	system_call(SCALL_GUI, SCALL_GUI_SET_LIST_TEXT, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGEnableListItem(	IN int32 wid,
+					IN int32 cid,
+					IN uint32 index)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	sparams.param2 = SPARAM(index);
+	system_call(SCALL_GUI, SCALL_GUI_ENABLE_LIST_ITEM, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGDisableListItem(	IN int32 wid,
+					IN int32 cid,
+					IN uint32 index)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	sparams.param2 = SPARAM(index);
+	system_call(SCALL_GUI, SCALL_GUI_DISABLE_LIST_ITEM, &sparams);
 	return BOOL_SPARAM(sparams.param0);
 }

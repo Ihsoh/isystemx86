@@ -87,6 +87,7 @@ typedef struct Window
 																	// 如果该函数返回FALSE，则表示不要把按键添加到key_buffer中。
 	BOOL					locked;									// 如果该值为TRUE，则锁住窗体，不把工作区的内容更新到显存。
 	int32					old_state;								// 旧的状态。
+	BOOL					is_top;									// 指示窗体是否为最顶，该值由render_window函数更新。
 } * WindowPtr;
 
 extern

@@ -216,8 +216,7 @@ list_enable(IN OUT ListPtr list)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < list->count; ui++)
-		if(!ENABLE_BUTTON(&list->buttons[ui]))
-			return FALSE;
+		ENABLE_BUTTON(&list->buttons[ui]);
 	return TRUE;
 }
 
@@ -240,7 +239,56 @@ list_disable(IN OUT ListPtr list)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < list->count; ui++)
-		if(!DISABLE_BUTTON(&list->buttons[ui]))
-			return FALSE;
+		DISABLE_BUTTON(&list->buttons[ui]);
+	return TRUE;
+}
+
+/**
+	@Function:		list_enable_item
+	@Access:		Public
+	@Description:
+		启用列表项。
+	@Parameters:
+		list, ListPtr, IN OUT
+			指向List对象的指针。
+		index, uint32, IN
+			索引。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+list_enable_item(	IN OUT ListPtr list,
+					IN uint32 index)
+{
+	if(	list == NULL
+		|| index >= list->count)
+		return FALSE;
+	ENABLE_BUTTON(&list->buttons[index]);
+	return TRUE;
+}
+
+/**
+	@Function:		list_disable_item
+	@Access:		Public
+	@Description:
+		禁用列表项。
+	@Parameters:
+		list, ListPtr, IN OUT
+			指向List对象的指针。
+		index, uint32, IN
+			索引。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+list_disable_item(	IN OUT ListPtr list,
+					IN uint32 index)
+{
+	if(	list == NULL
+		|| index >= list->count)
+		return FALSE;
+	DISABLE_BUTTON(&list->buttons[index]);
 	return TRUE;
 }

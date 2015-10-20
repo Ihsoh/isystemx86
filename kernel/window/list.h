@@ -46,6 +46,12 @@ typedef	struct
 #define	DISABLE_LIST(_list)	\
 	(list_disable((_list)))
 
+#define	ENABLE_LIST_ITEM(_list, _index)	\
+	(list_enable_item((_list), (_index)))
+
+#define	DISABLE_LIST_ITEM(_list, _index)	\
+	(list_disable_item((_list), (_index)))
+
 extern
 BOOL
 list_init(	OUT ListPtr list,
@@ -80,5 +86,15 @@ list_enable(IN OUT ListPtr list);
 extern
 BOOL
 list_disable(IN OUT ListPtr list);
+
+extern
+BOOL
+list_enable_item(	IN OUT ListPtr list,
+					IN uint32 index);
+
+extern
+BOOL
+list_disable_item(	IN OUT ListPtr list,
+					IN uint32 index);
 
 #endif

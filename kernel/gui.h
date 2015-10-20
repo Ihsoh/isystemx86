@@ -238,6 +238,18 @@ gui_free_msgdata(	IN int32 tid,
 
 extern
 BOOL
+gui_enable_control(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid);
+
+extern
+BOOL
+gui_disable_control(IN int32 tid,
+					IN int32 wid,
+					IN int32 cid);
+
+extern
+BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,
@@ -271,6 +283,20 @@ gui_set_list_text(	IN int32 tid,
 					IN int32 cid,
 					IN uint32 index,
 					IN CASCTEXT text);
+
+extern
+BOOL
+gui_enable_list_item(	IN int32 tid,
+						IN int32 wid,
+						IN int32 cid,
+						IN uint32 index);
+
+extern
+BOOL
+gui_disable_list_item(	IN int32 tid,
+						IN int32 wid,
+						IN int32 cid,
+						IN uint32 index);
 
 DEFINE_LOCK_EXTERN(gui)
 

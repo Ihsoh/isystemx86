@@ -180,10 +180,28 @@ render_window(	IN struct Window * window,
 		window_dispatch_event(window, WINDOW_EVENT_HIDDEN, NULL);
 	// 更新旧状态。
 	window->old_state = window->state;
-
 	if(	window->state == WINDOW_STATE_CLOSED
 		|| window->state == WINDOW_STATE_HIDDEN)
 		return FALSE;
+
+	// 窗体对象中is_top为FALSE，但渲染窗体时窗体在最顶层，
+	// 说明窗体从底层过渡到顶层，发送WINDOW_EVENT_FOCUS事件。
+	if(!window->is_top && top)
+	{
+		window_dispatch_event(	window,
+								WINDOW_EVENT_FOCUS,
+								NULL);
+		window->is_top = TRUE;
+	}
+	// 窗体对象中is_top为TRUE，但渲染窗体时窗体不在最顶层，
+	// 说明窗体从顶层过渡到底层，发送WINDOW_EVENT_UNFOCUS事件。
+	else if(window->is_top && !top)
+	{
+		window_dispatch_event(	window,
+								WINDOW_EVENT_UNFOCUS,
+								NULL);
+		window->is_top = FALSE;
+	}
 
 	uint32 wstyle = window->style;
 	BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);

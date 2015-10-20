@@ -308,7 +308,22 @@ system_call_gui(IN uint32 func,
 			gui_free_msgdata(tid, data);
 			break;
 		}
-
+		case SCALL_GUI_ENABLE_CONTROL:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			BOOL r = gui_enable_control(tid, wid, cid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_DISABLE_CONTROL:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			BOOL r = gui_disable_control(tid, wid, cid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 		// ============================== Button ==============================
 		case SCALL_GUI_NEW_BUTTON:
 		{
@@ -366,6 +381,24 @@ system_call_gui(IN uint32 func,
 			vptr = VOID_PTR_SPARAM(sparams->param3);
 			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
 			BOOL r = gui_set_list_text(tid, wid, cid, index, text);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_ENABLE_LIST_ITEM:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			uint32 index = UINT32_SPARAM(sparams->param2);
+			BOOL r = gui_enable_list_item(tid, wid, cid, index);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_DISABLE_LIST_ITEM:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			uint32 index = UINT32_SPARAM(sparams->param2);
+			BOOL r = gui_disable_list_item(tid, wid, cid, index);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

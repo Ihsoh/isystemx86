@@ -246,6 +246,10 @@ err:
 	if(winstance == NULL || winstance->tid != tid)	\
 		return FALSE;
 
+#define _CONTROL_FALSE		\
+	__v = dsl_lst_get(winstance->controls, cid);	\
+	ControlPtr control = (ControlPtr)DSL_OBJECTVAL(__v);
+
 /**
 	@Function:		gui_clear_messages
 	@Access:		Public
@@ -1116,8 +1120,7 @@ gui_set_text(	IN int32 tid,
 	_WINSTANCE_FALSE
 	if(text == NULL)
 		return FALSE;
-	DSLValuePtr v = dsl_lst_get(winstance->controls, cid);
-	ControlPtr control = (ControlPtr)DSL_OBJECTVAL(v);
+	_CONTROL_FALSE
 	switch(control->type)
 	{
 		case CONTROL_BUTTON:
@@ -1175,8 +1178,7 @@ gui_get_text(	IN int32 tid,
 	_WINSTANCE_FALSE
 	if(text == NULL)
 		return FALSE;
-	DSLValuePtr v = dsl_lst_get(winstance->controls, cid);
-	ControlPtr control = (ControlPtr)DSL_OBJECTVAL(v);
+	_CONTROL_FALSE
 	CASCTEXT ctl_text = NULL;
 	switch(control->type)
 	{
@@ -1309,6 +1311,86 @@ gui_free_msgdata(	IN int32 tid,
 	if(phyaddr_data == NULL)
 		return;
 	free_memory(phyaddr_data);
+}
+
+/**
+	@Function:		gui_enable_control
+	@Access:		Public
+	@Description:
+		启用控件。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+gui_enable_control(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid)
+{
+	_WINSTANCE_FALSE
+	_CONTROL_FALSE
+	switch(control->type)
+	{
+		case CONTROL_BUTTON:
+			ENABLE_BUTTON((ButtonPtr)control);
+			break;
+		case CONTROL_LABEL:
+			ENABLE_LABEL((LabelPtr)control);
+			break;
+		case CONTROL_LIST:
+			ENABLE_LIST((ListPtr)control);
+			break;
+		default:
+			return FALSE;
+	}
+	return TRUE;
+}
+
+/**
+	@Function:		gui_disable_control
+	@Access:		Public
+	@Description:
+		禁用控件。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+gui_disable_control(IN int32 tid,
+					IN int32 wid,
+					IN int32 cid)
+{
+	_WINSTANCE_FALSE
+	_CONTROL_FALSE
+	switch(control->type)
+	{
+		case CONTROL_BUTTON:
+			DISABLE_BUTTON((ButtonPtr)control);
+			break;
+		case CONTROL_LABEL:
+			DISABLE_LABEL((LabelPtr)control);
+			break;
+		case CONTROL_LIST:
+			DISABLE_LIST((ListPtr)control);
+			break;
+		default:
+			return FALSE;
+	}
+	return TRUE;
 }
 
 /**
@@ -1626,4 +1708,60 @@ gui_set_list_text(	IN int32 tid,
 	if(control->type != CONTROL_LIST)
 		return FALSE;
 	return SET_LIST_TEXT(control, index, text);
+}
+
+/**
+	@Function:		gui_enable_list_item
+	@Access:		Public
+	@Description:
+		启用列表项。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		index, uint32, IN
+			列表项的索引。
+	@Return:
+		返回TRUE则成功，否则失败。
+*/
+BOOL
+gui_enable_list_item(	IN int32 tid,
+						IN int32 wid,
+						IN int32 cid,
+						IN uint32 index)
+{
+	_WINSTANCE_FALSE
+	_CONTROL_FALSE
+	return list_enable_item((ListPtr)control, index);
+}
+
+/**
+	@Function:		gui_disable_list_item
+	@Access:		Public
+	@Description:
+		禁用列表项。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		index, uint32, IN
+			列表项的索引。
+	@Return:
+		返回TRUE则成功，否则失败。
+*/
+BOOL
+gui_disable_list_item(	IN int32 tid,
+						IN int32 wid,
+						IN int32 cid,
+						IN uint32 index)
+{
+	_WINSTANCE_FALSE
+	_CONTROL_FALSE
+	return list_disable_item((ListPtr)control, index);
 }

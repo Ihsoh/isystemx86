@@ -204,6 +204,16 @@ ILGFreeMsgData(IN void * data);
 
 extern
 BOOL
+ILGEnableControl(	IN int32 wid,
+					IN int32 cid);
+
+extern
+BOOL
+ILGDisableControl(	IN int32 wid,
+					IN int32 cid);
+
+extern
+BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
 				IN int32 y,
@@ -233,5 +243,17 @@ ILGSetListText(	IN int32 wid,
 				IN int32 cid,
 				IN uint32 index,
 				IN CASCTEXT text);
+
+extern
+BOOL
+ILGEnableListItem(	IN int32 wid,
+					IN int32 cid,
+					IN uint32 index);
+
+extern
+BOOL
+ILGDisableListItem(	IN int32 wid,
+					IN int32 cid,
+					IN uint32 index);
 
 #endif

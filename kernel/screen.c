@@ -1067,6 +1067,7 @@ create_window(	IN uint32		width,
 	window->cb_key_press = NULL;
 	window->locked = FALSE;
 	window->old_state = WINDOW_STATE_NONE;
+	window->is_top = FALSE;
 	if(!new_empty_image0(&window->workspace, width, height))
 	{
 		free_window(window);
@@ -1367,15 +1368,6 @@ flush_screen(void)
 						{
 							windows[ui] = windows[0];
 							windows[0] = window;
-							if(ui != 0)
-							{
-								window_dispatch_event(	windows[ui],
-														WINDOW_EVENT_UNFOCUS,
-														NULL);
-								window_dispatch_event(	windows[0],
-														WINDOW_EVENT_FOCUS,
-														NULL);
-							}
 							break;
 						}
 					}
@@ -1389,15 +1381,6 @@ flush_screen(void)
 						{
 							windows[ui] = windows[0];
 							windows[0] = window;
-							if(ui != 0)
-							{
-								window_dispatch_event(	windows[ui],
-														WINDOW_EVENT_UNFOCUS,
-														NULL);
-								window_dispatch_event(	windows[0],
-														WINDOW_EVENT_FOCUS,
-														NULL);
-							}
 							break;
 						}
 				}
