@@ -739,9 +739,9 @@ init_screen(void)
 		start_window_init();
 		power_window_init();
 		wmgr_window_init();
-		init_sfunc_window();
+		// init_sfunc_window();
 		init_console_window();
-		init_clock_window();
+		// init_clock_window();
 		detail_window_init();
 		explorer_window_init();
 	}
