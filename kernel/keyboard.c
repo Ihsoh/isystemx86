@@ -525,8 +525,8 @@ tran_key(IN uint8 scan_code)
 				break;
 			case KEY_F2:
 			{
-				if(alt && vesa_is_valid())
-					show_sfunc_window();
+				/*if(alt && vesa_is_valid())
+					show_sfunc_window();*/
 				break;
 			}
 			case KEY_F3:

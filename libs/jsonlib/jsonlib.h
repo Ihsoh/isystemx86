@@ -13,12 +13,14 @@
 #define	JSONL_TYPE_TRUE			5
 #define	JSONL_TYPE_FALSE		6
 #define	JSONL_TYPE_NUMBER		7
+#define	JSONL_TYPE_UINT			8
 
 #define	JSONL_VALUE_TYPE_ERROR	-1
 #define	JSONL_VALUE_TYPE_BOOL	1
 #define	JSONL_VALUE_TYPE_NULL	2
 #define	JSONL_VALUE_TYPE_STRING	3
 #define	JSONL_VALUE_TYPE_NUMBER	4
+#define	JSONL_VALUE_TYPE_UINT	5
 
 #define	JSONL_MAX_VALUE_LEN		1023
 
@@ -76,6 +78,12 @@ typedef struct _JSONLNumber
 	double		number;
 } JSONLNumber, * JSONLNumberPtr;
 
+typedef struct _JSONLUInt
+{
+	int32		type;
+	uint32		number;
+} JSONLUInt, * JSONLUIntPtr;
+
 typedef struct _JSONLRaw
 {
 	int32		type;
@@ -121,6 +129,11 @@ BOOL
 jsonl_string_value(	IN JSONLRawPtr raw,
 					OUT int8 * v,
 					IN uint32 max);
+
+extern
+BOOL
+jsonl_uint_value(	IN JSONLRawPtr raw,
+					OUT uint32 * v);
 
 extern
 JSONLRawPtr

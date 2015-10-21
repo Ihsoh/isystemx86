@@ -108,3 +108,30 @@ jsonl_lib_stod(IN int8 * str)
 	else
 		n = (double)jsonl_lib_stol(str);
 }
+
+uint32
+jsonl_lib_hexstoui(IN int8 * str)
+{
+	if(str == NULL)
+		return 0;
+	uint32 r = 0;
+	uint32 d = 1;
+	uint32 len = jsonl_lib_strlen(str);
+	int32 i;
+	for(i = len - 1; i >= 0; i--)
+	{
+		int8 chr = str[i];
+		uint32 n;
+		if(chr >= '0' && chr <= '9')
+			n = chr - '0';
+		else if(chr >= 'a' && chr <= 'f')
+			n = chr - 'a' + 0xa;
+		else if(chr >= 'A' && chr <= 'F')
+			n = chr - 'A' + 0xa;
+		else
+			return r;
+		r += n * d;
+		d = d * 0x10;
+	}
+	return r;
+}

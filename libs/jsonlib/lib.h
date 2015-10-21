@@ -35,4 +35,8 @@ extern
 double
 jsonl_lib_stod(IN int8 * str);
 
+extern
+uint32
+jsonl_lib_hexstoui(IN int8 * str);
+
 #endif

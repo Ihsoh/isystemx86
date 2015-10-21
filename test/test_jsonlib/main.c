@@ -24,7 +24,8 @@ const char * text0 = "	\
 		f:123.123,	\
 		h:[[1], {a:2}, [3], {b:4}]	\
 	},	\
-	h:[\"123\", null, true, false, 123, 123.123, {a:[], b:{}, c:[], d:{}}]	\
+	h:[\"123\", null, true, false, 123, 123.123, {a:[], b:{}, c:[], d:{}}],	\
+	i:0x1234abEF	\
 }";
 
 int main(int argc, char * argv[])
@@ -44,6 +45,14 @@ int main(int argc, char * argv[])
 	char buffer[1024];
 	if(	!jsonl_string_value(text0_a, buffer, sizeof(buffer))
 		|| strcmp(buffer, "test0") != 0)
+		die("Bad test0 json object!");
+
+	JSONLRawPtr text0_i = NULL;
+	if(!JSONL_OBJECT_GET(text0_jsonobj, "i", &text0_i))
+		die("Bad test0 json object!");
+	uint32 i = 0x0;
+	if(	!jsonl_uint_value(text0_i, &i)
+		|| i != 0x1234abEF)
 		die("Bad test0 json object!");
 	JSONLRawPtr text0_g = NULL;
 	if(!JSONL_OBJECT_GET(text0_jsonobj, "g", &text0_g))

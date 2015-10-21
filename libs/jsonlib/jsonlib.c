@@ -69,6 +69,8 @@ jsonl_value_type(IN JSONLRawPtr raw)
 		return JSONL_VALUE_TYPE_STRING;
 	else if(JSONL_TYPE(raw) == JSONL_TYPE_NUMBER)
 		return JSONL_VALUE_TYPE_NUMBER;
+	else if(JSONL_TYPE(raw) == JSONL_TYPE_UINT)
+		return JSONL_VALUE_TYPE_UINT;
 	else
 		return JSONL_VALUE_TYPE_ERROR;
 }
@@ -110,7 +112,7 @@ jsonl_string_value(	IN JSONLRawPtr raw,
 	if(	raw == NULL 
 		|| v == NULL
 		|| max == 0
-		|| jsonl_value_type(raw) != JSONL_TYPE_VALUE
+		|| jsonl_value_type(raw) != JSONL_VALUE_TYPE_STRING
 		|| JSONL_VALUE(raw)[0] != '"')
 		return FALSE;
 	max--;
@@ -119,6 +121,18 @@ jsonl_string_value(	IN JSONLRawPtr raw,
 	while(max-- != 0 && len-- != 0)
 		*(v++) = (JSONL_VALUE(raw) + 1)[index++];
 	*v = '\0';
+	return TRUE;
+}
+
+BOOL
+jsonl_uint_value(	IN JSONLRawPtr raw,
+					OUT uint32 * v)
+{
+	if(	raw == NULL
+		|| v == NULL
+		|| jsonl_value_type(raw) != JSONL_VALUE_TYPE_UINT)
+		return FALSE;
+	*v = ((JSONLUIntPtr)raw)->number;
 	return TRUE;
 }
 
@@ -374,24 +388,50 @@ jsonl_parse(IN int8 * json_text,
 				}
 				else if(*json_text >= '0' && *json_text <= '9')
 				{
-					int8 buffer[KB(1)];
-					int32 len = 0;
-					while(	(*json_text >= '0' && *json_text <= '9')
-							|| *json_text == '.')
-						buffer[len++] = *(json_text++);
-					buffer[len] = '\0';
-					double number = jsonl_lib_stod(buffer);
-					JSONLNumberPtr jsonnum = (JSONLNumberPtr)jsonl_malloc(sizeof(JSONLNumber));
-					if(jsonnum == NULL)
+					if(*(json_text + 1) == 'x' || *(json_text + 1) == 'X')
 					{
-						dsl_lst_delete_all_object_value(array->array);
-						dsl_lst_free(array->array);
-						jsonl_free(array);
-						return NULL;
+						json_text += 2;
+						int8 buffer[KB(1)];
+						int32 len = 0;
+						while(	(*json_text >= '0' && *json_text <= '9')
+								|| (*json_text >= 'a' && *json_text <= 'f')
+								|| (*json_text >= 'A' && *json_text <= 'F'))
+							buffer[len++] = *(json_text++);
+						buffer[len] = '\0';
+						uint32 number = jsonl_lib_hexstoui(buffer);
+						JSONLUIntPtr jsonnum = (JSONLUIntPtr)jsonl_malloc(sizeof(JSONLUInt));
+						if(jsonnum == NULL)
+						{
+							dsl_lst_delete_all_object_value(array->array);
+							dsl_lst_free(array->array);
+							jsonl_free(array);
+							return NULL;
+						}
+						jsonnum->type = JSONL_TYPE_UINT;
+						jsonnum->number = number;
+						raw_value = jsonnum;
 					}
-					jsonnum->type = JSONL_TYPE_NUMBER;
-					jsonnum->number = number;
-					raw_value = jsonnum;
+					else
+					{
+						int8 buffer[KB(1)];
+						int32 len = 0;
+						while(	(*json_text >= '0' && *json_text <= '9')
+								|| *json_text == '.')
+							buffer[len++] = *(json_text++);
+						buffer[len] = '\0';
+						double number = jsonl_lib_stod(buffer);
+						JSONLNumberPtr jsonnum = (JSONLNumberPtr)jsonl_malloc(sizeof(JSONLNumber));
+						if(jsonnum == NULL)
+						{
+							dsl_lst_delete_all_object_value(array->array);
+							dsl_lst_free(array->array);
+							jsonl_free(array);
+							return NULL;
+						}
+						jsonnum->type = JSONL_TYPE_NUMBER;
+						jsonnum->number = number;
+						raw_value = jsonnum;
+					}
 				}
 				else
 				{
@@ -701,24 +741,50 @@ jsonl_parse(IN int8 * json_text,
 				}
 				else if(*json_text >= '0' && *json_text <= '9')
 				{
-					int8 buffer[KB(1)];
-					int32 len = 0;
-					while(	(*json_text >= '0' && *json_text <= '9')
-							|| *json_text == '.')
-						buffer[len++] = *(json_text++);
-					buffer[len] = '\0';
-					double number = jsonl_lib_stod(buffer);
-					JSONLNumberPtr jsonnum = (JSONLNumberPtr)jsonl_malloc(sizeof(JSONLNumber));
-					if(jsonnum == NULL)
+					if(*(json_text + 1) == 'x' || *(json_text + 1) == 'X')
 					{
-						dsl_hashtable_unset_all(obj->obj);
-						dsl_hashtable_free(obj->obj);
-						jsonl_free(obj);
-						return NULL;
+						json_text += 2;
+						int8 buffer[KB(1)];
+						int32 len = 0;
+						while(	(*json_text >= '0' && *json_text <= '9')
+								|| (*json_text >= 'a' && *json_text <= 'f')
+								|| (*json_text >= 'A' && *json_text <= 'F'))
+							buffer[len++] = *(json_text++);
+						buffer[len] = '\0';
+						uint32 number = jsonl_lib_hexstoui(buffer);
+						JSONLUIntPtr jsonnum = (JSONLUIntPtr)jsonl_malloc(sizeof(JSONLUInt));
+						if(jsonnum == NULL)
+						{
+							dsl_hashtable_unset_all(obj->obj);
+							dsl_hashtable_free(obj->obj);
+							jsonl_free(obj);
+							return NULL;
+						}
+						jsonnum->type = JSONL_TYPE_UINT;
+						jsonnum->number = number;
+						raw_value = jsonnum;
 					}
-					jsonnum->type = JSONL_TYPE_NUMBER;
-					jsonnum->number = number;
-					raw_value = jsonnum;
+					else
+					{
+						int8 buffer[KB(1)];
+						int32 len = 0;
+						while(	(*json_text >= '0' && *json_text <= '9')
+								|| *json_text == '.')
+							buffer[len++] = *(json_text++);
+						buffer[len] = '\0';
+						double number = jsonl_lib_stod(buffer);
+						JSONLNumberPtr jsonnum = (JSONLNumberPtr)jsonl_malloc(sizeof(JSONLNumber));
+						if(jsonnum == NULL)
+						{
+							dsl_hashtable_unset_all(obj->obj);
+							dsl_hashtable_free(obj->obj);
+							jsonl_free(obj);
+							return NULL;
+						}
+						jsonnum->type = JSONL_TYPE_NUMBER;
+						jsonnum->number = number;
+						raw_value = jsonnum;
+					}
 				}
 				else
 				{
@@ -777,6 +843,7 @@ jsonl_free_json(IN JSONLRawPtr raw)
 		case JSONL_TYPE_TRUE:
 		case JSONL_TYPE_FALSE:
 		case JSONL_TYPE_NUMBER:
+		case JSONL_TYPE_UINT:
 			jsonl_free(raw);
 			break;
 		case JSONL_TYPE_ARRAY:
