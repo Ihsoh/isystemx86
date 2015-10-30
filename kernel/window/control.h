@@ -25,6 +25,12 @@
 #define	WINDOW_DEFBGCOLOR	0xffffffff
 #define	WINDOW_BORDERCOLOR	0xff000000
 
+#define	GET_CONTROL_WIDTH(_c)	\
+	(control_get_width((_c)))
+
+#define	GET_CONTROL_HEIGHT(_c)	\
+	(control_get_height((_c)))
+
 typedef void (* ControlEvent)(uint32 id, uint32 type, void * param);
 
 typedef struct
@@ -42,5 +48,13 @@ __dummy_event(uint32 id, uint32 type, void * param);
 extern
 int32
 __new_control_id(void);
+
+extern
+uint32
+control_get_width(IN void * c);
+
+extern
+uint32
+control_get_height(IN void * c);
 
 #endif

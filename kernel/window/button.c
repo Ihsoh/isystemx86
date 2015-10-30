@@ -98,6 +98,8 @@ button_init(OUT ButtonPtr button,
 	button->vpext = NULL;
 	if(button->width == 0)
 		button->width = _BUTTON_WIDTH(button);
+	if(button->height == 0)
+		button->height = BUTTON_HEIGHT;
 	return TRUE;
 }
 

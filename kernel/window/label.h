@@ -68,6 +68,12 @@ typedef	struct
 #define	DISABLE_LABEL(_label)	\
 	((_label)->enabled = FALSE)
 
+#define	GET_LABEL_WIDTH(_label)	\
+	((_label)->width)
+
+#define	GET_LABEL_HEIGHT(_label)	\
+	((_label)->height)
+
 extern
 BOOL
 label_init(	OUT LabelPtr label,

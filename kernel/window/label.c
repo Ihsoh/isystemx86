@@ -147,6 +147,8 @@ label_init(	OUT LabelPtr label,
 	label->enabled = FALSE;
 	if(label->width == 0)
 		label->width = _LABEL_WIDTH(label);
+	if(label->height == 0)
+		label->height = LABEL_TPADDING + label->max_row * ENFONT_HEIGHT + LABEL_BPADDING;
 	return TRUE;
 }
 
@@ -312,6 +314,7 @@ label_set_text(	OUT LabelPtr label,
 	label->old_max_col = label->max_col;
 	_max(text, &label->max_row, &label->max_col);
 	label->width = _LABEL_WIDTH(label);
+	label->height = LABEL_TPADDING + label->max_row * ENFONT_HEIGHT + LABEL_BPADDING;
 	label->clean = TRUE;
 	return TRUE;
 }

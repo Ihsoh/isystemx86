@@ -250,6 +250,20 @@ gui_disable_control(IN int32 tid,
 
 extern
 BOOL
+gui_get_width(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				OUT uint32 * width);
+
+extern
+BOOL
+gui_get_height(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				OUT uint32 * height);
+
+extern
+BOOL
 gui_new_button(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,

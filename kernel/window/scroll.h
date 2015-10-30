@@ -54,6 +54,12 @@ typedef struct
 #define	DISABLE_SCROLL(_scroll)	\
 	((_scroll)->enabled = FALSE)
 
+#define	GET_SCROLL_WIDTH(_scroll)	\
+	((_scroll)->width)
+
+#define	GET_SCROLL_HEIGHT(_scroll)	\
+	((_scroll)->height)
+
 extern
 BOOL
 scroll_init(OUT ScrollPtr scroll,

@@ -292,3 +292,31 @@ list_disable_item(	IN OUT ListPtr list,
 	DISABLE_BUTTON(&list->buttons[index]);
 	return TRUE;
 }
+
+/**
+	@Function:		list_get_width
+	@Access:		Public
+	@Description:
+		获取列表的宽度。
+	@Parameters:
+		list, ListPtr, IN
+			指向List对象的指针。
+	@Return:
+		uint32
+			获取列表的宽度。
+*/
+uint32
+list_get_width(IN ListPtr list)
+{
+	if(list == NULL)
+		return 0;
+	uint32 max_width = 0;
+	uint32 ui;
+	for(ui = 0; ui < list->count; ui++)
+	{
+		uint32 width = GET_BUTTON_WIDTH(&list->buttons[ui]);
+		if(width > max_width)
+			max_width = width;
+	}
+	return max_width;
+}

@@ -410,6 +410,32 @@ ILGDisableControl(	IN int32 wid,
 }
 
 BOOL
+ILGGetWidth(IN int32 wid,
+			IN int32 cid,
+			OUT uint32 * width)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	sparams.param2 = SPARAM(width);
+	system_call(SCALL_GUI, SCALL_GUI_GET_WIDTH, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
+ILGGetHeight(	IN int32 wid,
+				IN int32 cid,
+				OUT uint32 * height)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(cid);
+	sparams.param2 = SPARAM(height);
+	system_call(SCALL_GUI, SCALL_GUI_GET_HEIGHT, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}
+
+BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
 				IN int32 y,

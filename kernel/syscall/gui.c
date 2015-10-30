@@ -324,6 +324,28 @@ system_call_gui(IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+		case SCALL_GUI_GET_WIDTH:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param2);
+			uint32 * width = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_get_width(tid, wid, cid, width);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
+		case SCALL_GUI_GET_HEIGHT:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 cid = INT32_SPARAM(sparams->param1);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param2);
+			uint32 * height = (uint32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_get_height(tid, wid, cid, height);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 		// ============================== Button ==============================
 		case SCALL_GUI_NEW_BUTTON:
 		{

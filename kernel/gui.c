@@ -1394,6 +1394,72 @@ gui_disable_control(IN int32 tid,
 }
 
 /**
+	@Function:		gui_get_width
+	@Access:		Public
+	@Description:
+		获取控件宽度。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		width, uint32 *, OUT
+			指向用于储存宽度的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+gui_get_width(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				OUT uint32 * width)
+{
+	if(width == NULL)
+		return FALSE;
+	_WINSTANCE_FALSE
+	_CONTROL_FALSE
+	*width = 0;
+	*width = GET_CONTROL_WIDTH(control);
+	return TRUE;
+}
+
+/**
+	@Function:		gui_get_height
+	@Access:		Public
+	@Description:
+		获取控件高度。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		cid, int32, IN
+			控件ID。
+		height, uint32 *, OUT
+			指向用于储存高度的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+gui_get_height(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				OUT uint32 * height)
+{
+	if(height == NULL)
+		return FALSE;
+	_WINSTANCE_FALSE
+	_CONTROL_FALSE
+	*height = 0;
+	*height = GET_CONTROL_HEIGHT(control);
+	return TRUE;
+}
+
+/**
 	@Function:		_no_data_event
 	@Access:		Public
 	@Description:

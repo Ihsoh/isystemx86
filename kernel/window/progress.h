@@ -42,6 +42,12 @@ typedef struct
 #define	SET_PROGRESS_PERCENT(_progress, _percent)	\
 	(progress_set_percent((_progress), (_percent)))
 
+#define	GET_PROGRESS_WIDTH(_progress)	\
+	((_progress)->width)
+
+#define	GET_PROGRESS_HEIGHT(_progress)	\
+	((_progress)->height)
+
 extern
 BOOL
 progress_init(	OUT ProgressPtr progress,

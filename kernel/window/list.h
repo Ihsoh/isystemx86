@@ -52,6 +52,12 @@ typedef	struct
 #define	DISABLE_LIST_ITEM(_list, _index)	\
 	(list_disable_item((_list), (_index)))
 
+#define	GET_LIST_WIDTH(_list)	\
+	(list_get_width((_list)))
+
+#define	GET_LIST_HEIGHT(_list)	\
+	((_list)->count * BUTTON_HEIGHT)
+
 extern
 BOOL
 list_init(	OUT ListPtr list,
@@ -96,5 +102,9 @@ extern
 BOOL
 list_disable_item(	IN OUT ListPtr list,
 					IN uint32 index);
+
+extern
+uint32
+list_get_width(IN ListPtr list);
 
 #endif

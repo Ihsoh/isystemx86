@@ -214,6 +214,18 @@ ILGDisableControl(	IN int32 wid,
 
 extern
 BOOL
+ILGGetWidth(IN int32 wid,
+			IN int32 cid,
+			OUT uint32 * width);
+
+extern
+BOOL
+ILGGetHeight(	IN int32 wid,
+				IN int32 cid,
+				OUT uint32 * height);
+
+extern
+BOOL
 ILGNewButton(	IN int32 wid,
 				IN int32 x,
 				IN int32 y,

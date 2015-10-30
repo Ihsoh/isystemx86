@@ -69,6 +69,12 @@ typedef struct
 #define	DISABLE_BUTTON(_button)	\
 	((_button)->enabled = FALSE)
 
+#define	GET_BUTTON_WIDTH(_button)	\
+	((_button)->width)
+
+#define	GET_BUTTON_HEIGHT(_button)	\
+	((_button)->height)
+
 extern
 BOOL
 button_init(OUT ButtonPtr button,
