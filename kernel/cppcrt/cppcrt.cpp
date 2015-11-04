@@ -39,3 +39,21 @@ inline void operator delete [](void * p)
 {
 	free_memory(p);
 }
+
+inline void * operator new(uint32, void * p)
+{
+	return p;
+}
+
+inline void * operator new [](uint32, void * p)
+{
+	return p;
+}
+
+inline void operator delete(void *, void *)
+{
+}
+
+inline void operator delete [](void *, void *)
+{
+}
