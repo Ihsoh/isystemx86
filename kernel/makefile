@@ -39,15 +39,15 @@ windows/bin/power.obj windows/bin/wmgr.obj
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj syscall/bin/gui.obj
 
-FS_IFS1=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
+FS_IFS1Objs=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 
 $(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin \
-$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1)
+$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs)	$(SyscallObjs) $(FS_IFS1)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -309,4 +309,5 @@ fs/ifs1/bin/fs.obj: fs/ifs1/fs.c fs/ifs1/fs.h
 .PHONY:clean
 
 clean:
-	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(Target)
+	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs)	\
+$(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(Target)
