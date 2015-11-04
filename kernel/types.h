@@ -27,7 +27,12 @@ typedef	void *	object;
 //typedef	int32	bool;
 #define	bool int32
 
+#undef	NULL
+#ifdef __cplusplus
+#define	NULL	0
+#else
 #define	NULL	((void *)0)
+#endif
 
 #define	KB(n)	((n) * 1024)
 #define	MB(n)	((n) * 1024 * 1024)

@@ -58,7 +58,9 @@ extern void trimex(char * str, char chr);
 
 extern int is_valid_uint(char * str);
 
+#ifndef	_KERNEL_MODULE_
 #include "string/string.h"
+#endif
 
 #endif	// #ifndef	_ILIB_STRING_H_
 

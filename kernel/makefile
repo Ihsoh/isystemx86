@@ -12,6 +12,11 @@ CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 ASFlags=--32 -march=i386 -mtune=i386
 StringObj=../libs/ilib/bin/string.obj
 
+CPP=g++
+CPPFLAGS= -std=c++11 -O0 -ffreestanding -fno-builtin -nostdinc	\
+-fno-exceptions -fno-rtti -Wall -Wextra	\
+-m32 -march=i386 -mtune=i386
+
 Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
 bin/console.obj bin/disk.obj bin/vdisk.obj bin/memory.obj \
@@ -41,13 +46,16 @@ syscall/bin/system.obj syscall/bin/gui.obj
 
 FS_IFS1Objs=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 
+CppCRTObjs=cppcrt/bin/cppcrt.obj
+
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
+Definition=-D_KERNEL_MODULE_
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin \
-$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs)
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin \
+$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -59,6 +67,12 @@ bin:
 
 bmp/bin:
 	-mkdir bmp/bin
+
+cppcrt/bin:
+	-mkdir cppcrt/bin
+
+dump/bin:
+	-mkdir dump/bin
 
 fs/ifs1/bin:
 	-mkdir fs/ifs1/bin
@@ -76,238 +90,241 @@ windows/bin:
 	-mkdir windows/bin
 
 bin/kernel.obj: kernel.c kernel.h
-	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include)
+	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include) $(Definition)
 
 bin/386.obj: 386.c 386.h types.h
-	$(CC) $(CFlags) -c 386.c -o bin/386.obj $(Include)
+	$(CC) $(CFlags) -c 386.c -o bin/386.obj $(Include) $(Definition)
 
 bin/screen.obj: screen.c screen.h types.h 386.h
-	$(CC) $(CFlags) -c screen.c -o bin/screen.obj $(Include)
+	$(CC) $(CFlags) -c screen.c -o bin/screen.obj $(Include) $(Definition)
 
 bin/die.obj: die.c die.h screen.h types.h
-	$(CC) $(CFlags) -c die.c -o bin/die.obj $(Include)
+	$(CC) $(CFlags) -c die.c -o bin/die.obj $(Include) $(Definition)
 
 bin/keyboard.obj: keyboard.c keyboard.h types.h
-	$(CC) $(CFlags) -c keyboard.c -o bin/keyboard.obj $(Include)
+	$(CC) $(CFlags) -c keyboard.c -o bin/keyboard.obj $(Include) $(Definition)
 
 bin/console.obj: console.c console.h keyboard.h screen.h
-	$(CC) $(CFlags) -c console.c -o bin/console.obj $(Include)
+	$(CC) $(CFlags) -c console.c -o bin/console.obj $(Include) $(Definition)
 
 bin/disk.obj: disk.c disk.h
-	$(CC) $(CFlags) -c disk.c -o bin/disk.obj $(Include)
+	$(CC) $(CFlags) -c disk.c -o bin/disk.obj $(Include) $(Definition)
 
 bin/vdisk.obj: vdisk.c vdisk.h
-	$(CC) $(CFlags) -c vdisk.c -o bin/vdisk.obj $(Include)
+	$(CC) $(CFlags) -c vdisk.c -o bin/vdisk.obj $(Include) $(Definition)
 
 bin/memory.obj: memory.c memory.h
-	$(CC) $(CFlags) -c memory.c -o bin/memory.obj $(Include)
+	$(CC) $(CFlags) -c memory.c -o bin/memory.obj $(Include) $(Definition)
 
 bin/kfuncs.obj: kfuncs.c kfuncs.h
-	$(CC) $(CFlags) -c kfuncs.c -o bin/kfuncs.obj $(Include)
+	$(CC) $(CFlags) -c kfuncs.c -o bin/kfuncs.obj $(Include) $(Definition)
 
 bin/hdisk.obj: hdisk.c hdisk.h
-	$(CC) $(CFlags) -c hdisk.c -o bin/hdisk.obj $(Include)
+	$(CC) $(CFlags) -c hdisk.c -o bin/hdisk.obj $(Include) $(Definition)
 
 bin/cmos.obj: cmos.c cmos.h
-	$(CC) $(CFlags) -c cmos.c -o bin/cmos.obj $(Include)
+	$(CC) $(CFlags) -c cmos.c -o bin/cmos.obj $(Include) $(Definition)
 
 bin/tasks.obj: tasks.c tasks.h
-	$(CC) $(CFlags) -c tasks.c -o bin/tasks.obj $(Include)
+	$(CC) $(CFlags) -c tasks.c -o bin/tasks.obj $(Include) $(Definition)
 
 bin/vesa.obj: vesa.c vesa.h
-	$(CC) $(CFlags) -c vesa.c -o bin/vesa.obj $(Include)
+	$(CC) $(CFlags) -c vesa.c -o bin/vesa.obj $(Include) $(Definition)
 
 bin/enfont.obj: enfont.c enfont.h
-	$(CC) $(CFlags) -c enfont.c -o bin/enfont.obj $(Include)
+	$(CC) $(CFlags) -c enfont.c -o bin/enfont.obj $(Include) $(Definition)
 
 bin/vars.obj: vars.c vars.h
-	$(CC) $(CFlags) -c vars.c -o bin/vars.obj $(Include)
+	$(CC) $(CFlags) -c vars.c -o bin/vars.obj $(Include) $(Definition)
 
 bin/image.obj: image.c image.h
-	$(CC) $(CFlags) -c image.c -o bin/image.obj $(Include) -D_KERNEL_MODEL_
+	$(CC) $(CFlags) -c image.c -o bin/image.obj $(Include) $(Definition)
 
 bin/cpu.obj: cpu.c cpu.h
-	$(CC) $(CFlags) -c cpu.c -o bin/cpu.obj $(Include)
+	$(CC) $(CFlags) -c cpu.c -o bin/cpu.obj $(Include) $(Definition)
 
 bin/paging.obj: paging.c paging.h
-	$(CC) $(CFlags) -c paging.c -o bin/paging.obj $(Include)
+	$(CC) $(CFlags) -c paging.c -o bin/paging.obj $(Include) $(Definition)
 
 bin/lock.obj: lock.c lock.h
-	$(CC) $(CFlags) -c lock.c -o bin/lock.obj $(Include)
+	$(CC) $(CFlags) -c lock.c -o bin/lock.obj $(Include) $(Definition)
 
 bin/window.obj: window.c window.h
-	$(CC) $(CFlags) -c window.c -o bin/window.obj $(Include)
+	$(CC) $(CFlags) -c window.c -o bin/window.obj $(Include) $(Definition)
 
 bin/klib.obj: klib.c klib.h
-	$(CC) $(CFlags) -c klib.c -o bin/klib.obj $(Include)
+	$(CC) $(CFlags) -c klib.c -o bin/klib.obj $(Include) $(Definition)
 
 bin/kstring.obj: kstring.c kstring.h
-	$(CC) $(CFlags) -c kstring.c -o bin/kstring.obj $(Include)
+	$(CC) $(CFlags) -c kstring.c -o bin/kstring.obj $(Include) $(Definition)
 
 bin/log.obj: log.c log.h
-	$(CC) $(CFlags) -c log.c -o bin/log.obj $(Include)
+	$(CC) $(CFlags) -c log.c -o bin/log.obj $(Include) $(Definition)
 
 bin/rsdp.obj: rsdp.c rsdp.h
-	$(CC) $(CFlags) -c rsdp.c -o bin/rsdp.obj $(Include)
+	$(CC) $(CFlags) -c rsdp.c -o bin/rsdp.obj $(Include) $(Definition)
 
 bin/acpi.obj: acpi.c acpi.h
-	$(CC) $(CFlags) -c acpi.c -o bin/acpi.obj $(Include)
+	$(CC) $(CFlags) -c acpi.c -o bin/acpi.obj $(Include) $(Definition)
 
 bin/rsdt.obj: rsdt.c rsdt.h
-	$(CC) $(CFlags) -c rsdt.c -o bin/rsdt.obj $(Include)
+	$(CC) $(CFlags) -c rsdt.c -o bin/rsdt.obj $(Include) $(Definition)
 
 bin/fadt.obj: fadt.c fadt.h
-	$(CC) $(CFlags) -c fadt.c -o bin/fadt.obj $(Include)
+	$(CC) $(CFlags) -c fadt.c -o bin/fadt.obj $(Include) $(Definition)
 
 bin/atapi.obj: atapi.c atapi.h
-	$(CC) $(CFlags) -c atapi.c -o bin/atapi.obj $(Include)
+	$(CC) $(CFlags) -c atapi.c -o bin/atapi.obj $(Include) $(Definition)
 
 bin/serial.obj: serial.c serial.h
-	$(CC) $(CFlags) -c serial.c -o bin/serial.obj $(Include)
+	$(CC) $(CFlags) -c serial.c -o bin/serial.obj $(Include) $(Definition)
 
 bin/mqueue.obj: mqueue.c mqueue.h
-	$(CC) $(CFlags) -c mqueue.c -o bin/mqueue.obj $(Include)
+	$(CC) $(CFlags) -c mqueue.c -o bin/mqueue.obj $(Include) $(Definition)
 
 bin/toaruos_pci.obj: toaruos_pci.c toaruos_pci.h
-	$(CC) $(CFlags) -c toaruos_pci.c -o bin/toaruos_pci.obj $(Include)
+	$(CC) $(CFlags) -c toaruos_pci.c -o bin/toaruos_pci.obj $(Include) $(Definition)
 
 bin/pci.obj: pci.c pci.h
-	$(CC) $(CFlags) -c pci.c -o bin/pci.obj $(Include)
+	$(CC) $(CFlags) -c pci.c -o bin/pci.obj $(Include) $(Definition)
 
 bin/apic.obj: apic.c apic.h
-	$(CC) $(CFlags) -c apic.c -o bin/apic.obj $(Include)
+	$(CC) $(CFlags) -c apic.c -o bin/apic.obj $(Include) $(Definition)
 
 bin/madt.obj: madt.c madt.h
-	$(CC) $(CFlags) -c madt.c -o bin/madt.obj $(Include)
+	$(CC) $(CFlags) -c madt.c -o bin/madt.obj $(Include) $(Definition)
 
 bin/pic.obj: pic.c pic.h
-	$(CC) $(CFlags) -c pic.c -o bin/pic.obj $(Include)
+	$(CC) $(CFlags) -c pic.c -o bin/pic.obj $(Include) $(Definition)
 
 bin/interrupts.obj: interrupts.c interrupts.h
-	$(CC) $(CFlags) -c interrupts.c -o bin/interrupts.obj $(Include)
+	$(CC) $(CFlags) -c interrupts.c -o bin/interrupts.obj $(Include) $(Definition)
 
 bin/config.obj: config.c config.h
-	$(CC) $(CFlags) -c config.c -o bin/config.obj $(Include)
+	$(CC) $(CFlags) -c config.c -o bin/config.obj $(Include) $(Definition)
 
 bin/ahci.obj: ahci.c ahci.h
-	$(CC) $(CFlags) -c ahci.c -o bin/ahci.obj $(Include)
+	$(CC) $(CFlags) -c ahci.c -o bin/ahci.obj $(Include) $(Definition)
 
 bin/dma.obj: dma.c dma.h
-	$(CC) $(CFlags) -c dma.c -o bin/dma.obj $(Include)
+	$(CC) $(CFlags) -c dma.c -o bin/dma.obj $(Include) $(Definition)
 
 bin/mouse.obj: mouse.c mouse.h
-	$(CC) $(CFlags) -c mouse.c -o bin/mouse.obj $(Include)
+	$(CC) $(CFlags) -c mouse.c -o bin/mouse.obj $(Include) $(Definition)
 
 bin/kmpool.obj: kmpool.c kmpool.h
-	$(CC) $(CFlags) -c kmpool.c -o bin/kmpool.obj $(Include)
+	$(CC) $(CFlags) -c kmpool.c -o bin/kmpool.obj $(Include) $(Definition)
 
 bin/knlldr.obj: knlldr.c knlldr.h
-	$(CC) $(CFlags) -c knlldr.c -o bin/knlldr.obj $(Include)
+	$(CC) $(CFlags) -c knlldr.c -o bin/knlldr.obj $(Include) $(Definition)
 
 bin/irq.obj: irq.s
 	$(AS) $(ASFlags) -c irq.s -o bin/irq.obj
 
 bin/timer.obj: timer.c timer.h
-	$(CC) $(CFlags) -c timer.c -o bin/timer.obj $(Include)
+	$(CC) $(CFlags) -c timer.c -o bin/timer.obj $(Include) $(Definition)
 
 bin/gui.obj: gui.c gui.h
-	$(CC) $(CFlags) -c gui.c -o bin/gui.obj $(Include)
+	$(CC) $(CFlags) -c gui.c -o bin/gui.obj $(Include) $(Definition)
 
 
 bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
-	$(CC) $(CFlags) -c bmp/bmp.c -o bmp/bin/bmp.obj $(Include) -std=c99
+	$(CC) $(CFlags) -c bmp/bmp.c -o bmp/bin/bmp.obj $(Include) $(Definition) -std=c99
 
 
 utils/bin/img.obj: utils/img.c utils/img.h
-	$(CC) $(CFlags) -c utils/img.c -o utils/bin/img.obj $(Include)
+	$(CC) $(CFlags) -c utils/img.c -o utils/bin/img.obj $(Include) $(Definition)
 
 
 dump/bin/dump.obj: dump/dump.c dump/dump.h
-	$(CC) $(CFlags) -c dump/dump.c -o dump/bin/dump.obj $(Include)
+	$(CC) $(CFlags) -c dump/dump.c -o dump/bin/dump.obj $(Include) $(Definition)
 
 dump/bin/msg.obj: dump/msg.c dump/msg.h
-	$(CC) $(CFlags) -c dump/msg.c -o dump/bin/msg.obj $(Include)
+	$(CC) $(CFlags) -c dump/msg.c -o dump/bin/msg.obj $(Include) $(Definition)
 
 
 window/bin/control.obj: window/control.c window/control.h
-	$(CC) $(CFlags) -c window/control.c -o window/bin/control.obj $(Include)
+	$(CC) $(CFlags) -c window/control.c -o window/bin/control.obj $(Include) $(Definition)
 
 window/bin/button.obj: window/button.c window/button.h
-	$(CC) $(CFlags) -c window/button.c -o window/bin/button.obj $(Include)
+	$(CC) $(CFlags) -c window/button.c -o window/bin/button.obj $(Include) $(Definition)
 
 window/bin/label.obj: window/label.c window/label.h
-	$(CC) $(CFlags) -c window/label.c -o window/bin/label.obj $(Include)
+	$(CC) $(CFlags) -c window/label.c -o window/bin/label.obj $(Include) $(Definition)
 
 window/bin/list.obj: window/list.c window/list.h
-	$(CC) $(CFlags) -c window/list.c -o window/bin/list.obj $(Include)
+	$(CC) $(CFlags) -c window/list.c -o window/bin/list.obj $(Include) $(Definition)
 
 window/bin/progress.obj: window/progress.c window/progress.h
-	$(CC) $(CFlags) -c window/progress.c -o window/bin/progress.obj $(Include)
+	$(CC) $(CFlags) -c window/progress.c -o window/bin/progress.obj $(Include) $(Definition)
 
 window/bin/scroll.obj: window/scroll.c window/scroll.h
-	$(CC) $(CFlags) -c window/scroll.c -o window/bin/scroll.obj $(Include)
+	$(CC) $(CFlags) -c window/scroll.c -o window/bin/scroll.obj $(Include) $(Definition)
 
 
 windows/bin/clock.obj: windows/clock.c windows/clock.h
-	$(CC) $(CFlags) -c windows/clock.c -o windows/bin/clock.obj $(Include)
+	$(CC) $(CFlags) -c windows/clock.c -o windows/bin/clock.obj $(Include) $(Definition)
 
 windows/bin/console.obj: windows/console.c windows/console.h
-	$(CC) $(CFlags) -c windows/console.c -o windows/bin/console.obj $(Include)
+	$(CC) $(CFlags) -c windows/console.c -o windows/bin/console.obj $(Include) $(Definition)
 
 windows/bin/sfunc.obj: windows/sfunc.c windows/sfunc.h
-	$(CC) $(CFlags) -c windows/sfunc.c -o windows/bin/sfunc.obj $(Include)
+	$(CC) $(CFlags) -c windows/sfunc.c -o windows/bin/sfunc.obj $(Include) $(Definition)
 
 windows/bin/message.obj: windows/message.c windows/message.h
-	$(CC) $(CFlags) -c windows/message.c -o windows/bin/message.obj $(Include)
+	$(CC) $(CFlags) -c windows/message.c -o windows/bin/message.obj $(Include) $(Definition)
 
 windows/bin/detail.obj: windows/detail.c windows/detail.h
-	$(CC) $(CFlags) -c windows/detail.c -o windows/bin/detail.obj $(Include)
+	$(CC) $(CFlags) -c windows/detail.c -o windows/bin/detail.obj $(Include) $(Definition)
 
 windows/bin/explorer.obj: windows/explorer.c windows/explorer.h
-	$(CC) $(CFlags) -c windows/explorer.c -o windows/bin/explorer.obj $(Include)
+	$(CC) $(CFlags) -c windows/explorer.c -o windows/bin/explorer.obj $(Include) $(Definition)
 
 windows/bin/taskbar.obj: windows/taskbar.c windows/taskbar.h
-	$(CC) $(CFlags) -c windows/taskbar.c -o windows/bin/taskbar.obj $(Include)
+	$(CC) $(CFlags) -c windows/taskbar.c -o windows/bin/taskbar.obj $(Include) $(Definition)
 
 windows/bin/start.obj: windows/start.c windows/start.h
-	$(CC) $(CFlags) -c windows/start.c -o windows/bin/start.obj $(Include)
+	$(CC) $(CFlags) -c windows/start.c -o windows/bin/start.obj $(Include) $(Definition)
 
 windows/bin/power.obj: windows/power.c windows/power.h
-	$(CC) $(CFlags) -c windows/power.c -o windows/bin/power.obj $(Include)
+	$(CC) $(CFlags) -c windows/power.c -o windows/bin/power.obj $(Include) $(Definition)
 
 windows/bin/wmgr.obj: windows/wmgr.c windows/wmgr.h
-	$(CC) $(CFlags) -c windows/wmgr.c -o windows/bin/wmgr.obj $(Include)
+	$(CC) $(CFlags) -c windows/wmgr.c -o windows/bin/wmgr.obj $(Include) $(Definition)
 
 
 syscall/bin/fs.obj: syscall/fs.c syscall/fs.h
-	$(CC) $(CFlags) -c syscall/fs.c -o syscall/bin/fs.obj $(Include)
+	$(CC) $(CFlags) -c syscall/fs.c -o syscall/bin/fs.obj $(Include) $(Definition)
 
 syscall/bin/keyboard.obj: syscall/keyboard.c syscall/keyboard.h
-	$(CC) $(CFlags) -c syscall/keyboard.c -o syscall/bin/keyboard.obj $(Include)
+	$(CC) $(CFlags) -c syscall/keyboard.c -o syscall/bin/keyboard.obj $(Include) $(Definition)
 
 syscall/bin/mouse.obj: syscall/mouse.c syscall/mouse.h
-	$(CC) $(CFlags) -c syscall/mouse.c -o syscall/bin/mouse.obj $(Include)
+	$(CC) $(CFlags) -c syscall/mouse.c -o syscall/bin/mouse.obj $(Include) $(Definition)
 
 syscall/bin/screen.obj: syscall/screen.c syscall/screen.h
-	$(CC) $(CFlags) -c syscall/screen.c -o syscall/bin/screen.obj $(Include)
+	$(CC) $(CFlags) -c syscall/screen.c -o syscall/bin/screen.obj $(Include) $(Definition)
 
 syscall/bin/system.obj: syscall/system.c syscall/system.h
-	$(CC) $(CFlags) -c syscall/system.c -o syscall/bin/system.obj $(Include)
+	$(CC) $(CFlags) -c syscall/system.c -o syscall/bin/system.obj $(Include) $(Definition)
 
 syscall/bin/gui.obj: syscall/gui.c syscall/gui.h
-	$(CC) $(CFlags) -c syscall/gui.c -o syscall/bin/gui.obj $(Include)
+	$(CC) $(CFlags) -c syscall/gui.c -o syscall/bin/gui.obj $(Include) $(Definition)
 
 
 fs/ifs1/bin/blocks.obj: fs/ifs1/blocks.c fs/ifs1/blocks.h
-	$(CC) $(CFlags) -c fs/ifs1/blocks.c -o fs/ifs1/bin/blocks.obj $(Include)
+	$(CC) $(CFlags) -c fs/ifs1/blocks.c -o fs/ifs1/bin/blocks.obj $(Include) $(Definition)
 
 fs/ifs1/bin/fs.obj: fs/ifs1/fs.c fs/ifs1/fs.h
-	$(CC) $(CFlags) -c fs/ifs1/fs.c -o fs/ifs1/bin/fs.obj $(Include)
+	$(CC) $(CFlags) -c fs/ifs1/fs.c -o fs/ifs1/bin/fs.obj $(Include) $(Definition)
 
+
+cppcrt/bin/cppcrt.obj: cppcrt/cppcrt.cpp cppcrt/cppcrt.hpp
+	$(CPP) $(CPPFLAGS) -c cppcrt/cppcrt.cpp -o cppcrt/bin/cppcrt.obj $(Include) $(Definition)
 
 
 .PHONY:clean
 
 clean:
 	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs)	\
-$(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(Target)
+$(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(Target)

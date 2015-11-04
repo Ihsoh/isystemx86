@@ -9,7 +9,7 @@
 #include "image.h"
 #include "types.h"
 
-#ifdef	_KERNEL_MODEL_
+#ifdef	_KERNEL_MODULE_
 	#include "enfont.h"
 	#include "memory.h"
 	#include "fs/ifs1/fs.h"
@@ -170,7 +170,7 @@ save_common_image(	IN struct CommonImage * common_image,
 {
 	if(common_image == NULL || path == NULL)
 		return FALSE;
-	#ifdef	_KERNEL_MODEL_
+	#ifdef	_KERNEL_MODULE_
 	FileObject * fptr = open_file(path, FILE_MODE_ALL);
 	#else
 	ILFILE * fptr = ILOpenFile(path, FILE_MODE_ALL);
@@ -180,7 +180,7 @@ save_common_image(	IN struct CommonImage * common_image,
 	switch(common_image->type)
 	{
 		case CMMNIMAGE_IMG0:
-			#ifdef	_KERNEL_MODEL_
+			#ifdef	_KERNEL_MODULE_
 			write_file(fptr, CMMNIMAGE_IMG0_SYMBOL, strlen(CMMNIMAGE_IMG0_SYMBOL));			
 			append_file(fptr, (uint8 *)&(common_image->width), 4);	
 			append_file(fptr, (uint8 *)&(common_image->height), 4);
@@ -195,7 +195,7 @@ save_common_image(	IN struct CommonImage * common_image,
 		default:
 			return FALSE;
 	}
-	#ifdef	_KERNEL_MODEL_
+	#ifdef	_KERNEL_MODULE_
 	close_file(fptr);
 	#else
 	ILCloseFile(fptr);
@@ -850,14 +850,14 @@ text_common_image_normal(	OUT struct CommonImage * common_image,
 		return FALSE;
 	uint32 char_count = strlen(text);
 	uint32 ui;
-	#ifdef	_KERNEL_MODEL_
+	#ifdef	_KERNEL_MODULE_
 	BOOL enfx_enabled = enfontx_enabled();
 	uint8 * enfont_content = enfont + 6;
 	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
 	#endif
 	for(ui = 0; ui < char_count && ui < count; ui++)
 	{
-		#ifdef	_KERNEL_MODEL_
+		#ifdef	_KERNEL_MODULE_
 		if(enfx_enabled)
 		{
 			uint8 * char_image = enfont_content + text[ui] * enfont_size;
@@ -955,14 +955,14 @@ text_common_image_sse(	OUT struct CommonImage * common_image,
 		return FALSE;
 	uint32 char_count = strlen(text);
 	uint32 ui;
-	#ifdef	_KERNEL_MODEL_
+	#ifdef	_KERNEL_MODULE_
 	BOOL enfx_enabled = enfontx_enabled();
 	uint8 * enfont_content = enfont + 6;
 	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
 	#endif
 	for(ui = 0; ui < char_count && ui < count; ui++)
 	{
-		#ifdef	_KERNEL_MODEL_
+		#ifdef	_KERNEL_MODULE_
 		if(enfx_enabled)
 		{
 			uint8 * char_image = enfont_content + text[ui] * enfont_size;
@@ -1046,7 +1046,7 @@ text_common_image_sse_ex(	OUT struct CommonImage * common_image,
 		return FALSE;
 	uint32 char_count = strlen(text);
 	uint32 ui;
-	#ifdef	_KERNEL_MODEL_
+	#ifdef	_KERNEL_MODULE_
 	BOOL enfx_enabled = enfontx_enabled();
 	uint8 * enfont_content = enfont + 6;
 	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
@@ -1055,7 +1055,7 @@ text_common_image_sse_ex(	OUT struct CommonImage * common_image,
 	blendx_init();
 	for(ui = 0; ui < char_count && ui < count; ui++)
 	{
-		#ifdef	_KERNEL_MODEL_
+		#ifdef	_KERNEL_MODULE_
 		if(enfx_enabled)
 		{
 			uint8 * char_image = enfont_content + text[ui] * enfont_size;
