@@ -10,12 +10,13 @@ CC=gcc
 AS=as
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 ASFlags=--32 -march=i386 -mtune=i386
-StringObj=../libs/ilib/bin/string.obj
 
 CPP=g++
 CPPFLAGS= -std=c++11 -O0 -ffreestanding -fno-builtin -nostdinc	\
 -fno-exceptions -fno-rtti -Wall -Wextra	\
 -m32 -march=i386 -mtune=i386
+
+StringObj=../libs/ilib/bin/string.obj
 
 Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
@@ -46,7 +47,7 @@ syscall/bin/system.obj syscall/bin/gui.obj
 
 FS_IFS1Objs=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 
-CppCRTObjs=cppcrt/bin/cppcrt.obj
+CppCRTObjs=cppcrt/bin/cppcrt.obj cppcrt/bin/ctor.obj cppcrt/bin/dtor.obj
 
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
@@ -321,6 +322,12 @@ fs/ifs1/bin/fs.obj: fs/ifs1/fs.c fs/ifs1/fs.h
 
 cppcrt/bin/cppcrt.obj: cppcrt/cppcrt.cpp cppcrt/cppcrt.hpp
 	$(CPP) $(CPPFLAGS) -c cppcrt/cppcrt.cpp -o cppcrt/bin/cppcrt.obj $(Include) $(Definition)
+
+cppcrt/bin/ctor.obj: cppcrt/ctor.cpp
+	$(CPP) $(CPPFLAGS) -c cppcrt/ctor.cpp -o cppcrt/bin/ctor.obj $(Include) $(Definition)
+
+cppcrt/bin/dtor.obj: cppcrt/dtor.cpp
+	$(CPP) $(CPPFLAGS) -c cppcrt/dtor.cpp -o cppcrt/bin/dtor.obj $(Include) $(Definition)
 
 
 .PHONY:clean
