@@ -12,6 +12,9 @@ tools/*/bin/*
 # 过滤 Apps 文件夹内的编译后产生的文件。
 apps/*/bin/*
 
+# 过滤 WApps 文件夹内的编译后产生的文件。
+wapps/*/bin/*
+
 # 过滤生成的 VHD 文件。
 *.vhd
 
@@ -24,4 +27,5 @@ apps/*/bin/*
 # 不忽略.gitignore。
 !.gitignore
 
+# 忽略光盘文件。
 *.iso
