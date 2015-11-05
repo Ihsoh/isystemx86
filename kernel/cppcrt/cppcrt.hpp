@@ -13,8 +13,6 @@ extern "C"
 {
 #endif
 
-extern void cpp_test(void);
-
 #ifdef __cplusplus
 }
 #endif	
