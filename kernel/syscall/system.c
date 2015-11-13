@@ -426,5 +426,16 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			timer_dispatch_tick();
 			break;
 		}
+		//装载ELF文件。
+		//
+		case SCALL_LOAD_ELF:
+		{
+			int32 tid = sparams->tid;
+			void * vptr = VOID_PTR_SPARAM(sparams->param0);
+			CASCTEXT path = (CASCTEXT)get_physical_address(tid, vptr);
+			uint32 entry = tasks_load_elf(tid, path);
+			sparams->param0 = SPARAM(entry);
+			break;
+		}
 	}
 }

@@ -124,4 +124,6 @@ extern void dispatch_tick(void);
 #define	il_dispatch_tick()	(dispatch_tick())
 #define	ILDispatchTick()	(dispatch_tick())
 
+extern uint32 ILLoadELF(CASCTEXT path);
+
 #endif

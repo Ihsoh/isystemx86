@@ -154,5 +154,6 @@
 #define	SCALL_WAIT				15
 #define	SCALL_MEMORY_BLOCK_SIZE	16
 #define	SCALL_DISPATCH_TICK		17
+#define	SCALL_LOAD_ELF			18
 
 #endif

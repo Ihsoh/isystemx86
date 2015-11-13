@@ -39,7 +39,7 @@ StdioObjs=bin/__vfscanf.obj
 AR=ar
 Include=-I../
 
-$(Target): bin  bin/mta32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
+$(Target): bin  bin/mta32.obj bin/elf32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
 	$(AR) -rc $(Target) $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
 
 bin:
@@ -338,7 +338,10 @@ bin/__vfscanf.obj: stdio/__vfscanf.c
 bin/mta32.obj: mta32.c
 	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj $(Include)
 
+bin/elf32.obj: elf32.c
+	$(CC) $(CFlags) -c elf32.c -o bin/elf32.obj $(Include)
+
 .PHONY:clean
 
 clean:
-	-rm -f $(Target) $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs)
+	-rm -f $(Target) bin/mta32.obj bin/elf32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs)

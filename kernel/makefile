@@ -8,7 +8,7 @@ Out=kernel.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
 AS=as
-CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
+CFlags= -O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 ASFlags=--32 -march=i386 -mtune=i386
 
 CPP=g++
@@ -49,14 +49,16 @@ FS_IFS1Objs=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 
 CppCRTObjs=cppcrt/bin/cppcrt.obj cppcrt/bin/ctor.obj cppcrt/bin/dtor.obj
 
+ELFObjs=elf/bin/helper.obj elf/bin/parser.obj
+
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 Definition=-D_KERNEL_MODULE_
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin \
-$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin \
+$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -68,9 +70,6 @@ bin:
 
 bmp/bin:
 	-mkdir bmp/bin
-
-cppcrt/bin:
-	-mkdir cppcrt/bin
 
 dump/bin:
 	-mkdir dump/bin
@@ -89,6 +88,12 @@ window/bin:
 
 windows/bin:
 	-mkdir windows/bin
+
+cppcrt/bin:
+	-mkdir cppcrt/bin
+
+elf/bin:
+	-mkdir elf/bin
 
 bin/kernel.obj: kernel.c kernel.h
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include) $(Definition)
@@ -330,8 +335,15 @@ cppcrt/bin/dtor.obj: cppcrt/dtor.cpp
 	$(CPP) $(CPPFLAGS) -c cppcrt/dtor.cpp -o cppcrt/bin/dtor.obj $(Include) $(Definition)
 
 
+elf/bin/helper.obj: elf/helper.c
+	$(CC) $(CFlags) -c elf/helper.c -o elf/bin/helper.obj $(Include) $(Definition)
+
+elf/bin/parser.obj: elf/parser.c
+	$(CC) $(CFlags) -c elf/parser.c -o elf/bin/parser.obj $(Include) $(Definition)
+
+
 .PHONY:clean
 
 clean:
 	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs)	\
-$(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(Target)
+$(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(Target)

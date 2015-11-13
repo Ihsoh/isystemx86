@@ -48,7 +48,10 @@ BOOL __init_mempool(void)
 
 BOOL __destroy_mempool(void)
 {
-	return mempooll_free_pool(&pool);
+	if(pool_was_inited)
+		return mempooll_free_pool(&pool);
+	else
+		return FALSE;
 }
 
 void * malloc(uint num_bytes)

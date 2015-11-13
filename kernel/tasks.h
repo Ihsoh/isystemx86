@@ -85,6 +85,8 @@ struct Task
 	TaskPriority 		priority;			//任务优先级。
 	int32				tick;				//滴答。到0时切换任务。
 	OnTaskExit			on_exit;			//当任务退出时调用。
+	uint8 *				elf;				//装载ELF程序的空间。
+	uint32				pad[3];
 };
 
 
@@ -202,6 +204,11 @@ void *
 tasks_alloc_memory(	IN int32 tid,
 					IN uint32 size,
 					OUT void ** phyaddr);
+
+extern
+uint32
+tasks_load_elf(	IN int32 tid,
+				IN CASCTEXT path);
 
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()

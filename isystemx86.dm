@@ -69,7 +69,7 @@ MAKE_DIR	VA:/isystem/ bins
 
 #Command 'printf'
 MAKE_FILE	VA:/isystem/bins/ printf
-WRITE_FILE	VA:/isystem/bins/printf apps/printf/bin/printf.bin
+WRITE_FILE	VA:/isystem/bins/printf apps/printf/bin/printf.elf
 
 #Command 'fwrite'
 MAKE_FILE	VA:/isystem/bins/ fwrite
@@ -112,6 +112,10 @@ MAKE_FILE	VA:/isystem/bins/ lua2
 WRITE_FILE	VA:/isystem/bins/lua2 apps/lua2/bin/lua2.bin
 MAKE_FILE	VA:/isystem/bins/ lua2c
 WRITE_FILE	VA:/isystem/bins/lua2c apps/lua2/bin/lua2c.bin
+
+#ELF Loader
+MAKE_FILE	VA:/isystem/bins/ elf
+WRITE_FILE	VA:/isystem/bins/elf apps/elf/bin/elf.bin
 
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd

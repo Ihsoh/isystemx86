@@ -1,7 +1,7 @@
 SECTIONS
 {
-. = 0x08048000;
+. = 0x01300000;
 .text : { *(.text) }
-.data : { *(.data) }
 .bss : { *(.bss) }
+.data : { *(.data) }
 }

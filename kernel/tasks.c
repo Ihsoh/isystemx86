@@ -23,6 +23,8 @@
 
 #include "syscall/fs.h"
 
+#include "elf/parser.h"
+
 #include <ilib/string.h>
 
 static struct Task 	tasks[MAX_TASK_COUNT];
@@ -165,6 +167,7 @@ _create_task(	IN int8 * name,
 		task->type = task_type;
 		task->priority = TASK_TICK_NORMAL;
 		task->tick = TASK_TICK_NORMAL;
+		task->elf = NULL;
 
 		strcpy(task->name, name);
 		strcpy(task->param, param);
@@ -460,6 +463,9 @@ _kill_task(IN int32 tid)
 		close_file(task->stdout);
 	if(task->stderr != NULL)
 		close_file(task->stderr);
+
+	if(task->elf != NULL)
+		free_memory(task->elf);
 
 	// 释放与这个任务对应的系统调用。
 	free_syscall(tid);
@@ -1173,4 +1179,77 @@ tasks_alloc_memory(	IN int32 tid,
 	}
 	else
 		return NULL;
+}
+
+/**
+	@Function:		tasks_load_elf
+	@Access:		Public
+	@Description:
+		加载ELF进任务的内存空间。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		path, CASCTEXT, IN
+			ELF文件路径。
+	@Return:
+		uint32
+			ELF入口函数地址（相对于任务的内存空间）。
+*/
+uint32
+tasks_load_elf(	IN int32 tid,
+				IN CASCTEXT path)
+{
+	if(path == NULL)
+		goto err;
+	struct Task * task = get_task_info_ptr(tid);
+	if(task->elf != NULL)
+		return 0;	// 如果已经载入了ELF程序，则不执行载入逻辑。
+	if(task == NULL)
+		goto err;
+	ELFContext ctx;
+	if(!elf_parse(path, &ctx))
+		goto err;
+	uint32 vbase = 0xffffffff;
+	uint32 max_vaddr = 0x00000000;	// 储存PHDR表中最大的虚拟地址。
+	uint32 max_msize = 0;			// 拥有最大的虚拟地址的PHDR的内存大小。
+	Elf32_Phdr * phdr = NULL;
+	while((phdr = elf_next_phdr(&ctx)) != NULL)
+	{
+		if(	phdr->p_type == PT_LOAD
+			&& phdr->p_vaddr < vbase)
+			vbase = phdr->p_vaddr;
+		if(	phdr->p_type == PT_LOAD
+			&& phdr->p_vaddr > max_vaddr)
+		{
+			max_vaddr = phdr->p_vaddr;
+			max_msize = phdr->p_memsz;
+		}
+	}
+	uint32 msize = max_vaddr - vbase + max_msize;
+	task->elf = alloc_memory(msize);
+	memset(task->elf, 0, msize);
+	if(task->elf == NULL)
+		goto err;
+	if(!map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
+								vbase,
+								msize,
+								(uint32)task->elf,
+								RW_RWE))
+		goto err;
+	elf_reset_phdr(&ctx);
+	while((phdr = elf_next_phdr(&ctx)) != NULL)
+		if(phdr->p_type == PT_LOAD)
+			memcpy(	task->elf + (phdr->p_vaddr - vbase),
+					ctx.file_content + phdr->p_offset,
+					phdr->p_filesz);
+	elf_free(&ctx);
+	return ctx.header->e_entry;
+err:
+	if(task->elf != NULL)
+	{
+		free_memory(task->elf);
+		task->elf = NULL;
+	}
+	elf_free(&ctx);
+	return 0;
 }

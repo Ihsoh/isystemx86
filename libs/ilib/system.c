@@ -283,3 +283,11 @@ void dispatch_tick(void)
 	struct SParams sparams;
 	system_call(SCALL_SYSTEM, SCALL_DISPATCH_TICK, &sparams);
 }
+
+uint32 ILLoadELF(CASCTEXT path)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(path);
+	system_call(SCALL_SYSTEM, SCALL_LOAD_ELF, &sparams);
+	return UINT32_SPARAM(sparams.param0);
+}

@@ -65,6 +65,7 @@ static struct HardDiskArguments hdisk1;
 
 #define	MAX_TIMEOUT	0x0fffffff
 #define	MAX_RETRY	0x100
+#define	MAX_LOCK_RETRY	0x80000000
 
 static BOOL lock = FALSE;
 
@@ -82,8 +83,21 @@ static
 BOOL
 lock_hdisk(void)
 {
+	// 在规定重试次数内尝试获取锁。
+	int32 i;
+	for(i = 0; i < MAX_LOCK_RETRY; i++)
+	{
+		if(!lock)
+			break;
+		int32 i1;
+		for(i1 = 0; i1 < 0x1000; i1++)
+			asm volatile ("pause");
+	}
+
+	// 检测是否获取到锁，如果未获取则返回FALSE。
 	if(lock)
 		return FALSE;
+
 	lock = TRUE;
 	return TRUE;
 }
