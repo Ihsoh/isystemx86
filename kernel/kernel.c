@@ -1013,17 +1013,17 @@ free_task_tss(void)
 	}
 }
 
-static volatile int32	counter						= 1;
-static volatile int32	clock_counter				= 100;
-static volatile int32	is_system_call				= 0;
-static volatile BOOL	switch_to_kernel			= FALSE;
-static volatile BOOL	kt_jk_lock					= TRUE;
-static volatile BOOL	will_reset_all_exceptions	= FALSE;
+static int32	counter						= 1;
+static int32	clock_counter				= 100;
+static int32	is_system_call				= 0;
+static BOOL	switch_to_kernel			= FALSE;
+static BOOL	kt_jk_lock					= TRUE;
+static BOOL	will_reset_all_exceptions	= FALSE;
 
-static volatile BOOL				kernel_init_i387	= FALSE;
-static volatile struct I387State	kernel_i387_state;
-static volatile BOOL				kernel_task_ran		= FALSE;
-static volatile SSEState			kernel_sse_state;
+static BOOL				kernel_init_i387	= FALSE;
+static struct I387State	kernel_i387_state;
+static BOOL				kernel_task_ran		= FALSE;
+static SSEState			kernel_sse_state;
 
 /**
 	@Function:		timer_int
@@ -1260,15 +1260,15 @@ timer_int(void)
 	}
 }
 
-static volatile int32	old_mouse_x = 0;
-static volatile int32	old_mouse_y = 0;
-static volatile int32	mouse_x = 0;
-static volatile int32	mouse_y = 0;
-static volatile BOOL	mouse_left_button_down = 0;
-static volatile BOOL	mouse_right_button_down = 0;
-static volatile int32	mouse_count = 0;
-static volatile int32 	x_sign = 0;
-static volatile int32	y_sign = 0;
+static int32	old_mouse_x = 0;
+static int32	old_mouse_y = 0;
+static int32	mouse_x = 0;
+static int32	mouse_y = 0;
+static BOOL		mouse_left_button_down = 0;
+static BOOL		mouse_right_button_down = 0;
+static int32	mouse_count = 0;
+static int32 	x_sign = 0;
+static int32	y_sign = 0;
 
 #define MOUSE_DEVICE  0x60
 #define MOUSE_PENDING 0x64

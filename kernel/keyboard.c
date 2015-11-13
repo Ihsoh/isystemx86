@@ -23,10 +23,10 @@
 #define	IBUFFER_SIZE	16
 #define	KEY_MAP_SIZE	256	
 
-static volatile uint8 	buffer[IBUFFER_SIZE];
-static volatile int32 	key_map[KEY_MAP_SIZE];
-static volatile int32 	bpos = -1;
-static volatile BOOL 	shift = FALSE, control = FALSE, alt = FALSE, capslock = FALSE, ext = FALSE;
+static uint8 	buffer[IBUFFER_SIZE];
+static int32 	key_map[KEY_MAP_SIZE];
+static int32 	bpos = -1;
+static BOOL 	shift = FALSE, control = FALSE, alt = FALSE, capslock = FALSE, ext = FALSE;
 
 #define	is_upper() ((shift && !capslock) || (!shift && capslock))
 
