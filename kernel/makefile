@@ -31,7 +31,7 @@ bin/gui.obj
 
 BMPObjs=bmp/bin/bmp.obj
 
-UtilsObjs=utils/bin/img.obj
+UtilsObjs=utils/bin/img.obj utils/bin/sfstr.obj
 
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
 
@@ -53,7 +53,7 @@ ELFObjs=elf/bin/helper.obj elf/bin/parser.obj
 
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
-Definition=-D_KERNEL_MODULE_
+Definition=-D_KERNEL_MODULE_ -D_KERNEL_DEBUG_
 
 $(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin \
 $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs)
@@ -240,6 +240,9 @@ bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
 
 utils/bin/img.obj: utils/img.c utils/img.h
 	$(CC) $(CFlags) -c utils/img.c -o utils/bin/img.obj $(Include) $(Definition)
+
+utils/bin/sfstr.obj: utils/sfstr.c utils/sfstr.h
+	$(CC) $(CFlags) -c utils/sfstr.c -o utils/bin/sfstr.obj $(Include) $(Definition)
 
 
 dump/bin/dump.obj: dump/dump.c dump/dump.h

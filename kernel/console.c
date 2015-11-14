@@ -2406,6 +2406,14 @@ exec(	IN int8 * cmd,
 			fix_path(path, current_path, path);
 			detail_window_show(path);
 		}
+		#ifdef _KERNEL_DEBUG_
+		// Kernel Unit Test
+		else if(strcmp(name, "kernel-unit-test") == 0)
+		{
+			#include "test.h"
+			RUN_UNIT_TEST(utils_sfstr);
+		}
+		#endif
 		//Batch
 		else if(strcmp(name, "goto") == 0)
 		{
