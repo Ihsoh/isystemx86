@@ -129,7 +129,7 @@ label_init(	OUT LabelPtr label,
 	label->uwcid = -1;
 	label->x = x;
 	label->y = y;
-	strcpy(label->text, text);
+	strcpy_safe(label->text, sizeof(label->text), text);
 	label->color = color;
 	label->bgcolor = bgcolor;
 	label->colorh = colorh;
@@ -309,7 +309,7 @@ label_set_text(	OUT LabelPtr label,
 		|| text == NULL
 		|| strlen(text) > MAX_LABEL_TEXT_LEN)
 		return FALSE;
-	strcpy(label->text, text);
+	strcpy_safe(label->text, sizeof(label->text), text);
 	label->old_max_row = label->max_row;
 	label->old_max_col = label->max_col;
 	_max(text, &label->max_row, &label->max_col);

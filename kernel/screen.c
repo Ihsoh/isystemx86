@@ -1062,7 +1062,7 @@ create_window(	IN uint32		width,
 	window->over_close_button = 0;
 	window->over_hidden_button = 0;
 	window->style = style;
-	strcpy(window->title, title);
+	strcpy_safe(window->title, sizeof(window->title), title);
 	window->event = event;
 	window->cb_key_press = NULL;
 	window->locked = FALSE;

@@ -54,7 +54,7 @@ _pad(IN OUT ASCTEXT text)
 	int32 len = (int32)MESSAGE_BOX_MAX_CHAR - (int32)strlen(text);
 	int32 i;
 	for(i = 0; i < len; i++)
-		strcat(text, " ");
+		strcat_safe(text, MESSAGE_BOX_MAX_CHAR, " ");
 }
 
 /**
@@ -96,10 +96,10 @@ _control_event(	IN uint32 id,
 					_pad(name);
 					_pad(platform);
 					_pad(version);
-					strcpy(buffer, name);
-					strcat(buffer, platform);
-					strcat(buffer, version);
-					strcat(buffer, group);
+					strcpy_safe(buffer, sizeof(buffer), name);
+					strcat_safe(buffer, sizeof(buffer), platform);
+					strcat_safe(buffer, sizeof(buffer), version);
+					strcat_safe(buffer, sizeof(buffer), group);
 					message_window_show("About System",
 										buffer,
 										MESSAGE_WINDOW_STYLE_CENTER | MESSAGE_WINDOW_STYLE_TOP,

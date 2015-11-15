@@ -25,7 +25,7 @@ die(IN struct die_info * info);
 
 #define	fill_info(info, c, txt)	{\
 										(info).code = (c);\
-										strcpy((info).info, (txt));\
+										strcpy_safe((info).info, sizeof((info).info), (txt));\
 									}
 
 	#define	DC_NOIMPLEMENT_INT		0x00000001

@@ -79,11 +79,11 @@ log(IN const int8 * type,
 	{
 		write_log_to_disk();
 		clear_log();
-		strcpy(log_buffer, buffer);
+		strcpy_safe(log_buffer, LOG_BUFFER_SIZE, buffer);
 	}
 	else
 	{
-		strcat(log_buffer, buffer);
+		strcat_safe(log_buffer, LOG_BUFFER_SIZE, buffer);
 		if(write_in_rt)
 		{
 			write_log_to_disk();

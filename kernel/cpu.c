@@ -349,12 +349,13 @@ init_cpu(void)
 	@Parameters:
 		buffer, int8 *, OUT
 			指向用于储存CPU制造商名称的缓冲区。
+			该缓冲区的大小必须大于等于13字节。
 	@Return:
 */
 void
 get_vendor_id_string(OUT int8 * buffer)
 {
-	strcpy(buffer, vendor_id_string);
+	strcpy_safe(buffer, sizeof(vendor_id_string), vendor_id_string);
 }
 
 /**
@@ -365,12 +366,13 @@ get_vendor_id_string(OUT int8 * buffer)
 	@Parameters:
 		buffer, int8 *, OUT
 			指向用于储存CPU商标的缓冲区。
+			该缓冲区的大小必须大于等于49字节。
 	@Return:	
 */
 void
 get_brand_string(OUT int8 * buffer)
 {
-	strcpy(buffer, brand_string);
+	strcpy_safe(buffer, sizeof(brand_string), brand_string);
 }
 
 /**

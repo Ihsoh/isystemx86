@@ -2687,7 +2687,7 @@ gp_int(void)
 						timer_tss.ds, timer_tss.fs, timer_tss.gs,
 						timer_tss.cs, timer_tss.eip,
 						timer_tss.esp);
-			strcat(buffer, buffer00);
+			strcat_safe(buffer, sizeof(buffer), buffer00);
 			log(LOG_ERROR, buffer);
 
 			print_str_p(buffer, CC_RED);

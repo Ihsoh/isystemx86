@@ -155,7 +155,7 @@ pci_write_to_file(IN const int8 * path)
 	message.message = FUNC_WRITE_TO_FILE;
 	if(strlen(path) >= sizeof(message.bsparam0))
 		return FALSE;
-	strcpy(message.bsparam0, path);
+	strcpy_safe(message.bsparam0, sizeof(message.bsparam0), path);
 	if(!mqueue_add_message(mqueue, MQUEUE_OUT, &message))
 		return FALSE;
 	MQueueMessagePtr messageptr = NULL;

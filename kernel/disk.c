@@ -33,6 +33,7 @@ static uint32 disk_count = 0;
 			索引。
 		symbol, int8 *, OUT
 			盘符。
+			盘符缓冲区必须大于或等于DISK_SYMBOL_BUFFER_SIZE。
 	@Return:	
 */
 void
@@ -40,9 +41,9 @@ get_disk_symbol(IN uint32 index,
 				OUT int8 * symbol)
 {
 	if(index < 0 || index >= MAX_DISK_COUNT)
-		strcpy(symbol, "");
+		strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, "");
 	else
-		strcpy(symbol, disk_list[index]);
+		strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk_list[index]);
 }
 
 /**
@@ -139,15 +140,15 @@ init_disk(IN int8 * symbol)
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 	{
 		init_vdisk(symbol);
-		strcpy(disk_list[disk_count++], symbol);
+		strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, symbol);
 	}
 	else if(strcmp(symbol, "HD") == 0)
 	{
 		uint32 r = init_hdisk();
 		if((r & 0x1) != 0)
-			strcpy(disk_list[disk_count++], "DA");
+			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, "DA");
 		if((r & 0x2) != 0)
-			strcpy(disk_list[disk_count++], "DB");
+			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, "DB");
 	}
 }
 

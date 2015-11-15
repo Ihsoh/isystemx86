@@ -73,7 +73,7 @@ detail_window_show(IN CASCTEXT path)
 							"Directory",
 							strlen("Directory"),
 							0xff0000ff);
-		strcpy(_window->title, "Directory Detail");
+		strcpy_safe(_window->title, sizeof(_window->title), "Directory Detail");
 		if(len == 4)
 			text_common_image(	workspace,
 								20, 
@@ -89,7 +89,7 @@ detail_window_show(IN CASCTEXT path)
 			for(pos = len - 2; pos >= 0; pos--)
 				if(path[pos] == '/')
 					break;
-			strcpy(name, path + pos + 1);
+			strcpy_safe(name, sizeof(name), path + pos + 1);
 			text_common_image(	workspace,
 								20, 
 								40, 
@@ -100,9 +100,9 @@ detail_window_show(IN CASCTEXT path)
 		}
 		ASCCHAR buffer[1024];
 		ASCCHAR buffer1[1024];
-		strcpy(buffer, "Item Count: ");
+		strcpy_safe(buffer, sizeof(buffer), "Item Count: ");
 		uint32 count = df_count(path);
-		strcat(buffer, uitos(buffer1, count));
+		strcat_safe(buffer, sizeof(buffer), uitos(buffer1, count));
 		text_common_image(	workspace,
 							20, 
 							60, 
@@ -120,13 +120,13 @@ detail_window_show(IN CASCTEXT path)
 							"File",
 							strlen("File"),
 							0xff00ff00);
-		strcpy(_window->title, "File Detail");
+		strcpy_safe(_window->title, sizeof(_window->title), "File Detail");
 		ASCCHAR name[1024];
 		int32 pos;
 		for(pos = len - 1; pos >= 0; pos--)
 			if(path[pos] == '/')
 				break;
-		strcpy(name, path + pos + 1);
+		strcpy_safe(name, sizeof(name), path + pos + 1);
 		text_common_image(	workspace,
 							20, 
 							40, 
@@ -141,13 +141,13 @@ detail_window_show(IN CASCTEXT path)
 		close_file(fptr);
 		ASCCHAR buffer[1024];
 		ASCCHAR buffer1[1024];
-		strcpy(buffer, "Length: ");
-		strcat(buffer, uitos(buffer1, len_b));
-		strcat(buffer, "B, ");
-		strcat(buffer, uitos(buffer1, len_kb));
-		strcat(buffer, "KB, ");
-		strcat(buffer, uitos(buffer1, len_mb));
-		strcat(buffer, "MB");
+		strcpy_safe(buffer, sizeof(buffer), "Length: ");
+		strcat_safe(buffer, sizeof(buffer), uitos(buffer1, len_b));
+		strcat_safe(buffer, sizeof(buffer), "B, ");
+		strcat_safe(buffer, sizeof(buffer), uitos(buffer1, len_kb));
+		strcat_safe(buffer, sizeof(buffer), "KB, ");
+		strcat_safe(buffer, sizeof(buffer), uitos(buffer1, len_mb));
+		strcat_safe(buffer, sizeof(buffer), "MB");
 		text_common_image(	workspace,
 							20, 
 							60, 

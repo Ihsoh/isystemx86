@@ -169,9 +169,9 @@ _create_task(	IN int8 * name,
 		task->tick = TASK_TICK_NORMAL;
 		task->elf = NULL;
 
-		strcpy(task->name, name);
-		strcpy(task->param, param);
-		strcpy(task->working_dir, working_dir);
+		strcpy_safe(task->name, 1024, name);
+		strcpy_safe(task->param, 1024, param);
+		strcpy_safe(task->working_dir, 1024, working_dir);
 		task->app_len = app_len;
 		uint32 real_task_len = 3 * 1024 * 1024 + app_len;
 		task->addr = (uint8 *)alloc_memory(real_task_len);

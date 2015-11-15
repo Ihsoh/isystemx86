@@ -46,11 +46,11 @@ void
 clock_window_event(	IN struct Window * window, 
 					IN struct WindowEventParams * params)
 {
+	/*
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
 		
 	}
-	/*
 	struct CommonImage * screen = params->screen;	
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
@@ -65,19 +65,19 @@ clock_window_event(	IN struct Window * window,
 		char buffer[1024] = "";
 		char temp[10];
 		
-		strcat(buffer, itos(temp, dt.year));
-		strcat(buffer, "-");
-		strcat(buffer, itos(temp, dt.month));
-		strcat(buffer, "-");
-		strcat(buffer, itos(temp, dt.day));
-		strcat(buffer, " ");
-		strcat(buffer, weeks[dt.day_of_week]);
-		strcat(buffer, " ");
-		strcat(buffer, itos(temp, dt.hour));
-		strcat(buffer, ":");
-		strcat(buffer, itos(temp, dt.minute));
-		strcat(buffer, ":");
-		strcat(buffer, itos(temp, dt.second));
+		strcat_safe(buffer, sizeof(buffer), itos(temp, dt.year));
+		strcat_safe(buffer, sizeof(buffer), "-");
+		strcat_safe(buffer, sizeof(buffer), itos(temp, dt.month));
+		strcat_safe(buffer, sizeof(buffer), "-");
+		strcat_safe(buffer, sizeof(buffer), itos(temp, dt.day));
+		strcat_safe(buffer, sizeof(buffer), " ");
+		strcat_safe(buffer, sizeof(buffer), weeks[dt.day_of_week]);
+		strcat_safe(buffer, sizeof(buffer), " ");
+		strcat_safe(buffer, sizeof(buffer), itos(temp, dt.hour));
+		strcat_safe(buffer, sizeof(buffer), ":");
+		strcat_safe(buffer, sizeof(buffer), itos(temp, dt.minute));
+		strcat_safe(buffer, sizeof(buffer), ":");
+		strcat_safe(buffer, sizeof(buffer), itos(temp, dt.second));
 		text_common_image(	screen,
 							10,
 							0,

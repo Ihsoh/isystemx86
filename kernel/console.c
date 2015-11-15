@@ -88,7 +88,7 @@ _parse_cmd(	IN int8 * cmd,
 	static uint32 pos = 0;
 	if(cmd != NULL)
 	{
-		strcpy(buffer, cmd);
+		strcpy_safe(buffer, sizeof(buffer), cmd);
 		len = strlen(buffer);
 		pos = 0;
 	}
@@ -1116,7 +1116,7 @@ cd(IN int8 * path)
 		error("Invalid path!");
 		return 0;
 	}
-	strcpy(current_path, temp);
+	strcpy_safe(current_path, sizeof(current_path), temp);
 	return 1;
 }
 
@@ -1869,7 +1869,9 @@ _batch(IN int8 * path)
 		if(chr == '\n' || index + 1 == BATCH_MAX_CMD_LEN)
 		{
 			trim(cmd);
-			strcpy(lines + line++ * BATCH_MAX_CMD_LEN, cmd);
+			strcpy_safe(lines + line++ * BATCH_MAX_CMD_LEN,
+						BATCH_MAX_CMD_LEN,
+						cmd);
 			cmd[0] = '\0';
 			index = 0;
 		}
@@ -2239,8 +2241,8 @@ exec(	IN int8 * cmd,
 				if(exists_file(path, src_path))
 				{
 					int8 temp[1024];
-					strcpy(temp, path);
-					strcat(temp, src_path);
+					strcpy_safe(temp, sizeof(temp), path);
+					strcat_safe(temp, sizeof(temp), src_path);
 					r = run(temp, cmd) == -1 ? 0 : 1;
 					ran = TRUE;
 				}
@@ -2486,7 +2488,7 @@ exec(	IN int8 * cmd,
 					else
 						n_r = 0.0;
 					int8 buffer[100];
-					strcpy(stack[++stack_top], dtos(buffer, n_r));
+					strcpy_safe(stack[++stack_top], sizeof(stack[++stack_top]), dtos(buffer, n_r));
 				}
 				else if(strcmp(word, "add") == 0
 						|| strcmp(word, "sub") == 0
@@ -2532,7 +2534,7 @@ exec(	IN int8 * cmd,
 					else if(strcmp(word, "or") == 0)
 						n_r = n0 || n1;
 					int8 buffer[100];
-					strcpy(stack[++stack_top], dtos(buffer, n_r));
+					strcpy_safe(stack[++stack_top], sizeof(stack[++stack_top]), dtos(buffer, n_r));
 				}
 				else if(strcmp(word, "int") == 0
 						|| strcmp(word, "uint") == 0
@@ -2548,7 +2550,7 @@ exec(	IN int8 * cmd,
 					else if(strcmp(word, "not") == 0)
 						n_r = n == 0.0 ? 1.0 : 0.0;
 					int8 buffer[100];
-					strcpy(stack[++stack_top], dtos(buffer, n_r));
+					strcpy_safe(stack[++stack_top], sizeof(stack[++stack_top]), dtos(buffer, n_r));
 				}
 				else if(strcmp(word, "strcat") == 0)
 				{
@@ -2557,13 +2559,13 @@ exec(	IN int8 * cmd,
 					int8 * str = stack[stack_top--];
 					if(stack_top == -1)
 						return 0;
-					strcat(stack[stack_top], str);
+					strcat_safe(stack[stack_top], sizeof(stack[stack_top]), str);
 				}
 				else
 				{
 					if(stack_top == 63)
 						return 0;
-					strcpy(stack[++stack_top], word);
+					strcpy_safe(stack[++stack_top], sizeof(stack[++stack_top]), word);
 				}
 			}
 			if(stack_top != 0)
@@ -2618,8 +2620,8 @@ exec(	IN int8 * cmd,
 				if(exists_file(path, app))
 				{
 					int8 temp[1024];
-					strcpy(temp, path);
-					strcat(temp, app);
+					strcpy_safe(temp, sizeof(temp), path);
+					strcat_safe(temp, sizeof(temp), app);
 					r = run_wait(temp, cmd + len, stdin, stdout, stderr) == -1 ? 0 : 1;
 					ran = TRUE;
 				}
@@ -2640,8 +2642,8 @@ exec(	IN int8 * cmd,
 				if(exists_file(path, name))
 				{
 					int8 temp[1024];
-					strcpy(temp, path);
-					strcat(temp, name);
+					strcpy_safe(temp, sizeof(temp), path);
+					strcat_safe(temp, sizeof(temp), name);
 					r = batch(temp);
 					ran = TRUE;
 					break;
@@ -2663,8 +2665,8 @@ exec(	IN int8 * cmd,
 				if(exists_file(path, name))
 				{
 					int8 temp[1024];
-					strcpy(temp, path);
-					strcat(temp, name);
+					strcpy_safe(temp, sizeof(temp), path);
+					strcat_safe(temp, sizeof(temp), name);
 					r = run_wait(temp, cmd, NULL, NULL, NULL) == -1 ? 0 : 1;
 					ran = TRUE;
 				}
@@ -2773,7 +2775,7 @@ console(void)
 		int8 prompt[KB(1)];
 		if(strcmp(current_path, "") == 0)
 		{
-			strcpy(prompt, promptns);
+			strcpy_safe(prompt, sizeof(prompt), promptns);
 			print_str_p(prompt, promptns_color);
 		}
 		else
@@ -2874,12 +2876,13 @@ set_clock(IN int32 enable)
 	@Parameters:
 		path, int8 *, IN
 			用于储存当前目录路径的缓冲区。
+			该缓冲区的大小必须大于或等于MAX_PATH_BUFFER_LEN。
 	@Return:	
 */
 void
 get_current_path(OUT int8 * path)
 {
-	strcpy(path, current_path);
+	strcpy_safe(path, MAX_PATH_BUFFER_LEN, current_path);
 }
 
 /**

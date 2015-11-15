@@ -10,7 +10,8 @@
 
 #include "types.h"
 
-#define MAX_DISK_COUNT	8
+#define MAX_DISK_COUNT				8
+#define	DISK_SYMBOL_BUFFER_SIZE		3
 
 extern
 void

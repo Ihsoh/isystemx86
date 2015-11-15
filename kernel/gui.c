@@ -545,7 +545,7 @@ gui_set_window_title(	IN int32 tid,
 		return FALSE;
 	if(title == NULL)
 		return FALSE;
-	strcpy(winstance->window->title, title);
+	strcpy_safe(winstance->window->title, sizeof(winstance->window->title), title);
 	return TRUE;
 }
 
@@ -574,7 +574,7 @@ gui_get_window_title(	IN int32 tid,
 	_WINSTANCE_FALSE
 	if(title == NULL)
 		return FALSE;
-	strcpy(title, winstance->window->title);
+	strcpy_safe(title, WINDOW_TITLE_SIZE, winstance->window->title);
 	return TRUE;
 }
 
@@ -1199,10 +1199,10 @@ gui_get_text(	IN int32 tid,
 	}
 	if(ctl_text != NULL)
 		if(strlen(ctl_text) < bufsz)
-			strcpy(text, ctl_text);
+			strcpy_safe(text, bufsz, ctl_text);
 		else
 		{
-			strncpy(text, ctl_text, bufsz - 1);
+			memcpy_safe(text, bufsz, ctl_text, bufsz - 1);
 			text[bufsz - 1] = '\0';
 		}
 	else

@@ -13,6 +13,7 @@
 #include "../../screen.h"
 #include "../../lock.h"
 #include "../../config.h"
+#include "../../disk.h"
 
 #include <ilib/string.h>
 #include <dslib/linked_list.h>
@@ -666,7 +667,7 @@ _rename_dir(IN int8 * symbol,
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
-	strcpy(dir.dirname, new_name);
+	strcpy_safe(dir.dirname, sizeof(dir.dirname), new_name);
 	return set_block(symbol, id, (struct RawBlock *)&dir);
 }
 
@@ -701,7 +702,7 @@ _rename_file(	IN int8 * symbol,
 		|| file.used == 0
 		|| file.type != BLOCK_TYPE_FILE)
 		return FALSE;
-	strcpy(file.filename, new_name);
+	strcpy_safe(file.filename, sizeof(file.filename), new_name);
 	return set_block(symbol, id, (struct RawBlock *)&file);
 }
 
@@ -932,14 +933,14 @@ parse_path_ex(	IN int8 * path,
 				if(	block.type == BLOCK_TYPE_FILE
 					&& strcmp(((struct FileBlock *)&block)->filename, name) == 0)
 				{
-					strcpy(symbol, disk);
+					strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
 					return block_id;
 				}
 				else if(block.type == BLOCK_TYPE_SLINK
 						&& strcmp(((struct SLinkBlock *)&block)->filename, name) == 0)
 					if(ret_slnk)
 					{
-						strcpy(symbol, disk);
+						strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
 						return block_id;
 					}
 					else
@@ -955,7 +956,7 @@ parse_path_ex(	IN int8 * path,
 		}
 		return INVALID_BLOCK_ID;
 	}
-	strcpy(symbol, disk);
+	strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
 	return blockid;
 }
 
@@ -1245,8 +1246,8 @@ del_dirs(IN int8 * path)
 			{
 				struct FileBlock * file = (struct FileBlock *)sub;
 				int8 temp[MAX_PATH_BUFFER_LEN];
-				strcpy(temp, path);
-				strcat(temp, file->filename);
+				strcpy_safe(temp, sizeof(temp), path);
+				strcat_safe(temp, sizeof(temp), file->filename);
 				if(!del_file(temp))
 					return FALSE;
 			}
@@ -1254,9 +1255,9 @@ del_dirs(IN int8 * path)
 			{
 				struct DirBlock * dir = (struct DirBlock *)sub;
 				int8 temp[MAX_PATH_BUFFER_LEN];
-				strcpy(temp, path);
-				strcat(temp, dir->dirname);
-				strcat(temp, "/");
+				strcpy_safe(temp, sizeof(temp), path);
+				strcat_safe(temp, sizeof(temp), dir->dirname);
+				strcat_safe(temp, sizeof(temp), "/");
 				if(!del_dirs(temp))
 					return FALSE;
 			}
@@ -1331,6 +1332,7 @@ is_valid_df_name(IN int8 * name)
 			目录路径。
 		new_path, int8 *, OUT
 			上一级目录路径。
+			缓冲区大小必须大于或等于MAX_PATH_BUFFER_LEN。
 	@Return:
 		BOOL
 			返回TRUE则成功，否则失败。		
@@ -1339,7 +1341,7 @@ BOOL
 prev_dir(	IN int8 * path, 
 			OUT int8 * new_path)
 {
-	strcpy(new_path, path);
+	strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
 	uint32 len = strlen(new_path);
 	if(len > 4)
 	{
@@ -1363,6 +1365,7 @@ prev_dir(	IN int8 * path,
 			路径。
 		new_path, int8 *, OUT
 			路径中得目录部分。
+			缓冲区大小必须大于或等于MAX_PATH_BUFFER_LEN。
 	@Return:
 		BOOL
 			返回TRUE则成功，否则失败。		
@@ -1371,7 +1374,7 @@ BOOL
 file_dir(	IN int8 * path, 
 			OUT int8 * new_path)
 {
-	strcpy(new_path, path);
+	strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
 	uint32 len = strlen(new_path);
 	if(len > 4)
 	{
@@ -1514,22 +1517,22 @@ fix_path(	IN int8 * path,
 {
 	if(strlen(path) == 4 && path[2] == ':' && path[3] == '/')
 	{
-		strcpy(new_path, path);
+		strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
 		return TRUE;
 	}
 	else if(strcmp(path, "/") == 0 && strcmp(current_path, "") != 0)
 	{
-		strcpy(new_path, current_path);
+		strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, current_path);
 		new_path[4] = '\0';
 		return TRUE;
 	}
 	else if(strcmp(current_path, "") != 0 || (strlen(path) > 4 && path[2] == ':' && path[3] == '/'))
 	{
 		int8 temp[MAX_PATH_BUFFER_LEN];
-		strcpy(temp, current_path);
+		strcpy_safe(temp, sizeof(temp), current_path);
 		if(strlen(path) > 4 && path[2] == ':' && path[3] == '/')
 		{
-			strncpy(temp, path, 4);
+			memcpy_safe(temp, sizeof(temp), path, 4);
 			temp[4] = '\0';
 			path += 4;
 		}
@@ -1560,8 +1563,8 @@ fix_path(	IN int8 * path,
 					;
 				else
 				{
-					strcat(temp, name);
-					strcat(temp, "/");
+					strcat_safe(temp, sizeof(temp), name);
+					strcat_safe(temp, sizeof(temp), "/");
 				}
 				n = name;
 				name[0] = '\0';
@@ -1573,8 +1576,8 @@ fix_path(	IN int8 * path,
 			else if(strcmp(name, ".") == 0)
 				;
 			else
-				strcat(temp, name);
-		strcpy(new_path, temp);
+				strcat_safe(temp, sizeof(temp), name);
+		strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, temp);
 		return TRUE;
 	}
 	else
@@ -1632,8 +1635,8 @@ copy_file(	IN int8 * src_path,
 			IN int8 * dst_name)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	strcpy(temp, dst_path);	
-	strcat(temp, dst_name);
+	strcpy_safe(temp, sizeof(temp), dst_path);	
+	strcat_safe(temp, sizeof(temp), dst_name);
 	if(	!exists_df(src_path)
 		|| exists_df(temp)
 		|| !create_file(dst_path, dst_name))
@@ -1753,11 +1756,11 @@ exists_df(IN int8 * path)
 		int8 temp[MAX_PATH_BUFFER_LEN];
 		int8 name[MAX_DIRNAME_BUFFER_LEN];
 		int32 i;
-		strcpy(temp, path);
+		strcpy_safe(temp, sizeof(temp), path);
 		temp[len - 1] = '\0';
 		len--;
 		for(i = len - 1; i >= 0 && temp[i] != '/'; i--);
-		strcpy(name, temp + i + 1);
+		strcpy_safe(name, sizeof(name), temp + i + 1);
 		temp[i + 1] = '\0';
 		return exists_dir(temp, name);
 	}
@@ -1766,10 +1769,10 @@ exists_df(IN int8 * path)
 		int8 temp[MAX_PATH_BUFFER_LEN];
 		int8 name[MAX_FILENAME_BUFFER_LEN];
 		int32 i;
-		strcpy(temp, path);
+		strcpy_safe(temp, sizeof(temp), path);
 		for(i = len - 1; i >= 0 && path[i] != '/'; i--);
 		temp[i + 1] = '\0';
-		strcpy(name, path + i + 1);
+		strcpy_safe(name, sizeof(name), path + i + 1);
 		return exists_file(temp, name);
 	}
 }
@@ -1805,7 +1808,7 @@ _open_file_unsafe(	IN int8 * path,
 		return NULL;
 	}
 	fptr->mode = mode;
-	strcpy(fptr->symbol, symbol);
+	strcpy_safe(fptr->symbol, sizeof(fptr->symbol), symbol);
 	fptr->file_block_id = id;
 	fptr->next_block_index = 0;
 	fptr->next_block_pos = 0;
@@ -2466,8 +2469,8 @@ repair_files(	IN int8 * symbol,
 	uint32 ui;
 	if(strcmp(dir->dirname, "/") != 0)
 	{
-		strcat(repairing_path, dir->dirname);
-		strcat(repairing_path, "/");
+		strcat_safe(repairing_path, sizeof(repairing_path), dir->dirname);
+		strcat_safe(repairing_path, sizeof(repairing_path), "/");
 	}
 	for(ui = 0; ui < sizeof(dir->blockids) / sizeof(uint32); ui++)
 	{		
@@ -2491,8 +2494,8 @@ repair_files(	IN int8 * symbol,
 					{
 						file_block->lock = 0;
 						int8 temp_path[MAX_PATH_BUFFER_LEN];
-						strcpy(temp_path, repairing_path);
-						strcat(temp_path, file_block->filename);
+						strcpy_safe(temp_path, sizeof(temp_path), repairing_path);
+						strcat_safe(temp_path, sizeof(temp_path), file_block->filename);
 						if(set_block(symbol, id, &raw_block))
 						{
 							print_str_p("Unlocked ", CC_GREEN);
@@ -2543,7 +2546,7 @@ repair_ifs1(IN int8 * symbol)
 		|| dir.used == 0
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
-	strcpy(repairing_path, symbol);
-	strcat(repairing_path, ":/");
+	strcpy_safe(repairing_path, sizeof(repairing_path), symbol);
+	strcat_safe(repairing_path, sizeof(repairing_path), ":/");
 	return repair_files(symbol, &dir);
 }

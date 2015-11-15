@@ -352,12 +352,12 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			int8 * param = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
 			int8 buffer[1024];
 			if(strlen(path) < sizeof(buffer))
-				strcpy(buffer, path);
+				strcpy_safe(buffer, sizeof(buffer), path);
 			if(strlen(param) != 0)
 				if(strlen(buffer) + 1 + strlen(param) < sizeof(buffer))
 				{
-					strcat(buffer, " ");
-					strcat(buffer, param);
+					strcat_safe(buffer, sizeof(buffer), " ");
+					strcat_safe(buffer, sizeof(buffer), param);
 				}
 				else
 				{
