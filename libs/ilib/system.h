@@ -126,4 +126,8 @@ extern void dispatch_tick(void);
 
 extern uint32 ILLoadELF(CASCTEXT path);
 
+extern uint32 ILLoadELFSO(CASCTEXT path);
+
+extern void * ILGetELFSOSymbol(uint32 ctx_idx, CASCTEXT name);
+
 #endif

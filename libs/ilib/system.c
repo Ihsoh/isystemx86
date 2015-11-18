@@ -291,3 +291,20 @@ uint32 ILLoadELF(CASCTEXT path)
 	system_call(SCALL_SYSTEM, SCALL_LOAD_ELF, &sparams);
 	return UINT32_SPARAM(sparams.param0);
 }
+
+uint32 ILLoadELFSO(CASCTEXT path)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(path);
+	system_call(SCALL_SYSTEM, SCALL_LOAD_ELF_SO, &sparams);
+	return UINT32_SPARAM(sparams.param0);
+}
+
+void * ILGetELFSOSymbol(uint32 ctx_idx, CASCTEXT name)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(ctx_idx);
+	sparams.param1 = SPARAM(name);
+	system_call(SCALL_SYSTEM, SCALL_GET_ELF_SO_SYMBOL, &sparams);
+	return VOID_PTR_SPARAM(sparams.param0);
+}

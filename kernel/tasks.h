@@ -13,6 +13,8 @@
 #include "lock.h"
 #include "sse.h"
 
+#include "elf/parser.h"
+
 #include "fs/ifs1/fs.h"
 
 #define	MAX_TASK_COUNT				64
@@ -21,6 +23,8 @@
 #define	MAX_TASK_MEMORY_BLOCK_COUNT	(10 * 1024)
 #define MAX_TASK_MQUEUE_COUNT		16
 #define	TASK_BASE_ADDR				0x00000000
+
+#define MAX_TASK_ELF_SO_COUNT		4
 
 typedef enum
 {
@@ -86,6 +90,7 @@ struct Task
 	int32				tick;				//滴答。到0时切换任务。
 	OnTaskExit			on_exit;			//当任务退出时调用。
 	uint8 *				elf;				//装载ELF程序的空间。
+	ELFContextPtr		elf_so_ctx[MAX_TASK_ELF_SO_COUNT];
 	uint32				pad[3];
 };
 
@@ -209,6 +214,17 @@ extern
 uint32
 tasks_load_elf(	IN int32 tid,
 				IN CASCTEXT path);
+
+extern
+uint32
+tasks_load_elf_so(	IN int32 tid,
+					IN CASCTEXT path);
+
+extern
+void *
+tasks_get_elf_so_symbol(IN int32 tid,
+						IN uint32 ctx_idx,
+						IN CASCTEXT name);
 
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()

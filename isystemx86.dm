@@ -117,6 +117,12 @@ WRITE_FILE	VA:/isystem/bins/lua2c apps/lua2/bin/lua2c.bin
 MAKE_FILE	VA:/isystem/bins/ elf
 WRITE_FILE	VA:/isystem/bins/elf apps/elf/bin/elf.bin
 
+MAKE_FILE	VA:/isystem/bins/ math.so
+WRITE_FILE	VA:/isystem/bins/math.so apps/math/bin/math.elf.so
+
+MAKE_FILE	VA:/isystem/bins/ testmath
+WRITE_FILE	VA:/isystem/bins/testmath apps/testmath/bin/testmath.bin
+
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd
 MAKE_FILE	VA:/isystem/wd/ fib.wd

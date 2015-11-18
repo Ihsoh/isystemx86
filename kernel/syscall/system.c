@@ -437,5 +437,28 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			sparams->param0 = SPARAM(entry);
 			break;
 		}
+		//装载ELF SO文件。
+		//
+		case SCALL_LOAD_ELF_SO:
+		{
+			int32 tid = sparams->tid;
+			void * vptr = VOID_PTR_SPARAM(sparams->param0);
+			CASCTEXT path = (CASCTEXT)get_physical_address(tid, vptr);
+			uint32 ctx_idx = tasks_load_elf_so(tid, path);
+			sparams->param0 = SPARAM(ctx_idx);
+			break;
+		}
+		//获取ELF SO的符号。
+		//
+		case SCALL_GET_ELF_SO_SYMBOL:
+		{
+			int32 tid = sparams->tid;
+			uint32 ctx_idx = UINT32_SPARAM(sparams->param0);
+			void * vptr = VOID_PTR_SPARAM(sparams->param1);
+			CASCTEXT name = (CASCTEXT)get_physical_address(tid, vptr);
+			void * symaddr = tasks_get_elf_so_symbol(tid, ctx_idx, name);
+			sparams->param0 = SPARAM(symaddr);
+			break;
+		}
 	}
 }

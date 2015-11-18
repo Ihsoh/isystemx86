@@ -41,6 +41,8 @@ struct SParams
 #define	UINT16_PTR_SPARAM(sp)	((ushort *)sp)
 #define	UINT32_PTR_SPARAM(sp)	((uint *)sp)
 
+#define	VOID_PTR_SPARAM(sp)		((void *)sp)
+
 #define	SPARAM(p)	(*((uint *)&(p)))
 
 extern void system_call(uint func, uint sub_func, struct SParams * sparams);
