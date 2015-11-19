@@ -3,345 +3,349 @@
 #Date:		2014-1-29
 #Descriptor:Make ilib
 
-TargetDir=bin
-Out=libilib.a
+# TargetDir=bin
+# Out=libilib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
 AS=as
-CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 $(CFlagsExt)
+CFlagsNoExt=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
 ASFlags=--32 -march=i386 -mtune=i386
 
-Objs=bin/string.obj bin/sparams.obj bin/system.obj bin/screen.obj bin/keyboard.obj \
-bin/fs.obj bin/image.obj bin/mouse.obj bin/stdio.obj bin/stdlib.obj bin/assert.obj 	\
-bin/setjmp.obj bin/longjmp.obj bin/ctype.obj bin/errno.obj bin/strtod.obj bin/gui.obj
+Objs=$(TargetDir)/string.obj $(TargetDir)/sparams.obj $(TargetDir)/system.obj $(TargetDir)/screen.obj $(TargetDir)/keyboard.obj \
+$(TargetDir)/fs.obj $(TargetDir)/image.obj $(TargetDir)/mouse.obj $(TargetDir)/stdio.obj $(TargetDir)/stdlib.obj $(TargetDir)/assert.obj 	\
+$(TargetDir)/setjmp.obj $(TargetDir)/longjmp.obj $(TargetDir)/ctype.obj $(TargetDir)/errno.obj $(TargetDir)/strtod.obj $(TargetDir)/gui.obj
 
-StdlibObjs=bin/strtol.obj bin/strtoul.obj bin/atoi.obj bin/atol.obj bin/mbstowcs.obj 	\
-bin/mbtowc.obj bin/wctomb.obj bin/wcstombs.obj bin/strtod.obj bin/atof.obj bin/abs.obj 	\
-bin/labs.obj bin/qsort.obj bin/msort.obj bin/mblen.obj
+StdlibObjs=$(TargetDir)/strtol.obj $(TargetDir)/strtoul.obj $(TargetDir)/atoi.obj $(TargetDir)/atol.obj $(TargetDir)/mbstowcs.obj 	\
+$(TargetDir)/mbtowc.obj $(TargetDir)/wctomb.obj $(TargetDir)/wcstombs.obj $(TargetDir)/strtod.obj $(TargetDir)/atof.obj $(TargetDir)/abs.obj 	\
+$(TargetDir)/labs.obj $(TargetDir)/qsort.obj $(TargetDir)/msort.obj $(TargetDir)/mblen.obj
 
-MathObjs=bin/ceil.obj bin/floor.obj bin/fabs.obj bin/__scalb.obj bin/__finite.obj
+MathObjs=$(TargetDir)/ceil.obj $(TargetDir)/floor.obj $(TargetDir)/fabs.obj $(TargetDir)/__scalb.obj $(TargetDir)/__finite.obj
 
-SysDepsObjs=bin/memmove.obj bin/__infnan.obj bin/__copysign.obj bin/pow.obj bin/atan2.obj 	\
-bin/atan.obj bin/exp.obj bin/exp__E.obj bin/sqrt.obj bin/acos.obj bin/acosh.obj bin/__isnan.obj 	\
-bin/__isinf.obj bin/__logb.obj bin/ldexp.obj bin/__drem.obj bin/log.obj bin/log10.obj 	\
-bin/log1p.obj bin/log__L.obj bin/asin.obj bin/atanh.obj bin/bcopy.obj bin/bzero.obj 	\
-bin/hypot.obj bin/cabs.obj bin/cosh.obj bin/fabs.obj bin/ffs.obj bin/fmod.obj bin/fexp.obj 	\
-bin/modf.obj bin/sincos.obj bin/sinh.obj bin/__expm1.obj bin/tan.obj bin/tanh.obj 	\
-bin/strncat.obj bin/strpbrk.obj bin/strspn.obj
+SysDepsObjs=$(TargetDir)/memmove.obj $(TargetDir)/__infnan.obj $(TargetDir)/__copysign.obj $(TargetDir)/pow.obj $(TargetDir)/atan2.obj 	\
+$(TargetDir)/atan.obj $(TargetDir)/exp.obj $(TargetDir)/exp__E.obj $(TargetDir)/sqrt.obj $(TargetDir)/acos.obj $(TargetDir)/acosh.obj $(TargetDir)/__isnan.obj 	\
+$(TargetDir)/__isinf.obj $(TargetDir)/__logb.obj $(TargetDir)/ldexp.obj $(TargetDir)/__drem.obj $(TargetDir)/log.obj $(TargetDir)/log10.obj 	\
+$(TargetDir)/log1p.obj $(TargetDir)/log__L.obj $(TargetDir)/asin.obj $(TargetDir)/atanh.obj $(TargetDir)/bcopy.obj $(TargetDir)/bzero.obj 	\
+$(TargetDir)/hypot.obj $(TargetDir)/cabs.obj $(TargetDir)/cosh.obj $(TargetDir)/fabs.obj $(TargetDir)/ffs.obj $(TargetDir)/fmod.obj $(TargetDir)/fexp.obj 	\
+$(TargetDir)/modf.obj $(TargetDir)/sincos.obj $(TargetDir)/sinh.obj $(TargetDir)/__expm1.obj $(TargetDir)/tan.obj $(TargetDir)/tanh.obj 	\
+$(TargetDir)/strncat.obj $(TargetDir)/strpbrk.obj $(TargetDir)/strspn.obj
 
-LocaleObjs=bin/C-collate.obj bin/C-ctype.obj bin/C-numeric.obj bin/C-ctype_ct.obj bin/C-ctype_mb.obj 	\
-bin/C-monetary.obj bin/C-response.obj bin/C-time.obj bin/localeconv.obj bin/setlocale.obj
+LocaleObjs=$(TargetDir)/C-collate.obj $(TargetDir)/C-ctype.obj $(TargetDir)/C-numeric.obj $(TargetDir)/C-ctype_ct.obj $(TargetDir)/C-ctype_mb.obj 	\
+$(TargetDir)/C-monetary.obj $(TargetDir)/C-response.obj $(TargetDir)/C-time.obj $(TargetDir)/localeconv.obj $(TargetDir)/setlocale.obj
 
-StringObjs=bin/strdup.obj bin/strtok.obj
+StringObjs=$(TargetDir)/strdup.obj $(TargetDir)/strtok.obj
 
-StdioObjs=bin/__vfscanf.obj
+StdioObjs=$(TargetDir)/__vfscanf.obj
 
 AR=ar
 Include=-I../
 
-$(Target): bin  bin/mta32.obj bin/elf32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
+$(Target): $(TargetDir)  $(TargetDir)/mta32.obj $(TargetDir)/elf32.obj $(TargetDir)/elfso32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
 	$(AR) -rc $(Target) $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs) $(StdioObjs)
 
-bin:
-	-mkdir bin
+$(TargetDir):
+	-mkdir $(TargetDir)
 
-bin/string.obj: string.c string.h
-	$(CC) $(CFlags) -c string.c -o bin/string.obj $(Include)
+$(TargetDir)/string.obj: string.c string.h
+	$(CC) $(CFlags) -c string.c -o $(TargetDir)/string.obj $(Include)
 	
-bin/sparams.obj: sparams.c sparams.h
-	$(CC) $(CFlags) -c sparams.c -o bin/sparams.obj $(Include)
+$(TargetDir)/sparams.obj: sparams.c sparams.h
+	$(CC) $(CFlagsNoExt) -c sparams.c -o $(TargetDir)/sparams.obj $(Include)
 	
-bin/system.obj: system.c system.h
-	$(CC) $(CFlags) -c system.c -o bin/system.obj $(Include)
+$(TargetDir)/system.obj: system.c system.h
+	$(CC) $(CFlags) -c system.c -o $(TargetDir)/system.obj $(Include)
 	
-bin/screen.obj: screen.c screen.h
-	$(CC) $(CFlags) -c screen.c -o bin/screen.obj $(Include)
+$(TargetDir)/screen.obj: screen.c screen.h
+	$(CC) $(CFlags) -c screen.c -o $(TargetDir)/screen.obj $(Include)
 	
-bin/keyboard.obj: keyboard.c keyboard.h
-	$(CC) $(CFlags) -c keyboard.c -o bin/keyboard.obj $(Include)
+$(TargetDir)/keyboard.obj: keyboard.c keyboard.h
+	$(CC) $(CFlags) -c keyboard.c -o $(TargetDir)/keyboard.obj $(Include)
 	
-bin/fs.obj: fs.c fs.h
-	$(CC) $(CFlags) -c fs.c -o bin/fs.obj $(Include)
+$(TargetDir)/fs.obj: fs.c fs.h
+	$(CC) $(CFlags) -c fs.c -o $(TargetDir)/fs.obj $(Include)
 
-bin/image.obj: image.c image.h
-	$(CC) $(CFlags) -c image.c -o bin/image.obj $(Include)
+$(TargetDir)/image.obj: image.c image.h
+	$(CC) $(CFlags) -c image.c -o $(TargetDir)/image.obj $(Include)
 
-bin/mouse.obj: mouse.c mouse.h
-	$(CC) $(CFlags) -c mouse.c -o bin/mouse.obj $(Include)
+$(TargetDir)/mouse.obj: mouse.c mouse.h
+	$(CC) $(CFlags) -c mouse.c -o $(TargetDir)/mouse.obj $(Include)
 
-bin/stdio.obj: stdio.c stdio.h
-	$(CC) $(CFlags) -c stdio.c -o bin/stdio.obj $(Include)
+$(TargetDir)/stdio.obj: stdio.c stdio.h
+	$(CC) $(CFlags) -c stdio.c -o $(TargetDir)/stdio.obj $(Include)
 
-bin/stdlib.obj: stdlib.c stdlib.h
-	$(CC) $(CFlags) -c stdlib.c -o bin/stdlib.obj $(Include)
+$(TargetDir)/stdlib.obj: stdlib.c stdlib.h
+	$(CC) $(CFlags) -c stdlib.c -o $(TargetDir)/stdlib.obj $(Include)
 
-bin/assert.obj: assert.c assert.h
-	$(CC) $(CFlags) -c assert.c -o bin/assert.obj $(Include)
+$(TargetDir)/assert.obj: assert.c assert.h
+	$(CC) $(CFlags) -c assert.c -o $(TargetDir)/assert.obj $(Include)
 
-bin/setjmp.obj: setjmp.s
-	$(AS) $(ASFlags) -c setjmp.s -o bin/setjmp.obj
+$(TargetDir)/setjmp.obj: setjmp.s
+	$(AS) $(ASFlags) -c setjmp.s -o $(TargetDir)/setjmp.obj
 
-bin/longjmp.obj: longjmp.s
-	$(AS) $(ASFlags) -c longjmp.s -o bin/longjmp.obj
+$(TargetDir)/longjmp.obj: longjmp.s
+	$(AS) $(ASFlags) -c longjmp.s -o $(TargetDir)/longjmp.obj
 
-bin/ctype.obj: ctype.c ctype.h
-	$(CC) $(CFlags) -c ctype.c -o bin/ctype.obj $(Include)
+$(TargetDir)/ctype.obj: ctype.c ctype.h
+	$(CC) $(CFlags) -c ctype.c -o $(TargetDir)/ctype.obj $(Include)
 
-bin/errno.obj: errno.c errno.h
-	$(CC) $(CFlags) -c errno.c -o bin/errno.obj $(Include)
+$(TargetDir)/errno.obj: errno.c errno.h
+	$(CC) $(CFlags) -c errno.c -o $(TargetDir)/errno.obj $(Include)
 
-bin/strtod.obj: strtod.c
-	$(CC) $(CFlags) -c strtod.c -o bin/strtod.obj $(Include)
+$(TargetDir)/strtod.obj: strtod.c
+	$(CC) $(CFlags) -c strtod.c -o $(TargetDir)/strtod.obj $(Include)
 
-bin/gui.obj: gui.c
-	$(CC) $(CFlags) -c gui.c -o bin/gui.obj $(Include)
+$(TargetDir)/gui.obj: gui.c
+	$(CC) $(CFlags) -c gui.c -o $(TargetDir)/gui.obj $(Include)
 
 
 #==============================Stdlib==============================
 
-bin/strtol.obj: stdlib/strtol.c
-	$(CC) $(CFlags) -c stdlib/strtol.c -o bin/strtol.obj $(Include)
+$(TargetDir)/strtol.obj: stdlib/strtol.c
+	$(CC) $(CFlags) -c stdlib/strtol.c -o $(TargetDir)/strtol.obj $(Include)
 
-bin/strtoul.obj: stdlib/strtoul.c
-	$(CC) $(CFlags) -c stdlib/strtoul.c -o bin/strtoul.obj $(Include)
+$(TargetDir)/strtoul.obj: stdlib/strtoul.c
+	$(CC) $(CFlags) -c stdlib/strtoul.c -o $(TargetDir)/strtoul.obj $(Include)
 
-bin/atoi.obj: stdlib/atoi.c
-	$(CC) $(CFlags) -c stdlib/atoi.c -o bin/atoi.obj $(Include)
+$(TargetDir)/atoi.obj: stdlib/atoi.c
+	$(CC) $(CFlags) -c stdlib/atoi.c -o $(TargetDir)/atoi.obj $(Include)
 
-bin/atol.obj: stdlib/atol.c
-	$(CC) $(CFlags) -c stdlib/atol.c -o bin/atol.obj $(Include)
+$(TargetDir)/atol.obj: stdlib/atol.c
+	$(CC) $(CFlags) -c stdlib/atol.c -o $(TargetDir)/atol.obj $(Include)
 
-bin/mbstowcs.obj: stdlib/mbstowcs.c
-	$(CC) $(CFlags) -c stdlib/mbstowcs.c -o bin/mbstowcs.obj $(Include)
+$(TargetDir)/mbstowcs.obj: stdlib/mbstowcs.c
+	$(CC) $(CFlags) -c stdlib/mbstowcs.c -o $(TargetDir)/mbstowcs.obj $(Include)
 
-bin/mbtowc.obj: stdlib/mbtowc.c
-	$(CC) $(CFlags) -c stdlib/mbtowc.c -o bin/mbtowc.obj $(Include)
+$(TargetDir)/mbtowc.obj: stdlib/mbtowc.c
+	$(CC) $(CFlags) -c stdlib/mbtowc.c -o $(TargetDir)/mbtowc.obj $(Include)
 
-bin/wctomb.obj: stdlib/wctomb.c
-	$(CC) $(CFlags) -c stdlib/wctomb.c -o bin/wctomb.obj $(Include)
+$(TargetDir)/wctomb.obj: stdlib/wctomb.c
+	$(CC) $(CFlags) -c stdlib/wctomb.c -o $(TargetDir)/wctomb.obj $(Include)
 
-bin/wcstombs.obj: stdlib/wcstombs.c
-	$(CC) $(CFlags) -c stdlib/wcstombs.c -o bin/wcstombs.obj $(Include)
+$(TargetDir)/wcstombs.obj: stdlib/wcstombs.c
+	$(CC) $(CFlags) -c stdlib/wcstombs.c -o $(TargetDir)/wcstombs.obj $(Include)
 
-bin/strtod.obj: stdlib/strtod.c
-	$(CC) $(CFlags) -c stdlib/strtod.c -o bin/strtod.obj $(Include)
+$(TargetDir)/strtod.obj: stdlib/strtod.c
+	$(CC) $(CFlags) -c stdlib/strtod.c -o $(TargetDir)/strtod.obj $(Include)
 
-bin/atof.obj: stdlib/atof.c
-	$(CC) $(CFlags) -c stdlib/atof.c -o bin/atof.obj $(Include)
+$(TargetDir)/atof.obj: stdlib/atof.c
+	$(CC) $(CFlags) -c stdlib/atof.c -o $(TargetDir)/atof.obj $(Include)
 
-bin/abs.obj: stdlib/abs.c
-	$(CC) $(CFlags) -c stdlib/abs.c -o bin/abs.obj $(Include)
+$(TargetDir)/abs.obj: stdlib/abs.c
+	$(CC) $(CFlags) -c stdlib/abs.c -o $(TargetDir)/abs.obj $(Include)
 
-bin/labs.obj: stdlib/labs.c
-	$(CC) $(CFlags) -c stdlib/labs.c -o bin/labs.obj $(Include)
+$(TargetDir)/labs.obj: stdlib/labs.c
+	$(CC) $(CFlags) -c stdlib/labs.c -o $(TargetDir)/labs.obj $(Include)
 
-bin/msort.obj: stdlib/msort.c
-	$(CC) $(CFlags) -c stdlib/msort.c -o bin/msort.obj $(Include)
+$(TargetDir)/msort.obj: stdlib/msort.c
+	$(CC) $(CFlags) -c stdlib/msort.c -o $(TargetDir)/msort.obj $(Include)
 
-bin/qsort.obj: stdlib/qsort.c
-	$(CC) $(CFlags) -c stdlib/qsort.c -o bin/qsort.obj $(Include)
+$(TargetDir)/qsort.obj: stdlib/qsort.c
+	$(CC) $(CFlags) -c stdlib/qsort.c -o $(TargetDir)/qsort.obj $(Include)
 
-bin/mblen.obj: stdlib/mblen.c
-	$(CC) $(CFlags) -c stdlib/mblen.c -o bin/mblen.obj $(Include)
+$(TargetDir)/mblen.obj: stdlib/mblen.c
+	$(CC) $(CFlags) -c stdlib/mblen.c -o $(TargetDir)/mblen.obj $(Include)
 
 
 
 
 #==============================Math==============================
 
-bin/ceil.obj: math/ceil.c
-	$(CC) $(CFlags) -c math/ceil.c -o bin/ceil.obj $(Include)
+$(TargetDir)/ceil.obj: math/ceil.c
+	$(CC) $(CFlags) -c math/ceil.c -o $(TargetDir)/ceil.obj $(Include)
 
-bin/floor.obj: math/floor.c
-	$(CC) $(CFlags) -c math/floor.c -o bin/floor.obj $(Include)
+$(TargetDir)/floor.obj: math/floor.c
+	$(CC) $(CFlags) -c math/floor.c -o $(TargetDir)/floor.obj $(Include)
 
-bin/fabs.obj: math/fabs.c
-	$(CC) $(CFlags) -c math/fabs.c -o bin/fabs.obj $(Include)
+$(TargetDir)/fabs.obj: math/fabs.c
+	$(CC) $(CFlags) -c math/fabs.c -o $(TargetDir)/fabs.obj $(Include)
 
-bin/__scalb.obj: math/__scalb.c
-	$(CC) $(CFlags) -c math/__scalb.c -o bin/__scalb.obj $(Include)
+$(TargetDir)/__scalb.obj: math/__scalb.c
+	$(CC) $(CFlags) -c math/__scalb.c -o $(TargetDir)/__scalb.obj $(Include)
 
-bin/__finite.obj: math/__finite.c
-	$(CC) $(CFlags) -c math/__finite.c -o bin/__finite.obj $(Include)
+$(TargetDir)/__finite.obj: math/__finite.c
+	$(CC) $(CFlags) -c math/__finite.c -o $(TargetDir)/__finite.obj $(Include)
 
 
 #==============================SysDeps==============================
 
-bin/memmove.obj: sysdeps/generic/memmove.c
-	$(CC) $(CFlags) -c sysdeps/generic/memmove.c -o bin/memmove.obj $(Include)
+$(TargetDir)/memmove.obj: sysdeps/generic/memmove.c
+	$(CC) $(CFlags) -c sysdeps/generic/memmove.c -o $(TargetDir)/memmove.obj $(Include)
 
-bin/__infnan.obj: sysdeps/generic/__infnan.c
-	$(CC) $(CFlags) -c sysdeps/generic/__infnan.c -o bin/__infnan.obj $(Include)
+$(TargetDir)/__infnan.obj: sysdeps/generic/__infnan.c
+	$(CC) $(CFlags) -c sysdeps/generic/__infnan.c -o $(TargetDir)/__infnan.obj $(Include)
 
-bin/__copysign.obj: sysdeps/generic/__copysign.c
-	$(CC) $(CFlags) -c sysdeps/generic/__copysign.c -o bin/__copysign.obj $(Include)
+$(TargetDir)/__copysign.obj: sysdeps/generic/__copysign.c
+	$(CC) $(CFlags) -c sysdeps/generic/__copysign.c -o $(TargetDir)/__copysign.obj $(Include)
 
-bin/pow.obj: sysdeps/generic/pow.c
-	$(CC) $(CFlags) -c sysdeps/generic/pow.c -o bin/pow.obj $(Include)
+$(TargetDir)/pow.obj: sysdeps/generic/pow.c
+	$(CC) $(CFlags) -c sysdeps/generic/pow.c -o $(TargetDir)/pow.obj $(Include)
 
-bin/atan2.obj: sysdeps/generic/atan2.c
-	$(CC) $(CFlags) -c sysdeps/generic/atan2.c -o bin/atan2.obj $(Include)
+$(TargetDir)/atan2.obj: sysdeps/generic/atan2.c
+	$(CC) $(CFlags) -c sysdeps/generic/atan2.c -o $(TargetDir)/atan2.obj $(Include)
 
-bin/atan.obj: sysdeps/generic/atan.c
-	$(CC) $(CFlags) -c sysdeps/generic/atan.c -o bin/atan.obj $(Include)
+$(TargetDir)/atan.obj: sysdeps/generic/atan.c
+	$(CC) $(CFlags) -c sysdeps/generic/atan.c -o $(TargetDir)/atan.obj $(Include)
 
-bin/exp.obj: sysdeps/generic/exp.c
-	$(CC) $(CFlags) -c sysdeps/generic/exp.c -o bin/exp.obj $(Include)
+$(TargetDir)/exp.obj: sysdeps/generic/exp.c
+	$(CC) $(CFlags) -c sysdeps/generic/exp.c -o $(TargetDir)/exp.obj $(Include)
 
-bin/exp__E.obj: sysdeps/generic/exp__E.c
-	$(CC) $(CFlags) -c sysdeps/generic/exp__E.c -o bin/exp__E.obj $(Include)
+$(TargetDir)/exp__E.obj: sysdeps/generic/exp__E.c
+	$(CC) $(CFlags) -c sysdeps/generic/exp__E.c -o $(TargetDir)/exp__E.obj $(Include)
 
-bin/sqrt.obj: sysdeps/ieee754/sqrt.c
-	$(CC) $(CFlags) -c sysdeps/ieee754/sqrt.c -o bin/sqrt.obj $(Include)
+$(TargetDir)/sqrt.obj: sysdeps/ieee754/sqrt.c
+	$(CC) $(CFlags) -c sysdeps/ieee754/sqrt.c -o $(TargetDir)/sqrt.obj $(Include)
 
-bin/acos.obj: sysdeps/generic/acos.c
-	$(CC) $(CFlags) -c sysdeps/generic/acos.c -o bin/acos.obj $(Include)
+$(TargetDir)/acos.obj: sysdeps/generic/acos.c
+	$(CC) $(CFlags) -c sysdeps/generic/acos.c -o $(TargetDir)/acos.obj $(Include)
 
-bin/acosh.obj: sysdeps/generic/acosh.c
-	$(CC) $(CFlags) -c sysdeps/generic/acosh.c -o bin/acosh.obj $(Include)
+$(TargetDir)/acosh.obj: sysdeps/generic/acosh.c
+	$(CC) $(CFlags) -c sysdeps/generic/acosh.c -o $(TargetDir)/acosh.obj $(Include)
 
-bin/__isnan.obj: sysdeps/ieee754/__isnan.c
-	$(CC) $(CFlags) -c sysdeps/ieee754/__isnan.c -o bin/__isnan.obj $(Include)
+$(TargetDir)/__isnan.obj: sysdeps/ieee754/__isnan.c
+	$(CC) $(CFlags) -c sysdeps/ieee754/__isnan.c -o $(TargetDir)/__isnan.obj $(Include)
 
-bin/__isinf.obj: sysdeps/ieee754/__isinf.c
-	$(CC) $(CFlags) -c sysdeps/ieee754/__isinf.c -o bin/__isinf.obj $(Include)
+$(TargetDir)/__isinf.obj: sysdeps/ieee754/__isinf.c
+	$(CC) $(CFlags) -c sysdeps/ieee754/__isinf.c -o $(TargetDir)/__isinf.obj $(Include)
 
-bin/__logb.obj: sysdeps/ieee754/__logb.c
-	$(CC) $(CFlags) -c sysdeps/ieee754/__logb.c -o bin/__logb.obj $(Include)
+$(TargetDir)/__logb.obj: sysdeps/ieee754/__logb.c
+	$(CC) $(CFlags) -c sysdeps/ieee754/__logb.c -o $(TargetDir)/__logb.obj $(Include)
 
-bin/ldexp.obj: sysdeps/ieee754/ldexp.c
-	$(CC) $(CFlags) -c sysdeps/ieee754/ldexp.c -o bin/ldexp.obj $(Include)
+$(TargetDir)/ldexp.obj: sysdeps/ieee754/ldexp.c
+	$(CC) $(CFlags) -c sysdeps/ieee754/ldexp.c -o $(TargetDir)/ldexp.obj $(Include)
 
-bin/__drem.obj: sysdeps/ieee754/__drem.c
-	$(CC) $(CFlags) -c sysdeps/ieee754/__drem.c -o bin/__drem.obj $(Include)
+$(TargetDir)/__drem.obj: sysdeps/ieee754/__drem.c
+	$(CC) $(CFlags) -c sysdeps/ieee754/__drem.c -o $(TargetDir)/__drem.obj $(Include)
 
-bin/log.obj: sysdeps/generic/log.c
-	$(CC) $(CFlags) -c sysdeps/generic/log.c -o bin/log.obj $(Include)
+$(TargetDir)/log.obj: sysdeps/generic/log.c
+	$(CC) $(CFlags) -c sysdeps/generic/log.c -o $(TargetDir)/log.obj $(Include)
 
-bin/log10.obj: sysdeps/generic/log10.c
-	$(CC) $(CFlags) -c sysdeps/generic/log10.c -o bin/log10.obj $(Include)
+$(TargetDir)/log10.obj: sysdeps/generic/log10.c
+	$(CC) $(CFlags) -c sysdeps/generic/log10.c -o $(TargetDir)/log10.obj $(Include)
 
-bin/log1p.obj: sysdeps/generic/log1p.c
-	$(CC) $(CFlags) -c sysdeps/generic/log1p.c -o bin/log1p.obj $(Include)
+$(TargetDir)/log1p.obj: sysdeps/generic/log1p.c
+	$(CC) $(CFlags) -c sysdeps/generic/log1p.c -o $(TargetDir)/log1p.obj $(Include)
 
-bin/log__L.obj: sysdeps/generic/log__L.c
-	$(CC) $(CFlags) -c sysdeps/generic/log__L.c -o bin/log__L.obj $(Include)
+$(TargetDir)/log__L.obj: sysdeps/generic/log__L.c
+	$(CC) $(CFlags) -c sysdeps/generic/log__L.c -o $(TargetDir)/log__L.obj $(Include)
 
-bin/asin.obj: sysdeps/generic/asin.c
-	$(CC) $(CFlags) -c sysdeps/generic/asin.c -o bin/asin.obj $(Include)
+$(TargetDir)/asin.obj: sysdeps/generic/asin.c
+	$(CC) $(CFlags) -c sysdeps/generic/asin.c -o $(TargetDir)/asin.obj $(Include)
 
-bin/atanh.obj: sysdeps/generic/atanh.c
-	$(CC) $(CFlags) -c sysdeps/generic/atanh.c -o bin/atanh.obj $(Include)
+$(TargetDir)/atanh.obj: sysdeps/generic/atanh.c
+	$(CC) $(CFlags) -c sysdeps/generic/atanh.c -o $(TargetDir)/atanh.obj $(Include)
 
-bin/bcopy.obj: sysdeps/generic/bcopy.c
-	$(CC) $(CFlags) -c sysdeps/generic/bcopy.c -o bin/bcopy.obj $(Include)
+$(TargetDir)/bcopy.obj: sysdeps/generic/bcopy.c
+	$(CC) $(CFlags) -c sysdeps/generic/bcopy.c -o $(TargetDir)/bcopy.obj $(Include)
 
-bin/bzero.obj: sysdeps/generic/bzero.c
-	$(CC) $(CFlags) -c sysdeps/generic/bzero.c -o bin/bzero.obj $(Include)
+$(TargetDir)/bzero.obj: sysdeps/generic/bzero.c
+	$(CC) $(CFlags) -c sysdeps/generic/bzero.c -o $(TargetDir)/bzero.obj $(Include)
 
-bin/hypot.obj: sysdeps/generic/hypot.c
-	$(CC) $(CFlags) -c sysdeps/generic/hypot.c -o bin/hypot.obj $(Include)
+$(TargetDir)/hypot.obj: sysdeps/generic/hypot.c
+	$(CC) $(CFlags) -c sysdeps/generic/hypot.c -o $(TargetDir)/hypot.obj $(Include)
 
-bin/cabs.obj: sysdeps/generic/cabs.c
-	$(CC) $(CFlags) -c sysdeps/generic/cabs.c -o bin/cabs.obj $(Include)
+$(TargetDir)/cabs.obj: sysdeps/generic/cabs.c
+	$(CC) $(CFlags) -c sysdeps/generic/cabs.c -o $(TargetDir)/cabs.obj $(Include)
 
-bin/cosh.obj: sysdeps/generic/cosh.c
-	$(CC) $(CFlags) -c sysdeps/generic/cosh.c -o bin/cosh.obj $(Include)
+$(TargetDir)/cosh.obj: sysdeps/generic/cosh.c
+	$(CC) $(CFlags) -c sysdeps/generic/cosh.c -o $(TargetDir)/cosh.obj $(Include)
 
-bin/fabs.obj: sysdeps/generic/fabs.c
-	$(CC) $(CFlags) -c sysdeps/generic/fabs.c -o bin/fabs.obj $(Include)
+$(TargetDir)/fabs.obj: sysdeps/generic/fabs.c
+	$(CC) $(CFlags) -c sysdeps/generic/fabs.c -o $(TargetDir)/fabs.obj $(Include)
 
-bin/ffs.obj: sysdeps/generic/ffs.c
-	$(CC) $(CFlags) -c sysdeps/generic/ffs.c -o bin/ffs.obj $(Include)
+$(TargetDir)/ffs.obj: sysdeps/generic/ffs.c
+	$(CC) $(CFlags) -c sysdeps/generic/ffs.c -o $(TargetDir)/ffs.obj $(Include)
 
-bin/fmod.obj: sysdeps/generic/fmod.c
-	$(CC) $(CFlags) -c sysdeps/generic/fmod.c -o bin/fmod.obj $(Include)
+$(TargetDir)/fmod.obj: sysdeps/generic/fmod.c
+	$(CC) $(CFlags) -c sysdeps/generic/fmod.c -o $(TargetDir)/fmod.obj $(Include)
 
-bin/fexp.obj: sysdeps/generic/fexp.c
-	$(CC) $(CFlags) -c sysdeps/generic/fexp.c -o bin/fexp.obj $(Include)
+$(TargetDir)/fexp.obj: sysdeps/generic/fexp.c
+	$(CC) $(CFlags) -c sysdeps/generic/fexp.c -o $(TargetDir)/fexp.obj $(Include)
 
-bin/modf.obj: sysdeps/generic/modf.c
-	$(CC) $(CFlags) -c sysdeps/generic/modf.c -o bin/modf.obj $(Include)
+$(TargetDir)/modf.obj: sysdeps/generic/modf.c
+	$(CC) $(CFlags) -c sysdeps/generic/modf.c -o $(TargetDir)/modf.obj $(Include)
 
-bin/sincos.obj: sysdeps/generic/sincos.c
-	$(CC) $(CFlags) -c sysdeps/generic/sincos.c -o bin/sincos.obj $(Include)
+$(TargetDir)/sincos.obj: sysdeps/generic/sincos.c
+	$(CC) $(CFlags) -c sysdeps/generic/sincos.c -o $(TargetDir)/sincos.obj $(Include)
 
-bin/sinh.obj: sysdeps/generic/sinh.c
-	$(CC) $(CFlags) -c sysdeps/generic/sinh.c -o bin/sinh.obj $(Include)
+$(TargetDir)/sinh.obj: sysdeps/generic/sinh.c
+	$(CC) $(CFlags) -c sysdeps/generic/sinh.c -o $(TargetDir)/sinh.obj $(Include)
 
-bin/__expm1.obj: sysdeps/generic/__expm1.c
-	$(CC) $(CFlags) -c sysdeps/generic/__expm1.c -o bin/__expm1.obj $(Include)
+$(TargetDir)/__expm1.obj: sysdeps/generic/__expm1.c
+	$(CC) $(CFlags) -c sysdeps/generic/__expm1.c -o $(TargetDir)/__expm1.obj $(Include)
 
-bin/tan.obj: sysdeps/generic/tan.c
-	$(CC) $(CFlags) -c sysdeps/generic/tan.c -o bin/tan.obj $(Include)
+$(TargetDir)/tan.obj: sysdeps/generic/tan.c
+	$(CC) $(CFlags) -c sysdeps/generic/tan.c -o $(TargetDir)/tan.obj $(Include)
 
-bin/tanh.obj: sysdeps/generic/tanh.c
-	$(CC) $(CFlags) -c sysdeps/generic/tanh.c -o bin/tanh.obj $(Include)
+$(TargetDir)/tanh.obj: sysdeps/generic/tanh.c
+	$(CC) $(CFlags) -c sysdeps/generic/tanh.c -o $(TargetDir)/tanh.obj $(Include)
 
-bin/strncat.obj: sysdeps/generic/strncat.c
-	$(CC) $(CFlags) -c sysdeps/generic/strncat.c -o bin/strncat.obj $(Include)
+$(TargetDir)/strncat.obj: sysdeps/generic/strncat.c
+	$(CC) $(CFlags) -c sysdeps/generic/strncat.c -o $(TargetDir)/strncat.obj $(Include)
 
-bin/strpbrk.obj: sysdeps/generic/strpbrk.c
-	$(CC) $(CFlags) -c sysdeps/generic/strpbrk.c -o bin/strpbrk.obj $(Include)
+$(TargetDir)/strpbrk.obj: sysdeps/generic/strpbrk.c
+	$(CC) $(CFlags) -c sysdeps/generic/strpbrk.c -o $(TargetDir)/strpbrk.obj $(Include)
 
-bin/strspn.obj: sysdeps/generic/strspn.c
-	$(CC) $(CFlags) -c sysdeps/generic/strspn.c -o bin/strspn.obj $(Include)
+$(TargetDir)/strspn.obj: sysdeps/generic/strspn.c
+	$(CC) $(CFlags) -c sysdeps/generic/strspn.c -o $(TargetDir)/strspn.obj $(Include)
 
 
 #==============================Locale==============================
 
-bin/C-collate.obj: locale/C-collate.c
-	$(CC) $(CFlags) -c locale/C-collate.c -o bin/C-collate.obj $(Include)
+$(TargetDir)/C-collate.obj: locale/C-collate.c
+	$(CC) $(CFlags) -c locale/C-collate.c -o $(TargetDir)/C-collate.obj $(Include)
 
-bin/C-ctype.obj: locale/C-ctype.c
-	$(CC) $(CFlags) -c locale/C-ctype.c -o bin/C-ctype.obj $(Include)
+$(TargetDir)/C-ctype.obj: locale/C-ctype.c
+	$(CC) $(CFlags) -c locale/C-ctype.c -o $(TargetDir)/C-ctype.obj $(Include)
 
-bin/C-numeric.obj: locale/C-numeric.c
-	$(CC) $(CFlags) -c locale/C-numeric.c -o bin/C-numeric.obj $(Include)
+$(TargetDir)/C-numeric.obj: locale/C-numeric.c
+	$(CC) $(CFlags) -c locale/C-numeric.c -o $(TargetDir)/C-numeric.obj $(Include)
 
-bin/C-ctype_ct.obj: locale/C-ctype_ct.c
-	$(CC) $(CFlags) -c locale/C-ctype_ct.c -o bin/C-ctype_ct.obj $(Include)
+$(TargetDir)/C-ctype_ct.obj: locale/C-ctype_ct.c
+	$(CC) $(CFlags) -c locale/C-ctype_ct.c -o $(TargetDir)/C-ctype_ct.obj $(Include)
 
-bin/C-ctype_mb.obj: locale/C-ctype_mb.c
-	$(CC) $(CFlags) -c locale/C-ctype_mb.c -o bin/C-ctype_mb.obj $(Include)
+$(TargetDir)/C-ctype_mb.obj: locale/C-ctype_mb.c
+	$(CC) $(CFlags) -c locale/C-ctype_mb.c -o $(TargetDir)/C-ctype_mb.obj $(Include)
 
-bin/C-monetary.obj: locale/C-monetary.c
-	$(CC) $(CFlags) -c locale/C-monetary.c -o bin/C-monetary.obj $(Include)
+$(TargetDir)/C-monetary.obj: locale/C-monetary.c
+	$(CC) $(CFlags) -c locale/C-monetary.c -o $(TargetDir)/C-monetary.obj $(Include)
 
-bin/C-response.obj: locale/C-response.c
-	$(CC) $(CFlags) -c locale/C-response.c -o bin/C-response.obj $(Include)
+$(TargetDir)/C-response.obj: locale/C-response.c
+	$(CC) $(CFlags) -c locale/C-response.c -o $(TargetDir)/C-response.obj $(Include)
 
-bin/C-time.obj: locale/C-time.c
-	$(CC) $(CFlags) -c locale/C-time.c -o bin/C-time.obj $(Include)
+$(TargetDir)/C-time.obj: locale/C-time.c
+	$(CC) $(CFlags) -c locale/C-time.c -o $(TargetDir)/C-time.obj $(Include)
 
-bin/localeconv.obj: locale/localeconv.c
-	$(CC) $(CFlags) -c locale/localeconv.c -o bin/localeconv.obj $(Include)
+$(TargetDir)/localeconv.obj: locale/localeconv.c
+	$(CC) $(CFlags) -c locale/localeconv.c -o $(TargetDir)/localeconv.obj $(Include)
 
-bin/setlocale.obj: locale/setlocale.c
-	$(CC) $(CFlags) -c locale/setlocale.c -o bin/setlocale.obj $(Include)
+$(TargetDir)/setlocale.obj: locale/setlocale.c
+	$(CC) $(CFlags) -c locale/setlocale.c -o $(TargetDir)/setlocale.obj $(Include)
 
 
 
 #==============================String==============================
 
-bin/strdup.obj: string/strdup.c
-	$(CC) $(CFlags) -c string/strdup.c -o bin/strdup.obj $(Include)
+$(TargetDir)/strdup.obj: string/strdup.c
+	$(CC) $(CFlags) -c string/strdup.c -o $(TargetDir)/strdup.obj $(Include)
 
-bin/strtok.obj: string/strtok.c
-	$(CC) $(CFlags) -c string/strtok.c -o bin/strtok.obj $(Include)
+$(TargetDir)/strtok.obj: string/strtok.c
+	$(CC) $(CFlags) -c string/strtok.c -o $(TargetDir)/strtok.obj $(Include)
 
 #==============================Stdio==============================
 
-bin/__vfscanf.obj: stdio/__vfscanf.c
-	$(CC) $(CFlags) -c stdio/__vfscanf.c -o bin/__vfscanf.obj $(Include)
+$(TargetDir)/__vfscanf.obj: stdio/__vfscanf.c
+	$(CC) $(CFlags) -c stdio/__vfscanf.c -o $(TargetDir)/__vfscanf.obj $(Include)
 
-bin/mta32.obj: mta32.c
-	$(CC) $(CFlags) -c mta32.c -o bin/mta32.obj $(Include)
+$(TargetDir)/mta32.obj: mta32.c
+	$(CC) $(CFlags) -c mta32.c -o $(TargetDir)/mta32.obj $(Include)
 
-bin/elf32.obj: elf32.c
-	$(CC) $(CFlags) -c elf32.c -o bin/elf32.obj $(Include)
+$(TargetDir)/elf32.obj: elf32.c
+	$(CC) $(CFlags) -c elf32.c -o $(TargetDir)/elf32.obj $(Include)
+
+$(TargetDir)/elfso32.obj: elfso32.c
+	$(CC) $(CFlags) -c elfso32.c -o $(TargetDir)/elfso32.obj $(Include)
 
 .PHONY:clean
 
 clean:
-	-rm -f $(Target) bin/mta32.obj bin/elf32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs)
+	-rm -f $(Target) $(TargetDir)/mta32.obj $(TargetDir)/elf32.obj $(TargetDir)/elfso32.obj $(Objs) $(StdlibObjs) $(MathObjs) $(SysDepsObjs) $(LocaleObjs) $(StringObjs)

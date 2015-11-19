@@ -297,7 +297,19 @@ uint32 ILLoadELFSO(CASCTEXT path)
 	struct SParams sparams;
 	sparams.param0 = SPARAM(path);
 	system_call(SCALL_SYSTEM, SCALL_LOAD_ELF_SO, &sparams);
-	return UINT32_SPARAM(sparams.param0);
+	uint32 ctx_idx = UINT32_SPARAM(sparams.param0);
+	if(ctx_idx != 0xffffffff)
+	{
+		BOOL (* __elfso32_init)(void);
+		__elfso32_init = ILGetELFSOSymbol(ctx_idx, "__elfso32_init");
+		if(__elfso32_init != NULL)
+			if(!__elfso32_init())
+			{
+				ILUnloadELFSO(ctx_idx);
+				ctx_idx = 0xffffffff;
+			}
+	}
+	return ctx_idx;
 }
 
 void * ILGetELFSOSymbol(uint32 ctx_idx, CASCTEXT name)
@@ -311,6 +323,13 @@ void * ILGetELFSOSymbol(uint32 ctx_idx, CASCTEXT name)
 
 BOOL ILUnloadELFSO(uint32 ctx_idx)
 {
+	if(ctx_idx != 0xffffffff)
+	{
+		void (* __elfso32_uninit)(void);
+		__elfso32_uninit = ILGetELFSOSymbol(ctx_idx, "__elfso32_uninit");
+		if(__elfso32_uninit != NULL)
+			__elfso32_uninit();
+	}
 	struct SParams sparams;
 	sparams.param0 = SPARAM(ctx_idx);
 	system_call(SCALL_SYSTEM, SCALL_UNLOAD_ELF_SO, &sparams);

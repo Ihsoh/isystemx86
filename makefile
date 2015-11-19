@@ -17,7 +17,7 @@ $(Target):	bin	\
 			libs/mempoollib/bin/libmempoollib.a 	\
 			libs/regexlib/bin/libregexlib.a 	\
 			libs/imagelib/bin/libimagelib.a 	\
-			libs/imagelib/bin/libisys.a 	\
+			libs/isys/bin/libisys.a 	\
 			boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin \
 			kernel/bin/kernel.bin
 #tools/floppymaker/bin/floppymaker boot/bin/boot.bin kernelldr/bin/kernelldr.bin kernel/bin/kernel.bin bin/isystemx86.img
@@ -70,34 +70,44 @@ bin:
 	-mkdir bin
 
 libs/ilib/bin/libilib.a:
-	cd libs/ilib && make
+	cd libs/ilib && make TargetDir=bin Out=libilib.a
+	cd libs/ilib && make TargetDir=bin/pic Out=libilib.a CFlagsExt=-fPIC
 
 libs/dslib/bin/libdslib.a:
-	cd libs/dslib && make
+	cd libs/dslib && make TargetDir=bin Out=libdslib.a
+	cd libs/dslib && make TargetDir=bin/pic Out=libdslib.a CFlagsExt=-fPIC
 
 libs/jsonlib/bin/libjsonlib.a:
-	cd libs/jsonlib && make
+	cd libs/jsonlib && make TargetDir=bin Out=libjsonlib.a
+	cd libs/jsonlib && make TargetDir=bin/pic Out=libjsonlib.a CFlagsExt=-fPIC
 
 libs/encryptionlib/bin/libencryptionlib.a:
-	cd libs/encryptionlib && make
+	cd libs/encryptionlib && make TargetDir=bin Out=libencryptionlib.a
+	cd libs/encryptionlib && make TargetDir=bin/pic Out=libencryptionlib.a CFlagsExt=-fPIC
 
 libs/pathlib/bin/libpathlib.a:
-	cd libs/pathlib && make
+	cd libs/pathlib && make TargetDir=bin Out=libpathlib.a
+	cd libs/pathlib && make TargetDir=bin/pic Out=libpathlib.a CFlagsExt=-fPIC
 
 libs/baslanglib/bin/libbaslanglib.a:
-	cd libs/baslanglib && make
+	cd libs/baslanglib && make TargetDir=bin Out=libbaslanglib.a
+	cd libs/baslanglib && make TargetDir=bin/pic Out=libbaslanglib.a CFlagsExt=-fPIC
 
 libs/mempoollib/bin/libmempoollib.a:
-	cd libs/mempoollib && make
+	cd libs/mempoollib && make TargetDir=bin Out=libmempoollib.a
+	cd libs/mempoollib && make TargetDir=bin/pic Out=libmempoollib.a CFlagsExt=-fPIC
 
 libs/regexlib/bin/libregexlib.a:
-	cd libs/regexlib && make
+	cd libs/regexlib && make TargetDir=bin Out=libregexlib.a
+	cd libs/regexlib && make TargetDir=bin/pic Out=libregexlib.a CFlagsExt=-fPIC
 
 libs/imagelib/bin/libimagelib.a:
-	cd libs/imagelib && make
+	cd libs/imagelib && make TargetDir=bin Out=libimagelib.a
+	cd libs/imagelib && make TargetDir=bin/pic Out=libimagelib.a CFlagsExt=-fPIC
 
-libs/imagelib/bin/libisys.a:
-	cd libs/isys && make
+libs/isys/bin/libisys.a:
+	cd libs/isys && make TargetDir=bin Out=libisys.a
+	cd libs/isys && make TargetDir=bin/pic Out=libisys.a CFlagsExt=-fPIC
 
 boot/bin/boot.bin:
 	cd boot && make
@@ -113,16 +123,35 @@ kernel/bin/kernel.bin:
 clean:
 	-rm -f $(Target)
 	
-	cd libs/ilib && make clean
-	cd libs/dslib && make clean
-	cd libs/jsonlib && make clean
-	cd libs/encryptionlib && make clean
-	cd libs/pathlib && make clean
-	cd libs/baslanglib && make clean
-	cd libs/mempoollib && make clean
-	cd libs/regexlib && make clean
-	cd libs/imagelib && make clean
-	cd libs/isys && make clean
+	cd libs/ilib && make clean TargetDir=bin Out=libilib.a
+	cd libs/ilib && make clean TargetDir=bin/pic Out=libilib.a CFlagsExt=-fPIC
+	
+	cd libs/dslib && make clean TargetDir=bin Out=libdslib.a
+	cd libs/dslib && make clean TargetDir=bin/pic Out=libdslib.a CFlagsExt=-fPIC
+
+	cd libs/jsonlib && make clean TargetDir=bin Out=libjsonlib.a
+	cd libs/jsonlib && make clean TargetDir=bin/pic Out=libjsonlib.a CFlagsExt=-fPIC
+	
+	cd libs/encryptionlib && make clean TargetDir=bin Out=libencryptionlib.a
+	cd libs/encryptionlib && make clean TargetDir=bin/pic Out=libencryptionlib.a CFlagsExt=-fPIC
+
+	cd libs/pathlib && make clean TargetDir=bin Out=libpathlib.a
+	cd libs/pathlib && make clean TargetDir=bin/pic Out=libpathlib.a CFlagsExt=-fPIC
+	
+	cd libs/baslanglib && make clean TargetDir=bin Out=libbaslanglib.a
+	cd libs/baslanglib && make clean TargetDir=bin/pic Out=libbaslanglib.a CFlagsExt=-fPIC
+
+	cd libs/mempoollib && make clean TargetDir=bin Out=libmempoollib.a
+	cd libs/mempoollib && make clean TargetDir=bin/pic Out=libmempoollib.a CFlagsExt=-fPIC
+
+	cd libs/regexlib && make clean TargetDir=bin Out=libregexlib.a
+	cd libs/regexlib && make clean TargetDir=bin/pic Out=libregexlib.a CFlagsExt=-fPIC
+	
+	cd libs/imagelib && make clean TargetDir=bin Out=libimagelib.a
+	cd libs/imagelib && make clean TargetDir=bin/pic Out=libimagelib.a CFlagsExt=-fPIC
+
+	cd libs/isys && make clean TargetDir=bin Out=libisys.a
+	cd libs/isys && make clean TargetDir=bin/pic Out=libisys.a CFlagsExt=-fPIC
 
 	cd boot && make clean
 	cd kernelldr && make clean

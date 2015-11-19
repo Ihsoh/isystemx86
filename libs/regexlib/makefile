@@ -1,46 +1,46 @@
-TargetDir=bin
-Out=libregexlib.a
+# TargetDir=bin
+# Out=libregexlib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 -std=c99
-Objs=bin/reg_error.obj bin/reg_list.obj bin/reg_malloc.obj bin/reg_parse.obj 	\
-bin/reg_state.obj bin/reg_stream.obj bin/regex.obj bin/state_gen.obj bin/state_match.obj
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 -std=c99 $(CFlagsExt)
+Objs=$(TargetDir)/reg_error.obj $(TargetDir)/reg_list.obj $(TargetDir)/reg_malloc.obj $(TargetDir)/reg_parse.obj 	\
+$(TargetDir)/reg_state.obj $(TargetDir)/reg_stream.obj $(TargetDir)/regex.obj $(TargetDir)/state_gen.obj $(TargetDir)/state_match.obj
 
 AR=ar
 Include=-I../
 
-$(Target): bin $(Objs)
+$(Target): $(TargetDir) $(Objs)
 	$(AR) -rc $(Target) $(Objs)
 
-bin:
-	-mkdir bin
+$(TargetDir):
+	-mkdir $(TargetDir)
 
-bin/reg_error.obj: reg_error.c reg_error.h
-	$(CC) $(CFlags) -c reg_error.c -o bin/reg_error.obj $(Include)
+$(TargetDir)/reg_error.obj: reg_error.c reg_error.h
+	$(CC) $(CFlags) -c reg_error.c -o $(TargetDir)/reg_error.obj $(Include)
 
-bin/reg_list.obj: reg_list.c reg_list.h
-	$(CC) $(CFlags) -c reg_list.c -o bin/reg_list.obj $(Include)
+$(TargetDir)/reg_list.obj: reg_list.c reg_list.h
+	$(CC) $(CFlags) -c reg_list.c -o $(TargetDir)/reg_list.obj $(Include)
 
-bin/reg_malloc.obj: reg_malloc.c reg_malloc.h
-	$(CC) $(CFlags) -c reg_malloc.c -o bin/reg_malloc.obj $(Include)
+$(TargetDir)/reg_malloc.obj: reg_malloc.c reg_malloc.h
+	$(CC) $(CFlags) -c reg_malloc.c -o $(TargetDir)/reg_malloc.obj $(Include)
 
-bin/reg_parse.obj: reg_parse.c reg_parse.h
-	$(CC) $(CFlags) -c reg_parse.c -o bin/reg_parse.obj $(Include)
+$(TargetDir)/reg_parse.obj: reg_parse.c reg_parse.h
+	$(CC) $(CFlags) -c reg_parse.c -o $(TargetDir)/reg_parse.obj $(Include)
 
-bin/reg_state.obj: reg_state.c reg_state.h
-	$(CC) $(CFlags) -c reg_state.c -o bin/reg_state.obj $(Include)
+$(TargetDir)/reg_state.obj: reg_state.c reg_state.h
+	$(CC) $(CFlags) -c reg_state.c -o $(TargetDir)/reg_state.obj $(Include)
 
-bin/reg_stream.obj: reg_stream.c reg_stream.h
-	$(CC) $(CFlags) -c reg_stream.c -o bin/reg_stream.obj $(Include)
+$(TargetDir)/reg_stream.obj: reg_stream.c reg_stream.h
+	$(CC) $(CFlags) -c reg_stream.c -o $(TargetDir)/reg_stream.obj $(Include)
 
-bin/regex.obj: regex.c regex.h
-	$(CC) $(CFlags) -c regex.c -o bin/regex.obj $(Include)
+$(TargetDir)/regex.obj: regex.c regex.h
+	$(CC) $(CFlags) -c regex.c -o $(TargetDir)/regex.obj $(Include)
 
-bin/state_gen.obj: state_gen.c
-	$(CC) $(CFlags) -c state_gen.c -o bin/state_gen.obj $(Include)
+$(TargetDir)/state_gen.obj: state_gen.c
+	$(CC) $(CFlags) -c state_gen.c -o $(TargetDir)/state_gen.obj $(Include)
 
-bin/state_match.obj: state_match.c
-	$(CC) $(CFlags) -c state_match.c -o bin/state_match.obj $(Include)
+$(TargetDir)/state_match.obj: state_match.c
+	$(CC) $(CFlags) -c state_match.c -o $(TargetDir)/state_match.obj $(Include)
 
 .PHONY:clean
 

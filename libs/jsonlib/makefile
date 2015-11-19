@@ -1,23 +1,23 @@
-TargetDir=bin
-Out=libjsonlib.a
+# TargetDir=bin
+# Out=libjsonlib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
-Objs=bin/lib.obj bin/jsonlib.obj
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 $(CFlagsExt)
+Objs=$(TargetDir)/lib.obj $(TargetDir)/jsonlib.obj
 AR=ar
 Include=-I../
 
-$(Target): bin $(Objs)
+$(Target): $(TargetDir) $(Objs)
 	$(AR) -rc $(Target) $(Objs)
 
-bin:
-	-mkdir bin
+$(TargetDir):
+	-mkdir $(TargetDir)
 
-bin/jsonlib.obj: jsonlib.c jsonlib.h
-	$(CC) $(CFlags) -c jsonlib.c -o bin/jsonlib.obj $(Include)
+$(TargetDir)/jsonlib.obj: jsonlib.c jsonlib.h
+	$(CC) $(CFlags) -c jsonlib.c -o $(TargetDir)/jsonlib.obj $(Include)
 
-bin/lib.obj: lib.c lib.h
-	$(CC) $(CFlags) -c lib.c -o bin/lib.obj $(Include)
+$(TargetDir)/lib.obj: lib.c lib.h
+	$(CC) $(CFlags) -c lib.c -o $(TargetDir)/lib.obj $(Include)
 
 .PHONY:clean
 

@@ -211,6 +211,11 @@ tasks_alloc_memory(	IN int32 tid,
 					OUT void ** phyaddr);
 
 extern
+void
+tasks_free_memory(	IN int32 tid,
+					IN void * ptr);
+
+extern
 uint32
 tasks_load_elf(	IN int32 tid,
 				IN CASCTEXT path);
@@ -225,6 +230,11 @@ void *
 tasks_get_elf_so_symbol(IN int32 tid,
 						IN uint32 ctx_idx,
 						IN CASCTEXT name);
+
+extern
+BOOL
+tasks_unload_elf_so(IN int32 tid,
+					IN uint32 ctx_idx);
 
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()

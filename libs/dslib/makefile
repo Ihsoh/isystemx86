@@ -1,35 +1,35 @@
-TargetDir=bin
-Out=libdslib.a
+# TargetDir=bin
+# Out=libdslib.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
-Objs=bin/dslib.obj bin/value.obj bin/linked_list.obj bin/list.obj bin/lib.obj 	\
-bin/hashtable.obj
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 $(CFlagsExt)
+Objs=$(TargetDir)/dslib.obj $(TargetDir)/value.obj $(TargetDir)/linked_list.obj $(TargetDir)/list.obj $(TargetDir)/lib.obj 	\
+$(TargetDir)/hashtable.obj
 AR=ar
 
-$(Target): bin $(Objs)
+$(Target): $(TargetDir) $(Objs)
 	$(AR) -rc $(Target) $(Objs)
 
-bin:
-	-mkdir bin
+$(TargetDir):
+	-mkdir $(TargetDir)
 
-bin/dslib.obj: dslib.c dslib.h
-	$(CC) $(CFlags) -c dslib.c -o bin/dslib.obj
+$(TargetDir)/dslib.obj: dslib.c dslib.h
+	$(CC) $(CFlags) -c dslib.c -o $(TargetDir)/dslib.obj
 
-bin/value.obj: value.c value.h
-	$(CC) $(CFlags) -c value.c -o bin/value.obj
+$(TargetDir)/value.obj: value.c value.h
+	$(CC) $(CFlags) -c value.c -o $(TargetDir)/value.obj
 
-bin/linked_list.obj: linked_list.c linked_list.h
-	$(CC) $(CFlags) -c linked_list.c -o bin/linked_list.obj
+$(TargetDir)/linked_list.obj: linked_list.c linked_list.h
+	$(CC) $(CFlags) -c linked_list.c -o $(TargetDir)/linked_list.obj
 
-bin/list.obj: list.c list.h
-	$(CC) $(CFlags) -c list.c -o bin/list.obj
+$(TargetDir)/list.obj: list.c list.h
+	$(CC) $(CFlags) -c list.c -o $(TargetDir)/list.obj
 
-bin/lib.obj: lib.c lib.h
-	$(CC) $(CFlags) -c lib.c -o bin/lib.obj
+$(TargetDir)/lib.obj: lib.c lib.h
+	$(CC) $(CFlags) -c lib.c -o $(TargetDir)/lib.obj
 
-bin/hashtable.obj: hashtable.c hashtable.h
-	$(CC) $(CFlags) -c hashtable.c -o bin/hashtable.obj
+$(TargetDir)/hashtable.obj: hashtable.c hashtable.h
+	$(CC) $(CFlags) -c hashtable.c -o $(TargetDir)/hashtable.obj
 
 .PHONY:clean
 

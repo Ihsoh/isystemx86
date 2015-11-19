@@ -1,39 +1,39 @@
-TargetDir=bin
-Out=libisys.a
+# TargetDir=bin
+# Out=libisys.a
 Target=$(TargetDir)/$(Out)
 CC=gcc
-CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
-Objs=bin/console.obj bin/fs.obj bin/keyboard.obj bin/mouse.obj bin/screen.obj \
-bin/system.obj bin/window.obj
+CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 $(CFlagsExt)
+Objs=$(TargetDir)/console.obj $(TargetDir)/fs.obj $(TargetDir)/keyboard.obj $(TargetDir)/mouse.obj $(TargetDir)/screen.obj \
+$(TargetDir)/system.obj $(TargetDir)/window.obj
 AR=ar
 Include=-I../
 
-$(Target): bin $(Objs)
+$(Target): $(TargetDir) $(Objs)
 	$(AR) -rc $(Target) $(Objs)
 
-bin:
-	-mkdir bin
+$(TargetDir):
+	-mkdir $(TargetDir)
 
-bin/console.obj: console.c console.h
-	$(CC) $(CFlags) -c console.c -o bin/console.obj $(Include)
+$(TargetDir)/console.obj: console.c console.h
+	$(CC) $(CFlags) -c console.c -o $(TargetDir)/console.obj $(Include)
 
-bin/fs.obj: fs.c fs.h
-	$(CC) $(CFlags) -c fs.c -o bin/fs.obj $(Include)
+$(TargetDir)/fs.obj: fs.c fs.h
+	$(CC) $(CFlags) -c fs.c -o $(TargetDir)/fs.obj $(Include)
 
-bin/keyboard.obj: keyboard.c keyboard.h
-	$(CC) $(CFlags) -c keyboard.c -o bin/keyboard.obj $(Include)
+$(TargetDir)/keyboard.obj: keyboard.c keyboard.h
+	$(CC) $(CFlags) -c keyboard.c -o $(TargetDir)/keyboard.obj $(Include)
 
-bin/mouse.obj: mouse.c mouse.h
-	$(CC) $(CFlags) -c mouse.c -o bin/mouse.obj $(Include)
+$(TargetDir)/mouse.obj: mouse.c mouse.h
+	$(CC) $(CFlags) -c mouse.c -o $(TargetDir)/mouse.obj $(Include)
 
-bin/screen.obj: screen.c screen.h
-	$(CC) $(CFlags) -c screen.c -o bin/screen.obj $(Include)
+$(TargetDir)/screen.obj: screen.c screen.h
+	$(CC) $(CFlags) -c screen.c -o $(TargetDir)/screen.obj $(Include)
 
-bin/system.obj: system.c system.h
-	$(CC) $(CFlags) -c system.c -o bin/system.obj $(Include)
+$(TargetDir)/system.obj: system.c system.h
+	$(CC) $(CFlags) -c system.c -o $(TargetDir)/system.obj $(Include)
 
-bin/window.obj: window.c window.h
-	$(CC) $(CFlags) -c window.c -o bin/window.obj $(Include)
+$(TargetDir)/window.obj: window.c window.h
+	$(CC) $(CFlags) -c window.c -o $(TargetDir)/window.obj $(Include)
 
 .PHONY:clean
 

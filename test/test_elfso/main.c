@@ -3,6 +3,7 @@
 int (* add)(int, int);
 int (* add1)(int, int);
 int (* get_value0)(void);
+void (* test)(void);
 
 int32 main(int32 argc, ASCCHAR * argv[])
 {
@@ -17,6 +18,8 @@ int32 main(int32 argc, ASCCHAR * argv[])
 	printf("%d\n", add1(12340, 5));
 	get_value0 = ILGetELFSOSymbol(ctx_idx, "get_value0");
 	printf("0x%x\n", get_value0());
+	test = ILGetELFSOSymbol(ctx_idx, "test");
+	test();
 	if(ILUnloadELFSO(ctx_idx))
 		printf("%s\n", "Unloaded ELF Shared Object.");
 	else

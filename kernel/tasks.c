@@ -1195,6 +1195,39 @@ tasks_alloc_memory(	IN int32 tid,
 }
 
 /**
+	@Function:		tasks_free_memory
+	@Access:		Public
+	@Description:
+		释放任务申请的内存。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		ptr, void *, IN
+			用户空间的线性地址。
+	@Return:
+*/
+void
+tasks_free_memory(	IN int32 tid,
+					IN void * ptr)
+{
+	struct Task * task = get_task_info_ptr(tid);
+	if(task == NULL)
+		return;
+	void * phyptr = get_physical_address(tid, ptr);
+	if(phyptr != NULL)
+	{
+		free_pages(	(uint32 *)task->real_pagedt_addr,
+					(uint32)ptr,
+					get_memory_block_size(phyptr));
+		uint32 ui;
+		for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT; ui++)
+			if(task->memory_block_ptrs[ui] == phyptr)
+				task->memory_block_ptrs[ui] = NULL;
+		DELETE(phyptr);
+	}
+}
+
+/**
 	@Function:		tasks_load_elf
 	@Access:		Public
 	@Description:
@@ -1216,10 +1249,10 @@ tasks_load_elf(	IN int32 tid,
 	if(path == NULL)
 		goto err;
 	struct Task * task = get_task_info_ptr(tid);
-	if(task->elf != NULL)
-		return 0;	// 如果已经载入了ELF程序，则不执行载入逻辑。
 	if(task == NULL)
 		goto err;
+	if(task->elf != NULL)
+		return 0;	// 如果已经载入了ELF程序，则不执行载入逻辑。
 	ELFContext ctx;
 	if(!elf_parse(path, &ctx))
 		goto err;
@@ -1380,8 +1413,8 @@ tasks_load_elf_so(	IN int32 tid,
 
 	return ctx_idx;
 err:
-	if(elf_knl != NULL)
-		free_memory(elf_knl);
+	if(elf_usr != NULL)
+		tasks_free_memory(tid, elf_usr);
 	if(ctx != NULL)
 	{
 		if(ctx_idx < MAX_TASK_ELF_SO_COUNT)
@@ -1472,7 +1505,9 @@ tasks_unload_elf_so(IN int32 tid,
 
 	// 释放ELF SO上下文。
 	task->elf_so_ctx[ctx_idx] = NULL;
-	DELETE(ctx->elf_knl);
+	tasks_free_memory(tid, ctx->elf_usr);
+	ctx->elf_usr = NULL;
+	ctx->elf_knl = NULL;
 	elf_free(ctx);
 	DELETE(ctx);
 	

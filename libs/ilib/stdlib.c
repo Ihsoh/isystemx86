@@ -56,21 +56,29 @@ BOOL __destroy_mempool(void)
 
 void * malloc(uint num_bytes)
 {
+	if(!pool_was_inited)
+		return NULL;
 	return mempooll_alloc_memory(&pool, num_bytes);
 }
 
 void * calloc(uint n, uint size)
 {
+	if(!pool_was_inited)
+		return NULL;
 	return mempooll_alloc_memory(&pool, n * size);
 }
 
 void free(void * ptr)
 {
+	if(!pool_was_inited)
+		return;
 	mempooll_free_memory(&pool, ptr);
 }
 
 void * realloc(void * mem_address, unsigned int newsize)
 {
+	if(!pool_was_inited)
+		return NULL;
 	if(mem_address == NULL)
 		return NULL;
 	uint32 * addr = mem_address;
