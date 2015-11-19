@@ -136,7 +136,7 @@ vsprintf_s(	OUT int8 * buffer,
 							end = 1;
 						else
 						{
-							strncpy(buffer, d_s, d_s_len);
+							memcpy_safe(buffer, d_s_len, d_s, d_s_len);
 							buffer += d_s_len;
 							buf_len += d_s_len;
 						}
@@ -153,7 +153,7 @@ vsprintf_s(	OUT int8 * buffer,
 							end = 1;
 						else
 						{
-							strncpy(buffer, d_s, d_s_len);
+							memcpy_safe(buffer, d_s_len, d_s, d_s_len);
 							buffer += d_s_len;
 							buf_len += d_s_len;
 						}
@@ -173,7 +173,7 @@ vsprintf_s(	OUT int8 * buffer,
 							end = 1;
 						else
 						{
-							strncpy(buffer, x_s, x_s_len);
+							memcpy_safe(buffer, x_s_len, x_s, x_s_len);
 							buffer += x_s_len;
 							buf_len += x_s_len;
 						}
@@ -189,7 +189,7 @@ vsprintf_s(	OUT int8 * buffer,
 							end = 1;
 						else
 						{
-							strncpy(buffer, x_s, x_s_len);
+							memcpy_safe(buffer, x_s_len, x_s, x_s_len);
 							buffer += x_s_len;
 							buf_len += x_s_len;
 						}
@@ -203,7 +203,7 @@ vsprintf_s(	OUT int8 * buffer,
 							end = 1;
 						else
 						{
-							strncpy(buffer, str, str_len);
+							memcpy_safe(buffer, str_len, str, str_len);
 							buffer += str_len;
 							buf_len += str_len;
 						}

@@ -1602,11 +1602,12 @@ BOOL
 is_sub_dir(	IN int8 * dir,
 			IN int8 * sub_dir)
 {
-	if(strlen(sub_dir) < strlen(dir))
+	uint32 dir_len = strlen(dir);
+	if(strlen(sub_dir) < dir_len)
 		return FALSE;
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	strncpy(temp, sub_dir, strlen(dir));
-	temp[strlen(dir)] = '\0';
+	memcpy_safe(temp, sizeof(temp), sub_dir, dir_len);
+	temp[dir_len] = '\0';
 	if(strcmp(dir, temp) == 0)
 		return TRUE;
 	else
