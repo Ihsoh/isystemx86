@@ -117,11 +117,15 @@ WRITE_FILE	VA:/isystem/bins/lua2c apps/lua2/bin/lua2c.bin
 MAKE_FILE	VA:/isystem/bins/ elf
 WRITE_FILE	VA:/isystem/bins/elf apps/elf/bin/elf.bin
 
-MAKE_FILE	VA:/isystem/bins/ math.so
-WRITE_FILE	VA:/isystem/bins/math.so apps/math/bin/math.elf.so
-
 MAKE_FILE	VA:/isystem/bins/ testmath
 WRITE_FILE	VA:/isystem/bins/testmath apps/testmath/bin/testmath.bin
+
+#System library directory
+MAKE_DIR	VA:/isystem/ slib
+
+#Test library
+MAKE_FILE	VA:/isystem/slib/ test.so
+WRITE_FILE	VA:/isystem/slib/test.so slib/test/bin/test.elf.so
 
 #WDVM application directory
 MAKE_DIR	VA:/isystem/ wd
@@ -230,6 +234,10 @@ MAKE_DIR	VA:/isystem/ test
 #Testing jsonlib application
 MAKE_FILE	VA:/isystem/test/ test_jsonlib
 WRITE_FILE	VA:/isystem/test/test_jsonlib test/test_jsonlib/bin/test_jsonlib.bin
+
+#Testing ELF SO application
+MAKE_FILE	VA:/isystem/test/ test_elfso
+WRITE_FILE	VA:/isystem/test/test_elfso test/test_elfso/bin/test_elfso.bin
 
 MAKE_FILE	VA:/isystem/ girl.bmp
 WRITE_FILE	VA:/isystem/girl.bmp isystem/girl.bmp

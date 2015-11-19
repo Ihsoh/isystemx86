@@ -34,8 +34,6 @@ $(Target):	bin	\
 	cd apps/lua1 && make
 	cd apps/lua2 && make
 	cd apps/elf && make
-	cd apps/math && make
-	cd apps/testmath && make
 
 	cd wapps/image && make
 	cd wapps/calc && make
@@ -47,6 +45,9 @@ $(Target):	bin	\
 	cd sys/timer && make
 
 	cd test/test_jsonlib && make
+	cd test/test_elfso && make
+
+	cd slib/test && make
 
 	# 文本模式。
 	# tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrtm.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
@@ -140,8 +141,6 @@ clean:
 	cd apps/lua1 && make clean
 	cd apps/lua2 && make clean
 	cd apps/elf && make clean
-	cd apps/math && make clean
-	cd apps/testmath && make clean
 
 	cd wapps/image && make clean
 	cd wapps/calc && make clean
@@ -153,4 +152,6 @@ clean:
 	cd sys/timer && make clean
 
 	cd test/test_jsonlib && make clean
+	cd test/test_elfso && make clean
 
+	cd slib/test && make clean
