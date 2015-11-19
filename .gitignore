@@ -3,6 +3,7 @@
 *.bin
 *.a
 *.elf
+*.so
 
 # 过滤 python 生成的二进制文件。
 *.pyc
