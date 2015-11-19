@@ -168,7 +168,7 @@ message_window_show(IN CASCTEXT title,
 		ASCCHAR line3[_MAX_CHAR];
 		strncpy(line0, text, _MAX_CHAR);
 		strncpy(line1, text + _MAX_CHAR, _MAX_CHAR);
-		strncpy(line2, text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
+		strncpy(line2, text + _MAX_CHAR * 2, _MAX_CHAR);
 		strncpy(line3, text + _MAX_CHAR * 3, len - _MAX_CHAR * 3);
 		uint8 * enfont = get_enfont_ptr();
 		text_common_image(	workspace,
@@ -197,7 +197,7 @@ message_window_show(IN CASCTEXT title,
 							_TPADDING + ENFONT_HEIGHT * 3, 
 							enfont,
 							line3,
-							_MAX_CHAR,
+							len - _MAX_CHAR * 3,
 							color);
 	}
 	else

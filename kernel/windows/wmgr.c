@@ -260,7 +260,7 @@ _pad(IN OUT ASCTEXT text)
 		int32 len = _ITEM_MAX_LEN - slen;
 		int32 i;
 		for(i = 0; i < len; i++)
-			strcat_safe(text, _ITEM_MAX_LEN, " ");
+			strcat_safe(text, _ITEM_MAX_LEN + 1, " ");
 	}
 	else if(slen > _ITEM_MAX_LEN)
 	{

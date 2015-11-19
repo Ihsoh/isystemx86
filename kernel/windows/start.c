@@ -54,7 +54,7 @@ _pad(IN OUT ASCTEXT text)
 	int32 len = (int32)MESSAGE_BOX_MAX_CHAR - (int32)strlen(text);
 	int32 i;
 	for(i = 0; i < len; i++)
-		strcat_safe(text, MESSAGE_BOX_MAX_CHAR, " ");
+		strcat_safe(text, MESSAGE_BOX_MAX_CHAR + 1, " ");
 }
 
 /**
