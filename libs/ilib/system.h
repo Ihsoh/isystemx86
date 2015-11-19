@@ -130,4 +130,6 @@ extern uint32 ILLoadELFSO(CASCTEXT path);
 
 extern void * ILGetELFSOSymbol(uint32 ctx_idx, CASCTEXT name);
 
+extern BOOL ILUnloadELFSO(uint32 ctx_idx);
+
 #endif

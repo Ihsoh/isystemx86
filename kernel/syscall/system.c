@@ -460,5 +460,15 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			sparams->param0 = SPARAM(symaddr);
 			break;
 		}
+		//卸载ELF SO文件。
+		//
+		case SCALL_UNLOAD_ELF_SO:
+		{
+			int32 tid = sparams->tid;
+			uint32 ctx_idx = UINT32_SPARAM(sparams->param0);
+			BOOL r = tasks_unload_elf_so(tid, ctx_idx);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }

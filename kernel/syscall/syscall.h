@@ -157,5 +157,6 @@
 #define	SCALL_LOAD_ELF			18
 #define	SCALL_LOAD_ELF_SO		19
 #define	SCALL_GET_ELF_SO_SYMBOL	20
+#define	SCALL_UNLOAD_ELF_SO		21
 
 #endif

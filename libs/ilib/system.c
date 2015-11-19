@@ -308,3 +308,11 @@ void * ILGetELFSOSymbol(uint32 ctx_idx, CASCTEXT name)
 	system_call(SCALL_SYSTEM, SCALL_GET_ELF_SO_SYMBOL, &sparams);
 	return VOID_PTR_SPARAM(sparams.param0);
 }
+
+BOOL ILUnloadELFSO(uint32 ctx_idx)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(ctx_idx);
+	system_call(SCALL_SYSTEM, SCALL_UNLOAD_ELF_SO, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}

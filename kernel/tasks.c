@@ -1271,6 +1271,22 @@ err:
 	return 0;
 }
 
+/**
+	@Function:		tasks_load_elf_so
+	@Access:		Public
+	@Description:
+		把ELF Shared Object文件加载进任务内存空间。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		path, CASCTEXT, IN
+			ELF Shared Object文件路径。
+	@Return:
+		uint32
+			ELF Shared Object上下文索引。
+			通过该索引可以获取ELF Shared Object的符号在任务内存空间的地址。
+			当加载失败时返回0xffffffff。
+*/
 uint32
 tasks_load_elf_so(	IN int32 tid,
 					IN CASCTEXT path)
@@ -1376,6 +1392,24 @@ err:
 	return 0xffffffff;
 }
 
+/**
+	@Function:		tasks_get_elf_so_symbol
+	@Access:		Public
+	@Description:
+		获取任务加载的ELF Shared Object的符号的地址。
+		该地址相对于用户内存空间。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		ctx_idx, uint32, IN
+			ELF Shared Object上下文索引。
+		name, CASCTEXT, IN
+			符号名。
+	@Return:
+		void *
+			ELF Shared Object的符号的地址。
+			该地址相对于用户内存空间。
+*/
 void *
 tasks_get_elf_so_symbol(IN int32 tid,
 						IN uint32 ctx_idx,
@@ -1403,4 +1437,46 @@ tasks_get_elf_so_symbol(IN int32 tid,
 	return (void *)(ctx->elf_usr + symaddr);
 err:
 	return NULL;
+}
+
+/**
+	@Function:		tasks_unload_elf_so
+	@Access:		Public
+	@Description:
+		释放任务加载的ELF Shared Object上下文。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		ctx_idx, uint32, IN
+			ELF Shared Object上下文索引。
+		name, CASCTEXT, IN
+			符号名。
+	@Return:
+		void *
+			ELF Shared Object的符号的地址。
+			该地址相对于用户内存空间。
+*/
+BOOL
+tasks_unload_elf_so(IN int32 tid,
+					IN uint32 ctx_idx)
+{
+	ELFContextPtr ctx = NULL;
+	if(ctx_idx >= MAX_TASK_ELF_SO_COUNT)
+		goto err;
+
+	// 获取任务信息和ELF SO上下文。
+	struct Task * task = get_task_info_ptr(tid);
+	if(task == NULL || task->elf_so_ctx[ctx_idx] == NULL)
+		goto err;
+	ctx = task->elf_so_ctx[ctx_idx];
+
+	// 释放ELF SO上下文。
+	task->elf_so_ctx[ctx_idx] = NULL;
+	DELETE(ctx->elf_knl);
+	elf_free(ctx);
+	DELETE(ctx);
+	
+	return TRUE;
+err:
+	return FALSE;
 }

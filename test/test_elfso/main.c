@@ -17,5 +17,9 @@ int32 main(int32 argc, ASCCHAR * argv[])
 	printf("%d\n", add1(12340, 5));
 	get_value0 = ILGetELFSOSymbol(ctx_idx, "get_value0");
 	printf("0x%x\n", get_value0());
+	if(ILUnloadELFSO(ctx_idx))
+		printf("%s\n", "Unloaded ELF Shared Object.");
+	else
+		printf("%s\n", "Cannot unload ELF Shared Object!");
 	return 0;
 }
