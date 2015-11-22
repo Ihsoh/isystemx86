@@ -65,7 +65,7 @@ static struct HardDiskArguments hdisk1;
 
 #define	MAX_TIMEOUT	0x0fffffff
 #define	MAX_RETRY	0x100
-#define	MAX_LOCK_RETRY	0x80000000
+#define	MAX_LOCK_RETRY	0x00100000
 
 static BOOL lock = FALSE;
 
