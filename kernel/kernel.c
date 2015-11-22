@@ -1664,14 +1664,12 @@ static
 void
 system_call_int(void)
 {
-	uint32 edx, ecx, eax;
+	uint32 edx, eax;
 	asm volatile (
 		"pushl	%%eax\n\t"
-		"pushl	%%ecx\n\t"
 		"pushl	%%edx\n\t"
 		"popl	%0\n\t"
 		"popl	%1\n\t"
-		"popl	%2\n\t"
 
 		/*"pushw	%%si\n\t"
 		"pushw	%%ds\n\t"
@@ -1683,11 +1681,16 @@ system_call_int(void)
 		"movw	%%si, %%es\n\t"
 		"movw	%%si, %%fs\n\t"
 		"movw	%%si, %%gs\n\t"*/
-		:"=m"(edx), "=m"(ecx), "=m"(eax));
+		:"=m"(edx), "=m"(eax));
+
+	// 获取发生系统调用的任务的ID。
+	int32 tid = *(int32 *)(0x01000000 + 0);
+	struct SParams * sparams = (struct SParams *)edx;
+	sparams->tid = tid;
 
 	//获取指定的TSS和Stack。
-	struct TSS * system_call_tss = &(scall_tss[ecx]);
-	uint8 * system_call_stack = scall_stacks[ecx];
+	struct TSS * system_call_tss = &(scall_tss[tid]);
+	uint8 * system_call_stack = scall_stacks[tid];
 
 	//重置System Call的TSS。
 	system_call_tss->eip = (uint32)system_call;
@@ -1695,7 +1698,7 @@ system_call_int(void)
 	system_call_tss->esp = (uint32)(system_call_stack + SYSCALL_PROCEDURE_STACK_SIZE);
 	system_call_tss->flags = 0x0;
 	system_call_tss->edx = edx;
-	system_call_tss->ecx = ecx;
+	system_call_tss->ecx = tid;
 	system_call_tss->eax = eax;
 
 	/*asm volatile (
@@ -1714,7 +1717,7 @@ system_call_int(void)
 			SYSTEM_CALL(tid_s);	\
 			break;
 
-	switch(ecx)
+	switch(tid)
 	{
 		SYSTEM_CALL_CASE(0, "0")
 		SYSTEM_CALL_CASE(1, "1")
