@@ -7,6 +7,13 @@ This repository contains the kernel, system applications, user applications and 
 ## Detail & Download ##
 <a href="http://www.ihsoh.com/" target="_blank">www.ihsoh.com</a>
 
+## How to build? ##
+You can run the *build.sh* to build ISystem x86. if no error occurred, the system images were generated in the *bin/*.
+
+```
+$ ./build.sh
+```
+
 ## Kernel ##
 The ISystem x86 kernel provides multitasking, memory management, a tree-structured directory filesystem, a console, a simple GUI, and some device drivers. PS/2 mouse, PS/2 keyboard, ATA harddisk, VESA, serial were supported.
 
@@ -32,12 +39,4 @@ The libraries are used to develop the user application and the system applicatio
 |isys                |ISystem API.                             |
 
 ## Screenshot ##
-### GUI ###
-![Alt GUI](http://ihsoh.github.io/images/screenshot/screenshot3.png "GUI")
-
-### Editor ###
-![Alt Editor](http://ihsoh.github.io/images/screenshot/screenshot4.png "Editor")
-
-### Lua ###
-![Alt Lua](http://ihsoh.github.io/images/screenshot/screenshot5.png "Lua")
-
+![Alt GUI](http://www.ihsoh.com/static/image/screenshot/ISystemx86.png "GUI")
