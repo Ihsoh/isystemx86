@@ -20,6 +20,8 @@
 
 DEFINE_LOCK_IMPL(ifs1)
 
+#define	_MAX_RW_OPTIMIZED_BYTES			KB(32)	// 必须是4的倍数。
+
 static BOOL read_buffer_was_enabled		= FALSE;
 static BOOL append_buffer_was_enabled	= FALSE;
 
@@ -2086,15 +2088,46 @@ _read_file_unsafe(	IN FileObject * fptr,
 				fptr->read_buffer_is_valid = TRUE;
 			}
 		}
-
-		*(buffer++) = fptr->read_buffer_data_block.data[fptr->next_block_pos++];
-		if(fptr->next_block_pos == DATA_BLOCK_DATA_LEN)
+		/*
+			读取优化的触发条件为：
+				1. 剩余的读取字节数必须大于或等于_MAX_RW_OPTIMIZED_BYTES。
+				2. 优化的读取逻辑执行完毕后，下一个读取位置必须小于或等于DATA_BLOCK_DATA_LEN。
+				3. 优化的读取逻辑的最后一个字节的位置在文件内。
+		*/
+		if(	len >= _MAX_RW_OPTIMIZED_BYTES
+			&& fptr->next_block_pos + _MAX_RW_OPTIMIZED_BYTES <= DATA_BLOCK_DATA_LEN
+			&& 	fptr->next_block_index * DATA_BLOCK_DATA_LEN + fptr->next_block_pos + _MAX_RW_OPTIMIZED_BYTES - 1
+				< fptr->file_block->length)
 		{
-			fptr->next_block_index++;
-			fptr->next_block_pos = 0;
+			// 优化的读取逻辑。
+			uint32 ui;
+			uint32 nread = _MAX_RW_OPTIMIZED_BYTES / 4;
+			uint32 * dst = (uint32 *)buffer;
+			uint32 * src = (uint32 *)(fptr->read_buffer_data_block.data + fptr->next_block_pos);
+			for(ui = 0; ui < nread; ui++)
+				*(dst++) = *(src++);
+			buffer += _MAX_RW_OPTIMIZED_BYTES;
+			fptr->next_block_pos += _MAX_RW_OPTIMIZED_BYTES;
+			if(fptr->next_block_pos == DATA_BLOCK_DATA_LEN)
+			{
+				fptr->next_block_index++;
+				fptr->next_block_pos = 0;
+			}
+			len -= _MAX_RW_OPTIMIZED_BYTES;
+			real_len += _MAX_RW_OPTIMIZED_BYTES;
 		}
-		len--;
-		real_len++;
+		else
+		{
+			// 未优化的读取逻辑。
+			*(buffer++) = fptr->read_buffer_data_block.data[fptr->next_block_pos++];
+			if(fptr->next_block_pos == DATA_BLOCK_DATA_LEN)
+			{
+				fptr->next_block_index++;
+				fptr->next_block_pos = 0;
+			}
+			len--;
+			real_len++;
+		}
 	}
 	return real_len;
 }
@@ -2143,14 +2176,46 @@ _read_file_without_buffer_unsafe(	IN FileObject * fptr,
 				(struct RawBlock *)&data_block))
 				break;
 		}
-		*(buffer++) = data_block.data[fptr->next_block_pos++];
-		if(fptr->next_block_pos == DATA_BLOCK_DATA_LEN)
+		/*
+			读取优化的触发条件为：
+				1. 剩余的读取字节数必须大于或等于_MAX_RW_OPTIMIZED_BYTES。
+				2. 优化的读取逻辑执行完毕后，下一个读取位置必须小于或等于DATA_BLOCK_DATA_LEN。
+				3. 优化的读取逻辑的最后一个字节的位置在文件内。
+		*/
+		if(	len >= _MAX_RW_OPTIMIZED_BYTES
+			&& fptr->next_block_pos + _MAX_RW_OPTIMIZED_BYTES <= DATA_BLOCK_DATA_LEN
+			&& 	fptr->next_block_index * DATA_BLOCK_DATA_LEN + fptr->next_block_pos + _MAX_RW_OPTIMIZED_BYTES - 1
+				< fptr->file_block->length)
 		{
-			fptr->next_block_index++;
-			fptr->next_block_pos = 0;
+			// 优化的读取逻辑。
+			uint32 ui;
+			uint32 nread = _MAX_RW_OPTIMIZED_BYTES / 4;
+			uint32 * dst = (uint32 *)buffer;
+			uint32 * src = (uint32 *)(data_block.data + fptr->next_block_pos);
+			for(ui = 0; ui < nread; ui++)
+				*(dst++) = *(src++);
+			buffer += _MAX_RW_OPTIMIZED_BYTES;
+			fptr->next_block_pos += _MAX_RW_OPTIMIZED_BYTES;
+			if(fptr->next_block_pos == DATA_BLOCK_DATA_LEN)
+			{
+				fptr->next_block_index++;
+				fptr->next_block_pos = 0;
+			}
+			len -= _MAX_RW_OPTIMIZED_BYTES;
+			real_len += _MAX_RW_OPTIMIZED_BYTES;
 		}
-		len--;
-		real_len++;
+		else
+		{
+			// 未优化的读取逻辑。
+			*(buffer++) = data_block.data[fptr->next_block_pos++];
+			if(fptr->next_block_pos == DATA_BLOCK_DATA_LEN)
+			{
+				fptr->next_block_index++;
+				fptr->next_block_pos = 0;
+			}
+			len--;
+			real_len++;
+		}
 	}
 	return real_len;
 }
