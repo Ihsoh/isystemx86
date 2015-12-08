@@ -260,7 +260,7 @@ disks(void)
 {
 	uint32 disk_count = get_disk_count();
 	uint32 ui;
-	print_str_p("Name    System  Size                    \n", 
+	print_str_p("Name    System  Read                Write               Size                \n", 
 				CC_YELLOW | CBGC_GRAYWHITE);
 	for(ui = 0; ui < disk_count; ui++)
 	{
@@ -272,6 +272,21 @@ disks(void)
 			print_str("Yes\t\t");
 		else
 			print_str("No\t\t");
+
+		// 输出磁盘读出字节数。
+		uint64 rbytes = disk_rbytes(symbol);
+		print_str("0x");
+		printuihex((uint32)(rbytes >> 32));
+		printuihex((uint32)rbytes);
+		print_str("\t");
+
+		// 输出磁盘写入字节数。
+		uint64 wbytes = disk_wbytes(symbol);
+		print_str("0x");
+		printuihex((uint32)(wbytes >> 32));
+		printuihex((uint32)wbytes);
+		print_str("\t");
+
 		uint32 disk_size = get_disk_size(symbol);
 		printun(disk_size);
 		print_str("KB, ");

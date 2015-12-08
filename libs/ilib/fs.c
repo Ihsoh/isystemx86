@@ -12,15 +12,20 @@
 
 static int _lock_fs(void)
 {
+	/*
 	struct SParams sparams;
 	system_call(SCALL_FS, SCALL_LOCK_FS, &sparams);
 	return INT32_SPARAM(sparams.param0);
+	*/
+	return TRUE;
 }
 
 static void _unlock_fs(void)
 {
+	/*
 	struct SParams sparams;
 	system_call(SCALL_FS, SCALL_UNLOCK_FS, &sparams);
+	*/
 }
 
 static int _fs_lock_state(void)

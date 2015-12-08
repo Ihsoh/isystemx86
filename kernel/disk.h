@@ -13,6 +13,8 @@
 #define MAX_DISK_COUNT				8
 #define	DISK_SYMBOL_BUFFER_SIZE		3
 
+#define	DISK_BYTES_PER_SECTOR		512
+
 extern
 void
 get_disk_symbol(	IN uint32 index, 
@@ -41,6 +43,14 @@ destroy_disk(IN int8 * symbol);
 extern
 uint32
 sector_count(IN int8 * symbol);
+
+extern
+uint64
+disk_wbytes(IN CASCTEXT symbol);
+
+extern
+uint64
+disk_rbytes(IN CASCTEXT symbol);
 
 extern
 BOOL

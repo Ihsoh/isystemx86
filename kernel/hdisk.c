@@ -282,7 +282,8 @@ wait_ready(void)
 	uint32 timeout_counter = 0;
 	while(1)
 	{
-		while(inb(HD_STATUS) & STAT_BUSY);
+		while(inb(HD_STATUS) & STAT_BUSY)
+			asm volatile ("pause");
 		uint8 state = inb(HD_STATUS);
 		if((state & STAT_ERR) || (state & STAT_ECC) || (state & STAT_WRERR))
 		{
@@ -319,7 +320,8 @@ wait_data(void)
 	uint32 timeout_counter = 0;
 	while(1)
 	{
-		while(inb(HD_STATUS) & STAT_BUSY);
+		while(inb(HD_STATUS) & STAT_BUSY)
+			asm volatile ("pause");
 		uint8 state = inb(HD_STATUS);
 		if((state & STAT_ERR) || (state & STAT_ECC) || (state & STAT_WRERR))
 		{

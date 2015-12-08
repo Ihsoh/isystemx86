@@ -13,15 +13,24 @@
 #include "atapi.h"
 #include <ilib/string.h>
 
-static int8 disk_list[MAX_DISK_COUNT][3] = {{0, 0, 0},
-											{0, 0, 0},
-											{0, 0, 0},
-											{0, 0, 0},
-											{0, 0, 0},
-											{0, 0, 0},
-											{0, 0, 0},
-											{0, 0, 0}};
+static int8 disk_list[MAX_DISK_COUNT][3];
+static uint64 _disk_rbytes[MAX_DISK_COUNT];
+static uint64 _disk_wbytes[MAX_DISK_COUNT];
 static uint32 disk_count = 0;
+
+#define	_INIT_DISK_RWBYTES(_idx)	\
+	_disk_rbytes[(_idx)] = 0;	\
+	_disk_wbytes[(_idx)] = 0;
+
+#define	_INC_DISK_RBYTES(_idx, _v)	\
+	_disk_rbytes[(_idx)] += (_v);
+
+#define	_INC_DISK_WBYTES(_idx, _v)	\
+	_disk_wbytes[(_idx)] += (_v);
+
+#define	_DISK_RBYTES(_idx)	(_disk_rbytes[(_idx)])
+
+#define	_DISK_WBYTES(_idx)	(_disk_wbytes[(_idx)])
 
 /**
 	@Function:		get_disk_symbol
@@ -137,18 +146,27 @@ is_system_disk(IN int8 * symbol)
 void
 init_disk(IN int8 * symbol)
 {
+	if(symbol == NULL)
+		return;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 	{
 		init_vdisk(symbol);
+		_INIT_DISK_RWBYTES(disk_count);
 		strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, symbol);
 	}
 	else if(strcmp(symbol, "HD") == 0)
 	{
 		uint32 r = init_hdisk();
 		if((r & 0x1) != 0)
+		{
+			_INIT_DISK_RWBYTES(disk_count);
 			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, "DA");
+		}
 		if((r & 0x2) != 0)
+		{
+			_INIT_DISK_RWBYTES(disk_count);
 			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, "DB");
+		}
 	}
 }
 
@@ -198,6 +216,73 @@ sector_count(IN int8 * symbol)
 }
 
 /**
+	@Function:		_disk_index
+	@Access:		Public
+	@Description:
+		获取一个磁盘的索引。
+	@Parameters:
+		symbol, CASCTEXT, IN
+			磁盘标识符。
+	@Return:
+		uint32
+			磁盘索引。
+*/
+static
+uint32
+_disk_index(IN CASCTEXT symbol)
+{
+	if(symbol == NULL)
+		return 0xffffffff;
+	uint32 idx;
+	for(idx = 0; idx < disk_count; idx++)
+		if(strcmp(disk_list[idx], symbol) == 0)
+			return idx;
+	return 0xffffffff;
+}
+
+/**
+	@Function:		disk_wbytes
+	@Access:		Public
+	@Description:
+		获取一个磁盘的写入的字节数。
+	@Parameters:
+		symbol, CASCTEXT, IN
+			磁盘标识符。
+	@Return:
+		uint64
+			磁盘的写入的字节数。
+*/
+uint64
+disk_wbytes(IN CASCTEXT symbol)
+{
+	if(symbol == NULL)
+		return 0;
+	uint32 idx = _disk_index(symbol);
+	return _DISK_WBYTES(idx);
+}
+
+/**
+	@Function:		disk_rbytes
+	@Access:		Public
+	@Description:
+		获取一个磁盘的读出的字节数。
+	@Parameters:
+		symbol, CASCTEXT, IN
+			磁盘标识符。
+	@Return:
+		uint64
+			磁盘的读出的字节数。
+*/
+uint64
+disk_rbytes(IN CASCTEXT symbol)
+{
+	if(symbol == NULL)
+		return 0;
+	uint32 idx = _disk_index(symbol);
+	return _DISK_RBYTES(idx);
+}
+
+/**
 	@Function:		read_sector
 	@Access:		Public
 	@Description:
@@ -218,32 +303,39 @@ read_sector(IN int8 * symbol,
 			IN uint32 pos, 
 			OUT uint8 * buffer)
 {
+	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		return read_sector_v(symbol, pos, buffer);
+		r = read_sector_v(symbol, pos, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		return read_sector_h(symbol, pos, buffer);
+		r = read_sector_h(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0)
-		return atapi_read_sector512(ATA_BUS_PRIMARY,
+		r = atapi_read_sector512(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_MASTER,
 									pos,
 									buffer);
 	else if(strcmp(symbol, "CB") == 0)
-		return atapi_read_sector512(ATA_BUS_PRIMARY,
+		r = atapi_read_sector512(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_SLAVE,
 									pos,
 									buffer);
 	else if(strcmp(symbol, "CC") == 0)
-		return atapi_read_sector512(ATA_BUS_SECONDARY,
+		r = atapi_read_sector512(	ATA_BUS_SECONDARY,
 									ATA_DRIVE_MASTER,
 									pos,
 									buffer);
 	else if(strcmp(symbol, "CD") == 0)
-		return atapi_read_sector512(ATA_BUS_SECONDARY,
+		r = atapi_read_sector512(	ATA_BUS_SECONDARY,
 									ATA_DRIVE_SLAVE,
 									pos,
 									buffer);
 	else
 		return FALSE;
+	if(r)
+	{
+		uint32 idx = _disk_index(symbol);
+		_INC_DISK_RBYTES(idx, DISK_BYTES_PER_SECTOR);
+	}
+	return r;
 }
 
 /**
@@ -267,17 +359,24 @@ write_sector(	IN int8 * symbol,
 				IN uint32 pos, 
 				IN uint8 * buffer)
 {
+	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		return write_sector_v(symbol, pos, buffer);
+		r = write_sector_v(symbol, pos, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		return write_sector_h(symbol, pos, buffer);
+		r = write_sector_h(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
-		return TRUE;
+		return FALSE;
 	else
 		return FALSE;
+	if(r)
+	{
+		uint32 idx = _disk_index(symbol);
+		_INC_DISK_WBYTES(idx, DISK_BYTES_PER_SECTOR);
+	}
+	return r;
 }
 
 /**
@@ -304,36 +403,43 @@ read_sectors(	IN int8 * symbol,
 				IN uint8 count, 
 				OUT uint8 * buffer)
 {
+	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		return read_sectors_v(symbol, pos, count, buffer);
+		r = read_sectors_v(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		return read_sectors_h(symbol, pos, count, buffer);
+		r = read_sectors_h(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0)
-		return atapi_read_sector512s(	ATA_BUS_PRIMARY,
-										ATA_DRIVE_MASTER,
-										pos,
-										count,
-										buffer);
+		r = atapi_read_sector512s(	ATA_BUS_PRIMARY,
+									ATA_DRIVE_MASTER,
+									pos,
+									count,
+									buffer);
 	else if(strcmp(symbol, "CB") == 0)
-		return atapi_read_sector512s(	ATA_BUS_PRIMARY,
-										ATA_DRIVE_SLAVE,
-										pos,
-										count,
-										buffer);
+		r = atapi_read_sector512s(	ATA_BUS_PRIMARY,
+									ATA_DRIVE_SLAVE,
+									pos,
+									count,
+									buffer);
 	else if(strcmp(symbol, "CC") == 0)
-		return atapi_read_sector512s(	ATA_BUS_SECONDARY,
-										ATA_DRIVE_MASTER,
-										pos,
-										count,
-										buffer);
+		r = atapi_read_sector512s(	ATA_BUS_SECONDARY,
+									ATA_DRIVE_MASTER,
+									pos,
+									count,
+									buffer);
 	else if(strcmp(symbol, "CD") == 0)
-		return atapi_read_sector512s(	ATA_BUS_SECONDARY,
-										ATA_DRIVE_SLAVE,
-										pos,
-										count,
-										buffer);
+		r = atapi_read_sector512s(	ATA_BUS_SECONDARY,
+									ATA_DRIVE_SLAVE,
+									pos,
+									count,
+									buffer);
 	else 
 		return FALSE;
+	if(r)
+	{
+		uint32 idx = _disk_index(symbol);
+		_INC_DISK_RBYTES(idx, count * DISK_BYTES_PER_SECTOR);
+	}
+	return r;
 }
 
 /**
@@ -360,15 +466,22 @@ write_sectors(	IN int8 * symbol,
 				IN uint8 count, 
 				IN uint8 * buffer)
 {
+	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		return write_sectors_v(symbol, pos, count, buffer);
+		r = write_sectors_v(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		return write_sectors_h(symbol, pos, count, buffer);
+		r = write_sectors_h(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
-		return TRUE;
+		return FALSE;
 	else
 		return FALSE;
+	if(r)
+	{
+		uint32 idx = _disk_index(symbol);
+		_INC_DISK_WBYTES(idx, count * DISK_BYTES_PER_SECTOR);
+	}
+	return r;
 }

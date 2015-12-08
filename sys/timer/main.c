@@ -8,12 +8,11 @@ int
 main(	IN int argc,
 		IN char * argv[])
 {
-	if(vesa_is_valid())
-		for(;;)
-		{
-			dispatch_tick();
-			delay();
-		}
+	for(;;)
+	{
+		dispatch_tick();
+		delay();
+	}
 	return 0;
 }
 
