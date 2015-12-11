@@ -56,6 +56,7 @@ typedef struct WindowEventParams
 	int32					mouse_button;
 	struct CommonImage *	screen;
 	void *					data;
+	struct Window *			window;
 } * WindowEventParamsPtr;
 
 typedef void (* WindowEvent)(	struct Window * window,
@@ -88,6 +89,7 @@ typedef struct Window
 	BOOL					locked;									// 如果该值为TRUE，则锁住窗体，不把工作区的内容更新到显存。
 	int32					old_state;								// 旧的状态。
 	BOOL					is_top;									// 指示窗体是否为最顶，该值由render_window函数更新。
+	uint32					focused_ctrl;							// 当前获得焦点的控件的ID。如果该ID为CONTROL_INVALID_ID，则窗体没有获得焦点的控件。
 } * WindowPtr;
 
 extern
@@ -115,8 +117,21 @@ window_peek_key(IN struct Window * window);
 
 extern
 void
+window_clear_key(IN WindowPtr window);
+
+extern
+void
 window_dispatch_event(	IN WindowPtr window,
 						IN int32 type,
 						IN void * data);
+
+extern
+void
+window_focus_ctrl(	IN WindowPtr window,
+					IN uint32 cid);
+
+extern
+void
+window_unfocus_ctrl(IN WindowPtr window);
 
 #endif

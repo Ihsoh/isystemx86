@@ -528,3 +528,26 @@ ILGDisableListItem(	IN int32 wid,
 	system_call(SCALL_GUI, SCALL_GUI_DISABLE_LIST_ITEM, &sparams);
 	return BOOL_SPARAM(sparams.param0);
 }
+
+BOOL
+ILGNewEdit(	IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN uint32 row,
+			IN uint32 column,
+			IN CASCTEXT text,
+			IN uint32 style,
+			OUT int32 * cid)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(x);
+	sparams.param2 = SPARAM(y);
+	sparams.param3 = SPARAM(row);
+	sparams.param4 = SPARAM(column);
+	sparams.param5 = SPARAM(text);
+	sparams.param6 = SPARAM(style);
+	sparams.param7 = SPARAM(cid);
+	system_call(SCALL_GUI, SCALL_GUI_NEW_EDIT, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}

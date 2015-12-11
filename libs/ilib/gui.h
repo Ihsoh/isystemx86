@@ -268,4 +268,15 @@ ILGDisableListItem(	IN int32 wid,
 					IN int32 cid,
 					IN uint32 index);
 
+extern
+BOOL
+ILGNewEdit(	IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN uint32 row,
+			IN uint32 column,
+			IN CASCTEXT text,
+			IN uint32 style,
+			OUT int32 * cid);
+
 #endif

@@ -424,5 +424,24 @@ system_call_gui(IN uint32 func,
 			sparams->param0 = SPARAM(r);
 			break;
 		}
+
+		// ============================== Edit ==============================
+		case SCALL_GUI_NEW_EDIT:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			int32 x = INT32_SPARAM(sparams->param1);
+			int32 y = INT32_SPARAM(sparams->param2);
+			uint32 row = UINT32_SPARAM(sparams->param3);
+			uint32 column = UINT32_SPARAM(sparams->param4);
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param5);
+			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			uint32 style = UINT32_SPARAM(sparams->param6);
+			vptr = VOID_PTR_SPARAM(sparams->param7);
+			int32 * cid = (int32 *)get_physical_address(tid, vptr);
+			BOOL r = gui_new_edit(tid, wid, x, y, row, column, text, style, cid);
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 	}
 }

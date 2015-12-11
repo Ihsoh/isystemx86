@@ -36,7 +36,7 @@ UtilsObjs=utils/bin/img.obj utils/bin/sfstr.obj
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
 
 WindowObjs=window/bin/control.obj window/bin/button.obj window/bin/label.obj window/bin/list.obj 	\
-window/bin/progress.obj window/bin/scroll.obj
+window/bin/progress.obj window/bin/scroll.obj window/bin/edit.obj
 
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
 windows/bin/detail.obj windows/bin/explorer.obj windows/bin/taskbar.obj windows/bin/start.obj 	\
@@ -269,6 +269,9 @@ window/bin/progress.obj: window/progress.c window/progress.h
 
 window/bin/scroll.obj: window/scroll.c window/scroll.h
 	$(CC) $(CFlags) -c window/scroll.c -o window/bin/scroll.obj $(Include) $(Definition)
+
+window/bin/edit.obj: window/edit.c window/edit.h
+	$(CC) $(CFlags) -c window/edit.c -o window/bin/edit.obj $(Include) $(Definition)
 
 
 windows/bin/clock.obj: windows/clock.c windows/clock.h

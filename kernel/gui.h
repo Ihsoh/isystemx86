@@ -312,6 +312,18 @@ gui_disable_list_item(	IN int32 tid,
 						IN int32 cid,
 						IN uint32 index);
 
+extern
+BOOL
+gui_new_edit(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN uint32 row,
+				IN uint32 column,
+				IN CASCTEXT text,
+				IN uint32 style,
+				OUT int32 * cid);
+
 DEFINE_LOCK_EXTERN(gui)
 
 #endif

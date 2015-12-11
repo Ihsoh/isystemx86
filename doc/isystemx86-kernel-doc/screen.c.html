@@ -1302,6 +1302,90 @@
 	</div>
 </div>
 <div>
+	<a id="render_text_buffer_ex" name="render_text_buffer_ex" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">render_text_buffer_ex</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				渲染文本缓冲区。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		image</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ImagePtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			指向保存渲染结果的图片对象的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		start_x</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			X坐标。在X坐标绘制渲染后的图片。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		start_y</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			Y坐标。在Y坐标绘制渲染后的图片。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		txtbuf</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint8 *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向文本缓冲区的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		row</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本缓冲区的行数。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		col</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			文本缓冲区的列数。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		curx</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			光标的X坐标。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		cury</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			光标的Y坐标。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		struct Window *</span>
+		<p style="padding-left: 40px;">			顶层窗体的结构体的指针。
+</p>
+	</div>
+</div>
+<div>
 	<a id="render_text_buffer" name="render_text_buffer" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Public</div>

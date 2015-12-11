@@ -23,6 +23,7 @@
 #include "window/button.h"
 #include "window/label.h"
 #include "window/list.h"
+#include "window/edit.h"
 
 #include <dslib/list.h>
 #include <dslib/linked_list.h>
@@ -127,6 +128,11 @@ _window_event(	IN struct Window * window,
 						case CONTROL_LIST:
 						{
 							LIST(control, &window->workspace, params, top);
+							break;
+						}
+						case CONTROL_EDIT:
+						{
+							NMLEDIT(control, &window->workspace, params, top);
 							break;
 						}
 					}
@@ -1139,6 +1145,12 @@ gui_set_text(	IN int32 tid,
 			SET_LABEL_TEXT(label, text);
 			break;
 		}
+		case CONTROL_EDIT:
+		{
+			EditPtr edit = (EditPtr)control;
+			SET_EDIT_TEXT(edit, text);
+			break;
+		}
 		default:
 			return FALSE;
 	}
@@ -1193,6 +1205,11 @@ gui_get_text(	IN int32 tid,
 			LabelPtr label = (LabelPtr)control;
 			ctl_text = label->text;
 			break;
+		}
+		case CONTROL_EDIT:
+		{
+			EditPtr edit = (EditPtr)control;
+			return GET_EDIT_TEXT(edit, text, bufsz);
 		}
 		default:
 			return FALSE;
@@ -1830,4 +1847,79 @@ gui_disable_list_item(	IN int32 tid,
 	_WINSTANCE_FALSE
 	_CONTROL_FALSE
 	return list_disable_item((ListPtr)control, index);
+}
+
+/**
+	@Function:		gui_new_edit
+	@Access:		Public
+	@Description:
+		新建一个EDIT。
+	@Parameters:
+		tid, int32, IN
+			任务ID。
+		wid, int32, IN
+			窗体ID。
+		x, int32, IN
+			X坐标。
+		y, int32, IN
+			Y坐标。
+		row, uint32, IN
+			行数。
+		column, uint32, IN
+			列数。
+		text, CASCTEXT, IN
+			文本。
+		style, uint32, IN
+			样式。
+		cid, int32 *, OUT
+			指向用于储存控件ID的缓冲区的指针。
+	@Return:
+		返回TRUE则成功，否则失败。
+*/
+BOOL
+gui_new_edit(	IN int32 tid,
+				IN int32 wid,
+				IN int32 x,
+				IN int32 y,
+				IN uint32 row,
+				IN uint32 column,
+				IN CASCTEXT text,
+				IN uint32 style,
+				OUT int32 * cid)
+{
+	_WINSTANCE_FALSE
+	lock();
+	EditPtr edit = NULL;
+	DSLValuePtr val = NULL;
+	if(cid == NULL)
+		goto err;
+	edit = NEW(Edit);
+	if(edit == NULL)
+		goto err;
+	INIT_EDIT(edit, x, y, row, column, style, _no_data_event);
+	SET_EDIT_TEXT(edit, text);
+	edit->uwid = wid;
+	val = dsl_val_object(edit);
+	if(val == NULL)
+		goto err;
+	int32 _cid = dsl_lst_find_value(winstance->controls, NULL);
+	if(_cid == -1)
+	{
+		if(!dsl_lst_add_value(winstance->controls, val))
+			goto err;
+		_cid = dsl_lst_find_value(winstance->controls, val);
+	}
+	else
+		dsl_lst_set(winstance->controls, _cid, val);
+	edit->uwcid = _cid;
+	*cid = _cid;
+	unlock();
+	return TRUE;
+err:
+	if(edit != NULL)
+		DELETE(edit);
+	if(val != NULL)
+		DELETE(val);
+	unlock();
+	return FALSE;
 }

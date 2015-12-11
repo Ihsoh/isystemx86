@@ -1129,6 +1129,86 @@ get_top_window(void)
 }
 
 /**
+	@Function:		render_text_buffer_ex
+	@Access:		Public
+	@Description:
+		渲染文本缓冲区。
+	@Parameters:
+		image, ImagePtr, IN OUT
+			指向保存渲染结果的图片对象的指针。
+		start_x, uint32, IN
+			X坐标。在X坐标绘制渲染后的图片。
+		start_y, uint32, IN
+			Y坐标。在Y坐标绘制渲染后的图片。
+		txtbuf, uint8 *, IN
+			指向文本缓冲区的指针。
+		row, uint32, IN
+			文本缓冲区的行数。
+		col, uint32, IN
+			文本缓冲区的列数。
+		curx, uint32, IN
+			光标的X坐标。
+		cury, uint32, IN
+			光标的Y坐标。
+	@Return:
+		struct Window *
+			顶层窗体的结构体的指针。		
+*/
+BOOL
+render_text_buffer_ex(	IN OUT ImagePtr image,
+						IN uint32 start_x,
+						IN uint32 start_y,
+						IN uint8 * txtbuf,
+						IN uint32 row,
+						IN uint32 column,
+						IN uint32 curx,
+						IN uint32 cury)
+{
+	if(image == NULL || txtbuf == NULL)
+		return FALSE;
+	uint32 x, y;
+	for(y = 0; y < row; y++)
+		for(x = 0; x < column; x++)
+		{
+			uint8 * offset = txtbuf + (y * column + x) * 2;
+			int8 chr = *offset;
+			uint8 p = *(offset + 1);
+			uint32 color = property_to_real_color(p & 0x0F);
+			uint32 bg_color = property_to_real_color((p >> 4) & 0x0F);
+			rect_common_image(	image, 
+								start_x + x * ENFONT_WIDTH, 
+								start_y + y * (ENFONT_HEIGHT + CURSOR_HEIGHT), 
+								ENFONT_WIDTH, 
+								ENFONT_HEIGHT + CURSOR_HEIGHT, 
+								bg_color);
+			uint8 * font = get_enfont_ptr();
+
+			if(font != NULL)
+				text_common_image(	image,
+									start_x + x * ENFONT_WIDTH,
+									start_y + y * (ENFONT_HEIGHT + CURSOR_HEIGHT),
+									font,
+									&chr,
+									1,
+									color);
+		}
+	uint32 cursor_real_color = property_to_real_color(cursor_color);
+	uint32 c_x = curx, c_y = cury;
+	uint32 s_w = image->width;
+	for(x = 0; x < ENFONT_WIDTH; x++)
+		for(y = 0; y < CURSOR_HEIGHT; y++)
+		{
+			uint32 index = 	c_y * (ENFONT_HEIGHT + CURSOR_HEIGHT) * s_w
+							+ ENFONT_HEIGHT * s_w
+							+ (start_y + y) * s_w
+							+ (uint32)c_x * ENFONT_WIDTH
+							+ (start_x + x);
+			((uint32 *)image->data)[index] = cursor_real_color;
+		}
+	return TRUE;
+}
+
+/**
 	@Function:		render_text_buffer
 	@Access:		Public
 	@Description:
@@ -1158,47 +1238,7 @@ render_text_buffer(	IN OUT ImagePtr image,
 					IN uint32 curx,
 					IN uint32 cury)
 {
-	if(image == NULL || txtbuf == NULL)
-		return FALSE;
-	uint32 x, y;
-	for(y = 0; y < row; y++)
-		for(x = 0; x < column; x++)
-		{
-			uint8 * offset = txtbuf + (y * column + x) * 2;
-			int8 chr = *offset;
-			uint8 p = *(offset + 1);
-			uint32 color = property_to_real_color(p & 0x0F);
-			uint32 bg_color = property_to_real_color((p >> 4) & 0x0F);
-			rect_common_image(	image, 
-								x * ENFONT_WIDTH, 
-								y * (ENFONT_HEIGHT + CURSOR_HEIGHT), 
-								ENFONT_WIDTH, 
-								ENFONT_HEIGHT + CURSOR_HEIGHT, 
-								bg_color);
-			uint8 * font = get_enfont_ptr();
-
-			if(font != NULL)
-				text_common_image(	image,
-									x * ENFONT_WIDTH,
-									y * (ENFONT_HEIGHT + CURSOR_HEIGHT),
-									font,
-									&chr,
-									1,
-									color);
-		}
-	uint32 cursor_real_color = property_to_real_color(cursor_color);
-	uint32 c_x = curx, c_y = cury;
-	for(x = 0; x < ENFONT_WIDTH; x++)
-		for(y = 0; y < CURSOR_HEIGHT; y++)
-		{
-			uint32 index = 	c_y * (ENFONT_HEIGHT + CURSOR_HEIGHT) * console_screen_width
-							+ ENFONT_HEIGHT * console_screen_width
-							+ y * console_screen_width 
-							+ (uint32)c_x * ENFONT_WIDTH
-							+ x;
-			((uint32 *)image->data)[index] = cursor_real_color;
-		}
-	return TRUE;
+	return render_text_buffer_ex(image, 0, 0, txtbuf, row, column, curx, cury);
 }
 
 /**

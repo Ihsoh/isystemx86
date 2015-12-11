@@ -13,6 +13,7 @@
 #include "list.h"
 #include "progress.h"
 #include "scroll.h"
+#include "edit.h"
 
 #include "../types.h"
 
@@ -59,6 +60,8 @@ control_get_width(IN void * c)
 			return GET_PROGRESS_WIDTH((ProgressPtr)control);
 		case CONTROL_SCROLL:
 			return GET_SCROLL_WIDTH((ScrollPtr)control);
+		case CONTROL_EDIT:
+			return GET_EDIT_WIDTH((EditPtr)control);
 		default:
 			return 0;
 	}
@@ -94,6 +97,8 @@ control_get_height(IN void * c)
 			return GET_PROGRESS_HEIGHT((ProgressPtr)control);
 		case CONTROL_SCROLL:
 			return GET_SCROLL_HEIGHT((ScrollPtr)control);
+		case CONTROL_EDIT:
+			return GET_EDIT_HEIGHT((EditPtr)control);
 		default:
 			return 0;
 	}

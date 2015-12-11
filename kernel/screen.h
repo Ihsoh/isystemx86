@@ -77,6 +77,17 @@ get_cursor_color(void);
 
 extern
 BOOL
+render_text_buffer_ex(	IN OUT ImagePtr image,
+						IN uint32 start_x,
+						IN uint32 start_y,
+						IN uint8 * txtbuf,
+						IN uint32 row,
+						IN uint32 column,
+						IN uint32 curx,
+						IN uint32 cury);
+
+extern
+BOOL
 render_text_buffer(	IN OUT ImagePtr image,
 					IN uint8 * txtbuf,
 					IN uint32 row,

@@ -8,6 +8,8 @@
 #ifndef	_SYSCALL_SYSCALL_H_
 #define	_SYSCALL_SYSCALL_H_
 
+#include "../window/control.h"
+
 #define	SCALL_SCREEN		0
 #define	SCALL_KEYBOARD		1
 #define	SCALL_FS			2
@@ -83,6 +85,8 @@
 #define	SCALL_GUI_SET_LIST_TEXT			((CONTROL_LIST << 8) | 0x00000002)
 #define	SCALL_GUI_ENABLE_LIST_ITEM		((CONTROL_LIST << 8) | 0x00000003)
 #define	SCALL_GUI_DISABLE_LIST_ITEM		((CONTROL_LIST << 8) | 0x00000004)
+
+#define	SCALL_GUI_NEW_EDIT				((CONTROL_EDIT << 8) | 0x00000001)
 
 // ============================== Keyboard ==============================
 #define	SCALL_GET_CHAR			0

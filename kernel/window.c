@@ -18,6 +18,8 @@
 
 #include "fs/ifs1/fs.h"
 
+#include "window/control.h"
+
 static struct CommonImage close_button;
 static struct CommonImage close_button_hover;
 static struct CommonImage close_button_blur;
@@ -359,6 +361,24 @@ window_peek_key(IN struct Window * window)
 }
 
 /**
+	@Function:		window_clear_key
+	@Access:		Public
+	@Description:
+		清除指定窗体的按键缓冲区内的按键。
+	@Parameters:
+		window, WindowPtr, IN
+			指向窗体结构体的指针。
+	@Return:		
+*/
+void
+window_clear_key(IN WindowPtr window)
+{
+	if(window == NULL)
+		return;
+	window->key_count = 0;
+}
+
+/**
 	@Function:		window_dispatch_event
 	@Access:		Public
 	@Description:
@@ -404,5 +424,23 @@ window_dispatch_event(	IN WindowPtr window,
 	params.mouse_button = mouse_button;
 	params.screen = &window->workspace;
 	params.data = data;
+	params.window = window;
 	window->event(window, &params);
+}
+
+void
+window_focus_ctrl(	IN WindowPtr window,
+					IN uint32 cid)
+{
+	if(window == NULL)
+		return;
+	window->focused_ctrl = cid;
+}
+
+void
+window_unfocus_ctrl(IN WindowPtr window)
+{
+	if(window == NULL)
+		return;
+	window->focused_ctrl = CONTROL_INVALID_ID;
 }
