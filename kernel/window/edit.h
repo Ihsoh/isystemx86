@@ -87,7 +87,7 @@ edit_get_text(	IN EditPtr edit,
 
 extern
 BOOL
-edit_set_text(	IN EditPtr edit,
+edit_set_text(	OUT EditPtr edit,
 				IN CASCTEXT text);
 
 extern

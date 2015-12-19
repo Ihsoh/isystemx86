@@ -31,6 +31,7 @@
 #include "windows/start.h"
 #include "windows/power.h"
 #include "windows/wmgr.h"
+#include "windows/run.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -744,6 +745,7 @@ init_screen(void)
 		// init_clock_window();
 		detail_window_init();
 		explorer_window_init();
+		run_window_init();
 	}
 }
 

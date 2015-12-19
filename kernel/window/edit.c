@@ -63,6 +63,22 @@ static
 void
 _flush(IN OUT EditPtr edit);
 
+/**
+	@Function:		_init
+	@Access:		Private
+	@Description:
+		初始化EDIT控件。
+	@Parameters:
+		edit, EditPtr, OUT
+			指向EDIT控件对象的指针。给对象的各个字段填充初始值、创建内容缓冲区和显示缓冲区。
+		scr_row, uint32, IN
+			编辑区行数。
+		scr_column, uint32, IN
+			编辑区列数。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 static
 BOOL
 _init(	OUT EditPtr edit,
@@ -101,6 +117,16 @@ _init(	OUT EditPtr edit,
 	return TRUE;
 }
 
+/**
+	@Function:		_uninit
+	@Access:		Private
+	@Description:
+		释放EDIT控件的内容缓冲区和显示缓冲区。
+	@Parameters:
+		edit, EditPtr, IN
+			指向EDIT控件对象的指针。
+	@Return:
+*/
 static
 void
 _uninit(IN EditPtr edit)
@@ -113,6 +139,19 @@ _uninit(IN EditPtr edit)
 		free_memory(edit->screen_buffer);
 }
 
+/**
+	@Function:		_get_line_len
+	@Access:		Private
+	@Description:
+		获取指定行的长度。
+	@Parameters:
+		edit, EditPtr, IN
+			指向EDIT控件对象的指针。
+		line, uint32, IN
+			行数，从0开始。
+	@Return:
+		指定行的长度。
+*/
 static
 uint32
 _get_line_len(	IN EditPtr edit,
@@ -125,6 +164,20 @@ _get_line_len(	IN EditPtr edit,
 	return len;
 }
 
+/**
+	@Function:		_edit
+	@Access:		Private
+	@Description:
+		处理输入的按键。
+	@Parameters:
+		edit, EditPtr, IN OUT
+			指向EDIT控件对象的指针。
+		chr, uint32, IN
+			输入的按键值。如果按键值为KEY_EXT，则具体的执行根据chr1而定。
+		chr1, uint32, IN
+			如果chr为KEY_EXT，则该参数的值为扩展按键值，否则这个参数值为0。
+	@Return:
+*/
 static
 void
 _edit(	IN OUT EditPtr edit,
@@ -255,6 +308,18 @@ _edit(	IN OUT EditPtr edit,
 		}
 }
 
+/**
+	@Function:		_strcpy_sbuffer
+	@Access:		Private
+	@Description:
+		复制文本到显示缓冲区。
+	@Parameters:
+		dest, ASCCHAR *, OUT
+			指向显示缓冲区的指针。
+		src, CASCCHAR *, IN
+			指向文本缓冲区的指针。
+	@Return:
+*/
 static
 void
 _strcpy_sbuffer(OUT ASCCHAR * dest,
@@ -268,6 +333,16 @@ _strcpy_sbuffer(OUT ASCCHAR * dest,
 	}
 }
 
+/**
+	@Function:		_flush
+	@Access:		Private
+	@Description:
+		把当前的内容缓冲区的部分更新到显示缓冲区。
+	@Parameters:
+		edit, EditPtr, IN OUT
+			指向EDIT控件对象的指针。
+	@Return:
+*/
 static
 void
 _flush(IN OUT EditPtr edit)
@@ -289,6 +364,18 @@ _flush(IN OUT EditPtr edit)
 	}
 }
 
+/**
+	@Function:		_render
+	@Access:		Private
+	@Description:
+		渲染显示缓冲区。
+	@Parameters:
+		edit, EditPtr, IN
+			指向EDIT控件对象的指针。
+		image, ImagePtr, IN OUT
+			指向图片对象的指针。
+	@Return:
+*/
 static
 void
 _render(IN EditPtr edit,
@@ -305,6 +392,32 @@ _render(IN EditPtr edit,
 							edit->cursor_y);
 }
 
+/**
+	@Function:		edit_init
+	@Access:		Public
+	@Description:
+		渲染显示缓冲区。
+	@Parameters:
+		edit, EditPtr, OUT
+			指向EDIT控件对象的指针。
+		id, uint32, IN
+			控件ID。如果为0，则把控件对象的地址作为ID。
+		x, uint32, IN
+			X坐标。
+		y, uint32, IN
+			Y坐标。
+		row, uint32, IN
+			编辑区行数。
+		column, uint32, IN
+			编辑区列数。
+		style, uint32, IN
+			样式。
+		event, ControlEvent, IN
+			事件。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 edit_init(	OUT EditPtr edit,
 			IN uint32 id,
@@ -336,6 +449,24 @@ edit_init(	OUT EditPtr edit,
 	return TRUE;
 }
 
+/**
+	@Function:		nmledit
+	@Access:		Public
+	@Description:
+		EDIT的渲染、事件处理函数。
+	@Parameters:
+		edit, EditPtr, IN OUT
+			指向EDIT控件对象的指针。
+		image, ImagePtr, OUT
+			指向目标图片对象的指针。
+		params, WindowEventParamsPtr, IN
+			指向窗口事件参数的指针。
+		top, BOOL, IN
+			指示EDIT所在的窗体是否在最顶层。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 nmledit(IN OUT EditPtr edit,
 		OUT ImagePtr image,
@@ -385,6 +516,22 @@ nmledit(IN OUT EditPtr edit,
 	return TRUE;
 }
 
+/**
+	@Function:		edit_get_text
+	@Access:		Public
+	@Description:
+		获取EDIT控件的文本。
+	@Parameters:
+		edit, EditPtr, IN
+			指向EDIT控件对象的指针。
+		text, ASCTEXT, OUT
+			指向储存文本的缓冲区的指针。
+		size, uint32, IN
+			缓冲区大小。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 edit_get_text(	IN EditPtr edit,
 				OUT ASCTEXT text,
@@ -425,8 +572,22 @@ end:
 	return TRUE;
 }
 
+/**
+	@Function:		edit_set_text
+	@Access:		Public
+	@Description:
+		设置EDIT控件的文本。
+	@Parameters:
+		edit, EditPtr, OUT
+			指向EDIT控件对象的指针。
+		text, CASCTEXT, IN
+			指向储存文本的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
-edit_set_text(	IN EditPtr edit,
+edit_set_text(	OUT EditPtr edit,
 				IN CASCTEXT text)
 {
 	if(	edit == NULL
@@ -453,6 +614,18 @@ edit_set_text(	IN EditPtr edit,
 	return TRUE;
 }
 
+/**
+	@Function:		edit_get_width
+	@Access:		Public
+	@Description:
+		获取EDIT控件的宽度。
+	@Parameters:
+		edit, EditPtr, IN
+			指向EDIT控件对象的指针。
+	@Return:
+		uint32
+			EDIT控件的宽度。
+*/
 uint32
 edit_get_width(IN EditPtr edit)
 {
@@ -461,6 +634,18 @@ edit_get_width(IN EditPtr edit)
 	return edit->scr_column * ENFONT_WIDTH;
 }
 
+/**
+	@Function:		edit_get_height
+	@Access:		Public
+	@Description:
+		获取EDIT控件的高度。
+	@Parameters:
+		edit, EditPtr, IN
+			指向EDIT控件对象的指针。
+	@Return:
+		uint32
+			EDIT控件的高度。
+*/
 uint32
 edit_get_height(IN EditPtr edit)
 {

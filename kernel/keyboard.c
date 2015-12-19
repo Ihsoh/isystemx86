@@ -19,6 +19,7 @@
 #include "windows/sfunc.h"
 #include "windows/clock.h"
 #include "windows/console.h"
+#include "windows/run.h"
 
 #define	IBUFFER_SIZE	16
 #define	KEY_MAP_SIZE	256	
@@ -525,8 +526,8 @@ tran_key(IN uint8 scan_code)
 				break;
 			case KEY_F2:
 			{
-				/*if(alt && vesa_is_valid())
-					show_sfunc_window();*/
+				if(alt && vesa_is_valid())
+					run_window_show();
 				break;
 			}
 			case KEY_F3:

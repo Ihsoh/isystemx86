@@ -1415,7 +1415,11 @@ keyboard_int(void)
 		uint8 scan_code = 0;
 		scan_code = inb(KEYBOARD_DEVICE);
 		if(keyboard_loop_was_enabled)
+		{
+			lock();
 			tran_key(scan_code);
+			unlock_without_sti();
+		}
 		irq_ack(1);
 		asm volatile ("iret;");
 	}
