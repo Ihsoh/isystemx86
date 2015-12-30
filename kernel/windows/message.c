@@ -39,9 +39,14 @@ void
 _message_window_event(	IN WindowPtr window,
 						IN struct WindowEventParams * params)
 {
-	if(params->event_type == WINDOW_EVENT_PAINT)
+	BOOL top = get_top_window() == window;
+	switch(params->event_type)
 	{
-		
+		case WINDOW_EVENT_WILL_CLOSE:
+		{
+			destroy_window(window);
+			break;
+		}
 	}
 }
 

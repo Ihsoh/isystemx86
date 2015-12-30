@@ -43,6 +43,10 @@ extern
 void
 exit_batch(void);
 
+extern
+int32
+console_exec_cmd(IN CASCTEXT cmd);
+
 DEFINE_LOCK_EXTERN(console)
 
 #endif

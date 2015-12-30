@@ -12,6 +12,8 @@
 #include "../types.h"
 #include "../window.h"
 
+#define	TASKBAR_HEIGHT	24
+
 extern
 BOOL
 taskbar_window_init(void);

@@ -31,4 +31,6 @@
 
 #define	SCROLL_CHANGED	1
 
+#define	EDIT_INPUT		1
+
 #endif

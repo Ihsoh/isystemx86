@@ -25,7 +25,7 @@
 #include "../window/button.h"
 #include "../window/label.h"
 
-#define	_HEIGHT	24
+#define	_HEIGHT	TASKBAR_HEIGHT
 
 #define	_BTN_TIME_WIDTH		250
 

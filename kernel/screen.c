@@ -1356,12 +1356,9 @@ flush_screen(void)
 											CLOSE_BUTTON_WIDTH, 
 											CLOSE_BUTTON_HEIGHT))
 					{
-						if(top_window->uwid != -1)
-							window_dispatch_event(	top_window,
-													WINDOW_EVENT_WILL_CLOSE,
-													NULL);
-						else
-							destroy_window(top_window);
+						window_dispatch_event(	top_window,
+												WINDOW_EVENT_WILL_CLOSE,
+												NULL);
 						return;
 					}
 					else if(wstyle & WINDOW_STYLE_MINIMIZE

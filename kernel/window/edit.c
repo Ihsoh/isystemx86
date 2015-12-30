@@ -186,6 +186,14 @@ _edit(	IN OUT EditPtr edit,
 {
 	if(edit == NULL)
 		return;
+	ControlEvent event = edit->event;
+	if(event != NULL)
+	{
+		uint32 data[2];
+		data[0] = chr;
+		data[1] = chr1;
+		event(edit->id, EDIT_INPUT, data);
+	}
 	if(chr == KEY_EXT)
 		switch(chr1)
 		{
@@ -257,31 +265,34 @@ _edit(	IN OUT EditPtr edit,
 				break;
 			}
 			case '\n':
-				if(edit->total_line < MAX_ROW)
+				if(!(edit->style & EDIT_STYLE_SINGLE_LINE))
 				{
-					edit->total_line++;
-					int32 i, i1;
-					if(edit->total_line == 0)
-						for(i = 0; i < MAX_COLUMN; i++)
-							_SBROW(edit, edit->top_row + EDITAREA_Y(edit) + 1)[i]
-								= _SBROW(edit, edit->top_row + EDITAREA_Y(edit))[i];
-					else
-						for(i = edit->total_line; i > edit->top_row + EDITAREA_Y(edit) + 1; i--)
-							for(i1 = 0; i1 < MAX_COLUMN; i1++)
-								_SBROW(edit, i)[i1] = _SBROW(edit, i - 1)[i1];
-					for(i = 0; i < MAX_COLUMN; i++)
-						_SBROW(edit, edit->top_row + EDITAREA_Y(edit) + 1)[i] = '\0';
-					for(i = edit->top_column + EDITAREA_X(edit), i1 = 0; i < MAX_COLUMN; i++, i1++)
+					if(edit->total_line < MAX_ROW)
 					{
-						_SBROW(edit, edit->top_row + EDITAREA_Y(edit) + 1)[i1]
-							= _SBROW(edit, edit->top_row + EDITAREA_Y(edit))[i]; 
-						_SBROW(edit, edit->top_row + EDITAREA_Y(edit))[i] = '\0';
+						edit->total_line++;
+						int32 i, i1;
+						if(edit->total_line == 0)
+							for(i = 0; i < MAX_COLUMN; i++)
+								_SBROW(edit, edit->top_row + EDITAREA_Y(edit) + 1)[i]
+									= _SBROW(edit, edit->top_row + EDITAREA_Y(edit))[i];
+						else
+							for(i = edit->total_line; i > edit->top_row + EDITAREA_Y(edit) + 1; i--)
+								for(i1 = 0; i1 < MAX_COLUMN; i1++)
+									_SBROW(edit, i)[i1] = _SBROW(edit, i - 1)[i1];
+						for(i = 0; i < MAX_COLUMN; i++)
+							_SBROW(edit, edit->top_row + EDITAREA_Y(edit) + 1)[i] = '\0';
+						for(i = edit->top_column + EDITAREA_X(edit), i1 = 0; i < MAX_COLUMN; i++, i1++)
+						{
+							_SBROW(edit, edit->top_row + EDITAREA_Y(edit) + 1)[i1]
+								= _SBROW(edit, edit->top_row + EDITAREA_Y(edit))[i]; 
+							_SBROW(edit, edit->top_row + EDITAREA_Y(edit))[i] = '\0';
+						}
+						edit->cursor_x = 0;
+						if(EDITAREA_Y(edit) + 1 >= edit->row)
+							edit->top_row++;
+						else
+							edit->cursor_y++;
 					}
-					edit->cursor_x = 0;
-					if(EDITAREA_Y(edit) + 1 >= edit->row)
-						edit->top_row++;
-					else
-						edit->cursor_y++;
 				}
 				break;
 			case '\t':
@@ -559,13 +570,14 @@ edit_get_text(	IN EditPtr edit,
 			else
 				goto end;
 		}
-		if(size != 0)
-		{
-			*(text++) = '\n';
-			size--;
-		}
-		else
-			goto end;
+		if(!(edit->style & EDIT_STYLE_SINGLE_LINE))
+			if(size != 0)
+			{
+				*(text++) = '\n';
+				size--;
+			}
+			else
+				goto end;
 	}
 end:
 	*text = '\0';
@@ -600,7 +612,8 @@ edit_set_text(	OUT EditPtr edit,
 	for(ui = 0; ui < len; ui++)
 	{
 		CASCCHAR chr = text[ui];
-		if(chr == '\n')
+		if(	!(edit->style & EDIT_STYLE_SINGLE_LINE)
+			&& chr == '\n')
 		{
 			row++;
 			index = 0;

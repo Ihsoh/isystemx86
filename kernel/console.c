@@ -1437,7 +1437,10 @@ void
 reboot(void)
 {
 	print_str("Killing all tasks...\n");
-	kill_all_tasks();
+	//
+	// !!!如果该函数在除了内核任务的其他任务的情况下被调用将会导致调用该函数的任务被杀死，这会引发问题!!!
+	//
+	// kill_all_tasks();
 	print_str("OK!");
 	reboot_system();
 }
@@ -1455,7 +1458,10 @@ void
 shutdown(void)
 {
 	print_str("Killing all tasks...\n");
-	kill_all_tasks();
+	//
+	// !!!如果该函数在除了内核任务的其他任务的情况下被调用将会导致调用该函数的任务被杀死，这会引发问题!!!
+	//
+	// kill_all_tasks();
 	print_str("OK!");
 	shutdown_system();
 }
@@ -2939,4 +2945,29 @@ exit_batch(void)
 {
 	if(_run_in_batch)
 		_exit_batch = TRUE;
+}
+
+/**
+	@Function:		console_exec_cmd
+	@Access:		Public
+	@Description:
+		执行命令。
+	@Parameters:
+		cmd, CASCTEXT, IN
+			指向储存命令字符串的缓冲区的指针。
+	@Return:
+		返回0则失败，否则成功。
+*/
+int32
+console_exec_cmd(IN CASCTEXT cmd)
+{
+	struct Vars * local_vars_s = NULL;
+	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
+	if(local_vars_s == NULL)
+		goto err;
+	int32 r = exec(cmd, NULL, 0, 0, local_vars_s);
+	free_vars(local_vars_s);
+	return r;
+err:
+	return 0;
 }
