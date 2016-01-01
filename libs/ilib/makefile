@@ -28,7 +28,7 @@ $(TargetDir)/__isinf.obj $(TargetDir)/__logb.obj $(TargetDir)/ldexp.obj $(Target
 $(TargetDir)/log1p.obj $(TargetDir)/log__L.obj $(TargetDir)/asin.obj $(TargetDir)/atanh.obj $(TargetDir)/bcopy.obj $(TargetDir)/bzero.obj 	\
 $(TargetDir)/hypot.obj $(TargetDir)/cabs.obj $(TargetDir)/cosh.obj $(TargetDir)/fabs.obj $(TargetDir)/ffs.obj $(TargetDir)/fmod.obj $(TargetDir)/fexp.obj 	\
 $(TargetDir)/modf.obj $(TargetDir)/sincos.obj $(TargetDir)/sinh.obj $(TargetDir)/__expm1.obj $(TargetDir)/tan.obj $(TargetDir)/tanh.obj 	\
-$(TargetDir)/strncat.obj $(TargetDir)/strpbrk.obj $(TargetDir)/strspn.obj
+$(TargetDir)/strncat.obj $(TargetDir)/strpbrk.obj $(TargetDir)/strspn.obj $(TargetDir)/wordcopy.obj
 
 LocaleObjs=$(TargetDir)/C-collate.obj $(TargetDir)/C-ctype.obj $(TargetDir)/C-numeric.obj $(TargetDir)/C-ctype_ct.obj $(TargetDir)/C-ctype_mb.obj 	\
 $(TargetDir)/C-monetary.obj $(TargetDir)/C-response.obj $(TargetDir)/C-time.obj $(TargetDir)/localeconv.obj $(TargetDir)/setlocale.obj
@@ -287,6 +287,9 @@ $(TargetDir)/strpbrk.obj: sysdeps/generic/strpbrk.c
 
 $(TargetDir)/strspn.obj: sysdeps/generic/strspn.c
 	$(CC) $(CFlags) -c sysdeps/generic/strspn.c -o $(TargetDir)/strspn.obj $(Include)
+
+$(TargetDir)/wordcopy.obj: sysdeps/generic/wordcopy.c
+	$(CC) $(CFlags) -c sysdeps/generic/wordcopy.c -o $(TargetDir)/wordcopy.obj $(Include)
 
 
 #==============================Locale==============================

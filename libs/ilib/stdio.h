@@ -70,7 +70,8 @@ extern int ungetc(int c, FILE * fptr);
 #define	getc(fptr)	(fgetc((fptr)))
 extern void perror(const char * s);
 extern FILE * freopen(const char * filename, const char * mode, FILE * fptr);
-
+#define feof(fptr)	(ILIsEndOfFile((fptr)->ilfptr))
+#define	ferror(fptr)	(0)
 
 extern int __vfscanf(FILE * s, const char * format, va_list arg);
 
