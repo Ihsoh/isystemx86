@@ -156,7 +156,7 @@ run_window_show(void)
 								_TITLE,
 								_window_event);
 		if(_window == NULL)
-			return;
+			return FALSE;
 		_window->x = 0;
 		_window->y = vesa_get_height() - TASKBAR_HEIGHT - _HEIGHT - TITLE_BAR_HEIGHT;
 		rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xffffffff);	
