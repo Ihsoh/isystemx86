@@ -48,6 +48,9 @@ typedef	struct
 #define	INIT_EDIT(_edit, _x, _y, _row, _column, _style, _event)	\
 	(edit_init((_edit), 0, (_x), (_y), (_row), (_column), (_style), (_event)))
 
+#define	UNINIT_EDIT(_edit)	\
+	(edit_uninit((_edit)))
+
 #define	NMLEDIT(_edit, _image, _params, _top)	\
 	(nmledit((_edit), (_image), (_params), (_top)))
 
