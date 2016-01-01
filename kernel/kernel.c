@@ -1270,8 +1270,13 @@ static int32	mouse_count = 0;
 static int32 	x_sign = 0;
 static int32	y_sign = 0;
 
-#define MOUSE_DEVICE  0x60
-#define MOUSE_PENDING 0x64
+#define MOUSE_DEVICE	0x60
+#define MOUSE_STATUS	0x64
+#define MOUSE_ABIT		0x02
+#define MOUSE_BBIT		0x01
+#define MOUSE_WRITE		0xD4
+#define MOUSE_F_BIT		0x20
+#define MOUSE_V_BIT		0x08
 
 /**
 	@Function:		mouse_int
@@ -1288,41 +1293,54 @@ mouse_int(void)
 	while(1)
 	{
 		lock();
-		int32 max_screen_width = vesa_get_width();
-		int32 max_screen_height = vesa_get_height();
-		uint8 data = inb(MOUSE_DEVICE);
-
-		if(mouse_loop_was_enabled)
-			switch(++mouse_count)
+		uint8 status = inb(MOUSE_STATUS);
+		while(status & MOUSE_BBIT)
+		{
+			if(status & MOUSE_F_BIT)
 			{
-				case 1:
-					if(data & 0x01)
-						mouse_left_button_down = TRUE;
-					else
-						mouse_left_button_down = FALSE;
-					if(data & 0x02)
-						mouse_right_button_down = TRUE;
-					else
-						mouse_right_button_down = FALSE;
-					x_sign = data & 0x10 ? 0xffffff00 : 0;
-					y_sign = data & 0x20 ? 0xffffff00 : 0;
-					break;
-				case 2:
-					mouse_x += (x_sign | data);
-					if(mouse_x < 0)
-						mouse_x = 0;
-					else if(mouse_x >= max_screen_width)
-						mouse_x = max_screen_width - 1;
-					break;
-				case 3:
-					mouse_y += -(y_sign | data);
-					if(mouse_y < 0)
-						mouse_y = 0;
-					else if(mouse_y >= max_screen_height)
-						mouse_y = max_screen_height - 1;
-					mouse_count = 0;
-					break;
+				int32 max_screen_width = vesa_get_width();
+				int32 max_screen_height = vesa_get_height();
+				uint8 data = inb(MOUSE_DEVICE);
+
+				if(mouse_loop_was_enabled)
+					switch(mouse_count)
+					{
+						case 0:
+							if(!(data & MOUSE_V_BIT))
+								goto end;
+							if(data & 0x01)
+								mouse_left_button_down = TRUE;
+							else
+								mouse_left_button_down = FALSE;
+							if(data & 0x02)
+								mouse_right_button_down = TRUE;
+							else
+								mouse_right_button_down = FALSE;
+							x_sign = data & 0x10 ? 0xffffff00 : 0;
+							y_sign = data & 0x20 ? 0xffffff00 : 0;
+							mouse_count++;
+							break;
+						case 1:
+							mouse_x += (x_sign | data);
+							if(mouse_x < 0)
+								mouse_x = 0;
+							else if(mouse_x >= max_screen_width)
+								mouse_x = max_screen_width - 1;
+							mouse_count++;
+							break;
+						case 2:
+							mouse_y += -(y_sign | data);
+							if(mouse_y < 0)
+								mouse_y = 0;
+							else if(mouse_y >= max_screen_height)
+								mouse_y = max_screen_height - 1;
+							mouse_count = 0;
+							break;
+					}
 			}
+			status = inb(MOUSE_STATUS);
+		}
+end:
 		unlock_without_sti();
 		irq_ack(12);
 		asm volatile ("iret");
@@ -1414,14 +1432,13 @@ keyboard_int(void)
 {
 	while(1)
 	{
+		lock();
 		uint8 scan_code = 0;
+		while(inb(KEYBOARD_PENDING) & 2);
 		scan_code = inb(KEYBOARD_DEVICE);
 		if(keyboard_loop_was_enabled)
-		{
-			lock();
 			tran_key(scan_code);
-			unlock_without_sti();
-		}
+		unlock_without_sti();
 		irq_ack(1);
 		asm volatile ("iret;");
 	}
@@ -1441,11 +1458,13 @@ ide_int(void)
 {
 	while(1)
 	{
+		lock();
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
 		_ide0_signal++;
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
+		unlock_without_sti();
 		irq_ack(14);
 		asm volatile ("iret;");
 	}
@@ -1465,11 +1484,13 @@ ide1_int(void)
 {
 	while(1)
 	{
+		lock();
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
 		_ide1_signal++;
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
+		unlock_without_sti();
 		irq_ack(15);
 		asm volatile ("iret;");
 	}
@@ -1489,11 +1510,13 @@ fpu_int(void)
 {
 	while(1)
 	{
+		lock();
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_stop_timer();
 		outb(0xf0, 0x00);
 		if(!use_rtc_for_task_scheduler && apic_is_enable())
 			apic_start_timer();
+		unlock_without_sti();
 		irq_ack(13);
 		asm volatile ("iret;");
 	}
