@@ -60,6 +60,9 @@ typedef	struct
 #define	SET_EDIT_TEXT(_edit, _text)	\
 	(edit_set_text((_edit), (_text)))
 
+#define	APPEND_EDIT_TEXT(_edit, _text)	\
+	(edit_append_text((_edit), (_text)))
+
 #define	GET_EDIT_WIDTH(_edit)	\
 	(edit_get_width((_edit)))
 
@@ -96,8 +99,13 @@ edit_get_text(	IN EditPtr edit,
 
 extern
 BOOL
-edit_set_text(	OUT EditPtr edit,
+edit_set_text(	IN OUT EditPtr edit,
 				IN CASCTEXT text);
+
+extern
+BOOL
+edit_append_text(	IN OUT EditPtr edit,
+					IN CASCTEXT text);
 
 extern
 uint32

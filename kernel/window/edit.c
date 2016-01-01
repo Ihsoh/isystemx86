@@ -610,7 +610,7 @@ end:
 	@Description:
 		设置EDIT控件的文本。
 	@Parameters:
-		edit, EditPtr, OUT
+		edit, EditPtr, IN OUT
 			指向EDIT控件对象的指针。
 		text, CASCTEXT, IN
 			指向储存文本的缓冲区的指针。
@@ -619,7 +619,7 @@ end:
 			返回TRUE则成功，否则失败。
 */
 BOOL
-edit_set_text(	OUT EditPtr edit,
+edit_set_text(	IN OUT EditPtr edit,
 				IN CASCTEXT text)
 {
 	if(	edit == NULL
@@ -637,6 +637,8 @@ edit_set_text(	OUT EditPtr edit,
 		{
 			row++;
 			index = 0;
+			if(row == MAX_ROW)
+				break;
 		}
 		else
 			_SBROW(edit, row)[index++] = chr;
@@ -644,6 +646,54 @@ edit_set_text(	OUT EditPtr edit,
 	edit->total_line = row;
 	if(index != 0)
 		edit->total_line++;
+	edit->_forced_flush = TRUE;
+	return TRUE;
+}
+
+/**
+	@Function:		edit_append_text
+	@Access:		Public
+	@Description:
+		在EDIT控件的最后一行的下一行开始追加文本。
+	@Parameters:
+		edit, EditPtr, IN OUT
+			指向EDIT控件对象的指针。
+		text, CASCTEXT, IN
+			指向储存文本的缓冲区的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+edit_append_text(	IN OUT EditPtr edit,
+					IN CASCTEXT text)
+{
+	if(	edit == NULL
+		|| text == NULL
+		|| (edit->style & EDIT_STYLE_SINGLE_LINE)
+		|| edit->total_line == MAX_ROW)
+		return FALSE;
+	uint32 ui;
+	uint32 row = edit->total_line;
+	uint32 index = 0;
+	uint32 len = strlen(text);
+	for(ui = 0; ui < len; ui++)
+	{
+		CASCCHAR chr = text[ui];
+		if(chr == '\n')
+		{
+			row++;
+			index = 0;
+			if(row == MAX_ROW)
+				break;
+		}
+		else
+			_SBROW(edit, row)[index++] = chr;
+	}
+	edit->total_line = row;
+	if(index != 0)
+		edit->total_line++;
+	edit->_forced_flush = TRUE;
 	return TRUE;
 }
 
