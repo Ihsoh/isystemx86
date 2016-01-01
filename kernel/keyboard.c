@@ -20,6 +20,7 @@
 #include "windows/clock.h"
 #include "windows/console.h"
 #include "windows/run.h"
+#include "windows/dbgout.h"
 
 #define	IBUFFER_SIZE	16
 #define	KEY_MAP_SIZE	256	
@@ -550,6 +551,12 @@ tran_key(IN uint8 scan_code)
 			{
 				if(alt)
 					exit_batch();
+				break;
+			}
+			case KEY_F10:
+			{
+				if(alt)
+					dbgout_window_show();
 				break;
 			}
 		}

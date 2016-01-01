@@ -40,7 +40,7 @@ window/bin/progress.obj window/bin/scroll.obj window/bin/edit.obj
 
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
 windows/bin/detail.obj windows/bin/explorer.obj windows/bin/taskbar.obj windows/bin/start.obj 	\
-windows/bin/power.obj windows/bin/wmgr.obj windows/bin/run.obj
+windows/bin/power.obj windows/bin/wmgr.obj windows/bin/run.obj windows/bin/dbgout.obj
 
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj syscall/bin/gui.obj
@@ -306,6 +306,9 @@ windows/bin/wmgr.obj: windows/wmgr.c windows/wmgr.h
 
 windows/bin/run.obj: windows/run.c windows/run.h
 	$(CC) $(CFlags) -c windows/run.c -o windows/bin/run.obj $(Include) $(Definition)
+
+windows/bin/dbgout.obj: windows/dbgout.c windows/dbgout.h
+	$(CC) $(CFlags) -c windows/dbgout.c -o windows/bin/dbgout.obj $(Include) $(Definition)
 
 
 syscall/bin/fs.obj: syscall/fs.c syscall/fs.h

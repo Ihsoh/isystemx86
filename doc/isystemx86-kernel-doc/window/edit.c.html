@@ -399,6 +399,40 @@
 	</div>
 </div>
 <div>
+	<a id="edit_uninit" name="edit_uninit" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">edit_uninit</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				销毁EDIT的资源。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		edit</span>,
+	<span style="color:#428cc7; font-weight:blod;"> EditPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向EDIT控件对象的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
 	<a id="nmledit" name="nmledit" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Public</div>
@@ -523,7 +557,49 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		edit</span>,
 	<span style="color:#428cc7; font-weight:blod;"> EditPtr</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			指向EDIT控件对象的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		text</span>,
+	<span style="color:#428cc7; font-weight:blod;"> CASCTEXT</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			指向储存文本的缓冲区的指针。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="edit_append_text" name="edit_append_text" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">edit_append_text</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				在EDIT控件的最后一行的下一行开始追加文本。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		edit</span>,
+	<span style="color:#428cc7; font-weight:blod;"> EditPtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			指向EDIT控件对象的指针。
 </p>
 </div>

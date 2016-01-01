@@ -1287,6 +1287,7 @@ mouse_int(void)
 {
 	while(1)
 	{
+		lock();
 		int32 max_screen_width = vesa_get_width();
 		int32 max_screen_height = vesa_get_height();
 		uint8 data = inb(MOUSE_DEVICE);
@@ -1322,6 +1323,7 @@ mouse_int(void)
 					mouse_count = 0;
 					break;
 			}
+		unlock_without_sti();
 		irq_ack(12);
 		asm volatile ("iret");
 	}

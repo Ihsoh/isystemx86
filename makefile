@@ -34,6 +34,7 @@ $(Target):	bin	\
 	cd apps/lua1 && make
 	cd apps/lua2 && make
 	cd apps/elf && make
+	cd apps/lua3 && make
 
 	cd wapps/image && make
 	cd wapps/calc && make
@@ -170,6 +171,7 @@ clean:
 	cd apps/lua1 && make clean
 	cd apps/lua2 && make clean
 	cd apps/elf && make clean
+	cd apps/lua3 && make clean
 
 	cd wapps/image && make clean
 	cd wapps/calc && make clean
