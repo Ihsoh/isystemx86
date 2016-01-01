@@ -117,6 +117,12 @@ WRITE_FILE	VA:/isystem/bins/lua2c apps/lua2/bin/lua2c.bin
 MAKE_FILE	VA:/isystem/bins/ elf
 WRITE_FILE	VA:/isystem/bins/elf apps/elf/bin/elf.bin
 
+#lua3
+MAKE_FILE	VA:/isystem/bins/ lua3
+WRITE_FILE	VA:/isystem/bins/lua3 apps/lua3/bin/lua3.bin
+MAKE_FILE	VA:/isystem/bins/ lua3c
+WRITE_FILE	VA:/isystem/bins/lua3c apps/lua3/bin/lua3c.bin
+
 #System library directory
 MAKE_DIR	VA:/isystem/ slib
 
