@@ -75,6 +75,10 @@ edit_init(	OUT EditPtr edit,
 			IN ControlEvent event);
 
 extern
+void
+edit_uninit(IN EditPtr edit);
+
+extern
 BOOL
 nmledit(IN OUT EditPtr edit,
 		OUT ImagePtr image,

@@ -465,6 +465,22 @@ edit_init(	OUT EditPtr edit,
 }
 
 /**
+	@Function:		edit_uninit
+	@Access:		Public
+	@Description:
+		销毁EDIT的资源。
+	@Parameters:
+		edit, EditPtr, IN
+			指向EDIT控件对象的指针。
+	@Return:
+*/
+void
+edit_uninit(IN EditPtr edit)
+{
+	_uninit(edit);
+}
+
+/**
 	@Function:		nmledit
 	@Access:		Public
 	@Description:
