@@ -43,6 +43,7 @@ typedef	struct
 
 #define	EDIT_STYLE_REFRESH		0x00000001
 #define	EDIT_STYLE_SINGLE_LINE	0x00000002
+#define	EDIT_STYLE_READONLY		0x00000004
 
 #define	INIT_EDIT(_edit, _x, _y, _row, _column, _style, _event)	\
 	(edit_init((_edit), 0, (_x), (_y), (_row), (_column), (_style), (_event)))

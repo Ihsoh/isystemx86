@@ -225,6 +225,9 @@ _edit(	IN OUT EditPtr edit,
 				break;
 		}
 	else
+	{
+		if(edit->style & EDIT_STYLE_READONLY)
+			return;
 		switch(chr)
 		{
 			case 8:
@@ -317,6 +320,7 @@ _edit(	IN OUT EditPtr edit,
 				}
 				break;
 		}
+	}
 }
 
 /**
