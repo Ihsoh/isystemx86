@@ -164,11 +164,17 @@ jsonl_parse(IN int8 * json_text,
 		{
 			if(*json_text == '\0')
 				goto array_error;
-			if(*json_text == ',')
-				if(!has_value)
+
+			// 确认一个值的后面是否为“,”。如果是最后一个值，则可以省略。
+			if(has_value)
+			{
+				if(*json_text != ',')
 					goto array_error;
 				else
-					json_text++;
+					has_value = FALSE;
+				json_text++;
+			}
+
 			if(!IS_SPACE(*json_text))
 			{
 				has_value = TRUE;
@@ -200,6 +206,10 @@ jsonl_parse(IN int8 * json_text,
 			}
 			else
 				json_text++;
+
+			// 跳过值后面的所有空格。
+			while(IS_SPACE(*json_text))
+				json_text++;
 		}
 		json_text++;
 		if(next != NULL)
@@ -214,7 +224,8 @@ array_error:
 	else if(*json_text == '{')
 	{
 		json_text++;
-		JSONLObjectPtr obj = (JSONLObjectPtr)jsonl_malloc(sizeof(JSONLObject));
+		JSONLObjectPtr obj = NULL;
+		obj = (JSONLObjectPtr)jsonl_malloc(sizeof(JSONLObject));
 		if(obj == NULL)
 			return NULL;
 		obj->type = JSONL_TYPE_OBJECT;
@@ -226,7 +237,7 @@ array_error:
 		}
 		BOOL has_value = FALSE;
 		BOOL state_value = FALSE;
-		int8 key[DSLHASHTABLE_SIZE];
+		int8 key[DSLHASHTABLE_MAX_NAME_LEN + 1];
 		int32 key_len = 0;
 		while(*json_text != '}')
 		{
@@ -237,21 +248,33 @@ array_error:
 				jsonl_free(obj);
 				return NULL;
 			}
-			if(*json_text == ',')
-				if(!has_value)
+
+			// 确认一个键值对的后面是否为“,”。如果是最后一个键值对，则可以省略。
+			if(has_value)
+			{
+				if(*json_text != ',')
+					goto obj_error;
+				else
+					has_value = FALSE;
+				json_text++;
+			}
+
+			key[0] = '\0';
+			key_len = 0;
+			if(!state_value && !IS_SPACE(*json_text))
+			{
+				// 检测键名的左侧是否包含“"”。
+				if(*json_text != '"')
 				{
 					dsl_hashtable_unset_all(obj->obj);
 					dsl_hashtable_free(obj->obj);
 					jsonl_free(obj);
 					return NULL;
 				}
-				else
-					json_text++;
-			key[0] = '\0';
-			key_len = 0;
-			if(!state_value && !IS_SPACE(*json_text))
-			{
-				while(!IS_SPACE(*json_text) && *json_text != ':')
+				json_text++;
+
+				// 获取键名。
+				while(*json_text != '"')
 				{
 					if(	key_len >= DSLHASHTABLE_MAX_NAME_LEN
 						|| *json_text == '\0'
@@ -266,6 +289,8 @@ array_error:
 						key[key_len++] = *(json_text++);
 				}
 				key[key_len] = '\0';
+				json_text++;
+
 				while(IS_SPACE(*json_text))
 					json_text++;
 				if(*json_text != ':')
@@ -309,6 +334,10 @@ array_error:
 				state_value = FALSE;
 			}
 			else
+				json_text++;
+
+			// 跳过键值对后面的所有空格。
+			while(IS_SPACE(*json_text))
 				json_text++;
 		}
 		json_text++;
