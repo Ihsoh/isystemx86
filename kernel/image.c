@@ -54,10 +54,12 @@ image_fast_fill_uint8(	OUT uint8 * dest,
 					| (uint32)data;
 	uint32 ui;
 	uint32 * uiptr = (uint32 *)dest;
-	for(ui = 0; ui < count / 4; ui++)
+	uint32 c = count / 4;
+	for(ui = 0; ui < c; ui++)
 		*(uiptr++) = uidata;
 	dest = (uint8 *)uiptr;
-	for(ui = 0; ui < count % 4; ui++)
+	c = count % 4;
+	for(ui = 0; ui < c; ui++)
 		*(dest++) = data;
 }
 
@@ -226,6 +228,34 @@ fill_image_by_byte(	IN OUT struct CommonImage * common_image,
 	uint32 ui;
 	uint32 len = common_image->width * common_image->height * 4;
 	image_fast_fill_uint8(common_image->data, data, len);
+	return TRUE;
+}
+
+/**
+	@Function:		fill_image_by_uint32
+	@Access:		Public
+	@Description:
+		填充4字节数据到图片。
+	@Parameters:
+		common_image, struct CommonImage *, IN OUT
+			图片。
+		data, uint32, IN
+			4字节数据。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。		
+*/
+BOOL
+fill_image_by_uint32(	IN OUT struct CommonImage * common_image,
+						IN uint32 data)
+{
+	if(common_image == NULL || common_image->data == NULL)
+		return FALSE;
+	uint32 ui;
+	uint32 count = common_image->width * common_image->height;
+	uint32 * imgdata = (uint32 *)common_image->data;
+	for(ui = 0; ui < count; ui++)
+		imgdata[ui] = data;
 	return TRUE;
 }
 
@@ -610,7 +640,7 @@ vline_common_image(	IN OUT struct CommonImage * common_image,
 	@Description:
 		画线到图片上。
 	@Parameters:
-		common_image, struct CommonImage *, OUT
+		common_image, struct CommonImage *, IN OUT
 			图片。
 		start_x, int32, IN
 			起始 X 坐标。
@@ -627,7 +657,7 @@ vline_common_image(	IN OUT struct CommonImage * common_image,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-line_common_image(	OUT struct CommonImage * common_image,
+line_common_image(	IN OUT struct CommonImage * common_image,
 					IN int32 start_x,
 					IN int32 start_y,
 					IN int32 end_x,
@@ -652,7 +682,7 @@ line_common_image(	OUT struct CommonImage * common_image,
 	@Description:
 		画一个矩形到图片。
 	@Parameters:
-		common_image, struct CommonImage *, OUT
+		common_image, struct CommonImage *, IN OUT
 			图片。
 		start_x, int32, IN
 			起始 X 坐标。
@@ -669,7 +699,7 @@ line_common_image(	OUT struct CommonImage * common_image,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-rect_common_image(	OUT struct CommonImage * common_image,
+rect_common_image(	IN OUT struct CommonImage * common_image,
 					IN int32 start_x,
 					IN int32 start_y,
 					IN int32 width,
@@ -747,7 +777,7 @@ blend(	IN uint32 back,
 */
 static
 void
-blendx_init()
+blendx_init(void)
 {
 	__asm__ (
 		"PXOR %%xmm7, %%xmm7;"
@@ -818,7 +848,7 @@ blendx(	IN uint32 * back,
 		渲染一段文本。
 		这个版本未使用SSE，而是直接使用无符号整形进行Alpha混合计算。
 	@Parameters:
-		common_image, struct CommonImage *, OUT
+		common_image, struct CommonImage *, IN OUT
 			图片。
 		draw_x, int32, IN
 			起始位置 X 坐标。
@@ -838,7 +868,7 @@ blendx(	IN uint32 * back,
 */
 static
 BOOL
-text_common_image_normal(	OUT struct CommonImage * common_image,
+text_common_image_normal(	IN OUT struct CommonImage * common_image,
 							IN int32 draw_x,
 							IN int32 draw_y,
 							IN uint8 * enfont,
@@ -923,7 +953,7 @@ text_common_image_normal(	OUT struct CommonImage * common_image,
 		渲染一段文本。
 		这个版本使用了SSE。
 	@Parameters:
-		common_image, struct CommonImage *, OUT
+		common_image, struct CommonImage *, IN OUT
 			图片。
 		draw_x, int32, IN
 			起始位置 X 坐标。
@@ -943,7 +973,7 @@ text_common_image_normal(	OUT struct CommonImage * common_image,
 */
 static
 BOOL
-text_common_image_sse(	OUT struct CommonImage * common_image,
+text_common_image_sse(	IN OUT struct CommonImage * common_image,
 						IN int32 draw_x,
 						IN int32 draw_y,
 						IN uint8 * enfont,
@@ -1014,7 +1044,7 @@ text_common_image_sse(	OUT struct CommonImage * common_image,
 		渲染一段文本。
 		这个版本使用了SSE。使用了blendex(...)来进行Alpha混合计算。
 	@Parameters:
-		common_image, struct CommonImage *, OUT
+		common_image, struct CommonImage *, IN OUT
 			图片。
 		draw_x, int32, IN
 			起始位置 X 坐标。
@@ -1034,7 +1064,7 @@ text_common_image_sse(	OUT struct CommonImage * common_image,
 */
 static
 BOOL
-text_common_image_sse_ex(	OUT struct CommonImage * common_image,
+text_common_image_sse_ex(	IN OUT struct CommonImage * common_image,
 							IN int32 draw_x,
 							IN int32 draw_y,
 							IN uint8 * enfont,
@@ -1118,7 +1148,7 @@ text_common_image_sse_ex(	OUT struct CommonImage * common_image,
 	@Description:
 		画文本到图片。
 	@Parameters:
-		common_image, struct CommonImage *, OUT
+		common_image, struct CommonImage *, IN OUT
 			图片。
 		draw_x, int32, IN
 			起始位置 X 坐标。
@@ -1137,7 +1167,7 @@ text_common_image_sse_ex(	OUT struct CommonImage * common_image,
 			返回TRUE则成功，否则失败。			
 */
 BOOL
-text_common_image(	OUT struct CommonImage * common_image,
+text_common_image(	IN OUT struct CommonImage * common_image,
 					IN int32 draw_x,
 					IN int32 draw_y,
 					IN uint8 * enfont,
@@ -1181,7 +1211,7 @@ text_common_image(	OUT struct CommonImage * common_image,
 	@Description:
 		画文本到图片。支持换行的版本。
 	@Parameters:
-		common_image, struct CommonImage *, OUT
+		common_image, struct CommonImage *, IN OUT
 			图片。
 		draw_x, int32, IN
 			起始位置 X 坐标。
@@ -1200,7 +1230,7 @@ text_common_image(	OUT struct CommonImage * common_image,
 			返回TRUE则成功，否则失败。			
 */
 BOOL
-text_common_image_ml(	OUT struct CommonImage * common_image,
+text_common_image_ml(	IN OUT struct CommonImage * common_image,
 						IN int32 draw_x,
 						IN int32 draw_y,
 						IN uint8 * enfont,
@@ -1230,5 +1260,54 @@ text_common_image_ml(	OUT struct CommonImage * common_image,
 								draw_x, draw_y,
 								enfont, s, c, color))
 			return FALSE;
+	return TRUE;
+}
+
+/**
+	@Function:		draw_gradient_common_image
+	@Access:		Public
+	@Description:
+		绘制一张从左到右的渐变图像。
+	@Parameters:
+		image, ImagePtr, IN OUT
+			指向图片对象的指针。
+		left, uint32, IN
+			左边起始的颜色值。
+		right, uint32, IN
+			右边终止的颜色值。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。			
+*/
+BOOL
+draw_gradient_common_image(	IN OUT ImagePtr image,
+							IN uint32 left,
+							IN uint32 right)
+{
+	if(image == NULL)
+		return FALSE;
+	uint32 w = image->width;
+	uint32 h = image->height;
+	double left_r = (left >> 16) & 0x000000ff;
+	double left_g = (left >> 8) & 0x000000ff;
+	double left_b = left & 0x000000ff;
+	double right_r = (right >> 16) & 0x000000ff;
+	double right_g = (right >> 8) & 0x000000ff;
+	double right_b = right & 0x000000ff;
+	double dr = (right_r - left_r) / (double)w;
+	double dg = (right_g - left_g) / (double)w;
+	double db = (right_b - left_b) / (double)w;
+	uint32 x;
+	for(x = 0; x < w; x++)
+	{
+		left_r += dr;
+		left_g += dg;
+		left_b += db;
+		uint32 color = 	0xff000000
+						| ((uint32)left_r << 16) & 0x00ff0000
+						| ((uint32)left_g << 8) & 0x0000ff00
+						| ((uint32)left_b & 0x000000ff);
+		vline_common_image(image, x, 0, h, color);
+	}
 	return TRUE;
 }

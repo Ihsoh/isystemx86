@@ -28,7 +28,11 @@ config_##xxx##_get_bool(IN int8 * name,	\
 extern	\
 BOOL	\
 config_##xxx##_get_number(	IN int8 * name,	\
-							OUT double * v);
+							OUT double * v);	\
+extern	\
+BOOL	\
+config_##xxx##_get_uint(IN int8 * name,	\
+						OUT uint32 * v);
 
 EXTERN_CONFIG_XXX_GET_STH(system)
 EXTERN_CONFIG_XXX_GET_STH(system_console)

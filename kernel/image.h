@@ -56,6 +56,11 @@ fill_image_by_byte(	IN OUT struct CommonImage * common_image,
 
 extern
 BOOL
+fill_image_by_uint32(	IN OUT struct CommonImage * common_image,
+						IN uint32 data);
+
+extern
+BOOL
 set_pixel_common_image(	IN OUT struct CommonImage * common_image,
 						IN int32 x,
 						IN int32 y,
@@ -104,7 +109,7 @@ vline_common_image(	IN OUT struct CommonImage * common_image,
 
 extern
 BOOL
-line_common_image(	OUT struct CommonImage * common_image,
+line_common_image(	IN OUT struct CommonImage * common_image,
 					IN int32 start_x,
 					IN int32 start_y,
 					IN int32 end_x,
@@ -113,7 +118,7 @@ line_common_image(	OUT struct CommonImage * common_image,
 
 extern
 BOOL
-rect_common_image(	OUT struct CommonImage * common_image,
+rect_common_image(	IN OUT struct CommonImage * common_image,
 					IN int32 start_x,
 					IN int32 start_y,
 					IN int32 width,
@@ -122,7 +127,7 @@ rect_common_image(	OUT struct CommonImage * common_image,
 
 extern
 BOOL
-text_common_image(	OUT struct CommonImage * common_image, 
+text_common_image(	IN OUT struct CommonImage * common_image, 
 					IN int32 draw_x,
 					IN int32 draw_y,
 					IN uint8 * enfont,
@@ -132,12 +137,18 @@ text_common_image(	OUT struct CommonImage * common_image,
 
 extern
 BOOL
-text_common_image_ml(	OUT struct CommonImage * common_image,
+text_common_image_ml(	IN OUT struct CommonImage * common_image,
 						IN int32 draw_x,
 						IN int32 draw_y,
 						IN uint8 * enfont,
 						IN int8 * text,
 						IN uint32 count,
 						IN uint32 color);
+
+extern
+BOOL
+draw_gradient_common_image(	IN OUT ImagePtr image,
+							IN uint32 left,
+							IN uint32 right);
 
 #endif

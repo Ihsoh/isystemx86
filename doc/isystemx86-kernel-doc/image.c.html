@@ -285,6 +285,48 @@
 	</div>
 </div>
 <div>
+	<a id="fill_image_by_uint32" name="fill_image_by_uint32" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">fill_image_by_uint32</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				填充4字节数据到图片。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
+	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			图片。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		data</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			4字节数据。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
 	<a id="set_pixel_common_image" name="set_pixel_common_image" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Public</div>
@@ -878,7 +920,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
 	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			图片。
 </p>
 </div>
@@ -948,7 +990,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
 	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			图片。
 </p>
 </div>
@@ -1149,7 +1191,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
 	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			图片。
 </p>
 </div>
@@ -1226,7 +1268,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
 	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			图片。
 </p>
 </div>
@@ -1303,7 +1345,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
 	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			图片。
 </p>
 </div>
@@ -1380,7 +1422,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
 	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			图片。
 </p>
 </div>
@@ -1457,7 +1499,7 @@
 		<div style="padding-left: 40px;">
 	<span style="color:#b55539; font-weight:blod;">		common_image</span>,
 	<span style="color:#428cc7; font-weight:blod;"> struct CommonImage *</span>,
-	<span style="color:#e85266; font-weight:blod;"> OUT</span>
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
 	<p style="padding-left: 40px;">			图片。
 </p>
 </div>
@@ -1501,6 +1543,55 @@
 	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
 	<span style="color:#e85266; font-weight:blod;"> IN</span>
 	<p style="padding-left: 40px;">			文本颜色。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		BOOL</span>
+		<p style="padding-left: 40px;">			返回TRUE则成功，否则失败。
+</p>
+	</div>
+</div>
+<div>
+	<a id="draw_gradient_common_image" name="draw_gradient_common_image" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">draw_gradient_common_image</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				绘制一张从左到右的渐变图像。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		image</span>,
+	<span style="color:#428cc7; font-weight:blod;"> ImagePtr</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN OUT</span>
+	<p style="padding-left: 40px;">			指向图片对象的指针。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		left</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			左边起始的颜色值。
+</p>
+</div>
+<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		right</span>,
+	<span style="color:#428cc7; font-weight:blod;"> uint32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			右边终止的颜色值。
 </p>
 </div>
 

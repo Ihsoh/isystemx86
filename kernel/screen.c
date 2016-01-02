@@ -58,6 +58,14 @@ static BOOL flush_cbuffer = TRUE;
 
 struct CommonImage * target_screen = NULL;
 
+#define	_BGMODE_IMAGE		0x00000000
+#define	_BGMODE_PURE_COLOR	0x00000001
+#define	_BGMODE_GRADIENT	0x00000002
+
+static BOOL _background_mode		= _BGMODE_IMAGE;
+static uint32 _pure_color_bg		= 0xff000000;
+static uint32 _gradient_bg_lcolor	= 0xffffffff;
+static uint32 _gradient_bg_rcolor	= 0xff000000;
 
 #define	TCOLOR				0xffffffff
 
@@ -639,6 +647,20 @@ init_screen(void)
 		clear_screen();
 	else
 	{
+		// 获取关于背景的设置。
+		uint32 uiv = 0;
+		if(config_gui_get_uint("BackgroundMode", &uiv))
+			_background_mode = uiv;
+		uiv = 0;
+		if(config_gui_get_uint("PureColorBackground", &uiv))
+			_pure_color_bg = uiv;
+		uiv = 0;
+		if(config_gui_get_uint("GradientBackgroundLeftColor", &uiv))
+			_gradient_bg_lcolor = uiv;
+		uiv = 0;
+		if(config_gui_get_uint("GradientBackgroundRightColor", &uiv))
+			_gradient_bg_rcolor = uiv;
+
 		uint32 ui;
 		char_color = CC_GRAYWHITE;
 		struct die_info info;
@@ -677,32 +699,42 @@ init_screen(void)
 			screen_char_buffer[ui + 1] = CC_BLACK;
 		}
 
-		ASCCHAR bgfile[1024];
-		if(screen_width == 640 && screen_height == 480)
-			config_gui_get_string("Background640x480", bgfile, sizeof(bgfile));
-		else if(screen_width == 800 && screen_height == 600)
-			config_gui_get_string("Background800x600", bgfile, sizeof(bgfile));
-		else if(screen_width == 1024 && screen_height == 768)
-			config_gui_get_string("Background1024x768", bgfile, sizeof(bgfile));
-		else if(screen_width == 1280 && screen_height == 1024)
-			config_gui_get_string("Background1280x1024", bgfile, sizeof(bgfile));
-		IMGLBMPPtr bgbmpobj = imgl_bmp_create(bgfile);
-		if(bgbmpobj != NULL)
+		// 使用图片来设置背景。
+		if(_background_mode == _BGMODE_IMAGE)
 		{
-			int32 bgbmp_width, bgbmp_height;
-			int32 x, y;
-			destroy_common_image(&bg_image);
-			new_empty_image0(&bg_image, screen_width, screen_height);
-			bgbmp_width = imgl_bmp_get_width(bgbmpobj);
-			bgbmp_height = imgl_bmp_get_height(bgbmpobj);
-			for(x = 0; x < (int32)screen_width && x < bgbmp_width; x++)
-				for(y = 0; y < (int32)screen_height && y < bgbmp_height; y++)
-				{
-					uint32 pixel = imgl_bmp_get_color(bgbmpobj, x, y);
-					set_pixel_common_image(&bg_image, x, y, pixel);
-				}
-			imgl_bmp_destroy(bgbmpobj);
+			ASCCHAR bgfile[1024];
+			if(screen_width == 640 && screen_height == 480)
+				config_gui_get_string("Background640x480", bgfile, sizeof(bgfile));
+			else if(screen_width == 800 && screen_height == 600)
+				config_gui_get_string("Background800x600", bgfile, sizeof(bgfile));
+			else if(screen_width == 1024 && screen_height == 768)
+				config_gui_get_string("Background1024x768", bgfile, sizeof(bgfile));
+			else if(screen_width == 1280 && screen_height == 1024)
+				config_gui_get_string("Background1280x1024", bgfile, sizeof(bgfile));
+			IMGLBMPPtr bgbmpobj = imgl_bmp_create(bgfile);
+			if(bgbmpobj != NULL)
+			{
+				int32 bgbmp_width, bgbmp_height;
+				int32 x, y;
+				destroy_common_image(&bg_image);
+				new_empty_image0(&bg_image, screen_width, screen_height);
+				bgbmp_width = imgl_bmp_get_width(bgbmpobj);
+				bgbmp_height = imgl_bmp_get_height(bgbmpobj);
+				for(x = 0; x < (int32)screen_width && x < bgbmp_width; x++)
+					for(y = 0; y < (int32)screen_height && y < bgbmp_height; y++)
+					{
+						uint32 pixel = imgl_bmp_get_color(bgbmpobj, x, y);
+						set_pixel_common_image(&bg_image, x, y, pixel);
+					}
+				imgl_bmp_destroy(bgbmpobj);
+			}
 		}
+
+		// 使用渐变色来设置背景。
+		if(_background_mode == _BGMODE_GRADIENT)
+			draw_gradient_common_image(	&bg_image,
+										_gradient_bg_lcolor,
+										_gradient_bg_rcolor);
 
 		ASCCHAR pointer_file[1024];
 		IMGLBMPPtr pointer_bmpobj = NULL;
@@ -1261,12 +1293,17 @@ flush_screen(void)
 	uint32 * screen_buffer_data_ptr = screen_buffer.data;
 	uint32 * console_screen_buffer_data_ptr = console_screen_buffer.data;
 
-	if(target_screen != NULL)
-		//rect_common_image(target_screen, 0, 0, screen_width, screen_height, 0xff000000);
-		draw_common_image(target_screen, &bg_image, 0, 0, bg_image.width, bg_image.height);
-	else
-		//rect_common_image(&screen_buffer, 0, 0, screen_width, screen_height, 0xffaaaaaa);
-		draw_common_image(&screen_buffer, &bg_image, 0, 0, bg_image.width, bg_image.height);
+	if(_background_mode == _BGMODE_PURE_COLOR)
+		if(target_screen != NULL)
+			fill_image_by_uint32(target_screen, _pure_color_bg);
+		else
+			fill_image_by_uint32(&screen_buffer, _pure_color_bg);
+	else if(_background_mode == _BGMODE_IMAGE
+			|| _background_mode == _BGMODE_GRADIENT)
+		if(target_screen != NULL)
+			draw_common_image(target_screen, &bg_image, 0, 0, bg_image.width, bg_image.height);
+		else
+			draw_common_image(&screen_buffer, &bg_image, 0, 0, bg_image.width, bg_image.height);
 
 	//绘制控制台
 	if(flush_cbuffer)

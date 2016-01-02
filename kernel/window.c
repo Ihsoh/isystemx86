@@ -11,6 +11,7 @@
 #include "image.h"
 #include "enfont.h"
 #include "mouse.h"
+#include "config.h"
 
 #include "bmp/bmp.h"
 

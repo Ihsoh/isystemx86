@@ -12,5 +12,9 @@
   "Pointer":"DA:/isystem/resources/images/pointer.bmp",
   "ENFont":"DA:/isystem/fonts/default.ef",
   "EnableENFontX":true,
-  "ENFontX":"DA:/isystem/fonts/consolab.efx"
+  "ENFontX":"DA:/isystem/fonts/consolab.efx",
+  "BackgroundMode":0x00000000,
+  "PureColorBackground":0xff388e8e,
+  "GradientBackgroundLeftColor":0xff43cd80,
+  "GradientBackgroundRightColor":0xff388e8e
 }

@@ -211,6 +211,39 @@ config_get_number(	IN JSONLObjectPtr obj,
 	return jsonl_number_value(value_raw, v);
 }
 
+/**
+	@Function:		config_get_uint
+	@Access:		Private
+	@Description:
+		获取一个JSON对象的整数类型的键值。
+	@Parameters:
+		obj, JSONLObjectPtr, IN
+			JSON对象。
+		name, int8 *, IN
+			键名。
+		v, uint32 *, OUT
+			指向用于储存键值的缓冲区。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。	
+*/
+static
+uint32
+config_get_uint(IN JSONLObjectPtr obj,
+				IN int8 * name,
+				OUT uint32 * v)
+{
+	if(	name == NULL
+		|| obj == NULL
+		|| v == NULL)
+		return FALSE;
+	JSONLRawPtr value_raw = NULL;
+	if(	!JSONL_OBJECT_GET(obj, name, &value_raw)
+		|| jsonl_value_type(value_raw) != JSONL_VALUE_TYPE_UINT)
+		return FALSE;
+	return jsonl_uint_value(value_raw, v);
+}
+
 #define	CONFIG_XXX_GET_STH(xxx, fullname)	\
 BOOL 	\
 config_##xxx##_get_string(	IN int8 * name,	\
@@ -248,6 +281,21 @@ config_##xxx##_get_number(	IN int8 * name,	\
 							OUT double * v)	\
 {	\
 	BOOL r = config_get_number(xxx##_json, name, v);	\
+	if(!r)	\
+	{	\
+		int8 buffer[1024];	\
+		strcpy_safe(buffer, sizeof(buffer), fullname" configuration object doesn't contain key '");	\
+		strcat_safe(buffer, sizeof(buffer), name);	\
+		strcat_safe(buffer, sizeof(buffer), "'(NUMBER) or other some unknow errors.");	\
+		log(LOG_ERROR, buffer);	\
+	}	\
+	return r;	\
+}	\
+BOOL	\
+config_##xxx##_get_uint(IN int8 * name,	\
+						OUT uint32 * v)	\
+{	\
+	BOOL r = config_get_uint(xxx##_json, name, v);	\
 	if(!r)	\
 	{	\
 		int8 buffer[1024];	\
