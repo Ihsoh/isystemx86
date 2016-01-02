@@ -28,6 +28,11 @@ static struct CommonImage hidden_button;
 static struct CommonImage hidden_button_hover;
 static struct CommonImage hidden_button_blur;
 
+uint32 __window_title_bar_bgcolor		= 0xff000000;
+uint32 __window_title_bar_bgcolor_nt	= 0xffffffff;
+uint32 __window_border_color			= 0xff000000;
+uint32 __window_border_color_nt			= 0xffffffff;
+
 /**
 	@Function:		load_image
 	@Access:		Private
@@ -77,6 +82,20 @@ load_image(	OUT struct CommonImage * common_image,
 BOOL
 init_window_resources(void)
 {
+	// 加载窗体的配置。
+	uint32 uiv = 0;
+	if(config_gui_get_uint("TitleBarBackgroundColor", &uiv))
+		__window_title_bar_bgcolor = uiv;
+	uiv = 0;
+	if(config_gui_get_uint("TitleBarBackgroundColorNotTop", &uiv))
+		__window_title_bar_bgcolor_nt = uiv;
+	uiv = 0;
+	if(config_gui_get_uint("WindowBorderColor", &uiv))
+		__window_border_color = uiv;
+	uiv = 0;
+	if(config_gui_get_uint("WindowBorderColorNotTop", &uiv))
+		__window_border_color_nt = uiv;
+
 	new_empty_image0(&close_button, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
 	new_empty_image0(&close_button_hover, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);
 	new_empty_image0(&close_button_blur, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT);

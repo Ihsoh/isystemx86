@@ -12,10 +12,15 @@
 #include "image.h"
 
 #define	TITLE_BAR_HEIGHT		30
-#define	TITLE_BAR_BGCOLOR		0xff8e70c9
-#define	TITLE_BAR_BGCOLOR_NT	0xffcccccc
-#define	WINDOW_BORDER_COLOR		0xff8e70c9
-#define	WINDOW_BORDER_COLOR_NT	0xffcccccc
+#define	TITLE_BAR_BGCOLOR		(__window_title_bar_bgcolor)
+#define	TITLE_BAR_BGCOLOR_NT	(__window_title_bar_bgcolor_nt)
+#define	WINDOW_BORDER_COLOR		(__window_border_color)
+#define	WINDOW_BORDER_COLOR_NT	(__window_border_color_nt)
+
+extern uint32 __window_title_bar_bgcolor;
+extern uint32 __window_title_bar_bgcolor_nt;
+extern uint32 __window_border_color;
+extern uint32 __window_border_color_nt;
 
 #define	WINDOW_STATE_NONE		0
 #define	WINDOW_STATE_SHOW		1

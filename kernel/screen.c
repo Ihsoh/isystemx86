@@ -20,6 +20,8 @@
 #include "window.h"
 #include "klib.h"
 #include "cmlock.h"
+#include "config.h"
+
 #include "bmp/bmp.h"
 
 #include "windows/clock.h"

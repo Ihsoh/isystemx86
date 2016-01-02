@@ -16,5 +16,9 @@
   "BackgroundMode":0x00000000,
   "PureColorBackground":0xff388e8e,
   "GradientBackgroundLeftColor":0xff43cd80,
-  "GradientBackgroundRightColor":0xff388e8e
+  "GradientBackgroundRightColor":0xff388e8e,
+  "TitleBarBackgroundColor":0xff8e70c9,
+  "TitleBarBackgroundColorNotTop":0xffcccccc,
+  "WindowBorderColor":0xff8e70c9,
+  "WindowBorderColorNotTop":0xffcccccc
 }
