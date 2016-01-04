@@ -72,6 +72,7 @@ static void die(ASCCHAR * message)
 
 static void init(void)
 {
+	ILRunInBackground();
 	uint32 ui, ui1;
 	for(ui = 0; ui < MAX_ROW; ui++)
 		content_buffer[ui] = NULL;
@@ -98,7 +99,6 @@ static void init(void)
 	ILGSetWindowState(_wid, WINDOW_STATE_SHOW);
 	ILGUpdate(_wid);
 	ILGFocus(_wid);
-	ILRunInBackground();
 
 	row = scr_row - 1;
 	column = scr_column - MAX_LNUM_DIGIT;
