@@ -18,6 +18,7 @@
 #include "kmpool.h"
 #include "kernel.h"
 #include "gui.h"
+#include "atapi.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -509,6 +510,9 @@ _kill_task(IN int32 tid)
 
 	// 尝试释放ATA驱动的锁。
 	hdisk_attempt_to_unlock(tid);
+
+	// 尝试释放ATAPI驱动的锁。
+	atapi_attempt_to_unlock(tid);
 
 	gui_close_windows(tid);
 
