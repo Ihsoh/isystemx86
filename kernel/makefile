@@ -51,14 +51,17 @@ CppCRTObjs=cppcrt/bin/cppcrt.obj cppcrt/bin/ctor.obj cppcrt/bin/dtor.obj
 
 ELFObjs=elf/bin/helper.obj elf/bin/parser.obj
 
+PCIObjs=pci/bin/pci.obj
+
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 Definition=-D_KERNEL_MODULE_ -D_KERNEL_DEBUG_
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin \
-$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs)
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin \
+$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
+$(ELFObjs) $(PCIObjs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(PCIObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -94,6 +97,9 @@ cppcrt/bin:
 
 elf/bin:
 	-mkdir elf/bin
+
+pci/bin:
+	-mkdir pci/bin
 
 bin/kernel.obj: kernel.c kernel.h
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include) $(Definition)
@@ -352,6 +358,10 @@ elf/bin/helper.obj: elf/helper.c
 
 elf/bin/parser.obj: elf/parser.c
 	$(CC) $(CFlags) -c elf/parser.c -o elf/bin/parser.obj $(Include) $(Definition)
+
+
+pci/bin/pci.obj: pci/pci.c
+	$(CC) $(CFlags) -c pci/pci.c -o pci/bin/pci.obj $(Include) $(Definition)
 
 
 .PHONY:clean
