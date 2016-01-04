@@ -422,6 +422,30 @@ _kill_task(IN int32 tid)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
+
+	// 确认将要被杀死的任务是否正在进行ATA磁盘的读取操作，
+	// 如果是的话则等待其完成操作。
+	int32 ll = LOCK_LEVEL;
+	int32 retry = 0x0fffffff;
+	if(ll)
+		UNLOCK_TASK();
+	while(	
+			(
+				// ATA。
+				(hdisk_locked() && hdisk_lock_tid() == tid)
+				// ATAPI。
+				|| (atapi_locked() && atapi_lock_tid() == tid)
+			)
+			&& --retry != 0);
+	if(ll)
+		LOCK_TASK();
+	// 再次确认。
+	if(	// ATA。
+		(hdisk_locked() && hdisk_lock_tid() == tid)
+		// ATAPI。
+		|| (atapi_locked() && atapi_lock_tid() == tid))
+		return FALSE;
+
 	struct Task * task = tasks + tid;
 
 	if(task->addr != NULL)
@@ -482,6 +506,9 @@ _kill_task(IN int32 tid)
 
 	// 释放与这个任务对应的系统调用。
 	free_syscall(tid);
+
+	// 尝试释放ATA驱动的锁。
+	hdisk_attempt_to_unlock(tid);
 
 	gui_close_windows(tid);
 

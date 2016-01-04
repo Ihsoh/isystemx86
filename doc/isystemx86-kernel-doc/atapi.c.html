@@ -138,6 +138,68 @@
 	</div>
 </div>
 <div>
+	<a id="atapi_lock_tid" name="atapi_lock_tid" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">atapi_lock_tid</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				获取正在占用ATAPI驱动的任务ID。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;">		int32</span>
+		<p style="padding-left: 40px;">			正在占用ATAPI驱动的任务ID。
+</p>
+	</div>
+</div>
+<div>
+	<a id="atapi_attempt_to_unlock" name="atapi_attempt_to_unlock" />
+	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
+		<div style="float:left; color:blue;">		Public</div>
+		<div style="float:left; margin-left:20px;">atapi_attempt_to_unlock</div>
+		<br style="clear:both;" />
+	</h3>
+
+	<h4>函数描述</h4>
+	<hr />
+	<p style="padding-left:40px;">
+				尝试解除ATAPI驱动的锁。<br />
+	</p>
+
+	<h4>参数描述</h4>
+	<hr />
+	<div>
+		<div style="padding-left: 40px;">
+	<span style="color:#b55539; font-weight:blod;">		tid</span>,
+	<span style="color:#428cc7; font-weight:blod;"> int32</span>,
+	<span style="color:#e85266; font-weight:blod;"> IN</span>
+	<p style="padding-left: 40px;">			任务ID。如果该值等于当前正在占用ATAPI驱动的锁的任务ID相等，则解除锁。
+</p>
+</div>
+
+	</div>
+
+	<h4>返回值描述</h4>
+	<hr />
+	<div style="padding-left: 40px;">
+		<span style="color:#428cc7; font-weight:blod;"></span>
+		<p style="padding-left: 40px;"></p>
+	</div>
+</div>
+<div>
 	<a id="atapi_read_sector" name="atapi_read_sector" />
 	<h3 style="background-color:#aaaaaa; line-height:40px; padding-left:20px;">
 		<div style="float:left; color:blue;">		Private</div>

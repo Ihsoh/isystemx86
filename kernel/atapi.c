@@ -11,10 +11,19 @@
 #include "386.h"
 #include "hdisk.h"
 #include "kernel.h"
+#include "cmlock.h"
 
 #define	MAX_RETRY	0x100
+#define	MAX_LOCK_RETRY	0x00100000
 
+#define	_LOCK_TID_NONE		-2	// 没有任何任务获取到锁。
+#define	_LOCK_TID_KERNEL	-1	// 内核获取了锁。
+
+// 如果为TRUE则说明当前有任务占用ATAPI驱动。
 static BOOL _lock = FALSE;
+
+// 指示哪个任务正在占用ATAPI驱动。
+static int32 _lock_tid	= _LOCK_TID_NONE;
 
 /**
 	@Function:		atapi_init
@@ -46,9 +55,25 @@ static
 BOOL
 _atapi_lock(void)
 {
+	// 在规定重试次数内尝试获取锁。
+	int32 i;
+	for(i = 0; i < MAX_LOCK_RETRY; i++)
+	{
+		if(!_lock)
+			break;
+		int32 i1;
+		for(i1 = 0; i1 < 0x1000; i1++)
+			asm volatile ("pause");
+	}
+
+	// 检测是否获取到锁，如果未获取则返回FALSE。
 	if(_lock)
 		return FALSE;
+
+	common_lock();
 	_lock = TRUE;
+	_lock_tid = get_running_tid();
+	common_unlock();
 	return TRUE;
 }
 
@@ -65,6 +90,7 @@ void
 _atapi_unlock(void)
 {
 	_lock = FALSE;
+	_lock_tid = _LOCK_TID_NONE;
 }
 
 /**
@@ -81,6 +107,39 @@ BOOL
 atapi_locked(void)
 {
 	return _lock;
+}
+
+/**
+	@Function:		atapi_lock_tid
+	@Access:		Public
+	@Description:
+		获取正在占用ATAPI驱动的任务ID。
+	@Parameters:
+	@Return:
+		int32
+			正在占用ATAPI驱动的任务ID。
+*/
+int32
+atapi_lock_tid(void)
+{
+	return _lock_tid;
+}
+
+/**
+	@Function:		atapi_attempt_to_unlock
+	@Access:		Public
+	@Description:
+		尝试解除ATAPI驱动的锁。
+	@Parameters:
+		tid, int32, IN
+			任务ID。如果该值等于当前正在占用ATAPI驱动的锁的任务ID相等，则解除锁。
+	@Return:
+*/
+void
+atapi_attempt_to_unlock(IN int32 tid)
+{
+	if(tid == _lock_tid)
+		_atapi_unlock();
 }
 
 /**

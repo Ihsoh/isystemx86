@@ -11,6 +11,7 @@
 #include "386.h"
 #include "log.h"
 #include "atapi.h"
+#include "cmlock.h"
 
 #include <ilib/string.h>
 
@@ -67,7 +68,14 @@ static struct HardDiskArguments hdisk1;
 #define	MAX_RETRY	0x100
 #define	MAX_LOCK_RETRY	0x00100000
 
-static BOOL lock = FALSE;
+#define	_LOCK_TID_NONE		-2	// 没有任何任务获取到锁。
+#define	_LOCK_TID_KERNEL	-1	// 内核获取了锁。
+
+// 如果为TRUE则说明当前有任务占用ATA驱动。
+static BOOL _lock		= FALSE;
+
+// 指示哪个任务正在占用ATA驱动。
+static int32 _lock_tid	= _LOCK_TID_NONE;
 
 /**
 	@Function:		lock_hdisk
@@ -87,7 +95,7 @@ lock_hdisk(void)
 	int32 i;
 	for(i = 0; i < MAX_LOCK_RETRY; i++)
 	{
-		if(!lock)
+		if(!_lock)
 			break;
 		int32 i1;
 		for(i1 = 0; i1 < 0x1000; i1++)
@@ -95,10 +103,13 @@ lock_hdisk(void)
 	}
 
 	// 检测是否获取到锁，如果未获取则返回FALSE。
-	if(lock)
+	if(_lock)
 		return FALSE;
 
-	lock = TRUE;
+	common_lock();
+	_lock = TRUE;
+	_lock_tid = get_running_tid();
+	common_unlock();
 	return TRUE;
 }
 
@@ -114,7 +125,8 @@ static
 void
 unlock_hdisk(void)
 {
-	lock = FALSE;
+	_lock = FALSE;
+	_lock_tid = _LOCK_TID_NONE;
 }
 
 /**
@@ -124,12 +136,46 @@ unlock_hdisk(void)
 		获取ATA驱动的锁的状态。
 	@Parameters:
 	@Return:
-		返回TRUE则代表ATA驱动的锁被锁定中。
+		BOOL
+			返回TRUE则代表ATA驱动的锁被锁定中。
 */
 BOOL
 hdisk_locked(void)
 {
-	return lock;
+	return _lock;
+}
+
+/**
+	@Function:		hdisk_lock_tid
+	@Access:		Public
+	@Description:
+		获取正在占用ATA驱动的任务ID。
+	@Parameters:
+	@Return:
+		int32
+			正在占用ATA驱动的任务ID。
+*/
+int32
+hdisk_lock_tid(void)
+{
+	return _lock_tid;
+}
+
+/**
+	@Function:		hdisk_attempt_to_unlock
+	@Access:		Public
+	@Description:
+		尝试解除ATA驱动的锁。
+	@Parameters:
+		tid, int32, IN
+			任务ID。如果该值等于当前正在占用ATA驱动的锁的任务ID相等，则解除锁。
+	@Return:
+*/
+void
+hdisk_attempt_to_unlock(IN int32 tid)
+{
+	if(tid == _lock_tid)
+		unlock_hdisk();
 }
 
 /**
@@ -421,11 +467,14 @@ read_sector_h(	IN int8 * symbol,
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
-		if(_read_sector_h(symbol, pos, buffer))
+	{
+		BOOL r = _read_sector_h(symbol, pos, buffer);
+		if(r)
 		{
 			unlock_hdisk();
 			return TRUE;
 		}
+	}
 	unlock_hdisk();
 	return FALSE;
 }
@@ -510,11 +559,14 @@ write_sector_h(	IN int8 * symbol,
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
-		if(_write_sector_h(symbol, pos, buffer))
+	{
+		BOOL r = _write_sector_h(symbol, pos, buffer);
+		if(r)
 		{
 			unlock_hdisk();
 			return TRUE;
 		}
+	}
 	unlock_hdisk();
 	return FALSE;
 }
@@ -611,11 +663,14 @@ read_sectors_h(	IN int8 * symbol,
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
-		if(_read_sectors_h(symbol, pos, count, buffer))
+	{
+		BOOL r = _read_sectors_h(symbol, pos, count, buffer);
+		if(r)
 		{
 			unlock_hdisk();
 			return TRUE;
 		}
+	}
 	unlock_hdisk();
 	return FALSE;
 }
@@ -712,11 +767,14 @@ write_sectors_h(IN int8 * symbol,
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
-		if(_write_sectors_h(symbol, pos, count, buffer))
+	{
+		BOOL r = _write_sectors_h(symbol, pos, count, buffer);
+		if(r)
 		{
 			unlock_hdisk();
 			return TRUE;
 		}
+	}
 	unlock_hdisk();
 	return FALSE;
 }

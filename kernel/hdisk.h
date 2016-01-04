@@ -15,6 +15,14 @@ BOOL
 hdisk_locked(void);
 
 extern
+int32
+hdisk_lock_tid(void);
+
+extern
+void
+hdisk_attempt_to_unlock(IN int32 tid);
+
+extern
 uint32
 init_hdisk(void);
 

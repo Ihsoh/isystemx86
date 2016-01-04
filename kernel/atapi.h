@@ -55,6 +55,14 @@ atapi_locked(void);
 
 extern
 int32
+atapi_lock_tid(void);
+
+extern
+void
+atapi_attempt_to_unlock(IN int32 tid);
+
+extern
+int32
 atapi_read_sector(	IN uint32 bus,
 					IN uint32 drive,
 					IN uint32 lba,

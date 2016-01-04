@@ -86,4 +86,6 @@
 
 extern int32 lock_level;
 
+#define	LOCK_LEVEL	(lock_level)
+
 #endif
