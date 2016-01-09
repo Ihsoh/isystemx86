@@ -35,6 +35,7 @@
 #include "windows/wmgr.h"
 #include "windows/run.h"
 #include "windows/dbgout.h"
+#include "windows/taskmgr.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -782,6 +783,7 @@ init_screen(void)
 		explorer_window_init();
 		run_window_init();
 		dbgout_window_init();
+		taskmgr_window_init();
 	}
 }
 

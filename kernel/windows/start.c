@@ -15,19 +15,23 @@
 
 #include "message.h"
 #include "power.h"
+#include "taskmgr.h"
+#include "run.h"
 
 #include "../window/control.h"
 #include "../window/button.h"
 #include "../window/list.h"
 
-#define	_ITEM_COUNT		5
+#define	_ITEM_COUNT		7
 #define	_ITEM_MAX_LEN	20
 
 #define	_ITEM_ID_SETTING		0
 #define	_ITEM_ID_EXPLORER		1
 #define	_ITEM_ID_ABOUT			2
-#define	_ITEM_ID_POWER			3
-#define	_ITEM_ID_CLOSE			4
+#define	_ITEM_ID_TASKMGR		3
+#define	_ITEM_ID_RUN			4
+#define	_ITEM_ID_POWER			5
+#define	_ITEM_ID_CLOSE			6
 
 #define	_WIDTH		(BUTTON_LPADDING + _ITEM_MAX_LEN * ENFONT_WIDTH + BUTTON_RPADDING)
 #define	_HEIGHT		(24 * _ITEM_COUNT)
@@ -107,6 +111,16 @@ _control_event(	IN uint32 id,
 										0xff000000, 0xffffffff);
 					break;
 				}
+				case _ITEM_ID_TASKMGR:
+				{
+					taskmgr_window_show();
+					break;
+				}
+				case _ITEM_ID_RUN:
+				{
+					run_window_show();
+					break;
+				}
 				case _ITEM_ID_POWER:
 					power_window_show();
 					break;
@@ -171,11 +185,13 @@ start_window_init(void)
 				"",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event);
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_SETTING, 	"Setting           > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_SETTING,		"Setting           > ");
 	SET_LIST_TEXT(_lst_start, _ITEM_ID_EXPLORER,	"Explorer          > ");
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_POWER, 		"Power             > ");
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_ABOUT, 		"About             > ");
-	SET_LIST_TEXT(_lst_start, _ITEM_ID_CLOSE, 		"Close               ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_POWER,		"Power             > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_TASKMGR,		"Task Manager      > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_RUN,			"Run               > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_ABOUT,		"About             > ");
+	SET_LIST_TEXT(_lst_start, _ITEM_ID_CLOSE,		"Close               ");
 	uint32 ui;
 	for(ui = 0; ui < _lst_start->count; ui++)
 		_lst_start->buttons[ui].style = BUTTON_STYLE_REFRESH;
