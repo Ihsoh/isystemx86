@@ -8,7 +8,7 @@ Out=kernel.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
 AS=as
-CFlags= -O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386
+CFlags= -O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 -w
 ASFlags=--32 -march=i386 -mtune=i386
 
 CPP=g++

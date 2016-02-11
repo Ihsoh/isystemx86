@@ -46,6 +46,8 @@
 
 #include "fs/ifs1/fs.h"
 
+#include "pci/pci.h"
+
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
 #include <pathlib/pathlib.h>
@@ -196,13 +198,16 @@ main(void)
 	init_xf();
 	init_interrupt();
 
+	// 初始化PCI。
+	pci_init_devices();
+
 	init_disk("VA");
 	init_disk("VB");
 	init_disk("HD");
 	init_ide();
 	init_ide1();
 
-	ahci_init();
+	// ahci_init();
 
 	// 初始化外部库。DSLIB，JSONLIB，PATHLIB, MEMPOOLLIB。 
 	init_dsl();

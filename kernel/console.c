@@ -2429,6 +2429,34 @@ exec(	IN int8 * cmd,
 			fix_path(path, current_path, path);
 			detail_window_show(path);
 		}
+		else if(strcmp(name, "ahci") == 0)
+		{
+			#include "ahci.h"
+			ahci_init();
+
+			printn(ahci_port_count());
+			print_str("\n");
+
+			HBA_PORT * port = ahci_port(0);
+			uint8 buffer[KB(64)];
+			buffer[0] = 'A';
+			buffer[1] = 'B';
+			buffer[2] = '\0';
+
+			printn(ahci_write(port, 0, 0, KB(3) / 512, buffer));
+			print_str("\n");
+
+			buffer[0] = '\0';
+			buffer[1] = '\0';
+			buffer[2] = '\0';
+
+			printn(ahci_read(port, 0, 0, KB(3) / 512, buffer));
+			print_str("\n");
+
+			print_str(buffer);
+			print_str("\n");
+
+		}
 		#ifdef _KERNEL_DEBUG_
 		// Kernel Unit Test
 		else if(strcmp(name, "kernel-unit-test") == 0)

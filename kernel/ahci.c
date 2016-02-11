@@ -9,170 +9,427 @@
 #include "ahci.h"
 #include "types.h"
 
-typedef enum
+#include "pci/pci.h"
+
+#include "screen.h"
+
+#define SATA_SIG_ATA			0x00000101  // SATA drive
+#define SATA_SIG_ATAPI			0xEB140101  // SATAPI drive
+#define SATA_SIG_SEMB			0xC33C0101  // Enclosure management bridge
+#define SATA_SIG_PM				0x96690101  // Port multiplier
+#define AHCI_DEV_NULL			0
+#define AHCI_DEV_SATA			1
+#define AHCI_DEV_SATAPI			4
+#define AHCI_DEV_SEMB			2
+#define AHCI_DEV_PM				3
+#define HBA_PORT_DET_PRESENT	3
+#define HBA_PORT_IPM_ACTIVE		1
+#define AHCI_BASE				0x400000    // 4M
+#define HBA_PxCMD_CR            (1 << 15) /* CR - Command list Running */
+#define HBA_PxCMD_FR            (1 << 14) /* FR - FIS receive Running */
+#define HBA_PxCMD_FRE           (1 <<  4) /* FRE - FIS Receive Enable */
+#define HBA_PxCMD_SUD           (1 <<  1) /* SUD - Spin-Up Device */
+#define HBA_PxCMD_ST            (1 <<  0) /* ST - Start (command processing) */
+#define ATA_DEV_BUSY			0x80
+#define ATA_DEV_DRQ				0x08
+
+#define ATA_DEV_BUSY			0x80
+#define ATA_DEV_DRQ				0x08
+
+#define ATA_DEV_BUSY			0x80
+#define ATA_DEV_DRQ				0x08
+#define HBA_PxIS_TFES			(1 << 30)       /* TFES - Task File Error Status */
+#define ATA_CMD_READ_DMA_EX		0x25
+#define ATA_CMD_WRITE_DMA_EX	0x35
+
+#define	_MAX_DEVICE_COUNT	4
+#define	_MAX_PORT_COUNT		16
+
+typedef struct 
 {
-	FIS_TYPE_REG_H2D	= 0x27,	// Register FIS - host to device
-	FIS_TYPE_REG_D2H	= 0x34,	// Register FIS - device to host
-	FIS_TYPE_DMA_ACT	= 0x39,	// DMA activate FIS - device to host
-	FIS_TYPE_DMA_SETUP	= 0x41,	// DMA setup FIS - bidirectional
-	FIS_TYPE_DATA		= 0x46,	// Data FIS - bidirectional
-	FIS_TYPE_BIST		= 0x58,	// BIST activate FIS - bidirectional
-	FIS_TYPE_PIO_SETUP	= 0x5F,	// PIO setup FIS - device to host
-	FIS_TYPE_DEV_BITS	= 0xA1,	// Set device bits FIS - device to host
-} FIS_TYPE;
+	HBA_PORT *	port;
+	HBA_MEM *	abar;
+} AHCIPort, * AHCIPortPtr;
 
-typedef struct
+static uint32 _devices[_MAX_DEVICE_COUNT];
+static uint32 _devcnt = 0;
+static AHCIPort _ports[_MAX_PORT_COUNT];
+static uint32 _prtcnt = 0;
+
+uint32
+ahci_port_count(void)
 {
-	// DWORD 0
-	BYTE	fis_type;	// FIS_TYPE_REG_H2D
- 
-	BYTE	pmport:4;	// Port multiplier
-	BYTE	rsv0:3;		// Reserved
-	BYTE	c:1;		// 1: Command, 0: Control
- 
-	BYTE	command;	// Command register
-	BYTE	featurel;	// Feature register, 7:0
- 
-	// DWORD 1
-	BYTE	lba0;		// LBA low register, 7:0
-	BYTE	lba1;		// LBA mid register, 15:8
-	BYTE	lba2;		// LBA high register, 23:16
-	BYTE	device;		// Device register
- 
-	// DWORD 2
-	BYTE	lba3;		// LBA register, 31:24
-	BYTE	lba4;		// LBA register, 39:32
-	BYTE	lba5;		// LBA register, 47:40
-	BYTE	featureh;	// Feature register, 15:8
- 
-	// DWORD 3
-	BYTE	countl;		// Count register, 7:0
-	BYTE	counth;		// Count register, 15:8
-	BYTE	icc;		// Isochronous command completion
-	BYTE	control;	// Control register
- 
-	// DWORD 4
-	BYTE	rsv1[4];	// Reserved
-} FIS_REG_H2D;
+	return _prtcnt;
+}
 
-typedef struct
+HBA_PORT *
+ahci_port(uint32 index)
 {
-	// DWORD 0
-	BYTE	fis_type;    // FIS_TYPE_REG_D2H
- 
-	BYTE	pmport:4;    // Port multiplier
-	BYTE	rsv0:2;      // Reserved
-	BYTE	i:1;         // Interrupt bit
-	BYTE	rsv1:1;      // Reserved
- 
-	BYTE	status;      // Status register
-	BYTE	error;       // Error register
- 
-	// DWORD 1
-	BYTE	lba0;        // LBA low register, 7:0
-	BYTE	lba1;        // LBA mid register, 15:8
-	BYTE	lba2;        // LBA high register, 23:16
-	BYTE	device;      // Device register
- 
-	// DWORD 2
-	BYTE	lba3;        // LBA register, 31:24
-	BYTE	lba4;        // LBA register, 39:32
-	BYTE	lba5;        // LBA register, 47:40
-	BYTE	rsv2;        // Reserved
- 
-	// DWORD 3
-	BYTE	countl;      // Count register, 7:0
-	BYTE	counth;      // Count register, 15:8
-	BYTE	rsv3[2];     // Reserved
- 
-	// DWORD 4
-	BYTE	rsv4[4];     // Reserved
-} FIS_REG_D2H;
+	if(index >= _prtcnt)
+		return NULL;
+	return _ports[index].port;
+}
 
-typedef struct
+static
+HBA_MEM *
+_get_abar_by_port(IN HBA_PORT * port)
 {
-	// DWORD 0
-	BYTE	fis_type;	// FIS_TYPE_DATA
- 
-	BYTE	pmport:4;	// Port multiplier
-	BYTE	rsv0:4;		// Reserved
- 
-	BYTE	rsv1[2];	// Reserved
- 
-	// DWORD 1 ~ N
-	DWORD	data[1];	// Payload
-} FIS_DATA;
+	uint32 ui;
+	for(ui = 0; ui < _prtcnt; ui++)
+		if(_ports[ui].port == port)
+			return _ports[ui].abar;
+	return NULL;
+}
 
-typedef struct
+static
+void
+_check_all_devices(void)
 {
-	// DWORD 0
-	BYTE	fis_type;	// FIS_TYPE_PIO_SETUP
- 
-	BYTE	pmport:4;	// Port multiplier
-	BYTE	rsv0:1;		// Reserved
-	BYTE	d:1;		// Data transfer direction, 1 - device to host
-	BYTE	i:1;		// Interrupt bit
-	BYTE	rsv1:1;
- 
-	BYTE	status;		// Status register
-	BYTE	error;		// Error register
- 
-	// DWORD 1
-	BYTE	lba0;		// LBA low register, 7:0
-	BYTE	lba1;		// LBA mid register, 15:8
-	BYTE	lba2;		// LBA high register, 23:16
-	BYTE	device;		// Device register
- 
-	// DWORD 2
-	BYTE	lba3;		// LBA register, 31:24
-	BYTE	lba4;		// LBA register, 39:32
-	BYTE	lba5;		// LBA register, 47:40
-	BYTE	rsv2;		// Reserved
- 
-	// DWORD 3
-	BYTE	countl;		// Count register, 7:0
-	BYTE	counth;		// Count register, 15:8
-	BYTE	rsv3;		// Reserved
-	BYTE	e_status;	// New value of status register
- 
-	// DWORD 4
-	WORD	tc;		// Transfer count
-	BYTE	rsv4[2];	// Reserved
-} FIS_PIO_SETUP;
+	_devcnt = 0;
+	uint32 count = pci_device_count();
+	uint32 index;
+	for(index = 0; index < count; index++)
+	{
+		PCIDeviceInfoPtr device = pci_device(index);
+		if(	device != NULL
+			&& device->header->cfg_hdr.cc[2] == PCI_CLS_MASS_STORAGE_CONTROLLER
+			&& device->header->cfg_hdr.cc[1] == 0x06
+			&& device->header->cfg_hdr.cc[0] == 0x01)	// Serial ATA (AHCI 1.0)。
+			_devices[_devcnt++] = index;
+	}
+}
 
-typedef struct
+static
+int32
+_check_type(IN HBA_PORT * port)
 {
-	// DWORD 0
-	BYTE	fis_type;	// FIS_TYPE_DMA_SETUP
+	DWORD ssts = port->ssts;
+	BYTE ipm = (ssts >> 8) & 0x0f;
+	BYTE det = ssts & 0x0f;
+
+	if(det != HBA_PORT_DET_PRESENT)
+		return AHCI_DEV_NULL;
+	if(ipm != HBA_PORT_IPM_ACTIVE)
+		return AHCI_DEV_NULL;
+
+	switch(port->sig)
+	{
+		case SATA_SIG_ATAPI:
+			return AHCI_DEV_SATAPI;
+		case SATA_SIG_SEMB:
+			return AHCI_DEV_SEMB;
+		case SATA_SIG_PM:
+			return AHCI_DEV_PM;
+		default:
+			return AHCI_DEV_SATA;
+	}
+
+	return AHCI_DEV_NULL;
+}
+
+static
+void
+_start_cmd(IN OUT HBA_PORT * port)
+{
+	// Wait until CR (bit15) is cleared
+	while (port->cmd & HBA_PxCMD_CR);
+
+	// Set FRE (bit4) and ST (bit0)
+	port->cmd |= HBA_PxCMD_FRE;
+	port->cmd |= HBA_PxCMD_ST; 
+}
+
+static
+void
+_stop_cmd(IN OUT HBA_PORT * port)
+{
+	// Clear ST (bit0)
+	port->cmd &= ~HBA_PxCMD_ST;
+
+	// Clear FRE (bit4)
+	port->cmd &= ~HBA_PxCMD_FRE;
  
-	BYTE	pmport:4;	// Port multiplier
-	BYTE	rsv0:1;		// Reserved
-	BYTE	d:1;		// Data transfer direction, 1 - device to host
-	BYTE	i:1;		// Interrupt bit
-	BYTE	a:1;            // Auto-activate. Specifies if DMA Activate FIS is needed
+	// Wait until FR (bit14), CR (bit15) are cleared
+	while(1)
+	{
+		if (port->cmd & HBA_PxCMD_FR)
+			continue;
+		if (port->cmd & HBA_PxCMD_CR)
+			continue;
+		break;
+	}
  
-	BYTE    rsved[2];       // Reserved
+	
+}
 
-	//DWORD 1&2
-
-	QWORD   DMAbufferID;    // DMA Buffer Identifier. Used to Identify DMA buffer in host memory. SATA Spec says host specific and not in Spec. Trying AHCI spec might work.
-
-	//DWORD 3
-	DWORD   rsvd;           //More reserved
-
-	//DWORD 4
-	DWORD   DMAbufOffset;   //Byte offset into buffer. First 2 bits must be 0
-
-	//DWORD 5
-	DWORD   TransferCount;  //Number of bytes to transfer. Bit 0 must be 0
-
-	//DWORD 6
-	DWORD   resvd;          //Reserved
+static
+void
+_port_rebase(	IN OUT HBA_PORT * port,
+				IN uint32 portno)
+{
+	_stop_cmd(port);	// Stop command engine
  
-} FIS_DMA_SETUP;
+	// Command list offset: 1K*portno
+	// Command list entry size = 32
+	// Command list entry maxim count = 32
+	// Command list maxim size = 32*32 = 1K per port
+	port->clb = AHCI_BASE + (portno << 10);
+	port->clbu = 0;
+	memset((void *)(port->clb), 0, 1024);
+ 
+	// FIS offset: 32K+256*portno
+	// FIS entry size = 256 bytes per port
+	port->fb = AHCI_BASE + (32 << 10) + (portno << 8);
+	port->fbu = 0;
+	memset((void *)(port->fb), 0, 256);
+ 
+	// Command table offset: 40K + 8K*portno
+	// Command table size = 256*32 = 8K per port
+	HBA_CMD_HEADER * cmdheader = (HBA_CMD_HEADER *)(port->clb);
+	uint32 ui;
+	for(ui = 0; ui < 32; ui++)
+	{
+		cmdheader[ui].prdtl = 8;	// 8 prdt entries per command table
+					// 256 bytes per command table, 64+16+48+16*8
+		// Command table offset: 40K + 8K*portno + cmdheader_index*256
+		cmdheader[ui].ctba = AHCI_BASE + (40 << 10) + (portno << 13) + (ui << 8);
+		cmdheader[ui].ctbau = 0;
+		memset((void *)cmdheader[ui].ctba, 0, 256);
+	}
+ 
+	_start_cmd(port);	// Start command engine
+}
+
+static
+void
+_probe_port(void)
+{
+	uint32 devidx;
+	for(devidx = 0; devidx < _devcnt; devidx++)
+	{
+		PCIDeviceInfoPtr device = pci_device(_devices[devidx]);
+		if(device == NULL)
+			return;
+		HBA_MEM * abar = (HBA_MEM *)device->header->cfg_hdr.abar;
+		DWORD pi = abar->pi;
+		uint32 ui;
+		for(ui = 0; ui < 32; ui++)
+			if((pi >> ui) & 0x1)
+			{
+				int32 dt = _check_type((HBA_PORT *)&abar->ports[ui]);
+				switch(dt)
+				{
+					case AHCI_DEV_SATA:
+					{
+						AHCIPortPtr port = &_ports[_prtcnt++];
+						port->abar = abar;
+						port->port = (HBA_PORT *)&abar->ports[ui];
+						_port_rebase(port->port, ui);
+						if(_prtcnt == _MAX_PORT_COUNT)
+							return;
+						break;
+					}
+					case AHCI_DEV_SATAPI:
+					{
+						break;
+					}
+					case AHCI_DEV_SEMB:
+					{
+						break;
+					}
+					case AHCI_DEV_PM:
+					{
+						break;
+					}
+				}
+			}
+	}
+}
+
+static
+int32
+_find_cmdslot(IN HBA_PORT * port)
+{
+	// If not set in SACT and CI, the slot is free
+	DWORD slots = (port->sact | port->ci);
+	HBA_MEM * abar = _get_abar_by_port(port);
+	int32 n = (abar->cap & 0x0f00) >> 8;
+	int32 i;
+	for(i = 0; i < n; i++)
+	{
+		if ((slots & 1) == 0)
+			return i;
+		slots >>= 1;
+	}
+	return -1;
+}
+
+BOOL
+ahci_read(	IN OUT HBA_PORT * port,
+			IN DWORD startl,
+			IN DWORD starth,
+			IN DWORD count,
+			OUT WORD * buf)
+{
+	port->is = (DWORD)-1;
+	int32 spin = 0;
+	int32 slot = _find_cmdslot(port);
+	if(slot == -1)
+		return FALSE;
+
+	HBA_CMD_HEADER * cmdheader = (HBA_CMD_HEADER *)port->clb;
+	cmdheader += slot;
+	cmdheader->cfl = sizeof(FIS_REG_H2D) / sizeof(DWORD);
+	cmdheader->w = 0;
+	cmdheader->c = 1;
+	cmdheader->p = 1;
+	cmdheader->prdtl = (WORD)((count - 1) >> 4) + 1;
+
+	HBA_CMD_TBL * cmdtbl = (HBA_CMD_TBL *)cmdheader->ctba;
+	memset(	cmdtbl,
+			0,
+			sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
+
+	int32 i;
+	for(i = 0; i < cmdheader->prdtl - 1; i++)
+	{
+		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
+		cmdtbl->prdt_entry[i].dbc = 8 * 1024;
+		cmdtbl->prdt_entry[i].i = 0;
+		buf += 4 * 1024;
+		count -= 16;
+	}
+
+	cmdtbl->prdt_entry[i].dba = (DWORD)buf;
+	cmdtbl->prdt_entry[i].dbc = count << 9;
+	cmdtbl->prdt_entry[i].i = 0;
+
+	FIS_REG_H2D * cmdfis = (FIS_REG_H2D *)&cmdtbl->cfis;
+
+	cmdfis->fis_type = FIS_TYPE_REG_H2D;
+	cmdfis->c = 1;
+	cmdfis->command = ATA_CMD_READ_DMA_EX;
+
+	cmdfis->lba0 = (BYTE)startl;
+	cmdfis->lba1 = (BYTE)(startl >> 8);
+	cmdfis->lba2 = (BYTE)(startl >> 16);
+	cmdfis->device = 1 << 6;
+
+	cmdfis->lba3 = (BYTE)(startl >> 24);
+	cmdfis->lba4 = (BYTE)starth;
+	cmdfis->lba5 = (BYTE)(starth >> 8);
+
+	cmdfis->countl = (BYTE)count;
+	cmdfis->counth = (BYTE)(count >> 8);
+
+	while((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < 1000000)
+		spin++;
+	if(spin == 1000000)
+		return FALSE;
+
+	port->ci = 1 << slot;
+
+	while(1)
+	{
+		if((port->ci & (1 << slot)) == 0)
+			break;
+		if(port->is & HBA_PxIS_TFES)
+			return FALSE; 
+	}
+
+	if(port->is & HBA_PxIS_TFES)
+		return FALSE;
+
+	while(port->ci != 0);
+
+	return TRUE;
+}
+
+BOOL
+ahci_write(	IN OUT HBA_PORT * port,
+			IN DWORD startl,
+			IN DWORD starth,
+			IN DWORD count,
+			IN WORD * buf)
+{
+	port->is = (DWORD)-1;
+	int32 spin = 0;
+	int32 slot = _find_cmdslot(port);
+	if(slot == -1)
+		return FALSE;
+
+	HBA_CMD_HEADER * cmdheader = (HBA_CMD_HEADER *)port->clb;
+	cmdheader += slot;
+	cmdheader->cfl = sizeof(FIS_REG_H2D) / sizeof(DWORD);
+	cmdheader->w = 1;
+	cmdheader->c = 1;
+	cmdheader->p = 1;
+	cmdheader->prdtl = (WORD)((count - 1) >> 4) + 1;
+
+	HBA_CMD_TBL * cmdtbl = (HBA_CMD_TBL *)cmdheader->ctba;
+	memset(	cmdtbl,
+			0,
+			sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
+
+	int32 i;
+	for(i = 0; i < cmdheader->prdtl - 1; i++)
+	{
+		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
+		cmdtbl->prdt_entry[i].dbc = 8 * 1024;
+		cmdtbl->prdt_entry[i].i = 0;
+		buf += 4 * 1024;
+		count -= 16;
+	}
+
+	cmdtbl->prdt_entry[i].dba = (DWORD)buf;
+	cmdtbl->prdt_entry[i].dbc = count << 9;
+	cmdtbl->prdt_entry[i].i = 0;
+
+	FIS_REG_H2D * cmdfis = (FIS_REG_H2D *)&cmdtbl->cfis;
+
+	cmdfis->fis_type = FIS_TYPE_REG_H2D;
+	cmdfis->c = 1;
+	cmdfis->command = ATA_CMD_WRITE_DMA_EX;
+
+	cmdfis->lba0 = (BYTE)startl;
+	cmdfis->lba1 = (BYTE)(startl >> 8);
+	cmdfis->lba2 = (BYTE)(startl >> 16);
+	cmdfis->device = 1 << 6;
+
+	cmdfis->lba3 = (BYTE)(startl >> 24);
+	cmdfis->lba4 = (BYTE)starth;
+	cmdfis->lba5 = (BYTE)(starth >> 8);
+
+	cmdfis->countl = (BYTE)count;
+	cmdfis->counth = (BYTE)(count >> 8);
+
+	while((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < 1000000)
+		spin++;
+	if(spin == 1000000)
+		return FALSE;
+
+	port->ci = 1 << slot;
+
+	while(1)
+	{
+		if((port->ci & (1 << slot)) == 0)
+			break;
+		if(port->is & HBA_PxIS_TFES)
+			return FALSE; 
+	}
+
+	if(port->is & HBA_PxIS_TFES)
+		return FALSE;
+
+	while(port->ci != 0);
+
+	return TRUE;
+}
 
 BOOL
 ahci_init(void)
 {
+	_check_all_devices();
+	_probe_port();
 	return TRUE;
 }

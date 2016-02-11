@@ -12,9 +12,19 @@
 #include "../386.h"
 #include "../memory.h"
 
-static PCIDevicePtr _devices	= NULL;
-static uint32 _devcount			= 0;
+static PCIDeviceInfoPtr _devices	= NULL;
+static uint32 _devcount				= 0;
 
+/**
+	@Function:		_scan_devices
+	@Access:		Private
+	@Description:
+		扫描所有总线的所有槽来检测设备。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 static
 BOOL
 _scan_devices(void)
@@ -41,8 +51,7 @@ _scan_devices(void)
 			uint32 data = inl(PCI_CONFIG_DATA);
 			if(data == 0xffffffff)
 				continue;
-			_devcount++;
-			PCIDevicePtr dev = &_devices[_devcount];
+			PCIDeviceInfoPtr dev = &_devices[_devcount++];
 			dev->bus = bus;
 			dev->slot = slot;
 			dev->header = (PCIHeaderPtr)alloc_memory(sizeof(PCIHeader));
@@ -51,7 +60,10 @@ _scan_devices(void)
 			uint32 ui;
 			uint32 * header = (uint32 *)dev->header;
 			for(ui = 0; ui < sizeof(PCIHeader) / 4; ui++)
-				header[ui] = inl(addr | (ui << 2));
+			{
+				outl(PCI_CONFIG_ADDRESS, addr | (ui << 2));
+				header[ui] = inl(PCI_CONFIG_DATA);
+			}
 			if(_devcount == PCI_MAX_DEVICE_COUNT)
 				goto ok;
 		}
@@ -61,15 +73,33 @@ err:
 	return FALSE;
 }
 
+/**
+	@Function:		pci_init_devices
+	@Access:		Public
+	@Description:
+		初始化PCI设备所需的资源，并扫描总线获取设备信息。
+	@Parameters:
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 pci_init_devices(void)
 {
-	_devices = (PCIDevicePtr)alloc_memory(PCI_MAX_DEVICE_COUNT * sizeof(PCIDevice));
+	_devices = (PCIDeviceInfoPtr)alloc_memory(PCI_MAX_DEVICE_COUNT * sizeof(PCIDeviceInfo));
 	if(_devices == NULL)
 		return FALSE;
 	return _scan_devices();
 }
 
+/**
+	@Function:		pci_free_devices
+	@Access:		Public
+	@Description:
+		释放PCI设备所占用的资源。
+	@Parameters:
+	@Return:
+*/
 void
 pci_free_devices(void)
 {
@@ -86,16 +116,38 @@ pci_free_devices(void)
 	_devices = NULL;
 }
 
+/**
+	@Function:		pci_device_count
+	@Access:		Public
+	@Description:
+		获取PCI设备的数量。
+	@Parameters:
+	@Return:
+		uint32
+			PCI设备的数量。
+*/
 uint32
 pci_device_count(void)
 {
 	return _devcount;
 }
 
-PCIDevicePtr
-pci_device(uint32 index)
+/**
+	@Function:		pci_device
+	@Access:		Public
+	@Description:
+		获取PCI设备的信息。
+	@Parameters:
+		index, uint32, IN
+			PCI设备的索引。
+	@Return:
+		PCIDeviceInfoPtr
+			指向PCI设备信息对象的指针。
+*/
+PCIDeviceInfoPtr
+pci_device(IN uint32 index)
 {
 	if(index >= _devcount)
 		return NULL;
-	return &_devices[_devcount];
+	return &_devices[index];
 }

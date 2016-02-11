@@ -74,7 +74,7 @@ typedef struct
 	uint8			bus;
 	uint8			slot;
 	PCIHeaderPtr 	header;
-} PCIDevice, * PCIDevicePtr;
+} PCIDeviceInfo, * PCIDeviceInfoPtr;
 
 
 
@@ -91,7 +91,7 @@ uint32
 pci_device_count(void);
 
 extern
-PCIDevicePtr
-pci_device(uint32 index);
+PCIDeviceInfoPtr
+pci_device(IN uint32 index);
 
 #endif
