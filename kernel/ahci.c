@@ -11,7 +11,7 @@
 
 #include "pci/pci.h"
 
-#include "screen.h"
+#include "memory.h"
 
 #define SATA_SIG_ATA			0x00000101  // SATA drive
 #define SATA_SIG_ATAPI			0xEB140101  // SATAPI drive
@@ -24,17 +24,12 @@
 #define AHCI_DEV_PM				3
 #define HBA_PORT_DET_PRESENT	3
 #define HBA_PORT_IPM_ACTIVE		1
-#define AHCI_BASE				0x400000    // 4M
+#define AHCI_BASE				(_ahci_base)
 #define HBA_PxCMD_CR            (1 << 15) /* CR - Command list Running */
 #define HBA_PxCMD_FR            (1 << 14) /* FR - FIS receive Running */
 #define HBA_PxCMD_FRE           (1 <<  4) /* FRE - FIS Receive Enable */
 #define HBA_PxCMD_SUD           (1 <<  1) /* SUD - Spin-Up Device */
 #define HBA_PxCMD_ST            (1 <<  0) /* ST - Start (command processing) */
-#define ATA_DEV_BUSY			0x80
-#define ATA_DEV_DRQ				0x08
-
-#define ATA_DEV_BUSY			0x80
-#define ATA_DEV_DRQ				0x08
 
 #define ATA_DEV_BUSY			0x80
 #define ATA_DEV_DRQ				0x08
@@ -55,6 +50,7 @@ static uint32 _devices[_MAX_DEVICE_COUNT];
 static uint32 _devcnt = 0;
 static AHCIPort _ports[_MAX_PORT_COUNT];
 static uint32 _prtcnt = 0;
+static void * _ahci_base = NULL;
 
 uint32
 ahci_port_count(void)
@@ -190,8 +186,8 @@ _port_rebase(	IN OUT HBA_PORT * port,
 	for(ui = 0; ui < 32; ui++)
 	{
 		cmdheader[ui].prdtl = 8;	// 8 prdt entries per command table
-					// 256 bytes per command table, 64+16+48+16*8
-		// Command table offset: 40K + 8K*portno + cmdheader_index*256
+									// 256 bytes per command table, 64+16+48+16*8
+									// Command table offset: 40K + 8K*portno + cmdheader_index*256
 		cmdheader[ui].ctba = AHCI_BASE + (40 << 10) + (portno << 13) + (ui << 8);
 		cmdheader[ui].ctbau = 0;
 		memset((void *)cmdheader[ui].ctba, 0, 256);
@@ -291,17 +287,18 @@ ahci_read(	IN OUT HBA_PORT * port,
 			sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
 
 	int32 i;
+	DWORD c = count;
 	for(i = 0; i < cmdheader->prdtl - 1; i++)
 	{
 		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
 		cmdtbl->prdt_entry[i].dbc = 8 * 1024;
 		cmdtbl->prdt_entry[i].i = 0;
 		buf += 4 * 1024;
-		count -= 16;
+		c -= 16;
 	}
 
 	cmdtbl->prdt_entry[i].dba = (DWORD)buf;
-	cmdtbl->prdt_entry[i].dbc = count << 9;
+	cmdtbl->prdt_entry[i].dbc = c << 9;
 	cmdtbl->prdt_entry[i].i = 0;
 
 	FIS_REG_H2D * cmdfis = (FIS_REG_H2D *)&cmdtbl->cfis;
@@ -372,17 +369,18 @@ ahci_write(	IN OUT HBA_PORT * port,
 			sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
 
 	int32 i;
+	DWORD c = count;
 	for(i = 0; i < cmdheader->prdtl - 1; i++)
 	{
 		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
 		cmdtbl->prdt_entry[i].dbc = 8 * 1024;
 		cmdtbl->prdt_entry[i].i = 0;
 		buf += 4 * 1024;
-		count -= 16;
+		c -= 16;
 	}
 
 	cmdtbl->prdt_entry[i].dba = (DWORD)buf;
-	cmdtbl->prdt_entry[i].dbc = count << 9;
+	cmdtbl->prdt_entry[i].dbc = c << 9;
 	cmdtbl->prdt_entry[i].i = 0;
 
 	FIS_REG_H2D * cmdfis = (FIS_REG_H2D *)&cmdtbl->cfis;
@@ -429,6 +427,9 @@ ahci_write(	IN OUT HBA_PORT * port,
 BOOL
 ahci_init(void)
 {
+	_ahci_base = alloc_memory(MB(1));
+	if(_ahci_base == NULL)
+		return NULL;
 	_check_all_devices();
 	_probe_port();
 	return TRUE;
