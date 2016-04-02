@@ -19,6 +19,7 @@
 #include "kernel.h"
 #include "gui.h"
 #include "atapi.h"
+#include "ahci.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -436,6 +437,8 @@ _kill_task(IN int32 tid)
 				(hdisk_locked() && hdisk_lock_tid() == tid)
 				// ATAPI。
 				|| (atapi_locked() && atapi_lock_tid() == tid)
+				// AHCI。
+				|| (ahci_locked() && ahci_lock_tid() == tid)
 			)
 			&& --retry != 0);
 	if(ll)
@@ -444,7 +447,9 @@ _kill_task(IN int32 tid)
 	if(	// ATA。
 		(hdisk_locked() && hdisk_lock_tid() == tid)
 		// ATAPI。
-		|| (atapi_locked() && atapi_lock_tid() == tid))
+		|| (atapi_locked() && atapi_lock_tid() == tid)
+		// AHCI。
+		|| (ahci_locked() && ahci_lock_tid() == tid))
 		return FALSE;
 
 	struct Task * task = tasks + tid;

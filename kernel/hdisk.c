@@ -168,7 +168,7 @@ hdisk_lock_tid(void)
 		尝试解除ATA驱动的锁。
 	@Parameters:
 		tid, int32, IN
-			任务ID。如果该值等于当前正在占用ATA驱动的锁的任务ID相等，则解除锁。
+			任务ID。如果该值等于当前正在占用ATA驱动的锁的任务ID，则解除锁。
 	@Return:
 */
 void

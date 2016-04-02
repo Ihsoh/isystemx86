@@ -10,7 +10,7 @@
 
 #include "types.h"
 
-#define MAX_DISK_COUNT				8
+#define MAX_DISK_COUNT				16
 #define	DISK_SYMBOL_BUFFER_SIZE		3
 
 #define	DISK_BYTES_PER_SECTOR		512
@@ -18,7 +18,7 @@
 extern
 void
 get_disk_symbol(	IN uint32 index, 
-						OUT int8 * symbol);
+					OUT int8 * symbol);
 
 extern
 uint32

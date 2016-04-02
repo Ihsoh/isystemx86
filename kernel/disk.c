@@ -11,6 +11,7 @@
 #include "vdisk.h"
 #include "hdisk.h"
 #include "atapi.h"
+#include "ahci.h"
 #include <ilib/string.h>
 
 static int8 disk_list[MAX_DISK_COUNT][3];
@@ -31,6 +32,56 @@ static uint32 disk_count = 0;
 #define	_DISK_RBYTES(_idx)	(_disk_rbytes[(_idx)])
 
 #define	_DISK_WBYTES(_idx)	(_disk_wbytes[(_idx)])
+
+/**
+	@Function:		_is_ahcisym
+	@Access:		Private
+	@Description:
+		检测盘符是否为AHCI符号。
+	@Parameters:
+		symbol, CASCTEXT, IN
+			盘符。
+			盘符缓冲区必须大于或等于DISK_SYMBOL_BUFFER_SIZE。
+	@Return:
+		BOOL
+			返回TRUE则代表为AHCI符号。
+*/
+static
+BOOL
+_is_ahcisym(IN CASCTEXT symbol)
+{
+	return	symbol[0] == 'S'
+			&& (symbol[1] >= 'A' && symbol[1] <= 'Z')
+			&& symbol[2] == '\0';
+}
+
+/**
+	@Function:		_ahcisym2portno
+	@Access:		Private
+	@Description:
+		AHCI设备符号转换为端口号。
+	@Parameters:
+		symbol, CASCTEXT, IN
+			AHCI设备符号（SA、SB、SC、...、SZ）。
+			盘符缓冲区必须大于或等于DISK_SYMBOL_BUFFER_SIZE。
+	@Return:
+		uint32
+			如果AHCI符号不合法则返回0xffffffff，否则：
+			SA => 0
+			SB => 1
+			SC => 2
+			...
+			SZ => 25
+*/
+static
+uint32
+_ahcisym2portno(IN CASCTEXT symbol)
+{
+	if(_is_ahcisym(symbol))
+		return symbol[1] - 'A';
+	else
+		return 0xffffffff;
+}
 
 /**
 	@Function:		get_disk_symbol
@@ -99,6 +150,11 @@ get_disk_size(IN int8 * symbol)
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return ATAPI_MAX_SIZE / 1024;
+	else if(_is_ahcisym(symbol))
+	{
+		uint32 portno = _ahcisym2portno(symbol);
+		return (uint32)((uint64)ahci_sector_count(portno) * 512UL / 1024UL);
+	}
 	else
 		return 0;
 }
@@ -156,6 +212,7 @@ init_disk(IN int8 * symbol)
 	}
 	else if(strcmp(symbol, "HD") == 0)
 	{
+		// ATA。
 		uint32 r = init_hdisk();
 		if((r & 0x1) != 0)
 		{
@@ -166,6 +223,18 @@ init_disk(IN int8 * symbol)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
 			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, "DB");
+		}
+
+		// AHCI。
+		if(ahci_init())
+		{
+			ASCCHAR sym[3] = {'S', 'A', '\0'};
+			uint32 ui;
+			for(ui = 0; ui < ahci_port_count() && ui < 26; ui++, sym[1]++)
+			{
+				_INIT_DISK_RWBYTES(disk_count);
+				strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, sym);
+			}
 		}
 	}
 }
@@ -211,6 +280,11 @@ sector_count(IN int8 * symbol)
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return ATAPI_SECTOR512_COUNT;
+	else if(_is_ahcisym(symbol))
+	{
+		uint32 portno = _ahcisym2portno(symbol);
+		return ahci_sector_count(portno);
+	}
 	else 
 		return 0;
 }
@@ -328,6 +402,11 @@ read_sector(IN int8 * symbol,
 									ATA_DRIVE_SLAVE,
 									pos,
 									buffer);
+	else if(_is_ahcisym(symbol))
+	{
+		uint32 portno = _ahcisym2portno(symbol);
+		r = ahci_read(portno, pos, 0, 1, (WORD *)buffer);
+	}
 	else
 		return FALSE;
 	if(r)
@@ -369,6 +448,11 @@ write_sector(	IN int8 * symbol,
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return FALSE;
+	else if(_is_ahcisym(symbol))
+	{
+		uint32 portno = _ahcisym2portno(symbol);
+		r = ahci_write(portno, pos, 0, 1, (WORD *)buffer);
+	}
 	else
 		return FALSE;
 	if(r)
@@ -432,6 +516,11 @@ read_sectors(	IN int8 * symbol,
 									pos,
 									count,
 									buffer);
+	else if(_is_ahcisym(symbol))
+	{
+		uint32 portno = _ahcisym2portno(symbol);
+		r = ahci_read(portno, pos, 0, count, (WORD *)buffer);
+	}
 	else 
 		return FALSE;
 	if(r)
@@ -476,6 +565,11 @@ write_sectors(	IN int8 * symbol,
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return FALSE;
+	else if(_is_ahcisym(symbol))
+	{
+		uint32 portno = _ahcisym2portno(symbol);
+		r = ahci_write(portno, pos, 0, count, (WORD *)buffer);
+	}
 	else
 		return FALSE;
 	if(r)
