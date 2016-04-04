@@ -21,13 +21,13 @@ StringObj=../libs/ilib/bin/string.obj
 Objs=bin/kernel.obj	\
 bin/386.obj bin/screen.obj bin/die.obj bin/keyboard.obj \
 bin/console.obj bin/disk.obj bin/vdisk.obj bin/memory.obj \
-bin/kfuncs.obj bin/hdisk.obj bin/cmos.obj bin/tasks.obj \
+bin/kfuncs.obj bin/cmos.obj bin/tasks.obj \
 bin/vesa.obj bin/enfont.obj bin/vars.obj bin/image.obj bin/cpu.obj	\
 bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.obj bin/rsdp.obj	\
 bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
 bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj bin/timer.obj	\
-bin/gui.obj
+bin/gui.obj bin/ata.obj
 
 BMPObjs=bmp/bin/bmp.obj
 
@@ -131,9 +131,6 @@ bin/memory.obj: memory.c memory.h
 
 bin/kfuncs.obj: kfuncs.c kfuncs.h
 	$(CC) $(CFlags) -c kfuncs.c -o bin/kfuncs.obj $(Include) $(Definition)
-
-bin/hdisk.obj: hdisk.c hdisk.h
-	$(CC) $(CFlags) -c hdisk.c -o bin/hdisk.obj $(Include) $(Definition)
 
 bin/cmos.obj: cmos.c cmos.h
 	$(CC) $(CFlags) -c cmos.c -o bin/cmos.obj $(Include) $(Definition)
@@ -239,6 +236,9 @@ bin/timer.obj: timer.c timer.h
 
 bin/gui.obj: gui.c gui.h
 	$(CC) $(CFlags) -c gui.c -o bin/gui.obj $(Include) $(Definition)
+
+bin/ata.obj: ata.c ata.h
+	$(CC) $(CFlags) -c ata.c -o bin/ata.obj $(Include) $(Definition)
 
 
 bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h

@@ -9,9 +9,9 @@
 #include "disk.h"
 #include "types.h"
 #include "vdisk.h"
-#include "hdisk.h"
 #include "atapi.h"
 #include "ahci.h"
+#include "ata.h"
 #include <ilib/string.h>
 
 static int8 disk_list[MAX_DISK_COUNT][3];
@@ -84,6 +84,29 @@ _ahcisym2portno(IN CASCTEXT symbol)
 }
 
 /**
+	@Function:		_is_atasym
+	@Access:		Private
+	@Description:
+		检测盘符是否为ATA符号。
+	@Parameters:
+		symbol, CASCTEXT, IN
+			盘符。
+			盘符缓冲区必须大于或等于DISK_SYMBOL_BUFFER_SIZE。
+	@Return:
+		BOOL
+			返回TRUE则代表为ATA符号。
+*/
+static
+BOOL
+_is_atasym(IN CASCTEXT symbol)
+{
+	return 	strcmp(symbol, "DA") == 0
+			|| strcmp(symbol, "DB") == 0
+			|| strcmp(symbol, "DC") == 0
+			|| strcmp(symbol, "DD") == 0;
+}
+
+/**
 	@Function:		get_disk_symbol
 	@Access:		Public
 	@Description:
@@ -141,10 +164,8 @@ get_disk_size(IN int8 * symbol)
 		return get_vdisk_size("VA");
 	else if(strcmp(symbol, "VB") == 0)
 		return get_vdisk_size("VB");
-	else if(strcmp(symbol, "DA") == 0)
-		return get_hdisk_size("DA");
-	else if(strcmp(symbol, "DB") == 0)
-		return get_hdisk_size("DB");
+	else if(_is_atasym(symbol))
+		return ata_sector_count(symbol);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
@@ -213,16 +234,26 @@ init_disk(IN int8 * symbol)
 	else if(strcmp(symbol, "HD") == 0)
 	{
 		// ATA。
-		uint32 r = init_hdisk();
-		if((r & 0x1) != 0)
+		uint32 r = ata_init();
+		if(r & ATA_DISK0)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
-			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, "DA");
+			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK0_SYMBOL);
 		}
-		if((r & 0x2) != 0)
+		if(r & ATA_DISK1)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
-			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, "DB");
+			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK1_SYMBOL);
+		}
+		if(r & ATA_DISK2)
+		{
+			_INIT_DISK_RWBYTES(disk_count);
+			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK2_SYMBOL);
+		}
+		if(r & ATA_DISK3)
+		{
+			_INIT_DISK_RWBYTES(disk_count);
+			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK3_SYMBOL);
 		}
 
 		// AHCI。
@@ -273,8 +304,8 @@ sector_count(IN int8 * symbol)
 {
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		return sector_count_v();
-	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		return sector_count_h(symbol);
+	else if(_is_atasym(symbol))
+		return ata_sector_count(symbol);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
@@ -380,8 +411,8 @@ read_sector(IN int8 * symbol,
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = read_sector_v(symbol, pos, buffer);
-	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		r = read_sector_h(symbol, pos, buffer);
+	else if(_is_atasym(symbol))
+		r = ata_device_read_sector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0)
 		r = atapi_read_sector512(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_MASTER,
@@ -441,8 +472,8 @@ write_sector(	IN int8 * symbol,
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = write_sector_v(symbol, pos, buffer);
-	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		r = write_sector_h(symbol, pos, buffer);
+	else if(_is_atasym(symbol))
+		r = ata_device_write_sector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
@@ -490,8 +521,8 @@ read_sectors(	IN int8 * symbol,
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = read_sectors_v(symbol, pos, count, buffer);
-	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		r = read_sectors_h(symbol, pos, count, buffer);
+	else if(_is_atasym(symbol))
+		r = ata_device_read_sectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0)
 		r = atapi_read_sector512s(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_MASTER,
@@ -558,8 +589,8 @@ write_sectors(	IN int8 * symbol,
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = write_sectors_v(symbol, pos, count, buffer);
-	else if(strcmp(symbol, "DA") == 0 || strcmp(symbol, "DB") == 0)
-		r = write_sectors_h(symbol, pos, count, buffer);
+	else if(_is_atasym(symbol))
+		r = ata_device_write_sectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0

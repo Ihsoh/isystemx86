@@ -20,6 +20,7 @@
 #include "gui.h"
 #include "atapi.h"
 #include "ahci.h"
+#include "ata.h"
 
 #include "fs/ifs1/fs.h"
 
@@ -434,7 +435,7 @@ _kill_task(IN int32 tid)
 	while(	
 			(
 				// ATA。
-				(hdisk_locked() && hdisk_lock_tid() == tid)
+				(ata_locked() && ata_lock_tid() == tid)
 				// ATAPI。
 				|| (atapi_locked() && atapi_lock_tid() == tid)
 				// AHCI。
@@ -445,7 +446,7 @@ _kill_task(IN int32 tid)
 		LOCK_TASK();
 	// 再次确认。
 	if(	// ATA。
-		(hdisk_locked() && hdisk_lock_tid() == tid)
+		(ata_locked() && ata_lock_tid() == tid)
 		// ATAPI。
 		|| (atapi_locked() && atapi_lock_tid() == tid)
 		// AHCI。
@@ -514,7 +515,7 @@ _kill_task(IN int32 tid)
 	free_syscall(tid);
 
 	// 尝试释放ATA驱动的锁。
-	hdisk_attempt_to_unlock(tid);
+	ata_attempt_to_unlock(tid);
 
 	// 尝试释放ATAPI驱动的锁。
 	atapi_attempt_to_unlock(tid);

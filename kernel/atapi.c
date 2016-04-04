@@ -9,7 +9,7 @@
 #include "atapi.h"
 #include "types.h"
 #include "386.h"
-#include "hdisk.h"
+#include "ata.h"
 #include "kernel.h"
 #include "cmlock.h"
 
@@ -275,7 +275,7 @@ atapi_read_sector(	IN uint32 bus,
 					IN uint32 lba,
 					OUT uint8 * buffer)
 {
-	if(hdisk_locked())
+	if(ata_locked())
 		return -1;
 	if(!_atapi_lock())
 		return -1;
