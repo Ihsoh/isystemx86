@@ -13,7 +13,7 @@ set char_color "7"
 :mode_vesa
 
 rem Define system path variable "@__system__"
-def @__system__ "DA:/isystem/"
+def @__system__ "VS:/isystem/"
 
 rem Define application path variable "@__path__"
 def @__path__ ".;"

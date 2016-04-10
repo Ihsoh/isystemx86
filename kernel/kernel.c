@@ -308,15 +308,15 @@ main(void)
 	keyboard_loop_was_enabled = TRUE;
 
 	common_lock();
-	int32 sys_screen_tid = create_sys_task_by_file(	"DA:/isystem/sys/screen.sys",
-													"DA:/isystem/sys/screen.sys",
-													"DA:/isystem/sys/");
+	int32 sys_screen_tid = create_sys_task_by_file(	SYSTEM_PATH"sys/screen.sys",
+													SYSTEM_PATH"sys/screen.sys",
+													SYSTEM_PATH"sys/");
 	get_task_info_ptr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
 	task_ready(sys_screen_tid);
 
-	int32 sys_timer_tid = create_sys_task_by_file(	"DA:/isystem/sys/timer.sys",
-													"DA:/isystem/sys/timer.sys",
-													"DA:/isystem/sys/");
+	int32 sys_timer_tid = create_sys_task_by_file(	SYSTEM_PATH"sys/timer.sys",
+													SYSTEM_PATH"sys/timer.sys",
+													SYSTEM_PATH"sys/");
 	get_task_info_ptr(sys_timer_tid)->priority = TASK_PRIORITY_LOW;
 	task_ready(sys_timer_tid);
 	common_unlock();
@@ -1843,30 +1843,30 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 	is_kernel_task = TRUE;
 
 	// 检测screen.sys任务是不是被杀死了。
-	if(strcmp(get_task_info_ptr(tid)->name, "DA:/isystem/sys/screen.sys") == 0)
+	if(strcmp(get_task_info_ptr(tid)->name, SYSTEM_PATH"sys/screen.sys") == 0)
 	{
-		int32 sys_screen_tid = create_sys_task_by_file(	"DA:/isystem/sys/screen.sys",
-														"DA:/isystem/sys/screen.sys",
-														"DA:/isystem/sys/");
+		int32 sys_screen_tid = create_sys_task_by_file(	SYSTEM_PATH"sys/screen.sys",
+														SYSTEM_PATH"sys/screen.sys",
+														SYSTEM_PATH"sys/");
 		get_task_info_ptr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
 		task_ready(sys_screen_tid);
 	}
 
 	// 检测pci.sys任务是不是被杀死了。
-	if(strcmp(get_task_info_ptr(tid)->name, "DA:/isystem/sys/pci.sys") == 0)
+	if(strcmp(get_task_info_ptr(tid)->name, SYSTEM_PATH"sys/pci.sys") == 0)
 	{
-		int32 sys_pci_tid = create_sys_task_by_file("DA:/isystem/sys/pci.sys",
-													"DA:/isystem/sys/pci.sys",
-													"DA:/isystem/sys/");
+		int32 sys_pci_tid = create_sys_task_by_file(SYSTEM_PATH"sys/pci.sys",
+													SYSTEM_PATH"sys/pci.sys",
+													SYSTEM_PATH"sys/");
 		task_ready(sys_pci_tid);
 	}
 
 	// 检测timer.sys任务是不是被杀死了。
-	if(strcmp(get_task_info_ptr(tid)->name, "DA:/isystem/sys/timer.sys") == 0)
+	if(strcmp(get_task_info_ptr(tid)->name, SYSTEM_PATH"sys/timer.sys") == 0)
 	{
-		int32 sys_pci_tid = create_sys_task_by_file("DA:/isystem/sys/timer.sys",
-													"DA:/isystem/sys/timer.sys",
-													"DA:/isystem/sys/");
+		int32 sys_pci_tid = create_sys_task_by_file(SYSTEM_PATH"sys/timer.sys",
+													SYSTEM_PATH"sys/timer.sys",
+													SYSTEM_PATH"sys/");
 		get_task_info_ptr(sys_pci_tid)->priority = TASK_PRIORITY_LOW;
 		task_ready(sys_pci_tid);
 	}

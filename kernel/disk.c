@@ -12,6 +12,7 @@
 #include "atapi.h"
 #include "ahci.h"
 #include "ata.h"
+#include "system.h"
 #include <ilib/string.h>
 
 static int8 disk_list[MAX_DISK_COUNT][3];
@@ -123,6 +124,8 @@ void
 get_disk_symbol(IN uint32 index, 
 				OUT int8 * symbol)
 {
+	if(symbol == NULL)
+		return;
 	if(index < 0 || index >= MAX_DISK_COUNT)
 		strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, "");
 	else
@@ -160,10 +163,14 @@ get_disk_count(void)
 uint32
 get_disk_size(IN int8 * symbol)
 {
+	if(symbol == NULL)
+		return 0;
 	if(strcmp(symbol, "VA") == 0)
 		return get_vdisk_size("VA");
 	else if(strcmp(symbol, "VB") == 0)
 		return get_vdisk_size("VB");
+	else if(strcmp(symbol, "VS") == 0)
+		return get_disk_size(SYSTEM_DISK);
 	else if(_is_atasym(symbol))
 		return ata_sector_count(symbol);
 	else if(strcmp(symbol, "CA") == 0
@@ -195,6 +202,10 @@ get_disk_size(IN int8 * symbol)
 BOOL
 is_system_disk(IN int8 * symbol)
 {
+	if(symbol == NULL)
+		return FALSE;
+	if(strcmp(symbol, "VS") == 0)
+		return is_system_disk(SYSTEM_DISK);
 	uint32 disk_size = get_disk_size(symbol);
 	if(disk_size != 0)
 	{
@@ -231,6 +242,8 @@ init_disk(IN int8 * symbol)
 		_INIT_DISK_RWBYTES(disk_count);
 		strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, symbol);
 	}
+	else if(strcmp(symbol, "VS") == 0)
+		init_disk(SYSTEM_DISK);
 	else if(strcmp(symbol, "HD") == 0)
 	{
 		// ATA。
@@ -283,8 +296,12 @@ init_disk(IN int8 * symbol)
 void
 destroy_disk(IN int8 * symbol)
 {
+	if(symbol == NULL)
+		return;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		destroy_vdisk(symbol);
+	else if(strcmp(symbol, "VS") == 0)
+		destroy_disk(SYSTEM_DISK);
 }
 
 /**
@@ -302,8 +319,12 @@ destroy_disk(IN int8 * symbol)
 uint32
 sector_count(IN int8 * symbol)
 {
+	if(symbol == NULL)
+		return 0;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		return sector_count_v();
+	else if(strcmp(symbol, "VS") == 0)
+		return sector_count(SYSTEM_DISK);
 	else if(_is_atasym(symbol))
 		return ata_sector_count(symbol);
 	else if(strcmp(symbol, "CA") == 0
@@ -362,6 +383,8 @@ disk_wbytes(IN CASCTEXT symbol)
 {
 	if(symbol == NULL)
 		return 0;
+	if(strcmp(symbol, "VS") == 0)
+		return disk_wbytes(SYSTEM_DISK);
 	uint32 idx = _disk_index(symbol);
 	return _DISK_WBYTES(idx);
 }
@@ -383,6 +406,8 @@ disk_rbytes(IN CASCTEXT symbol)
 {
 	if(symbol == NULL)
 		return 0;
+	if(strcmp(symbol, "VS") == 0)
+		return disk_rbytes(SYSTEM_DISK);
 	uint32 idx = _disk_index(symbol);
 	return _DISK_RBYTES(idx);
 }
@@ -408,9 +433,13 @@ read_sector(IN int8 * symbol,
 			IN uint32 pos, 
 			OUT uint8 * buffer)
 {
+	if(symbol == NULL || buffer == NULL)
+		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = read_sector_v(symbol, pos, buffer);
+	else if(strcmp(symbol, "VS") == 0)
+		r = read_sector(SYSTEM_DISK, pos, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_read_sector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0)
@@ -469,9 +498,13 @@ write_sector(	IN int8 * symbol,
 				IN uint32 pos, 
 				IN uint8 * buffer)
 {
+	if(symbol == NULL || buffer == NULL)
+		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = write_sector_v(symbol, pos, buffer);
+	else if(strcmp(symbol, "VS") == 0)
+		r = write_sector(SYSTEM_DISK, pos, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_write_sector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0
@@ -518,9 +551,13 @@ read_sectors(	IN int8 * symbol,
 				IN uint8 count, 
 				OUT uint8 * buffer)
 {
+	if(symbol == NULL || buffer == NULL)
+		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = read_sectors_v(symbol, pos, count, buffer);
+	else if(strcmp(symbol, "VS") == 0)
+		r = read_sectors(SYSTEM_DISK, pos, count, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_read_sectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0)
@@ -586,9 +623,13 @@ write_sectors(	IN int8 * symbol,
 				IN uint8 count, 
 				IN uint8 * buffer)
 {
+	if(symbol == NULL || buffer == NULL)
+		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = write_sectors_v(symbol, pos, count, buffer);
+	else if(strcmp(symbol, "VS") == 0)
+		r = write_sectors(SYSTEM_DISK, pos, count, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_write_sectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0
