@@ -689,7 +689,7 @@ _ahci_read(	IN OUT HBA_PORT * port,
 	HBA_CMD_TBL * cmdtbl = (HBA_CMD_TBL *)cmdheader->ctba;
 	memset(	cmdtbl,
 			0,
-			sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
+			sizeof(HBA_CMD_TBL) + cmdheader->prdtl * sizeof(HBA_PRDT_ENTRY));
 
 	int32 i;
 	DWORD c = count;
@@ -697,16 +697,19 @@ _ahci_read(	IN OUT HBA_PORT * port,
 	{
 		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
 		cmdtbl->prdt_entry[i].dbau = 0;
-		cmdtbl->prdt_entry[i].dbc = 8 * 1024;
+		cmdtbl->prdt_entry[i].dbc = 8 * 1024 - 1;	// 长度是Zero-based。
 		cmdtbl->prdt_entry[i].i = 0;
 		buf += 4 * 1024;
 		c -= 16;
 	}
 
-	cmdtbl->prdt_entry[i].dba = (DWORD)buf;
-	cmdtbl->prdt_entry[i].dbau = 0;
-	cmdtbl->prdt_entry[i].dbc = c << 9;
-	cmdtbl->prdt_entry[i].i = 0;
+	if((c << 9) != 0)
+	{
+		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
+		cmdtbl->prdt_entry[i].dbau = 0;
+		cmdtbl->prdt_entry[i].dbc = (c << 9) - 1;	// 长度是Zero-based。
+		cmdtbl->prdt_entry[i].i = 0;
+	}
 
 	FIS_REG_H2D * cmdfis = (FIS_REG_H2D *)&cmdtbl->cfis;
 
@@ -836,7 +839,7 @@ _ahci_write(IN OUT HBA_PORT * port,
 	HBA_CMD_TBL * cmdtbl = (HBA_CMD_TBL *)cmdheader->ctba;
 	memset(	cmdtbl,
 			0,
-			sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
+			sizeof(HBA_CMD_TBL) + cmdheader->prdtl * sizeof(HBA_PRDT_ENTRY));
 
 	int32 i;
 	DWORD c = count;
@@ -844,16 +847,19 @@ _ahci_write(IN OUT HBA_PORT * port,
 	{
 		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
 		cmdtbl->prdt_entry[i].dbau = 0;
-		cmdtbl->prdt_entry[i].dbc = 8 * 1024;
+		cmdtbl->prdt_entry[i].dbc = 8 * 1024 - 1;	// 长度是Zero-based。
 		cmdtbl->prdt_entry[i].i = 0;
 		buf += 4 * 1024;
 		c -= 16;
 	}
 
-	cmdtbl->prdt_entry[i].dba = (DWORD)buf;
-	cmdtbl->prdt_entry[i].dbau = 0;
-	cmdtbl->prdt_entry[i].dbc = c << 9;
-	cmdtbl->prdt_entry[i].i = 0;
+	if((c << 9) != 0)
+	{
+		cmdtbl->prdt_entry[i].dba = (DWORD)buf;
+		cmdtbl->prdt_entry[i].dbau = 0;
+		cmdtbl->prdt_entry[i].dbc = (c << 9) - 1;	// 长度是Zero-based。
+		cmdtbl->prdt_entry[i].i = 0;
+	}
 
 	FIS_REG_H2D * cmdfis = (FIS_REG_H2D *)&cmdtbl->cfis;
 
