@@ -2429,28 +2429,6 @@ exec(	IN int8 * cmd,
 			fix_path(path, current_path, path);
 			detail_window_show(path);
 		}
-		else if(strcmp(name, "ata") == 0)
-		{
-			#include "ata.h"
-			ata_init();
-			// if(ata_is_existed("DA"))
-			// {
-			// 	print_str("DA Sector Count: ");
-			// 	printun((uint32)ata_sector_count("DA"));
-			// 	print_str("\n");
-			// }
-			// else
-			// 	print_str("DA Not Existed!\n");
-
-			// if(ata_is_existed("DB"))
-			// {
-			// 	print_str("DB Sector Count: ");
-			// 	printun((uint32)ata_sector_count("DB"));
-			// 	print_str("\n");
-			// }
-			// else
-			// 	print_str("DB Not Existed!\n");
-		}
 		#ifdef _KERNEL_DEBUG_
 		// Kernel Unit Test
 		else if(strcmp(name, "kernel-unit-test") == 0)
