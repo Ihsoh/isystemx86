@@ -15,6 +15,11 @@
 
 #define	DISK_BYTES_PER_SECTOR		512
 
+#define	DISK_TYPE_ATA				1
+#define	DISK_TYPE_SATA				2
+
+#define	DISK_HARD_DISK_TYPE			(disk_hard_disk_type)
+
 extern
 void
 get_disk_symbol(	IN uint32 index, 

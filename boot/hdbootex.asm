@@ -19,6 +19,7 @@ Drive 				EQU 80H		; 硬盘。
 
 MBRSize				EQU 512		; MBR的大小。
 MBREndFlagSize		EQU 2		; MBR结束标志的大小。
+SignatureStringSize	EQU 6		; ISystem识别标识字符串的大小。
 PartitionTableSize	EQU 64		; 分区表的大小。
 
 MaxPerIOSectorCount	EQU 64		; 每次对磁盘进行I/O时，扇区数量的最大值。
@@ -212,10 +213,13 @@ BootMsg0		DB 'ISystem booting...', 0
 BootEnd:
 
 ; 填充0。
-TIMES MBRSize - PartitionTableSize - MBREndFlagSize - (BootEnd - BootStart) DB 0
+TIMES MBRSize - SignatureStringSize - PartitionTableSize - MBREndFlagSize - (BootEnd - BootStart) DB 0
 
 ; 栈顶。
 StackTop:
+
+; 识别标识字符串。
+SignatureString	DB 'ISys20'
 
 ; 分区表。
 TIMES PartitionTableSize DB 0

@@ -9,9 +9,16 @@
 #define	MASTER_VER	"0"
 #define	SLAVE_VER	"0"
 
-#define	SYSTEM_DISK	"DA"
-#define	SYSTEM_PATH	SYSTEM_DISK":/isystem/"
-#define	SYSTEM_BINS_PATH	SYSTEM_PATH"bins/"
+#define	SYSTEM_SIGNATURE_STRING	"ISys20"
+
+// 明确的系统磁盘盘符。
+// 如果SATA的主盘为系统盘，则系统磁盘盘符为SA，否则为DA。
+#define	EXPLICIT_SYSTEM_DISK	\
+	((DISK_HARD_DISK_TYPE == DISK_TYPE_SATA) ? "SA" : (DISK_HARD_DISK_TYPE == DISK_TYPE_ATA ? "DA" : "DA"))
+
+#define	SYSTEM_DISK	"VS"						// 系统盘符。
+#define	SYSTEM_PATH	SYSTEM_DISK":/isystem/"		// 系统目录。
+#define	SYSTEM_BINS_PATH	SYSTEM_PATH"bins/"	// 系统非GUI程序目录。
 
 #define	SYSTEM_POINTER_WIDTH		16
 #define	SYSTEM_POINTER_HEIGHT		16

@@ -20,6 +20,8 @@ static uint64 _disk_rbytes[MAX_DISK_COUNT];
 static uint64 _disk_wbytes[MAX_DISK_COUNT];
 static uint32 disk_count = 0;
 
+uint32 disk_hard_disk_type = DISK_TYPE_ATA;
+
 #define	_INIT_DISK_RWBYTES(_idx)	\
 	_disk_rbytes[(_idx)] = 0;	\
 	_disk_wbytes[(_idx)] = 0;
@@ -170,7 +172,7 @@ get_disk_size(IN int8 * symbol)
 	else if(strcmp(symbol, "VB") == 0)
 		return get_vdisk_size("VB");
 	else if(strcmp(symbol, "VS") == 0)
-		return get_disk_size(SYSTEM_DISK);
+		return get_disk_size(EXPLICIT_SYSTEM_DISK);
 	else if(_is_atasym(symbol))
 		return ata_sector_count(symbol);
 	else if(strcmp(symbol, "CA") == 0
@@ -202,17 +204,27 @@ get_disk_size(IN int8 * symbol)
 BOOL
 is_system_disk(IN int8 * symbol)
 {
+	CASCTEXT sign_str = SYSTEM_SIGNATURE_STRING;
 	if(symbol == NULL)
 		return FALSE;
 	if(strcmp(symbol, "VS") == 0)
-		return is_system_disk(SYSTEM_DISK);
+		return is_system_disk(EXPLICIT_SYSTEM_DISK);
 	uint32 disk_size = get_disk_size(symbol);
 	if(disk_size != 0)
 	{
 		uchar buffer[512];
 		if(!read_sector(symbol, 0, buffer))
 			return FALSE;
-		if(buffer[510] == 0x55 && buffer[511] == 0xaa)
+		if(	// 验证MBR的合法性。
+			buffer[510] == 0x55
+			&& buffer[511] == 0xaa
+			// 验证磁盘的系统是否为ISystem。
+			&& buffer[509 - 64] == SYSTEM_SIGNATURE_STRING[5]
+			&& buffer[508 - 64] == SYSTEM_SIGNATURE_STRING[4]
+			&& buffer[507 - 64] == SYSTEM_SIGNATURE_STRING[3]
+			&& buffer[506 - 64] == SYSTEM_SIGNATURE_STRING[2]
+			&& buffer[505 - 64] == SYSTEM_SIGNATURE_STRING[1]
+			&& buffer[504 - 64] == SYSTEM_SIGNATURE_STRING[0])
 			return TRUE;
 		else
 			return FALSE;
@@ -243,7 +255,7 @@ init_disk(IN int8 * symbol)
 		strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, symbol);
 	}
 	else if(strcmp(symbol, "VS") == 0)
-		init_disk(SYSTEM_DISK);
+		init_disk(EXPLICIT_SYSTEM_DISK);
 	else if(strcmp(symbol, "HD") == 0)
 	{
 		// ATA。
@@ -280,6 +292,14 @@ init_disk(IN int8 * symbol)
 				strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, sym);
 			}
 		}
+
+		// 检查ATA与SATA的主盘是否为系统盘。
+		if(is_system_disk("SA"))
+			disk_hard_disk_type = DISK_TYPE_SATA;
+		else if(is_system_disk("DA"))
+			disk_hard_disk_type = DISK_TYPE_ATA;
+		else
+			disk_hard_disk_type = DISK_TYPE_ATA;
 	}
 }
 
@@ -301,7 +321,7 @@ destroy_disk(IN int8 * symbol)
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		destroy_vdisk(symbol);
 	else if(strcmp(symbol, "VS") == 0)
-		destroy_disk(SYSTEM_DISK);
+		destroy_disk(EXPLICIT_SYSTEM_DISK);
 }
 
 /**
@@ -324,7 +344,7 @@ sector_count(IN int8 * symbol)
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		return sector_count_v();
 	else if(strcmp(symbol, "VS") == 0)
-		return sector_count(SYSTEM_DISK);
+		return sector_count(EXPLICIT_SYSTEM_DISK);
 	else if(_is_atasym(symbol))
 		return ata_sector_count(symbol);
 	else if(strcmp(symbol, "CA") == 0
@@ -384,7 +404,7 @@ disk_wbytes(IN CASCTEXT symbol)
 	if(symbol == NULL)
 		return 0;
 	if(strcmp(symbol, "VS") == 0)
-		return disk_wbytes(SYSTEM_DISK);
+		return disk_wbytes(EXPLICIT_SYSTEM_DISK);
 	uint32 idx = _disk_index(symbol);
 	return _DISK_WBYTES(idx);
 }
@@ -407,7 +427,7 @@ disk_rbytes(IN CASCTEXT symbol)
 	if(symbol == NULL)
 		return 0;
 	if(strcmp(symbol, "VS") == 0)
-		return disk_rbytes(SYSTEM_DISK);
+		return disk_rbytes(EXPLICIT_SYSTEM_DISK);
 	uint32 idx = _disk_index(symbol);
 	return _DISK_RBYTES(idx);
 }
@@ -439,7 +459,7 @@ read_sector(IN int8 * symbol,
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = read_sector_v(symbol, pos, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = read_sector(SYSTEM_DISK, pos, buffer);
+		r = read_sector(EXPLICIT_SYSTEM_DISK, pos, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_read_sector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0)
@@ -504,7 +524,7 @@ write_sector(	IN int8 * symbol,
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = write_sector_v(symbol, pos, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = write_sector(SYSTEM_DISK, pos, buffer);
+		r = write_sector(EXPLICIT_SYSTEM_DISK, pos, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_write_sector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0
@@ -557,7 +577,7 @@ read_sectors(	IN int8 * symbol,
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = read_sectors_v(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = read_sectors(SYSTEM_DISK, pos, count, buffer);
+		r = read_sectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_read_sectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0)
@@ -629,7 +649,7 @@ write_sectors(	IN int8 * symbol,
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 		r = write_sectors_v(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = write_sectors(SYSTEM_DISK, pos, count, buffer);
+		r = write_sectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
 	else if(_is_atasym(symbol))
 		r = ata_device_write_sectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0
