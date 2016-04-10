@@ -12,9 +12,10 @@ Out=boot.bin
 Target=$(TargetDir)/$(Out)
 ASM=nasm
 
-$(Target): bin boot.asm
-#$(ASM) -f bin boot.asm -o $(Target)
-	$(ASM) -f bin hdboot.asm -o $(Target)
+$(Target): bin hdbootex.asm
+# $(ASM) -f bin boot.asm -o $(Target)
+# $(ASM) -f bin hdboot.asm -o $(Target)
+	$(ASM) -f bin hdbootex.asm -o $(Target)
 
 bin:
 	-mkdir bin

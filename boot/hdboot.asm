@@ -53,7 +53,7 @@ POPA
 CALL	InitDisk
 
 ;Init disk
-MOV 	AL, Driver
+MOV 	DL, Driver
 MOV 	AH, 0
 INT 	13H
 
@@ -169,7 +169,7 @@ Procedure	FSSReadSector
 	PUSH 	CX
 	PUSH 	DX
 	;Init driver
-	;MOV 	AL, Driver
+	;MOV 	DL, Driver
 	;MOV 	AH, 0
 	;INT 	13H
 	
