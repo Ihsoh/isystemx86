@@ -273,10 +273,10 @@ madt_write_to_file(IN const int8 * path)
 {
 	if(madt == NULL)
 		return FALSE;
-	FileObject * fptr = open_file(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
+	FileObject * fptr = Ifs1OpenFile(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
 	if(fptr == NULL)
 		return FALSE;
-	write_file(fptr, "", 0);
+	Ifs1WriteFile(fptr, "", 0);
 	int8 buffer[1024];
 	uint32 ui;
 	uint32 count = madt_get_type0_count();
@@ -289,7 +289,7 @@ madt_write_to_file(IN const int8 * path)
 					e->acpi_processor_id,
 					e->apic_id,
 					e->flags);
-		append_file(fptr, buffer, strlen(buffer));
+		Ifs1AppendFile(fptr, buffer, strlen(buffer));
 	}
 	count = madt_get_type1_count();
 	for(ui = 0; ui < count; ui++)
@@ -301,7 +301,7 @@ madt_write_to_file(IN const int8 * path)
 					e->ioapic_id,
 					e->ioapic_address,
 					e->global_sys_int_base);
-		append_file(fptr, buffer, strlen(buffer));
+		Ifs1AppendFile(fptr, buffer, strlen(buffer));
 	}
 	count = madt_get_type2_count();
 	for(ui = 0; ui < count; ui++)
@@ -314,8 +314,8 @@ madt_write_to_file(IN const int8 * path)
 					e->irq_source,
 					e->global_sys_int,
 					e->flags);
-		append_file(fptr, buffer, strlen(buffer));
+		Ifs1AppendFile(fptr, buffer, strlen(buffer));
 	}
-	close_file(fptr);
+	Ifs1CloseFile(fptr);
 	return TRUE;
 }

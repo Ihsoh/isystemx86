@@ -128,47 +128,47 @@ struct SLinkBlock
 
 extern
 BOOL
-ifs1blks_init(void);
+Ifs1InitBlocks(void);
 
 extern
 BOOL
-get_block(	IN const int8 * symbol, 
-			IN uint32 id, 
-			OUT struct RawBlock * block);
+Ifs1GetBlock(	IN const int8 * symbol, 
+				IN uint32 id, 
+				OUT struct RawBlock * block);
 
 extern
 BOOL
-set_block(	IN const int8 * symbol, 
-			IN uint32 id, 
-			IN struct RawBlock * block);
+Ifs1SetBlock(	IN const int8 * symbol, 
+				IN uint32 id, 
+				IN struct RawBlock * block);
 
 extern
 BOOL
-del_block(	IN const int8 * symbol, 
-			IN uint32 id);
+Ifs1DeleteBlock(IN const int8 * symbol, 
+				IN uint32 id);
 
 extern
 BOOL
-del_all_blocks(IN const int8 * symbol);
+Ifs1DeleteAllBlocks(IN const int8 * symbol);
 
 extern
 uint32
-add_block(	IN const int8 * symbol, 
-			IN struct RawBlock * block);
+Ifs1AddBlock(	IN const int8 * symbol, 
+				IN struct RawBlock * block);
 
 extern
 BOOL
-fill_dir_block(IN int8 * name,
-			OUT struct DirBlock * dir);
+Ifs1FillDirBlock(	IN int8 * name,
+					OUT struct DirBlock * dir);
 
 extern
 BOOL
-fill_file_block(IN int8 * name, 
-				OUT struct FileBlock * file);
+Ifs1FillFileBlock(	IN int8 * name, 
+					OUT struct FileBlock * file);
 
 extern
 BOOL
-fill_slink_block(	IN int8 * name,
+Ifs1FillSLinkBlock(	IN int8 * name,
 					IN int8 * link,
 					OUT struct SLinkBlock * slink);
 

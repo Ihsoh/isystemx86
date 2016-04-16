@@ -630,12 +630,12 @@ get_char_utask(void)
 			else
 			{
 				uint8 chr = 0;
-				while(read_file(task->stdin, &chr, 1) == 0)
+				while(Ifs1ReadFile(task->stdin, &chr, 1) == 0)
 					asm volatile ("pause");
 				task->read_count++;
 				if(flen(task->stdin) == task->read_count)
 				{
-					close_file(task->stdin);
+					Ifs1CloseFile(task->stdin);
 					task->stdin = NULL;
 				}
 				return chr;
@@ -871,11 +871,11 @@ get_strn_utask(	OUT int8 * input_buffer,
 			else
 			{
 				uint32 read_count = 0;
-				while(read_count < n && !is_eof(task->stdin))
-					read_count += read_file(task->stdin,
+				while(read_count < n && !Ifs1IsEOF(task->stdin))
+					read_count += Ifs1ReadFile(task->stdin,
 										input_buffer,
 										n - read_count);
-				close_file(task->stdin);
+				Ifs1CloseFile(task->stdin);
 				task->stdin = NULL;
 				input_buffer[read_count] = '\0';
 				return read_count;

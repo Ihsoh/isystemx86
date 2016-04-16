@@ -26,7 +26,7 @@ static BOOL read_buffer_was_enabled		= FALSE;
 static BOOL append_buffer_was_enabled	= FALSE;
 
 /**
-	@Function:		ifs1fs_init
+	@Function:		Ifs1Init
 	@Access:		Public
 	@Description:
 		初始化IFS1文件系统。
@@ -36,7 +36,7 @@ static BOOL append_buffer_was_enabled	= FALSE;
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-ifs1fs_init(void)
+Ifs1Init(void)
 {
 	config_system_ifs1_get_bool("EnableReadBuffer", 
 								&read_buffer_was_enabled);
@@ -45,7 +45,7 @@ ifs1fs_init(void)
 }
 
 /**
-	@Function:		format_disk
+	@Function:		Ifs1Format
 	@Access:		Public
 	@Description:
 		格式化磁盘。
@@ -57,20 +57,20 @@ ifs1fs_init(void)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-format_disk(IN int8 * symbol)
+Ifs1Format(IN int8 * symbol)
 {
-	if(symbol == NULL || !del_all_blocks(symbol))
+	if(symbol == NULL || !Ifs1DeleteAllBlocks(symbol))
 		return FALSE;
 	struct DirBlock dir;
-	fill_dir_block("/", &dir);
-	if(add_block(symbol, (struct RawBlock *)&dir) != INVALID_BLOCK_ID)
+	Ifs1FillDirBlock("/", &dir);
+	if(Ifs1AddBlock(symbol, (struct RawBlock *)&dir) != INVALID_BLOCK_ID)
 		return TRUE;
 	else
 		return FALSE;
 }
 
 /**
-	@Function:		check_disk
+	@Function:		Ifs1Check
 	@Access:		Public
 	@Description:
 		检查磁盘是否为IFS1文件系统。
@@ -82,11 +82,11 @@ format_disk(IN int8 * symbol)
 			返回TRUE则成功，否则失败。				
 */
 BOOL
-check_disk(IN int8 * symbol)
+Ifs1Check(IN int8 * symbol)
 {
 	struct DirBlock dir;
 	if(	symbol == NULL 
-		|| !get_block(symbol, START_BLOCK_ID, (struct RawBlock *)&dir))
+		|| !Ifs1GetBlock(symbol, START_BLOCK_ID, (struct RawBlock *)&dir))
 		return FALSE;
 	if(dir.type == BLOCK_TYPE_DIR && strcmp(dir.dirname, "/") == 0)
 		return TRUE;
@@ -95,7 +95,7 @@ check_disk(IN int8 * symbol)
 }
 
 /**
-	@Function:		_exists_dir
+	@Function:		_Ifs1DirExists
 	@Access:		Private
 	@Description:
 		确认指定磁盘的指定目录内是否存在指定名称的文件夹。
@@ -112,15 +112,15 @@ check_disk(IN int8 * symbol)
 */
 static
 BOOL
-_exists_dir(IN int8 * symbol, 
-			IN uint32 id, 
-			IN int8 * name)
+_Ifs1DirExists(	IN int8 * symbol, 
+				IN uint32 id, 
+				IN int8 * name)
 {
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
@@ -130,7 +130,7 @@ _exists_dir(IN int8 * symbol,
 		uint32 subdir_id = dir.blockids[ui];
 		struct DirBlock subdir;
 		if(	subdir_id != INVALID_BLOCK_ID 
-			&& get_block(symbol, subdir_id, (struct RawBlock *)&subdir) 
+			&& Ifs1GetBlock(symbol, subdir_id, (struct RawBlock *)&subdir) 
 			&& subdir.used
 			&& subdir.type == BLOCK_TYPE_DIR
 			&& strcmp(subdir.dirname, name) == 0)
@@ -140,7 +140,7 @@ _exists_dir(IN int8 * symbol,
 }
 
 /**
-	@Function:		_exists_file
+	@Function:		_Ifs1FileExists
 	@Access:		Private
 	@Description:
 		确认指定磁盘的指定目录内是否存在指定名称的文件。
@@ -157,7 +157,7 @@ _exists_dir(IN int8 * symbol,
 */
 static
 BOOL
-_exists_file(	IN int8 * symbol, 
+_Ifs1FileExists(IN int8 * symbol, 
 				IN uint32 id, 
 				IN int8 * name)
 {
@@ -165,7 +165,7 @@ _exists_file(	IN int8 * symbol,
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
@@ -175,7 +175,7 @@ _exists_file(	IN int8 * symbol,
 		uint32 subfile_id = dir.blockids[ui];
 		struct FileBlock subfile;
 		if(	subfile_id != INVALID_BLOCK_ID 
-			&& get_block(symbol, subfile_id, (struct RawBlock *)&subfile)
+			&& Ifs1GetBlock(symbol, subfile_id, (struct RawBlock *)&subfile)
 			&& subfile.used
 			&& subfile.type == BLOCK_TYPE_FILE
 			&& strcmp(subfile.filename, name) == 0)
@@ -185,7 +185,7 @@ _exists_file(	IN int8 * symbol,
 }
 
 /**
-	@Function:		_exists_slink
+	@Function:		_Ifs1SLinkExists
 	@Access:		Private
 	@Description:
 		确认指定磁盘的指定目录内是否存在指定名称的软链接。
@@ -202,15 +202,15 @@ _exists_file(	IN int8 * symbol,
 */
 static
 BOOL
-_exists_slink(	IN int8 * symbol,
-				IN uint32 id,
-				IN int8 * name)
+_Ifs1SLinkExists(	IN int8 * symbol,
+					IN uint32 id,
+					IN int8 * name)
 {
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
@@ -220,7 +220,7 @@ _exists_slink(	IN int8 * symbol,
 		uint32 slink_id = dir.blockids[ui];
 		struct SLinkBlock slink;
 		if(	slink_id != INVALID_BLOCK_ID 
-			&& get_block(symbol, slink_id, (struct RawBlock *)&slink)
+			&& Ifs1GetBlock(symbol, slink_id, (struct RawBlock *)&slink)
 			&& slink.used
 			&& slink.type == BLOCK_TYPE_SLINK
 			&& strcmp(slink.filename, name) == 0)
@@ -230,7 +230,7 @@ _exists_slink(	IN int8 * symbol,
 }
 
 /**
-	@Function:		_create_dir
+	@Function:		_Ifs1CreateDir
 	@Access:		Private
 	@Description:
 		在指定的磁盘的指定目录下创建文件夹。
@@ -249,24 +249,24 @@ _exists_slink(	IN int8 * symbol,
 */
 static
 BOOL
-_create_dir(IN int8 * symbol, 
-			IN uint32 id, 
-			IN int8 * name)
+_Ifs1CreateDir(	IN int8 * symbol, 
+				IN uint32 id, 
+				IN int8 * name)
 {
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| name == NULL
 		|| strlen(name) > MAX_DIRNAME_LEN
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR
-		|| _exists_slink(symbol, id, name)
-		|| _exists_dir(symbol, id, name))
+		|| _Ifs1SLinkExists(symbol, id, name)
+		|| _Ifs1DirExists(symbol, id, name))
 		return FALSE;
 	struct DirBlock new_dir;
-	fill_dir_block(name, &new_dir);
-	uint32 new_dir_id = add_block(symbol, (struct RawBlock *)&new_dir);
+	Ifs1FillDirBlock(name, &new_dir);
+	uint32 new_dir_id = Ifs1AddBlock(symbol, (struct RawBlock *)&new_dir);
 	if(new_dir_id == INVALID_BLOCK_ID)
 		return FALSE;
 	uint32 ui;
@@ -274,14 +274,14 @@ _create_dir(IN int8 * symbol,
 		if(dir.blockids[ui] == INVALID_BLOCK_ID)
 		{
 			dir.blockids[ui] = new_dir_id;
-			set_block(symbol, id, (struct RawBlock *)&dir);
+			Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir);
 			return TRUE;
 		}
 	return FALSE;
 }
 
 /**
-	@Function:		_create_file
+	@Function:		_Ifs1CreateFile
 	@Access:		Private
 	@Description:
 		在指定的磁盘的指定目录下创建文件。
@@ -300,7 +300,7 @@ _create_dir(IN int8 * symbol,
 */
 static
 BOOL
-_create_file(	IN int8 * symbol, 
+_Ifs1CreateFile(IN int8 * symbol, 
 				IN uint32 id, 
 				IN int8 * name)
 {
@@ -309,15 +309,15 @@ _create_file(	IN int8 * symbol,
 		|| symbol == NULL
 		|| name == NULL
 		|| strlen(name) > MAX_FILENAME_LEN
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR
-		|| _exists_slink(symbol, id, name)
-		|| _exists_file(symbol, id, name))
+		|| _Ifs1SLinkExists(symbol, id, name)
+		|| _Ifs1FileExists(symbol, id, name))
 		return FALSE;
 	struct FileBlock new_file;
-	fill_file_block(name, &new_file);
-	uint32 new_file_id = add_block(symbol, (struct RawBlock *)&new_file);
+	Ifs1FillFileBlock(name, &new_file);
+	uint32 new_file_id = Ifs1AddBlock(symbol, (struct RawBlock *)&new_file);
 	if(new_file_id == INVALID_BLOCK_ID)
 		return FALSE;
 	uint32 ui;
@@ -325,14 +325,14 @@ _create_file(	IN int8 * symbol,
 		if(dir.blockids[ui] == INVALID_BLOCK_ID)
 		{
 			dir.blockids[ui] = new_file_id;
-			set_block(symbol, id, (struct RawBlock *)&dir);
+			Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir);
 			return TRUE;
 		}
 	return FALSE;
 }
 
 /**
-	@Function:		_create_slink
+	@Function:		_Ifs1CreateSLink
 	@Access:		Private
 	@Description:
 		在指定的磁盘的指定目录下创建软链接。
@@ -353,10 +353,10 @@ _create_file(	IN int8 * symbol,
 */
 static
 BOOL
-_create_slink(	IN int8 * symbol,
-				IN uint32 id,
-				IN int8 * name,
-				IN int8 * link)
+_Ifs1CreateSLink(	IN int8 * symbol,
+					IN uint32 id,
+					IN int8 * name,
+					IN int8 * link)
 {
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
@@ -365,16 +365,16 @@ _create_slink(	IN int8 * symbol,
 		|| link == NULL
 		|| strlen(name) > MAX_FILENAME_LEN
 		|| strlen(link) >= SLINK_BLOCK_LINK_LEN
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR
-		|| _exists_slink(symbol, id, name)
-		|| _exists_file(symbol, id, name)
-		|| _exists_dir(symbol, id, name))
+		|| _Ifs1SLinkExists(symbol, id, name)
+		|| _Ifs1FileExists(symbol, id, name)
+		|| _Ifs1DirExists(symbol, id, name))
 		return FALSE;
 	struct SLinkBlock new_slink;
-	fill_slink_block(name, link, &new_slink);
-	uint32 new_slink_id = add_block(symbol, (struct RawBlock *)&new_slink);
+	Ifs1FillSLinkBlock(name, link, &new_slink);
+	uint32 new_slink_id = Ifs1AddBlock(symbol, (struct RawBlock *)&new_slink);
 	if(new_slink_id == INVALID_BLOCK_ID)
 		return FALSE;
 	uint32 ui;
@@ -382,14 +382,14 @@ _create_slink(	IN int8 * symbol,
 		if(dir.blockids[ui] == INVALID_BLOCK_ID)
 		{
 			dir.blockids[ui] = new_slink_id;
-			set_block(symbol, id, (struct RawBlock *)&dir);
+			Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir);
 			return TRUE;
 		}
 	return FALSE;
 }
 
 /**
-	@Function:		_del_dir
+	@Function:		_Ifs1DeleteDir
 	@Access:		Private
 	@Description:
 		删除指定磁盘的指定文件夹。
@@ -405,13 +405,13 @@ _create_slink(	IN int8 * symbol,
 */
 static
 BOOL
-_del_dir(	IN int8 * symbol, 
-			IN uint32 id)
+_Ifs1DeleteDir(	IN int8 * symbol, 
+				IN uint32 id)
 {
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
@@ -420,11 +420,11 @@ _del_dir(	IN int8 * symbol,
 		if(dir.blockids[ui] != INVALID_BLOCK_ID)
 			return FALSE;
 	dir.used = 0;
-	return set_block(symbol, id, (struct RawBlock *)&dir);
+	return Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir);
 }
 
 /**
-	@Function:		_del_file
+	@Function:		_Ifs1DeleteFile
 	@Access:		Private
 	@Description:
 		删除指定磁盘的指定文件。
@@ -440,23 +440,23 @@ _del_dir(	IN int8 * symbol,
 */
 static
 BOOL
-_del_file(	IN int8 * symbol, 
-			IN uint32 id)
+_Ifs1DeleteFile(IN int8 * symbol, 
+				IN uint32 id)
 {
 	struct FileBlock file;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&file)
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&file)
 		|| file.used == 0
 		|| file.type != BLOCK_TYPE_FILE
 		|| file.lock)
 		return FALSE;
 	file.used = 0;
-	return set_block(symbol, id, (struct RawBlock *)&file);
+	return Ifs1SetBlock(symbol, id, (struct RawBlock *)&file);
 }
 
 /**
-	@Function:		_del_slink
+	@Function:		_Ifs1DeleteSLink
 	@Access:		Private
 	@Description:
 		删除指定磁盘的指定软链接。
@@ -472,22 +472,22 @@ _del_file(	IN int8 * symbol,
 */
 static
 BOOL
-_del_slink(	IN int8 * symbol,
-			IN uint32 id)
+_Ifs1DeleteSLink(	IN int8 * symbol,
+					IN uint32 id)
 {
 	struct SLinkBlock slink;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&slink)
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&slink)
 		|| slink.used == 0
 		|| slink.type != BLOCK_TYPE_SLINK)
 		return FALSE;
 	slink.used = 0;
-	return set_block(symbol, id, (struct RawBlock *)&slink);
+	return Ifs1SetBlock(symbol, id, (struct RawBlock *)&slink);
 }
 
 /**
-	@Function:		_df_count
+	@Function:		_Ifs1GetItemCount
 	@Access:		Private
 	@Description:
 		获取指定磁盘的指定目录下的文件和文件夹数量的总和。
@@ -502,14 +502,14 @@ _del_slink(	IN int8 * symbol,
 */
 static
 int32
-_df_count(	IN int8 * symbol, 
-			IN uint32 id)
+_Ifs1GetItemCount(	IN int8 * symbol, 
+					IN uint32 id)
 {
 	int32 count = 0; 
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return -1;
@@ -519,7 +519,7 @@ _df_count(	IN int8 * symbol,
 		uint32 sub_block_id = dir.blockids[ui];
 		struct RawBlock sub_block;
 		if(	sub_block_id != INVALID_BLOCK_ID
-			&& get_block(symbol, sub_block_id, &sub_block)
+			&& Ifs1GetBlock(symbol, sub_block_id, &sub_block)
 			&& sub_block.used)
 			count++;
 	}
@@ -527,7 +527,7 @@ _df_count(	IN int8 * symbol,
 }
 
 /**
-	@Function:		_df
+	@Function:		_Ifs1GetItems
 	@Access:		Private
 	@Description:
 		获取指定磁盘的指定目录下的文件和文件夹的块集合。
@@ -546,17 +546,17 @@ _df_count(	IN int8 * symbol,
 */
 static
 int32
-_df(IN int8 * symbol, 
-	IN uint32 id, 
-	OUT struct RawBlock * blocks,
-	IN uint32 max)
+_Ifs1GetItems(	IN int8 * symbol, 
+				IN uint32 id, 
+				OUT struct RawBlock * blocks,
+				IN uint32 max)
 {
 	int32 count = 0; 
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| blocks == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return -1;
@@ -566,7 +566,7 @@ _df(IN int8 * symbol,
 		uint32 sub_blockid = dir.blockids[ui];
 		struct RawBlock raw_block;
 		if(	sub_blockid != INVALID_BLOCK_ID 
-			&& get_block(symbol, sub_blockid, &raw_block)
+			&& Ifs1GetBlock(symbol, sub_blockid, &raw_block)
 			&& raw_block.used)
 		{
 			memcpy(blocks + count, &raw_block, sizeof(struct RawBlock));
@@ -575,14 +575,14 @@ _df(IN int8 * symbol,
 		else
 			dir.blockids[ui] = INVALID_BLOCK_ID;
 	}
-	if(set_block(symbol, id, (struct RawBlock *)&dir))
+	if(Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir))
 		return count;
 	else
 		return -1;
 }
 
 /**
-	@Function:		_dir_list
+	@Function:		_Ifs1GetItemList
 	@Access:		Private
 	@Description:
 		获取指定磁盘的指定目录下的文件和文件夹的块集合。
@@ -599,16 +599,16 @@ _df(IN int8 * symbol,
 */
 static
 int32
-_dir_list(	IN int8 * symbol,
-			IN uint32 id,
-			OUT DSLLinkedList * list)
+_Ifs1GetItemList(	IN int8 * symbol,
+					IN uint32 id,
+					OUT DSLLinkedList * list)
 {
 	int32 count = 0; 
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| list == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return -1;
@@ -618,7 +618,7 @@ _dir_list(	IN int8 * symbol,
 		uint32 sub_blockid = dir.blockids[ui];
 		struct RawBlock raw_block;
 		if(	sub_blockid != INVALID_BLOCK_ID 
-			&& get_block(symbol, sub_blockid, &raw_block)
+			&& Ifs1GetBlock(symbol, sub_blockid, &raw_block)
 			&& raw_block.used)
 		{
 			struct RawBlock * new_raw_block = alloc_memory(sizeof(struct RawBlock));
@@ -632,14 +632,14 @@ _dir_list(	IN int8 * symbol,
 		else
 			dir.blockids[ui] = INVALID_BLOCK_ID;
 	}
-	if(set_block(symbol, id, (struct RawBlock *)&dir))
+	if(Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir))
 		return count;
 	else
 		return -1;
 }
 
 /**
-	@Function:		_rename_dir
+	@Function:		_Ifs1RenameDir
 	@Access:		Private
 	@Description:
 		重命名文件夹。
@@ -656,25 +656,25 @@ _dir_list(	IN int8 * symbol,
 */
 static
 BOOL
-_rename_dir(IN int8 * symbol, 
-			IN uint32 id, 
-			IN int8 * new_name)
+_Ifs1RenameDir(	IN int8 * symbol, 
+				IN uint32 id, 
+				IN int8 * new_name)
 {
 	struct DirBlock dir;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| new_name == NULL
 		|| strlen(new_name) > MAX_DIRNAME_LEN
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
 	strcpy_safe(dir.dirname, sizeof(dir.dirname), new_name);
-	return set_block(symbol, id, (struct RawBlock *)&dir);
+	return Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir);
 }
 
 /**
-	@Function:		_rename_file
+	@Function:		_Ifs1RenameFile
 	@Access:		Private
 	@Description:
 		重命名文件。
@@ -691,7 +691,7 @@ _rename_dir(IN int8 * symbol,
 */
 static
 BOOL
-_rename_file(	IN int8 * symbol, 
+_Ifs1RenameFile(IN int8 * symbol, 
 				IN uint32 id, 
 				IN int8 * new_name)
 {
@@ -700,16 +700,16 @@ _rename_file(	IN int8 * symbol,
 		|| symbol == NULL
 		|| new_name == NULL
 		|| strlen(new_name) > MAX_FILENAME_LEN
-		|| !get_block(symbol, id, (struct RawBlock *)&file)
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&file)
 		|| file.used == 0
 		|| file.type != BLOCK_TYPE_FILE)
 		return FALSE;
 	strcpy_safe(file.filename, sizeof(file.filename), new_name);
-	return set_block(symbol, id, (struct RawBlock *)&file);
+	return Ifs1SetBlock(symbol, id, (struct RawBlock *)&file);
 }
 
 /**
-	@Function:		_get_slink_link
+	@Function:		_Ifs1GetSLinkTarget
 	@Access:		Private
 	@Description:
 		获取软链接的链接目标。
@@ -729,16 +729,16 @@ _rename_file(	IN int8 * symbol,
 */
 static
 BOOL
-_get_slink_link(IN int8 * symbol,
-				IN uint32 id,
-				IN uint32 len,
-				OUT int8 * link)
+_Ifs1GetSLinkTarget(IN int8 * symbol,
+					IN uint32 id,
+					IN uint32 len,
+					OUT int8 * link)
 {
 	struct SLinkBlock slink;
 	if(	id == INVALID_BLOCK_ID
 		|| symbol == NULL
 		|| link == NULL
-		|| !get_block(symbol, id, (struct RawBlock *)&slink)
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&slink)
 		|| slink.used == 0
 		|| slink.type != BLOCK_TYPE_SLINK)
 		return FALSE;
@@ -747,7 +747,7 @@ _get_slink_link(IN int8 * symbol,
 }
 
 /**
-	@Function:		get_slink_link
+	@Function:		Ifs1GetSLinkTarget
 	@Access:		Public
 	@Description:
 		获取软链接的链接目标。
@@ -764,18 +764,18 @@ _get_slink_link(IN int8 * symbol,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-get_slink_link(	IN int8 * path,
-				IN uint32 len,
-				OUT int8 * link)
+Ifs1GetSLinkTarget(	IN int8 * path,
+					IN uint32 len,
+					OUT int8 * link)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path_ex(path, symbol, &type, TRUE);
-	return _get_slink_link(symbol, id, len, link);
+	uint32 id = Ifs1ParsePathEx(path, symbol, &type, TRUE);
+	return _Ifs1GetSLinkTarget(symbol, id, len, link);
 }
 
 /**
-	@Function:		parse_path_ex
+	@Function:		Ifs1ParsePathEx
 	@Access:		Public
 	@Description:
 		解析路径。根据路径获取盘符，块类型以及块ID。
@@ -794,7 +794,7 @@ get_slink_link(	IN int8 * path,
 			如果返回0xffffffff则说明路径无效。否则返回块ID。
 */
 uint32
-parse_path_ex(	IN int8 * path, 
+Ifs1ParsePathEx(IN int8 * path, 
 				OUT int8 * symbol, 
 				OUT int32 * type,
 				IN BOOL ret_slnk)
@@ -856,7 +856,7 @@ parse_path_ex(	IN int8 * path,
 			if(strcmp(name, "") == 0)
 				return INVALID_BLOCK_ID;
 			struct DirBlock dir;
-			if(	!get_block(disk, blockid, (struct RawBlock *)&dir) 
+			if(	!Ifs1GetBlock(disk, blockid, (struct RawBlock *)&dir) 
 				|| dir.used == 0 
 				|| dir.type != BLOCK_TYPE_DIR)
 				return INVALID_BLOCK_ID;
@@ -866,7 +866,7 @@ parse_path_ex(	IN int8 * path,
 				uint32 block_id = dir.blockids[ui];
 				struct RawBlock block;
 				if(	block_id != INVALID_BLOCK_ID
-					&& get_block(disk, block_id, &block))
+					&& Ifs1GetBlock(disk, block_id, &block))
 					if(	block.type == BLOCK_TYPE_DIR
 						&& strcmp(((struct DirBlock *)&block)->dirname, name) == 0)
 						{
@@ -886,10 +886,10 @@ parse_path_ex(	IN int8 * path,
 						{
 							int8 link[1024];
 							link[1023] = '\0';
-							if(_get_slink_link(disk, block_id, 1023, link))
+							if(_Ifs1GetSLinkTarget(disk, block_id, 1023, link))
 								if(strlen(link) != 0 && link[strlen(link) - 1] == '/')
 								{
-									uint32 id = parse_path(link, symbol, type);
+									uint32 id = Ifs1ParsePath(link, symbol, type);
 									if(id != INVALID_BLOCK_ID && *type == BLOCK_TYPE_DIR)
 									{
 										blockid = id;
@@ -901,7 +901,7 @@ parse_path_ex(	IN int8 * path,
 										break;
 									}
 									else if(id != INVALID_BLOCK_ID && *type == BLOCK_TYPE_SLINK)
-										block_id = parse_path(link, symbol, type);
+										block_id = Ifs1ParsePath(link, symbol, type);
 									else
 										return INVALID_BLOCK_ID;
 								}
@@ -921,7 +921,7 @@ parse_path_ex(	IN int8 * path,
 	{
 		*type = BLOCK_TYPE_FILE;
 		struct DirBlock dir;
-		if(	!get_block(disk, blockid, (struct RawBlock *)&dir) 
+		if(	!Ifs1GetBlock(disk, blockid, (struct RawBlock *)&dir) 
 			|| dir.used == 0 
 			|| dir.type != BLOCK_TYPE_DIR)
 			return INVALID_BLOCK_ID;
@@ -931,7 +931,7 @@ parse_path_ex(	IN int8 * path,
 			uint32 block_id = dir.blockids[ui];
 			struct RawBlock block;
 			if(	block_id != INVALID_BLOCK_ID 
-				&& get_block(disk, block_id, &block))
+				&& Ifs1GetBlock(disk, block_id, &block))
 				if(	block.type == BLOCK_TYPE_FILE
 					&& strcmp(((struct FileBlock *)&block)->filename, name) == 0)
 				{
@@ -949,9 +949,9 @@ parse_path_ex(	IN int8 * path,
 					{
 						int8 link[1024];
 						link[1023] = '\0';
-						if(_get_slink_link(disk, block_id, 1023, link))
+						if(_Ifs1GetSLinkTarget(disk, block_id, 1023, link))
 							if(strlen(link) != 0 && link[strlen(link) - 1] != '/')
-								return parse_path(link, symbol, type);
+								return Ifs1ParsePath(link, symbol, type);
 							else
 								return INVALID_BLOCK_ID;
 					}
@@ -963,7 +963,7 @@ parse_path_ex(	IN int8 * path,
 }
 
 /**
-	@Function:		parse_path
+	@Function:		Ifs1ParsePath
 	@Access:		Public
 	@Description:
 		解析路径。根据路径获取盘符，块类型以及块ID。
@@ -980,15 +980,15 @@ parse_path_ex(	IN int8 * path,
 			如果返回0xffffffff则说明路径无效。否则返回块ID。
 */
 uint32
-parse_path(	IN int8 * path, 
+Ifs1ParsePath(	IN int8 * path, 
 			OUT int8 * symbol, 
 			OUT int32 * type)
 {
-	return parse_path_ex(path, symbol, type, FALSE);
+	return Ifs1ParsePathEx(path, symbol, type, FALSE);
 }
 
 /**
-	@Function:		df_count
+	@Function:		Ifs1GetItemCount
 	@Access:		Public
 	@Description:
 		获取指定磁盘的指定目录下的文件和文件夹数量的总和。
@@ -1000,18 +1000,18 @@ parse_path(	IN int8 * path,
 			指定磁盘的指定目录下的文件和文件夹数量的总和。		
 */
 int32
-df_count(IN int8 * path)
+Ifs1GetItemCount(IN int8 * path)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
 	if(type != BLOCK_TYPE_DIR)
 		return -1;
-	return _df_count(symbol, id);
+	return _Ifs1GetItemCount(symbol, id);
 }
 
 /**
-	@Function:		df
+	@Function:		Ifs1GetItems
 	@Access:		Public
 	@Description:
 		获取指定磁盘的指定目录下的文件和文件夹的块集合。
@@ -1027,20 +1027,20 @@ df_count(IN int8 * path)
 			失败则返回-1，否则返回目录下的文件和文件夹数量的总和。
 */
 int32
-df(	IN int8 * path, 
-	OUT struct RawBlock * blocks,
-	IN uint32 max)
+Ifs1GetItems(	IN int8 * path, 
+				OUT struct RawBlock * blocks,
+				IN uint32 max)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
 	if(type != BLOCK_TYPE_DIR)
 		return -1;
-	return _df(symbol, id, blocks, max);
+	return _Ifs1GetItems(symbol, id, blocks, max);
 }
 
 /**
-	@Function:		dir_list
+	@Function:		Ifs1GetItemList
 	@Access:		Public
 	@Description:
 		获取指定磁盘的指定目录下的文件和文件夹的块集合。
@@ -1054,19 +1054,19 @@ df(	IN int8 * path,
 			失败则返回-1，否则返回目录下的文件和文件夹数量的总和。
 */
 int32
-dir_list(	IN int8 * path,
-			OUT DSLLinkedList * list)
+Ifs1GetItemList(IN int8 * path,
+				OUT DSLLinkedList * list)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
 	if(type != BLOCK_TYPE_DIR)
 		return -1;
-	return _dir_list(symbol, id, list);
+	return _Ifs1GetItemList(symbol, id, list);
 }
 
 /**
-	@Function:		create_dir
+	@Function:		Ifs1CreateDir
 	@Access:		Public
 	@Description:
 		在指定的磁盘的指定目录下创建文件夹。
@@ -1080,17 +1080,17 @@ dir_list(	IN int8 * path,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-create_dir(	IN int8 * path, 
-			IN int8 * name)
+Ifs1CreateDir(	IN int8 * path, 
+				IN int8 * name)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	return _create_dir(symbol, id, name);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	return _Ifs1CreateDir(symbol, id, name);
 }
 
 /**
-	@Function:		create_file
+	@Function:		Ifs1CreateFile
 	@Access:		Public
 	@Description:
 		在指定的磁盘的指定目录下创建文件。
@@ -1104,17 +1104,17 @@ create_dir(	IN int8 * path,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-create_file(IN int8 * path, 
-			IN int8 * name)
+Ifs1CreateFile(	IN int8 * path, 
+				IN int8 * name)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	return _create_file(symbol, id, name);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	return _Ifs1CreateFile(symbol, id, name);
 }
 
 /**
-	@Function:		create_slink
+	@Function:		Ifs1CreateSLink
 	@Access:		Public
 	@Description:
 		在指定的磁盘的指定目录下创建软链接。
@@ -1132,18 +1132,18 @@ create_file(IN int8 * path,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-create_slink(	IN int8 * path, 
+Ifs1CreateSLink(IN int8 * path, 
 				IN int8 * name,
 				IN int8 * link)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	return _create_slink(symbol, id, name, link);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	return _Ifs1CreateSLink(symbol, id, name, link);
 }
 
 /**
-	@Function:		del_dir
+	@Function:		Ifs1DeleteDir
 	@Access:		Public
 	@Description:
 		删除指定磁盘的指定文件夹。文件夹必须不包含内容。
@@ -1155,25 +1155,25 @@ create_slink(	IN int8 * path,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-del_dir(IN int8 * path)
+Ifs1DeleteDir(IN int8 * path)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	if(!_del_dir(symbol, id))
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	if(!_Ifs1DeleteDir(symbol, id))
 		return FALSE;
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	prev_dir(path, temp);
-	uint32 pdir_id = parse_path(temp, symbol, &type);
+	Ifs1GetParentDir(path, temp);
+	uint32 pdir_id = Ifs1ParsePath(temp, symbol, &type);
 	struct DirBlock pdir;
-	if(!get_block(symbol, pdir_id, (struct RawBlock *)&pdir))
+	if(!Ifs1GetBlock(symbol, pdir_id, (struct RawBlock *)&pdir))
 		return FALSE;
 	uint32 ui;	
 	for(ui = 0; ui < sizeof(pdir.blockids) / sizeof(uint32); ui++)
 		if(pdir.blockids[ui] == id)
 		{
 			pdir.blockids[ui] = INVALID_BLOCK_ID;
-			if(!set_block(symbol, pdir_id, (struct RawBlock *)&pdir))
+			if(!Ifs1SetBlock(symbol, pdir_id, (struct RawBlock *)&pdir))
 				return FALSE;
 			break;
 		}
@@ -1181,7 +1181,7 @@ del_dir(IN int8 * path)
 }
 
 /**
-	@Function:		del_file
+	@Function:		Ifs1DeleteFile
 	@Access:		Public
 	@Description:
 		删除指定磁盘的指定文件。
@@ -1193,25 +1193,25 @@ del_dir(IN int8 * path)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-del_file(IN int8 * path)
+Ifs1DeleteFile(IN int8 * path)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	if(!_del_file(symbol, id))
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	if(!_Ifs1DeleteFile(symbol, id))
 		return FALSE;
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	file_dir(path, temp);
-	uint32 pdir_id = parse_path(temp, symbol, &type);
+	Ifs1GetFileLocation(path, temp);
+	uint32 pdir_id = Ifs1ParsePath(temp, symbol, &type);
 	struct DirBlock pdir;
-	if(!get_block(symbol, pdir_id, (struct RawBlock *)&pdir))
+	if(!Ifs1GetBlock(symbol, pdir_id, (struct RawBlock *)&pdir))
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < sizeof(pdir.blockids) / sizeof(uint32); ui++)
 		if(pdir.blockids[ui] == id)
 		{
 			pdir.blockids[ui] = INVALID_BLOCK_ID;
-			if(!set_block(symbol, pdir_id, (struct RawBlock *)&pdir))
+			if(!Ifs1SetBlock(symbol, pdir_id, (struct RawBlock *)&pdir))
 				return FALSE;
 			break;
 		}
@@ -1219,7 +1219,7 @@ del_file(IN int8 * path)
 }
 
 /**
-	@Function:		del_dirs
+	@Function:		Ifs1DeleteDirRecursively
 	@Access:		Public
 	@Description:
 		删除指定磁盘的指定文件夹。
@@ -1231,15 +1231,15 @@ del_file(IN int8 * path)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-del_dirs(IN int8 * path)
+Ifs1DeleteDirRecursively(IN int8 * path)
 {
-	uint32 count = df_count(path);
+	uint32 count = Ifs1GetItemCount(path);
 	if(count != 0)
 	{
 		struct RawBlock * subs = (struct RawBlock *)alloc_memory(count * sizeof(struct RawBlock));
 		if(subs == NULL)
 			return FALSE;
-		df(path, subs, count);
+		Ifs1GetItems(path, subs, count);
 		uint32 ui;		
 		for(ui = 0; ui < count; ui++)
 		{
@@ -1250,7 +1250,7 @@ del_dirs(IN int8 * path)
 				int8 temp[MAX_PATH_BUFFER_LEN];
 				strcpy_safe(temp, sizeof(temp), path);
 				strcat_safe(temp, sizeof(temp), file->filename);
-				if(!del_file(temp))
+				if(!Ifs1DeleteFile(temp))
 					return FALSE;
 			}
 			else if(sub->type == BLOCK_TYPE_DIR)
@@ -1260,7 +1260,7 @@ del_dirs(IN int8 * path)
 				strcpy_safe(temp, sizeof(temp), path);
 				strcat_safe(temp, sizeof(temp), dir->dirname);
 				strcat_safe(temp, sizeof(temp), "/");
-				if(!del_dirs(temp))
+				if(!Ifs1DeleteDirRecursively(temp))
 					return FALSE;
 			}
 			else
@@ -1268,11 +1268,11 @@ del_dirs(IN int8 * path)
 		}
 		free_memory(subs);
 	}	
-	return del_dir(path);
+	return Ifs1DeleteDir(path);
 }
 
 /**
-	@Function:		del_slink
+	@Function:		Ifs1DeleteSLink
 	@Access:		Public
 	@Description:
 		删除指定磁盘的指定软链接。
@@ -1285,16 +1285,16 @@ del_dirs(IN int8 * path)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-del_slink(IN int8 * path)
+Ifs1DeleteSLink(IN int8 * path)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path_ex(path, symbol, &type, TRUE);
-	return _del_slink(symbol, id);
+	uint32 id = Ifs1ParsePathEx(path, symbol, &type, TRUE);
+	return _Ifs1DeleteSLink(symbol, id);
 }
 
 /**
-	@Function:		is_valid_df_name
+	@Function:		Ifs1IsValidName
 	@Access:		Public
 	@Description:
 		是否为合法的文件夹名称或文件名称。
@@ -1306,7 +1306,7 @@ del_slink(IN int8 * path)
 			返回TRUE则合法，否则不合法。
 */
 BOOL
-is_valid_df_name(IN int8 * name)
+Ifs1IsValidName(IN int8 * name)
 {
 	uint32 len = strlen(name);
 	if(len > MAX_FILENAME_LEN || len == 0)
@@ -1325,7 +1325,7 @@ is_valid_df_name(IN int8 * name)
 }
 
 /**
-	@Function:		prev_dir
+	@Function:		Ifs1GetParentDir
 	@Access:		Public
 	@Description:
 		获取指定目录路径的上一级目录路径。
@@ -1340,8 +1340,8 @@ is_valid_df_name(IN int8 * name)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-prev_dir(	IN int8 * path, 
-			OUT int8 * new_path)
+Ifs1GetParentDir(	IN int8 * path, 
+					OUT int8 * new_path)
 {
 	strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
 	uint32 len = strlen(new_path);
@@ -1358,7 +1358,7 @@ prev_dir(	IN int8 * path,
 }
 
 /**
-	@Function:		file_dir
+	@Function:		Ifs1GetFileLocation
 	@Access:		Public
 	@Description:
 		获取文件路径中的目录部分。
@@ -1373,8 +1373,8 @@ prev_dir(	IN int8 * path,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-file_dir(	IN int8 * path, 
-			OUT int8 * new_path)
+Ifs1GetFileLocation(IN int8 * path, 
+					OUT int8 * new_path)
 {
 	strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
 	uint32 len = strlen(new_path);
@@ -1390,7 +1390,7 @@ file_dir(	IN int8 * path,
 }
 
 /**
-	@Function:		is_valid_path
+	@Function:		Ifs1IsValidPath
 	@Access:		Public
 	@Description:
 		检查路径是否为合法的路径。
@@ -1402,7 +1402,7 @@ file_dir(	IN int8 * path,
 			返回TRUE则合法，否则不合法。
 */
 BOOL
-is_valid_path(IN int8 * path)
+Ifs1IsValidPath(IN int8 * path)
 {
 	int8 * s = path;
 	int32 state = 0;
@@ -1440,7 +1440,7 @@ is_valid_path(IN int8 * path)
 		}
 		else if(state == 4 && chr == '/')
 		{
-			if(!is_valid_df_name(name))
+			if(!Ifs1IsValidName(name))
 				return FALSE;
 			n = name;
 			name[0] = '\0';
@@ -1449,7 +1449,7 @@ is_valid_path(IN int8 * path)
 }
 
 /**
-	@Function:		rename_dir
+	@Function:		Ifs1RenameDir
 	@Access:		Public
 	@Description:
 		重命名文件夹。
@@ -1463,17 +1463,17 @@ is_valid_path(IN int8 * path)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-rename_dir(	IN int8 * path, 
-			IN int8 * new_name)
+Ifs1RenameDir(	IN int8 * path, 
+				IN int8 * new_name)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	return _rename_dir(symbol, id, new_name);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	return _Ifs1RenameDir(symbol, id, new_name);
 }
 
 /**
-	@Function:		rename_file
+	@Function:		Ifs1RenameFile
 	@Access:		Public
 	@Description:
 		重命名文件。
@@ -1487,17 +1487,17 @@ rename_dir(	IN int8 * path,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-rename_file(IN int8 * path, 
+Ifs1RenameFile(IN int8 * path, 
 			IN int8 * new_name)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	return _rename_file(symbol, id, new_name);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	return _Ifs1RenameFile(symbol, id, new_name);
 }
 
 /**
-	@Function:		fix_path
+	@Function:		Ifs1GetAbsolutePath
 	@Access:		Public
 	@Description:
 		根据当前路径和指定的相对路径产生一个绝对路径。
@@ -1513,9 +1513,9 @@ rename_file(IN int8 * path,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-fix_path(	IN int8 * path, 
-			IN int8 * current_path, 
-			OUT int8 * new_path)
+Ifs1GetAbsolutePath(IN int8 * path, 
+					IN int8 * current_path, 
+					OUT int8 * new_path)
 {
 	if(strlen(path) == 4 && path[2] == ':' && path[3] == '/')
 	{
@@ -1560,7 +1560,7 @@ fix_path(	IN int8 * path,
 			else
 			{
 				if(strcmp(name, "..") == 0)
-					prev_dir(temp, temp);
+					Ifs1GetParentDir(temp, temp);
 				else if(strcmp(name, ".") == 0)
 					;
 				else
@@ -1574,7 +1574,7 @@ fix_path(	IN int8 * path,
 			}
 		if(!processed)
 			if(strcmp(name, "..") == 0)
-				prev_dir(temp, temp);
+				Ifs1GetParentDir(temp, temp);
 			else if(strcmp(name, ".") == 0)
 				;
 			else
@@ -1587,7 +1587,7 @@ fix_path(	IN int8 * path,
 }
 
 /**
-	@Function:		is_sub_dir
+	@Function:		Ifs1IsChildPath
 	@Access:		Public
 	@Description:
 		确认一个路径是否为另一个路径的子路径。
@@ -1601,8 +1601,8 @@ fix_path(	IN int8 * path,
 			返回TRUE则是，否则不是。		
 */
 BOOL
-is_sub_dir(	IN int8 * dir,
-			IN int8 * sub_dir)
+Ifs1IsChildPath(IN int8 * dir,
+				IN int8 * sub_dir)
 {
 	uint32 dir_len = strlen(dir);
 	if(strlen(sub_dir) < dir_len)
@@ -1617,7 +1617,7 @@ is_sub_dir(	IN int8 * dir,
 }
 
 /**
-	@Function:		copy_file
+	@Function:		Ifs1CopyFile
 	@Access:		Public
 	@Description:
 		复制文件。
@@ -1633,24 +1633,24 @@ is_sub_dir(	IN int8 * dir,
 			返回TRUE则成功，否则失败。			
 */
 BOOL
-copy_file(	IN int8 * src_path, 
-			IN int8 * dst_path, 
-			IN int8 * dst_name)
+Ifs1CopyFile(	IN int8 * src_path,
+				IN int8 * dst_path,
+				IN int8 * dst_name)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	strcpy_safe(temp, sizeof(temp), dst_path);	
 	strcat_safe(temp, sizeof(temp), dst_name);
-	if(	!exists_df(src_path)
-		|| exists_df(temp)
-		|| !create_file(dst_path, dst_name))
+	if(	!Ifs1Exists(src_path)
+		|| Ifs1Exists(temp)
+		|| !Ifs1CreateFile(dst_path, dst_name))
 		return FALSE;
-	FileObject * src = open_file(src_path, FILE_MODE_READ);
+	FileObject * src = Ifs1OpenFile(src_path, FILE_MODE_READ);
 	if(src == NULL)
 		return FALSE;
-	FileObject * dst = open_file(temp, FILE_MODE_APPEND);
+	FileObject * dst = Ifs1OpenFile(temp, FILE_MODE_APPEND);
 	if(dst == NULL)
 	{
-		close_file(src);
+		Ifs1CloseFile(src);
 		return FALSE;
 	}
 	uint32 len = flen(src);
@@ -1662,27 +1662,27 @@ copy_file(	IN int8 * src_path,
 			copy_len = 1024;
 		else
 			copy_len = len;
-		if(!read_file(src, buffer, copy_len))
+		if(!Ifs1ReadFile(src, buffer, copy_len))
 		{
-			close_file(src);
-			close_file(dst);
+			Ifs1CloseFile(src);
+			Ifs1CloseFile(dst);
 			return FALSE;
 		}
-		if(!append_file(dst, buffer, copy_len))
+		if(!Ifs1AppendFile(dst, buffer, copy_len))
 		{
-			close_file(src);
-			close_file(dst);
+			Ifs1CloseFile(src);
+			Ifs1CloseFile(dst);
 			return FALSE;
 		}
 		len -= copy_len;
 	}
-	close_file(src);
-	close_file(dst);
+	Ifs1CloseFile(src);
+	Ifs1CloseFile(dst);
 	return TRUE;
 }
 
 /**
-	@Function:		exists_dir
+	@Function:		Ifs1DirExists
 	@Access:		Public
 	@Description:
 		确认指定磁盘的指定目录内是否存在指定名称的文件夹。
@@ -1696,17 +1696,17 @@ copy_file(	IN int8 * src_path,
 			返回TRUE则存在，否则不存在。	
 */
 BOOL
-exists_dir(	IN int8 * path,
-			IN int8 * name)
+Ifs1DirExists(	IN int8 * path,
+				IN int8 * name)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	return _exists_dir(symbol, id, name);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	return _Ifs1DirExists(symbol, id, name);
 }
 
 /**
-	@Function:		exists_file
+	@Function:		Ifs1FileExists
 	@Access:		Public
 	@Description:
 		确认指定磁盘的指定目录内是否存在指定名称的文件。
@@ -1720,17 +1720,17 @@ exists_dir(	IN int8 * path,
 			返回TRUE则存在，否则不存在。	
 */
 BOOL
-exists_file(IN int8 * path,
-			IN int8 * name)
+Ifs1FileExists(	IN int8 * path,
+				IN int8 * name)
 {
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
-	return _exists_file(symbol, id, name);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
+	return _Ifs1FileExists(symbol, id, name);
 }
 
 /**
-	@Function:		exists_df
+	@Function:		Ifs1Exists
 	@Access:		Public
 	@Description:
 		检查指定路径的资源是否存在。
@@ -1742,9 +1742,9 @@ exists_file(IN int8 * path,
 			返回TRUE则存在，否则不存在。	
 */
 BOOL
-exists_df(IN int8 * path)
+Ifs1Exists(IN int8 * path)
 {
-	if(!is_valid_path(path))
+	if(!Ifs1IsValidPath(path))
 		return FALSE;
 	uint32 len = strlen(path);
 	if(len == 4)
@@ -1752,7 +1752,7 @@ exists_df(IN int8 * path)
 		int8 symbol[3];
 		memcpy(symbol, path, 2);
 		symbol[2] = '\0';
-		return check_disk(symbol);
+		return Ifs1Check(symbol);
 	}
 	else if(path[len - 1] == '/')
 	{
@@ -1765,7 +1765,7 @@ exists_df(IN int8 * path)
 		for(i = len - 1; i >= 0 && temp[i] != '/'; i--);
 		strcpy_safe(name, sizeof(name), temp + i + 1);
 		temp[i + 1] = '\0';
-		return exists_dir(temp, name);
+		return Ifs1DirExists(temp, name);
 	}
 	else
 	{
@@ -1776,12 +1776,12 @@ exists_df(IN int8 * path)
 		for(i = len - 1; i >= 0 && path[i] != '/'; i--);
 		temp[i + 1] = '\0';
 		strcpy_safe(name, sizeof(name), path + i + 1);
-		return exists_file(temp, name);
+		return Ifs1FileExists(temp, name);
 	}
 }
 
 /**
-	@Function:		_open_file_unsafe
+	@Function:		_Ifs1OpenFileUnsafely
 	@Access:		Private
 	@Description:
 		打开一个文件。非安全版本。
@@ -1796,15 +1796,15 @@ exists_df(IN int8 * path)
 */
 static
 FileObject * 
-_open_file_unsafe(	IN int8 * path, 
-					IN int32 mode)
+_Ifs1OpenFileUnsafely(	IN int8 * path, 
+						IN int32 mode)
 {
 	FileObject * fptr = (FileObject *)alloc_memory(sizeof(FileObject));
 	if(fptr == NULL)
 		return NULL;
 	int32 type;
 	int8 symbol[3];
-	uint32 id = parse_path(path, symbol, &type);
+	uint32 id = Ifs1ParsePath(path, symbol, &type);
 	if(type != BLOCK_TYPE_FILE || id == INVALID_BLOCK_ID)
 	{
 		free_memory(fptr);
@@ -1822,14 +1822,14 @@ _open_file_unsafe(	IN int8 * path,
 		free_memory(fptr);
 		return NULL;
 	}
-	if(!get_block(symbol, id, (struct RawBlock *)file_block) || file_block->lock)
+	if(!Ifs1GetBlock(symbol, id, (struct RawBlock *)file_block) || file_block->lock)
 	{
 		free_memory(fptr->file_block);
 		free_memory(fptr);
 		return NULL;
 	}
 	file_block->lock = 1;
-	if(!set_block(symbol, id, (struct RawBlock *)file_block))
+	if(!Ifs1SetBlock(symbol, id, (struct RawBlock *)file_block))
 	{
 		free_memory(fptr->file_block);
 		free_memory(fptr);
@@ -1845,7 +1845,7 @@ _open_file_unsafe(	IN int8 * path,
 }
 
 /**
-	@Function:		open_file
+	@Function:		Ifs1OpenFile
 	@Access:		Public
 	@Description:
 		打开一个文件。
@@ -1859,23 +1859,23 @@ _open_file_unsafe(	IN int8 * path,
 			文件结构体指针。		
 */
 FileObject * 
-open_file(	IN int8 * path, 
-			IN int32 mode)
+Ifs1OpenFile(	IN int8 * path,
+				IN int32 mode)
 {
 	lock();
-	FileObject * fptr = _open_file_unsafe(path, mode);
+	FileObject * fptr = _Ifs1OpenFileUnsafely(path, mode);
 	unlock();
 	return fptr;
 }
 
 static
 BOOL
-_append_file_without_buffer_unsafe(	IN FileObject * fptr, 
+_Ifs1AppendFileWithoutBufferUnsafely(IN FileObject * fptr, 
 									IN uint8 * buffer, 
 									IN uint32 len);
 
 /**
-	@Function:		_close_file_unsafe
+	@Function:		_Ifs1CloseFileUnsafely
 	@Access:		Private
 	@Description:
 		关闭文件。非安全版本。
@@ -1888,7 +1888,7 @@ _append_file_without_buffer_unsafe(	IN FileObject * fptr,
 */
 static
 BOOL
-_close_file_unsafe(IN FileObject * fptr)
+_Ifs1CloseFileUnsafely(IN FileObject * fptr)
 {
 	if(fptr == NULL)
 		return FALSE;
@@ -1899,14 +1899,14 @@ _close_file_unsafe(IN FileObject * fptr)
 		&& fptr->append_buffer_was_enabled 
 		&& fptr->append_buffer_byte_count != 0)
 	{
-		if(	!_append_file_without_buffer_unsafe(fptr, 
-											fptr->append_buffer_bytes, 
-											fptr->append_buffer_byte_count))
+		if(	!_Ifs1AppendFileWithoutBufferUnsafely(	fptr, 
+													fptr->append_buffer_bytes, 
+													fptr->append_buffer_byte_count))
 			return FALSE;
 		fptr->append_buffer_byte_count = 0;
 	}
 
-	if(!set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block)))
+	if(!Ifs1SetBlock(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block)))
 		r = FALSE;
 	free_memory(fptr->file_block);
 	free_memory(fptr);
@@ -1914,7 +1914,7 @@ _close_file_unsafe(IN FileObject * fptr)
 }
 
 /**
-	@Function:		close_file
+	@Function:		Ifs1CloseFile
 	@Access:		Public
 	@Description:
 		关闭文件。
@@ -1926,16 +1926,16 @@ _close_file_unsafe(IN FileObject * fptr)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-close_file(IN FileObject * fptr)
+Ifs1CloseFile(IN FileObject * fptr)
 {
 	lock();
-	BOOL r = _close_file_unsafe(fptr);
+	BOOL r = _Ifs1CloseFileUnsafely(fptr);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_write_file_unsafe
+	@Function:		_Ifs1WriteFileUnsafely
 	@Access:		Private
 	@Description:
 		写文件。非安全版本。
@@ -1952,9 +1952,9 @@ close_file(IN FileObject * fptr)
 */
 static
 BOOL
-_write_file_unsafe(	IN FileObject * fptr, 
-					IN uint8 * buffer, 
-					IN uint32 len)
+_Ifs1WriteFileUnsafely(	IN FileObject * fptr, 
+						IN uint8 * buffer, 
+						IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_WRITE) == 0 || len > MAX_FILE_LEN)
 		return FALSE;
@@ -1966,7 +1966,7 @@ _write_file_unsafe(	IN FileObject * fptr,
 		{
 			struct DataBlock data_block;
 			data_block.used = 0;
-			if(!set_block(fptr->symbol, block_id, (struct RawBlock *)&data_block))
+			if(!Ifs1SetBlock(fptr->symbol, block_id, (struct RawBlock *)&data_block))
 				return FALSE;
 			fptr->file_block->blockids[ui] = INVALID_BLOCK_ID;
 		}
@@ -1986,7 +1986,7 @@ _write_file_unsafe(	IN FileObject * fptr,
 			data_block.reserve[ui] = 0;
 		memcpy(data_block.data, buffer, data_block.length);
 		buffer += data_block.length;
-		uint32 data_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
+		uint32 data_block_id = Ifs1AddBlock(fptr->symbol, (struct RawBlock *)&data_block);
 		fptr->file_block->blockids[index++] = data_block_id;
 	}
 	fptr->file_block->length = len;
@@ -2000,11 +2000,11 @@ _write_file_unsafe(	IN FileObject * fptr,
 		fptr->read_buffer_block_index = 0;
 	}
 
-	return set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)fptr->file_block);
+	return Ifs1SetBlock(fptr->symbol, fptr->file_block_id, (struct RawBlock *)fptr->file_block);
 }
 
 /**
-	@Function:		write_file
+	@Function:		Ifs1WriteFile
 	@Access:		Public
 	@Description:
 		写文件。
@@ -2020,18 +2020,18 @@ _write_file_unsafe(	IN FileObject * fptr,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-write_file(	IN FileObject * fptr, 
+Ifs1WriteFile(	IN FileObject * fptr, 
 			IN uint8 * buffer, 
 			IN uint32 len)
 {
 	lock();
-	BOOL r = _write_file_unsafe(fptr, buffer, len);
+	BOOL r = _Ifs1WriteFileUnsafely(fptr, buffer, len);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_read_file_unsafe
+	@Function:		_Ifs1ReadFileUnsafely
 	@Access:		Private
 	@Description:
 		读文件。非安全版本。
@@ -2049,9 +2049,9 @@ write_file(	IN FileObject * fptr,
 */
 static
 uint32
-_read_file_unsafe(	IN FileObject * fptr, 
-					OUT uint8 * buffer, 
-					IN uint32 len)
+_Ifs1ReadFileUnsafely(	IN FileObject * fptr, 
+						OUT uint8 * buffer, 
+						IN uint32 len)
 {
 	if((fptr->mode & FILE_MODE_READ) == 0 || len == 0)
 		return 0;
@@ -2060,9 +2060,9 @@ _read_file_unsafe(	IN FileObject * fptr,
 	if(	!fptr->read_buffer_is_valid 
 		|| fptr->read_buffer_block_index != fptr->file_block->blockids[block_index])
 	{
-		if(!get_block(	fptr->symbol, 
-						fptr->file_block->blockids[block_index], 
-						(struct RawBlock *)&(fptr->read_buffer_data_block)))
+		if(!Ifs1GetBlock(	fptr->symbol, 
+							fptr->file_block->blockids[block_index], 
+							(struct RawBlock *)&(fptr->read_buffer_data_block)))
 			return 0;
 		// 记录读取缓冲区信息。
 		fptr->read_buffer_block_index = fptr->file_block->blockids[block_index];
@@ -2079,9 +2079,9 @@ _read_file_unsafe(	IN FileObject * fptr,
 			if(	!fptr->read_buffer_is_valid 
 				|| fptr->read_buffer_block_index != fptr->file_block->blockids[block_index])
 			{
-				if(!get_block(	fptr->symbol, 
-								fptr->file_block->blockids[block_index], 
-								(struct RawBlock *)&(fptr->read_buffer_data_block)))
+				if(!Ifs1GetBlock(	fptr->symbol, 
+									fptr->file_block->blockids[block_index], 
+									(struct RawBlock *)&(fptr->read_buffer_data_block)))
 					break;
 				// 记录读取缓冲区信息。
 				fptr->read_buffer_block_index = fptr->file_block->blockids[block_index];
@@ -2133,7 +2133,7 @@ _read_file_unsafe(	IN FileObject * fptr,
 }
 
 /**
-	@Function:		_read_file_without_buffer_unsafe
+	@Function:		_Ifs1ReadFileWithoutBufferUnsafely
 	@Access:		Private
 	@Description:
 		读文件。非安全版本。
@@ -2151,7 +2151,7 @@ _read_file_unsafe(	IN FileObject * fptr,
 */
 static
 uint32
-_read_file_without_buffer_unsafe(	IN FileObject * fptr, 
+_Ifs1ReadFileWithoutBufferUnsafely(	IN FileObject * fptr, 
 									OUT uint8 * buffer, 
 									IN uint32 len)
 {
@@ -2160,7 +2160,7 @@ _read_file_without_buffer_unsafe(	IN FileObject * fptr,
 	uint32 real_len = 0;
 	uint32 block_index = fptr->next_block_index;
 	struct DataBlock data_block;
-	if(!get_block(	fptr->symbol,
+	if(!Ifs1GetBlock(	fptr->symbol,
 					fptr->file_block->blockids[block_index],
 					(struct RawBlock *)&data_block))
 		return 0;
@@ -2171,7 +2171,7 @@ _read_file_without_buffer_unsafe(	IN FileObject * fptr,
 		if(block_index != fptr->next_block_index)
 		{
 			block_index = fptr->next_block_index;
-			if(	!get_block(fptr->symbol,
+			if(	!Ifs1GetBlock(fptr->symbol,
 				fptr->file_block->blockids[block_index],
 				(struct RawBlock *)&data_block))
 				break;
@@ -2221,7 +2221,7 @@ _read_file_without_buffer_unsafe(	IN FileObject * fptr,
 }
 
 /**
-	@Function:		read_file
+	@Function:		Ifs1ReadFile
 	@Access:		Public
 	@Description:
 		读文件。
@@ -2237,22 +2237,22 @@ _read_file_without_buffer_unsafe(	IN FileObject * fptr,
 			实际读入长度。		
 */
 uint32
-read_file(	IN FileObject * fptr, 
-			OUT uint8 * buffer, 
-			IN uint32 len)
+Ifs1ReadFile(	IN FileObject * fptr, 
+				OUT uint8 * buffer, 
+				IN uint32 len)
 {
 	lock();
 	uint32 r = FALSE;
 	if(read_buffer_was_enabled)
-		r = _read_file_unsafe(fptr, buffer, len);
+		r = _Ifs1ReadFileUnsafely(fptr, buffer, len);
 	else
-		r = _read_file_without_buffer_unsafe(fptr, buffer, len);
+		r = _Ifs1ReadFileWithoutBufferUnsafely(fptr, buffer, len);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		reset_file
+	@Function:		Ifs1ResetFile
 	@Access:		Public
 	@Description:
 		重置文件的读取指针。
@@ -2262,14 +2262,14 @@ read_file(	IN FileObject * fptr,
 	@Return:	
 */
 void
-reset_file(IN FileObject * fptr)
+Ifs1ResetFile(IN FileObject * fptr)
 {
 	fptr->next_block_index = 0;
 	fptr->next_block_pos = 0;
 }
 
 /**
-	@Function:		is_eof
+	@Function:		Ifs1IsEOF
 	@Access:		Public
 	@Description:
 		检查文件指针是否已到达文件尾。
@@ -2281,7 +2281,7 @@ reset_file(IN FileObject * fptr)
 			返回TRUE则到达文件尾，否则未到达。
 */
 BOOL
-is_eof(IN FileObject * fptr)
+Ifs1IsEOF(IN FileObject * fptr)
 {
 	uint32 next = 	fptr->next_block_index
 					* DATA_BLOCK_DATA_LEN
@@ -2290,7 +2290,7 @@ is_eof(IN FileObject * fptr)
 }
 
 /**
-	@Function:		_append_file_without_buffer_unsafe
+	@Function:		_Ifs1AppendFileWithoutBufferUnsafely
 	@Access:		Private
 	@Description:
 		追加文件。非安全版本。
@@ -2308,9 +2308,9 @@ is_eof(IN FileObject * fptr)
 */
 static
 BOOL
-_append_file_without_buffer_unsafe(	IN FileObject * fptr, 
-									IN uint8 * buffer, 
-									IN uint32 len)
+_Ifs1AppendFileWithoutBufferUnsafely(	IN FileObject * fptr, 
+										IN uint8 * buffer, 
+										IN uint32 len)
 {
 	if(	fptr == NULL
 		|| buffer == NULL
@@ -2330,14 +2330,14 @@ _append_file_without_buffer_unsafe(	IN FileObject * fptr,
 		data_block.used = 1;
 		data_block.type = BLOCK_TYPE_DATA;
 		data_block.length = 0;
-		uint32 new_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
+		uint32 new_block_id = Ifs1AddBlock(fptr->symbol, (struct RawBlock *)&data_block);
 		if(new_block_id == INVALID_BLOCK_ID)
 			return FALSE;	
 		fptr->file_block->blockids[block_index] = new_block_id;
 	}
 
 	//获取下一个要写入的Data Block.
-	if(!get_block(fptr->symbol, fptr->file_block->blockids[cblock_index], (struct RawBlock *)&data_block))
+	if(!Ifs1GetBlock(fptr->symbol, fptr->file_block->blockids[cblock_index], (struct RawBlock *)&data_block))
 		return FALSE;
 	
 	int32 is_save = 0;	//Data Block是否已保存.
@@ -2351,7 +2351,7 @@ _append_file_without_buffer_unsafe(	IN FileObject * fptr,
 			if((cblock_index - 1) * DATA_BLOCK_DATA_LEN < fptr->file_block->length)
 			{
 				//存在. 直接保存.
-				if(!set_block(fptr->symbol, fptr->file_block->blockids[cblock_index - 1], (struct RawBlock *)&data_block))
+				if(!Ifs1SetBlock(fptr->symbol, fptr->file_block->blockids[cblock_index - 1], (struct RawBlock *)&data_block))
 					return FALSE;
 			}
 			else
@@ -2359,7 +2359,7 @@ _append_file_without_buffer_unsafe(	IN FileObject * fptr,
 				//不存在. 新建一个Data Block并追加到File Block里.
 				data_block.used = 1;
 				data_block.type = BLOCK_TYPE_DATA;
-				uint32 new_block_id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
+				uint32 new_block_id = Ifs1AddBlock(fptr->symbol, (struct RawBlock *)&data_block);
 				if(new_block_id == INVALID_BLOCK_ID)
 					return FALSE;
 				fptr->file_block->blockids[cblock_index - 1] = new_block_id;
@@ -2390,12 +2390,12 @@ _append_file_without_buffer_unsafe(	IN FileObject * fptr,
 		//检查未保存Data Block是否存在.
 		if(id != INVALID_BLOCK_ID)
 		{
-			if(!set_block(fptr->symbol, id, (struct RawBlock *)&data_block))
+			if(!Ifs1SetBlock(fptr->symbol, id, (struct RawBlock *)&data_block))
 				return FALSE;
 		}
 		else
 		{
-			id = add_block(fptr->symbol, (struct RawBlock *)&data_block);
+			id = Ifs1AddBlock(fptr->symbol, (struct RawBlock *)&data_block);
 			if(id == INVALID_BLOCK_ID)
 				return FALSE;
 			fptr->file_block->blockids[(is_next ? cblock_index - 1 : cblock_index)] = id;
@@ -2412,11 +2412,11 @@ _append_file_without_buffer_unsafe(	IN FileObject * fptr,
 		fptr->read_buffer_block_index = 0;
 	}
 
-	return set_block(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block));
+	return Ifs1SetBlock(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block));
 }
 
 /**
-	@Function:		_append_file_unsafe
+	@Function:		_Ifs1AppendFileUnsafely
 	@Access:		Private
 	@Description:
 		追加文件。非安全版本。
@@ -2434,9 +2434,9 @@ _append_file_without_buffer_unsafe(	IN FileObject * fptr,
 */
 static
 BOOL
-_append_file_unsafe(IN FileObject * fptr, 
-					IN uint8 * buffer, 
-					IN uint32 len)
+_Ifs1AppendFileUnsafely(IN FileObject * fptr, 
+						IN uint8 * buffer, 
+						IN uint32 len)
 {
 	if(	fptr == NULL
 		|| buffer == NULL
@@ -2447,13 +2447,13 @@ _append_file_unsafe(IN FileObject * fptr,
 	if(fptr->append_buffer_byte_count + len > sizeof(fptr->append_buffer_bytes))
 	{
 		if(fptr->append_buffer_byte_count != 0)
-			if(!_append_file_without_buffer_unsafe(	fptr, 
-												fptr->append_buffer_bytes, 
-												fptr->append_buffer_byte_count))
+			if(!_Ifs1AppendFileWithoutBufferUnsafely(	fptr, 
+														fptr->append_buffer_bytes, 
+														fptr->append_buffer_byte_count))
 				return FALSE;
 		if(len > sizeof(fptr->append_buffer_bytes))
 		{
-			if(!_append_file_without_buffer_unsafe(fptr, buffer, len))
+			if(!_Ifs1AppendFileWithoutBufferUnsafely(fptr, buffer, len))
 				return FALSE;
 			fptr->append_buffer_byte_count = 0;
 		}
@@ -2474,7 +2474,7 @@ _append_file_unsafe(IN FileObject * fptr,
 }
 
 /**
-	@Function:		append_file
+	@Function:		Ifs1AppendFile
 	@Access:		Public
 	@Description:
 		追加文件。
@@ -2487,32 +2487,32 @@ _append_file_unsafe(IN FileObject * fptr,
 			追加的数据的长度。
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。		
+			返回TRUE则成功，否则失败。
 */
 BOOL
-append_file(IN FileObject * fptr, 
-			IN uint8 * buffer, 
-			IN uint32 len)
+Ifs1AppendFile(	IN FileObject * fptr, 
+				IN uint8 * buffer, 
+				IN uint32 len)
 {
 	lock();
 	BOOL r = FALSE;
 	if(append_buffer_was_enabled)
-		r = _append_file_unsafe(fptr, buffer, len);
+		r = _Ifs1AppendFileUnsafely(fptr, buffer, len);
 	else
-		r = _append_file_without_buffer_unsafe(fptr, buffer, len);
+		r = _Ifs1AppendFileWithoutBufferUnsafely(fptr, buffer, len);
 	unlock();
 	return r;
 }
 
 static int8 repairing_path[MAX_PATH_BUFFER_LEN];
 
-#define	resume_repairing_path()	\
+#define	_RESUME_REPAIRING_PATH()	\
 {	\
 	repairing_path[strlen(repairing_path) - strlen(dir->dirname) - 1] = '\0';\
 }
 
 /**
-	@Function:		repair_files
+	@Function:		_Ifs1RepairFiles
 	@Access:		Private
 	@Description:
 		修复指定目录下的文件以及文件夹。
@@ -2527,8 +2527,8 @@ static int8 repairing_path[MAX_PATH_BUFFER_LEN];
 */
 static
 BOOL
-repair_files(	IN int8 * symbol, 
-				IN struct DirBlock * dir)
+_Ifs1RepairFiles(	IN int8 * symbol, 
+					IN struct DirBlock * dir)
 {
 	int32 r = TRUE;
 	uint32 * blockids = dir->blockids;
@@ -2544,7 +2544,7 @@ repair_files(	IN int8 * symbol,
 		if(id == INVALID_BLOCK_ID)
 			continue;
 		struct RawBlock raw_block;
-		if(!get_block(symbol, id, &raw_block))
+		if(!Ifs1GetBlock(symbol, id, &raw_block))
 		{
 			//无法通过symbol和id获取一个块
 			r = FALSE;
@@ -2562,7 +2562,7 @@ repair_files(	IN int8 * symbol,
 						int8 temp_path[MAX_PATH_BUFFER_LEN];
 						strcpy_safe(temp_path, sizeof(temp_path), repairing_path);
 						strcat_safe(temp_path, sizeof(temp_path), file_block->filename);
-						if(set_block(symbol, id, &raw_block))
+						if(Ifs1SetBlock(symbol, id, &raw_block))
 						{
 							print_str_p("Unlocked ", CC_GREEN);
 							print_str(temp_path);
@@ -2578,7 +2578,7 @@ repair_files(	IN int8 * symbol,
 					break;
 				}
 				case BLOCK_TYPE_DIR:
-					if(!repair_files(symbol, (struct DirBlock *)&raw_block))
+					if(!_Ifs1RepairFiles(symbol, (struct DirBlock *)&raw_block))
 						r = FALSE;	//修复该子文件夹时发生错误
 					break;
 				default:
@@ -2588,12 +2588,12 @@ repair_files(	IN int8 * symbol,
 		else
 			r = FALSE;	//文件夹的块列表包含一个错误的ID
 	}
-	resume_repairing_path();
+	_RESUME_REPAIRING_PATH();
 	return r;	//返回
 }
 
 /**
-	@Function:		repair_ifs1
+	@Function:		Ifs1Repair
 	@Access:		Public
 	@Description:
 		修复指定磁盘的IFS1文件系统。
@@ -2605,14 +2605,14 @@ repair_files(	IN int8 * symbol,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-repair_ifs1(IN int8 * symbol)
+Ifs1Repair(IN int8 * symbol)
 {
 	struct DirBlock dir;
-	if(	!get_block(symbol, START_BLOCK_ID, (struct RawBlock *)&dir)
+	if(	!Ifs1GetBlock(symbol, START_BLOCK_ID, (struct RawBlock *)&dir)
 		|| dir.used == 0
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
 	strcpy_safe(repairing_path, sizeof(repairing_path), symbol);
 	strcat_safe(repairing_path, sizeof(repairing_path), ":/");
-	return repair_files(symbol, &dir);
+	return _Ifs1RepairFiles(symbol, &dir);
 }

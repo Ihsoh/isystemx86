@@ -25,7 +25,7 @@ static DSLLinkedListPtr bat_da = NULL;	// Block Allocation Table - Hard disk A
 static DSLLinkedListPtr bat_db = NULL;	// Block Allocation Table - Hard disk B
 
 /**
-	@Function:		get_bat
+	@Function:		_Ifs1GetBAT
 	@Access:		Private
 	@Description:
 		获取指定磁盘的块分配表。
@@ -38,7 +38,7 @@ static DSLLinkedListPtr bat_db = NULL;	// Block Allocation Table - Hard disk B
 */
 static
 DSLLinkedListPtr
-get_bat(IN const int8 * symbol)
+_Ifs1GetBAT(IN const int8 * symbol)
 {
 	if(symbol == NULL)
 		return NULL;
@@ -55,7 +55,7 @@ get_bat(IN const int8 * symbol)
 }
 
 /**
-	@Function:		max_block_count
+	@Function:		_Ifs1GetMaxBlockCount
 	@Access:		Private
 	@Description:
 		获取指定磁盘的最大块数。
@@ -68,7 +68,7 @@ get_bat(IN const int8 * symbol)
 */
 static
 uint32
-max_block_count(IN const int8 * symbol)
+_Ifs1GetMaxBlockCount(IN const int8 * symbol)
 {
 	if(symbol == NULL)
 		return 0;
@@ -76,7 +76,7 @@ max_block_count(IN const int8 * symbol)
 }
 
 /**
-	@Function:		fill_bat
+	@Function:		_Ifs1FillBAT
 	@Access:		Private
 	@Description:
 		扫描磁盘，填充块分配表。
@@ -93,7 +93,7 @@ max_block_count(IN const int8 * symbol)
 */
 static
 BOOL
-fill_bat(	IN OUT DSLLinkedListPtr bat,
+_Ifs1FillBAT(	IN OUT DSLLinkedListPtr bat,
 			IN const int8 * symbol,
 			IN uint32 max)
 {
@@ -101,11 +101,11 @@ fill_bat(	IN OUT DSLLinkedListPtr bat,
 		return FALSE;
 	uint32 n = 0;
 	uint32 ui;
-	uint32 count = max_block_count(symbol);
+	uint32 count = _Ifs1GetMaxBlockCount(symbol);
 	for(ui = START_BLOCK_ID; ui < count && max > 0; ui++)
 	{
 		struct RawBlock block;
-		get_block(symbol, ui, &block);
+		Ifs1GetBlock(symbol, ui, &block);
 		if(!block.used)
 		{
 			DSLLinkedListNodePtr node;
@@ -123,7 +123,7 @@ fill_bat(	IN OUT DSLLinkedListPtr bat,
 }
 
 /**
-	@Function:		new_block_from_bat
+	@Function:		_Ifs1NewBlockFromBAT
 	@Access:		Private
 	@Description:
 		从块分配表获取一个可用块。
@@ -138,8 +138,8 @@ fill_bat(	IN OUT DSLLinkedListPtr bat,
 */
 static
 BOOL
-new_block_from_bat(	IN const int8 * symbol,
-					OUT uint32 * block_id)
+_Ifs1NewBlockFromBAT(	IN const int8 * symbol,
+						OUT uint32 * block_id)
 {
 	if(symbol == NULL || block_id == NULL)
 		return FALSE;
@@ -181,7 +181,7 @@ new_block_from_bat(	IN const int8 * symbol,
 }
 
 /**
-	@Function:		ifs1blks_init
+	@Function:		Ifs1InitBlocks
 	@Access:		Public
 	@Description:
 		初始化硬盘块处理模块。
@@ -191,16 +191,16 @@ new_block_from_bat(	IN const int8 * symbol,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-ifs1blks_init(void)
+Ifs1InitBlocks(void)
 {
 	bat_va = dsl_lnklst_new();
-	fill_bat(bat_va, "VA", DEFAULT_INIT_BAT_COUNT);
+	_Ifs1FillBAT(bat_va, "VA", DEFAULT_INIT_BAT_COUNT);
 	bat_vb = dsl_lnklst_new();
-	fill_bat(bat_vb, "VB", DEFAULT_INIT_BAT_COUNT);
+	_Ifs1FillBAT(bat_vb, "VB", DEFAULT_INIT_BAT_COUNT);
 	bat_da = dsl_lnklst_new();
-	fill_bat(bat_da, "DA", DEFAULT_INIT_BAT_COUNT);
+	_Ifs1FillBAT(bat_da, "DA", DEFAULT_INIT_BAT_COUNT);
 	bat_db = dsl_lnklst_new();
-	fill_bat(bat_db, "DB", DEFAULT_INIT_BAT_COUNT);
+	_Ifs1FillBAT(bat_db, "DB", DEFAULT_INIT_BAT_COUNT);
 	return 	bat_va != NULL
 			&& bat_vb != NULL
 			&& bat_da != NULL
@@ -208,7 +208,7 @@ ifs1blks_init(void)
 }
 
 /**
-	@Function:		get_block
+	@Function:		Ifs1GetBlock
 	@Access:		Public
 	@Description:
 		获取指定的磁盘的指定块。
@@ -224,20 +224,20 @@ ifs1blks_init(void)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-get_block(	IN const int8 * symbol, 
-			IN uint32 id, 
-			OUT struct RawBlock * block)
+Ifs1GetBlock(	IN const int8 * symbol, 
+				IN uint32 id, 
+				OUT struct RawBlock * block)
 {
 	if(	symbol == NULL
 		|| block == NULL
 		|| id < START_BLOCK_ID 
-		|| id >= max_block_count(symbol))
+		|| id >= _Ifs1GetMaxBlockCount(symbol))
 		return FALSE;
 	return read_sectors(symbol, id * BLOCK_SECTORS, BLOCK_SECTORS, (uint8 *)block);
 }
 
 /**
-	@Function:		set_block
+	@Function:		Ifs1SetBlock
 	@Access:		Public
 	@Description:
 		设置指定的磁盘的指定块。
@@ -253,20 +253,20 @@ get_block(	IN const int8 * symbol,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-set_block(	IN const int8 * symbol, 
-			IN uint32 id, 
-			IN struct RawBlock * block)
+Ifs1SetBlock(	IN const int8 * symbol, 
+				IN uint32 id, 
+				IN struct RawBlock * block)
 {
 	if(	symbol == NULL
 		|| block == NULL
 		|| id < START_BLOCK_ID 
-		|| id >= max_block_count(symbol))
+		|| id >= _Ifs1GetMaxBlockCount(symbol))
 		return FALSE;
 	return write_sectors(symbol, id * BLOCK_SECTORS, BLOCK_SECTORS, (uint8 *)block);
 }
 
 /**
-	@Function:		del_block
+	@Function:		Ifs1DeleteBlock
 	@Access:		Public
 	@Description:
 		删除指定的磁盘的指定块。
@@ -280,20 +280,20 @@ set_block(	IN const int8 * symbol,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-del_block(	IN const int8 * symbol, 
-			IN uint32 id)
+Ifs1DeleteBlock(IN const int8 * symbol, 
+				IN uint32 id)
 {
 	if(	symbol == NULL
 		|| id < START_BLOCK_ID 
-		|| id >= max_block_count(symbol))
+		|| id >= _Ifs1GetMaxBlockCount(symbol))
 		return FALSE;
 	struct RawBlock temp;
 	temp.used = 0;
-	BOOL r = set_block(symbol, id, &temp);
+	BOOL r = Ifs1SetBlock(symbol, id, &temp);
 	if(r)
 	{
 		// 如果块被删除，则把这个块添加到块分配表中。
-		DSLLinkedListPtr bat = get_bat(symbol);
+		DSLLinkedListPtr bat = _Ifs1GetBAT(symbol);
 		if(bat != NULL)
 		{
 			DSLLinkedListNodePtr node;
@@ -310,7 +310,7 @@ del_block(	IN const int8 * symbol,
 }
 
 /**
-	@Function:		del_all_blocks
+	@Function:		Ifs1DeleteAllBlocks
 	@Access:		Public
 	@Description:
 		删除指定的磁盘的所有块。
@@ -322,22 +322,22 @@ del_block(	IN const int8 * symbol,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-del_all_blocks(IN const int8 * symbol)
+Ifs1DeleteAllBlocks(IN const int8 * symbol)
 {
 	if(symbol == NULL)
 		return FALSE;
-	uint32 block_count = max_block_count(symbol);
+	uint32 block_count = _Ifs1GetMaxBlockCount(symbol);
 	if(block_count == 0)
 		return FALSE;
 	uint32 ui;
 	for(ui = START_BLOCK_ID; ui < block_count; ui++)
-		if(!del_block(symbol, ui))
+		if(!Ifs1DeleteBlock(symbol, ui))
 			return FALSE;
 	return TRUE;
 }
 
 /**
-	@Function:		add_block
+	@Function:		Ifs1AddBlock
 	@Access:		Public
 	@Description:
 		向指定的磁盘添加块。
@@ -351,8 +351,8 @@ del_all_blocks(IN const int8 * symbol)
 			返回INVALID_BLOCK_ID则失败，否则成功。		
 */
 uint32
-add_block(	IN const int8 * symbol, 
-			IN struct RawBlock * block)
+Ifs1AddBlock(	IN const int8 * symbol, 
+				IN struct RawBlock * block)
 {
 	if(symbol == NULL || block == NULL)
 		return INVALID_BLOCK_ID;
@@ -360,26 +360,26 @@ add_block(	IN const int8 * symbol,
 	// 先确认块分配表是否有可用的块。
 	// 如果有可用的块则直接返回块ID。
 	uint32 bat_block_id;
-	if(new_block_from_bat(symbol, &bat_block_id))
+	if(_Ifs1NewBlockFromBAT(symbol, &bat_block_id))
 	{
 		struct RawBlock temp;
-		if(!get_block(symbol, bat_block_id, &temp) || temp.used)
+		if(!Ifs1GetBlock(symbol, bat_block_id, &temp) || temp.used)
 			return INVALID_BLOCK_ID;
-		if(!set_block(symbol, bat_block_id, (struct RawBlock *)block))
+		if(!Ifs1SetBlock(symbol, bat_block_id, (struct RawBlock *)block))
 			return INVALID_BLOCK_ID;
 		return bat_block_id;
 	}
 
-	uint32 block_count = max_block_count(symbol);
+	uint32 block_count = _Ifs1GetMaxBlockCount(symbol);
 	uint32 ui;
 	for(ui = START_BLOCK_ID; ui < block_count; ui++)
 	{
 		struct RawBlock temp;
-		if(!get_block(symbol, ui, &temp))
+		if(!Ifs1GetBlock(symbol, ui, &temp))
 			return INVALID_BLOCK_ID;
 		if(!temp.used)
 		{
-			if(!set_block(symbol, ui, (struct RawBlock *)block))
+			if(!Ifs1SetBlock(symbol, ui, (struct RawBlock *)block))
 				return INVALID_BLOCK_ID;
 			return ui;
 		}
@@ -388,7 +388,7 @@ add_block(	IN const int8 * symbol,
 }
 
 /**
-	@Function:		fill_dir_block
+	@Function:		Ifs1FillDirBlock
 	@Access:		Public
 	@Description:
 		填充目录块结构体。
@@ -402,8 +402,8 @@ add_block(	IN const int8 * symbol,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-fill_dir_block(	IN int8 * name, 
-				IN struct DirBlock * dir)
+Ifs1FillDirBlock(	IN int8 * name, 
+					IN struct DirBlock * dir)
 {
 	if(name == NULL || dir == NULL)
 		return FALSE;
@@ -425,7 +425,7 @@ fill_dir_block(	IN int8 * name,
 }
 
 /**
-	@Function:		fill_file_block
+	@Function:		Ifs1FillFileBlock
 	@Access:		Public
 	@Description:
 		填充文件块结构体。
@@ -439,8 +439,8 @@ fill_dir_block(	IN int8 * name,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-fill_file_block(IN int8 * name, 
-				OUT struct FileBlock * file)
+Ifs1FillFileBlock(	IN int8 * name, 
+					OUT struct FileBlock * file)
 {
 	if(name == NULL || file == NULL)
 		return FALSE;
@@ -464,7 +464,7 @@ fill_file_block(IN int8 * name,
 }
 
 /**
-	@Function:		fill_slink_block
+	@Function:		Ifs1FillSLinkBlock
 	@Access:		Public
 	@Description:
 		填充软链接块结构体。
@@ -480,7 +480,7 @@ fill_file_block(IN int8 * name,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-fill_slink_block(	IN int8 * name,
+Ifs1FillSLinkBlock(	IN int8 * name,
 					IN int8 * link,
 					OUT struct SLinkBlock * slink)
 {

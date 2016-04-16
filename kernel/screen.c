@@ -416,7 +416,7 @@ print_char_p(	IN int8 chr,
 			if(task->stdout == NULL)
 				print_char_p_screen(chr, p);
 			else
-				append_file(task->stdout, &chr, 1);
+				Ifs1AppendFile(task->stdout, &chr, 1);
 	}
 }
 
@@ -465,7 +465,7 @@ print_str(IN const int8 * str)
 				while(*str != '\0')
 					print_char(*(str++));
 			else
-				append_file(task->stdout, str, strlen(str));
+				Ifs1AppendFile(task->stdout, str, strlen(str));
 	}
 }
 
@@ -499,7 +499,7 @@ print_str_p(IN const int8 * str,
 				while(*str != '\0')
 					print_char_p(*(str++), p);
 			else
-				append_file(task->stdout, str, strlen(str));
+				Ifs1AppendFile(task->stdout, str, strlen(str));
 	}
 }
 
@@ -530,7 +530,7 @@ print_err_char_p(	IN int8 chr,
 			if(task->stderr == NULL)
 				print_char_p_screen(chr, p);
 			else
-				append_file(task->stderr, &chr, 1);
+				Ifs1AppendFile(task->stderr, &chr, 1);
 	}
 }
 
@@ -579,7 +579,7 @@ print_err_str(IN const int8 * str)
 				while(*str != '\0')
 					print_char(*(str++));
 			else
-				append_file(task->stderr, str, strlen(str));
+				Ifs1AppendFile(task->stderr, str, strlen(str));
 	}
 }
 
@@ -613,7 +613,7 @@ print_err_str_p(IN const int8 * str,
 				while(*str != '\0')
 					print_char_p(*(str++), p);
 			else
-				append_file(task->stderr, str, strlen(str));
+				Ifs1AppendFile(task->stderr, str, strlen(str));
 	}
 }
 

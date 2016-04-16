@@ -48,7 +48,7 @@ detail_window_show(IN CASCTEXT path)
 {
 	if(_window == NULL || strlen(path) >= 1024)
 		return FALSE;
-	if(!exists_df(path))
+	if(!Ifs1Exists(path))
 	{
 		message_window_show(	"The path does not exists!",
 								"The path does not exists!",
@@ -101,7 +101,7 @@ detail_window_show(IN CASCTEXT path)
 		ASCCHAR buffer[1024];
 		ASCCHAR buffer1[1024];
 		strcpy_safe(buffer, sizeof(buffer), "Item Count: ");
-		uint32 count = df_count(path);
+		uint32 count = Ifs1GetItemCount(path);
 		strcat_safe(buffer, sizeof(buffer), uitos(buffer1, count));
 		text_common_image(	workspace,
 							20, 
@@ -134,11 +134,11 @@ detail_window_show(IN CASCTEXT path)
 							name,
 							strlen(name),
 							0xff000000);
-		FileObjectPtr fptr = open_file(path, FILE_MODE_READ);
+		FileObjectPtr fptr = Ifs1OpenFile(path, FILE_MODE_READ);
 		uint32 len_b = flen(fptr);
 		uint32 len_kb = len_b / 1024;
 		uint32 len_mb = len_kb / 1024;
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		ASCCHAR buffer[1024];
 		ASCCHAR buffer1[1024];
 		strcpy_safe(buffer, sizeof(buffer), "Length: ");

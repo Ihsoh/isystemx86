@@ -52,172 +52,176 @@ typedef struct File
 
 extern
 BOOL
-format_disk(IN int8 * symbol);
+Ifs1Init(void);
 
 extern
 BOOL
-check_disk(IN int8 * symbol);
+Ifs1Format(IN int8 * symbol);
 
 extern
 BOOL
-get_slink_link(	IN int8 * path,
+Ifs1Check(IN int8 * symbol);
+
+extern
+BOOL
+Ifs1GetSLinkTarget(	IN int8 * path,
 				IN uint32 len,
 				OUT int8 * link);
 
 extern
 uint32
-parse_path_ex(	IN int8 * path, 
+Ifs1ParsePathEx(	IN int8 * path, 
 				OUT int8 * symbol, 
 				OUT int32 * type,
 				IN BOOL ret_slnk);
 
 extern
 uint32
-parse_path(	IN int8 * path, 
+Ifs1ParsePath(	IN int8 * path, 
 			OUT int8 * symbol, 
 			OUT int32 * type);
 
 extern
 int32
-df_count(IN int8 * path);
+Ifs1GetItemCount(IN int8 * path);
 
 extern
 int32
-df(	IN int8 * path, 
+Ifs1GetItems(	IN int8 * path, 
 	OUT struct RawBlock * blocks,
 	IN uint32 max);
 
 extern
 int32
-dir_list(	IN int8 * path,
+Ifs1GetItemList(	IN int8 * path,
 			OUT DSLLinkedList * list);
 
 extern
 BOOL
-create_dir(	IN int8 * path,
+Ifs1CreateDir(	IN int8 * path,
 			IN int8 * name);
 
 extern
 BOOL
-create_file(IN int8 * path,
+Ifs1CreateFile(IN int8 * path,
 			IN int8 * name);
 
 extern
 BOOL
-create_slink(	IN int8 * path, 
+Ifs1CreateSLink(	IN int8 * path, 
 				IN int8 * name,
 				IN int8 * link);
 
 extern
 BOOL
-del_dir(IN int8 * path);
+Ifs1DeleteDir(IN int8 * path);
 
 extern
 BOOL
-del_file(IN int8 * path);
+Ifs1DeleteFile(IN int8 * path);
 
 extern
 BOOL
-del_dirs(IN int8 * path);
+Ifs1DeleteDirRecursively(IN int8 * path);
 
 extern
 BOOL
-del_slink(IN int8 * path);
+Ifs1DeleteSLink(IN int8 * path);
 
 extern
 BOOL
-prev_dir(	IN int8 * path,
+Ifs1GetParentDir(	IN int8 * path,
 			OUT int8 * new_path);
 
 extern
 BOOL
-file_dir(	IN int8 * path,
+Ifs1GetFileLocation(	IN int8 * path,
 			OUT int8 * new_patn);
 
 extern
 BOOL
-is_valid_df_name(IN int8 * name);
+Ifs1IsValidName(IN int8 * name);
 
 extern
 BOOL
-rename_dir(	IN int8 * path,
+Ifs1RenameDir(	IN int8 * path,
 			IN int8 * new_name);
 
 extern
 BOOL
-rename_file(IN int8 * path,
+Ifs1RenameFile(IN int8 * path,
 			IN int8 * new_name);
 
 extern
 BOOL
-fix_path(	IN int8 * path,
+Ifs1GetAbsolutePath(	IN int8 * path,
 			IN int8 * current_path,
 			OUT int8 * new_path);
 
 extern
 BOOL
-is_sub_dir(	IN int8 * dir,
+Ifs1IsChildPath(	IN int8 * dir,
 			IN int8 * sub_dir);
 
 extern
 BOOL
-copy_file(	IN int8 * src_path,
+Ifs1CopyFile(	IN int8 * src_path,
 			IN int8 * dst_path,
 			IN int8 * dst_name);
 
 
 extern
 BOOL
-exists_dir(	IN int8 * path,
+Ifs1DirExists(	IN int8 * path,
 			IN int8 * name);
 
 extern
 BOOL
-exists_file(IN int8 * path,
+Ifs1FileExists(IN int8 * path,
 			IN int8 * name);
 
 extern
 BOOL
-exists_df(IN int8 * path);
+Ifs1Exists(IN int8 * path);
 
 extern
 FileObject *
-open_file(	IN int8 * path,
+Ifs1OpenFile(	IN int8 * path,
 			IN int32 mode);
 
 extern
 BOOL
-close_file(IN FileObject * fptr);
+Ifs1CloseFile(IN FileObject * fptr);
 
 extern
 BOOL
-write_file(	IN FileObject * fptr,
+Ifs1WriteFile(	IN FileObject * fptr,
 			IN uint8 * buffer,
 			IN uint32 len);
 
 extern
 uint32
-read_file(	IN FileObject * fptr,
+Ifs1ReadFile(	IN FileObject * fptr,
 			OUT uint8 * buffer,
 			IN uint32 len);
 
 extern
 void
-reset_file(IN FileObject * fptr);
+Ifs1ResetFile(IN FileObject * fptr);
 
 extern
 BOOL
-is_eof(IN FileObject * fptr);
+Ifs1IsEOF(IN FileObject * fptr);
 
 extern
 BOOL
-append_file(IN FileObject * fptr,
+Ifs1AppendFile(IN FileObject * fptr,
 			IN uint8 * buffer,
 			IN uint32 len);
 
 extern
 BOOL
-repair_ifs1(IN int8 * symbol);
+Ifs1Repair(IN int8 * symbol);
 
 #define	flen(fptr)	((fptr)->file_block->length)
 

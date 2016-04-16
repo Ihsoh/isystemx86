@@ -462,7 +462,7 @@ _kill_task(IN int32 tid)
 	for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
 		if(task->opened_file_ptrs[ui] != NULL)
 		{
-			close_file(task->opened_file_ptrs[ui]);
+			Ifs1CloseFile(task->opened_file_ptrs[ui]);
 			task->opened_file_ptrs[ui] = NULL;
 		}
 		
@@ -493,11 +493,11 @@ _kill_task(IN int32 tid)
 		system_call_fs_unlock_fs();
 
 	if(task->stdin != NULL)
-		close_file(task->stdin);
+		Ifs1CloseFile(task->stdin);
 	if(task->stdout != NULL)
-		close_file(task->stdout);
+		Ifs1CloseFile(task->stdout);
 	if(task->stderr != NULL)
-		close_file(task->stderr);
+		Ifs1CloseFile(task->stderr);
 
 	if(task->elf != NULL)
 		free_memory(task->elf);
@@ -756,19 +756,19 @@ _create_task_by_file(	IN int8 * filename,
 		|| working_dir == NULL)
 		return -1;
 	uint8 * app;
-	FileObject * fptr = open_file(filename, FILE_MODE_READ);
+	FileObject * fptr = Ifs1OpenFile(filename, FILE_MODE_READ);
 	if(fptr == NULL)
 		return -1;
 	app = (uint8 *)alloc_memory(flen(fptr));
 	if(app == NULL)
 	{
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		return -1;
 	}
-	if(flen(fptr) <= 256 || !read_file(fptr, app, flen(fptr)))
+	if(flen(fptr) <= 256 || !Ifs1ReadFile(fptr, app, flen(fptr)))
 	{
 		free_memory(app);
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		return -1;
 	}
 
@@ -779,7 +779,7 @@ _create_task_by_file(	IN int8 * filename,
 		if(strcmp(file_symbol, "MTA32") != 0)
 		{
 			free_memory(app);
-			close_file(fptr);
+			Ifs1CloseFile(fptr);
 			return -1;
 		}
 	}
@@ -788,7 +788,7 @@ _create_task_by_file(	IN int8 * filename,
 		if(strcmp(file_symbol, "SYS32") != 0)
 		{
 			free_memory(app);
-			close_file(fptr);
+			Ifs1CloseFile(fptr);
 			return -1;
 		}
 	}
@@ -801,7 +801,7 @@ _create_task_by_file(	IN int8 * filename,
 								task_type,
 								task_attr);
 	free_memory(app);
-	close_file(fptr);
+	Ifs1CloseFile(fptr);
 	return tid;
 }
 
@@ -1076,11 +1076,11 @@ _tasks_redirect_io(	IN OUT FileObject ** v,
 {
 	if(v == NULL || path == NULL)
 		return FALSE;
-	FileObject * new = open_file(path, mode);
+	FileObject * new = Ifs1OpenFile(path, mode);
 	if(new == NULL)
 		return FALSE;
 	if(*v != NULL)
-		close_file(*v);
+		Ifs1CloseFile(*v);
 	*v = new;
 	return TRUE;
 }

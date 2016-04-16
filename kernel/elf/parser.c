@@ -103,21 +103,21 @@ int elf_parse(const char * path, ELFContextPtr ctx)
 
 	if(path == NULL || ctx == NULL)
 		goto err;
-	FileObjectPtr foptr = open_file((char *)path, FILE_MODE_READ);
+	FileObjectPtr foptr = Ifs1OpenFile((char *)path, FILE_MODE_READ);
 	if(foptr == NULL)
 		goto err;
 	ctx->file_size = flen(foptr);
 	ctx->file_content = (unsigned char *)alloc_memory(ctx->file_size);
-	if(read_file(foptr, ctx->file_content, ctx->file_size) != ctx->file_size)
+	if(Ifs1ReadFile(foptr, ctx->file_content, ctx->file_size) != ctx->file_size)
 		goto err;
-	close_file(foptr);
+	Ifs1CloseFile(foptr);
 	if(!_parse(ctx))
 		goto err;
 	ctx->valid = 1;
 	return 1;
 err:
 	if(foptr != NULL)
-		close_file(foptr);
+		Ifs1CloseFile(foptr);
 	if(ctx->file_content != NULL)
 		free_memory(ctx->file_content);
 	return 0;

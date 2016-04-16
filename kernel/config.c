@@ -40,12 +40,12 @@ config_init(void)
 	FileObject * fptr = NULL;
 
 	// system.json
-	fptr = open_file(SYSTEM_SYSTEM_CONFIG_FILE, FILE_MODE_READ);
+	fptr = Ifs1OpenFile(SYSTEM_SYSTEM_CONFIG_FILE, FILE_MODE_READ);
 	if(fptr != NULL)
 	{
-		uint32 len = read_file(fptr, buffer, sizeof(buffer));
+		uint32 len = Ifs1ReadFile(fptr, buffer, sizeof(buffer));
 		buffer[len] = '\0';
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		JSONLRawPtr system_json_raw = jsonl_parse_json(buffer);
 		if(	system_json_raw != NULL
 			&& JSONL_TYPE(system_json_raw) == JSONL_TYPE_OBJECT)
@@ -83,12 +83,12 @@ config_init(void)
 	}
 
 	// gui.json
-	fptr = open_file(SYSTEM_GUI_CONFIG_FILE, FILE_MODE_READ);
+	fptr = Ifs1OpenFile(SYSTEM_GUI_CONFIG_FILE, FILE_MODE_READ);
 	if(fptr != NULL)
 	{
-		uint32 len = read_file(fptr, buffer, sizeof(buffer));
+		uint32 len = Ifs1ReadFile(fptr, buffer, sizeof(buffer));
 		buffer[len] = '\0';
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		JSONLRawPtr gui_json_raw = jsonl_parse_json(buffer);
 		if(	gui_json_raw != NULL
 			&& JSONL_TYPE(gui_json_raw) == JSONL_TYPE_OBJECT)

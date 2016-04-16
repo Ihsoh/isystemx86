@@ -26,8 +26,8 @@ init_log(void)
 	log_buffer = alloc_memory(LOG_BUFFER_SIZE);
 	if(log_buffer == NULL)
 		return;
-	if(!exists_file(SYSTEM_PATH"data/log/", "system.log"))
-		create_file(SYSTEM_PATH"data/log/", "system.log");
+	if(!Ifs1FileExists(SYSTEM_PATH"data/log/", "system.log"))
+		Ifs1CreateFile(SYSTEM_PATH"data/log/", "system.log");
 	log_buffer[0] = '\0';
 	config_system_get_bool("WriteLogToDiskInRealTime", &write_in_rt);
 }
@@ -46,11 +46,11 @@ write_log_to_disk(void)
 {
 	if(log_buffer == NULL)
 		return;
-	FileObject * fptr = open_file(SYSTEM_LOG_FILE, FILE_MODE_APPEND);
+	FileObject * fptr = Ifs1OpenFile(SYSTEM_LOG_FILE, FILE_MODE_APPEND);
 	if(fptr == NULL)
 		return;
-	append_file(fptr, log_buffer, strlen(log_buffer));
-	close_file(fptr);
+	Ifs1AppendFile(fptr, log_buffer, strlen(log_buffer));
+	Ifs1CloseFile(fptr);
 }
 
 void

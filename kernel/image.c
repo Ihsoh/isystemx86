@@ -173,7 +173,7 @@ save_common_image(	IN struct CommonImage * common_image,
 	if(common_image == NULL || path == NULL)
 		return FALSE;
 	#ifdef	_KERNEL_MODULE_
-	FileObject * fptr = open_file(path, FILE_MODE_ALL);
+	FileObject * fptr = Ifs1OpenFile(path, FILE_MODE_ALL);
 	#else
 	ILFILE * fptr = ILOpenFile(path, FILE_MODE_ALL);
 	#endif
@@ -183,10 +183,10 @@ save_common_image(	IN struct CommonImage * common_image,
 	{
 		case CMMNIMAGE_IMG0:
 			#ifdef	_KERNEL_MODULE_
-			write_file(fptr, CMMNIMAGE_IMG0_SYMBOL, strlen(CMMNIMAGE_IMG0_SYMBOL));			
-			append_file(fptr, (uint8 *)&(common_image->width), 4);	
-			append_file(fptr, (uint8 *)&(common_image->height), 4);
-			append_file(fptr, common_image->data, common_image->width * common_image->height * 4);
+			Ifs1WriteFile(fptr, CMMNIMAGE_IMG0_SYMBOL, strlen(CMMNIMAGE_IMG0_SYMBOL));			
+			Ifs1AppendFile(fptr, (uint8 *)&(common_image->width), 4);	
+			Ifs1AppendFile(fptr, (uint8 *)&(common_image->height), 4);
+			Ifs1AppendFile(fptr, common_image->data, common_image->width * common_image->height * 4);
 			#else
 			ILWriteFile(fptr, CMMNIMAGE_IMG0_SYMBOL, strlen(CMMNIMAGE_IMG0_SYMBOL));			
 			ILAppendFile(fptr, (uint8 *)&(common_image->width), 4);	
@@ -198,7 +198,7 @@ save_common_image(	IN struct CommonImage * common_image,
 			return FALSE;
 	}
 	#ifdef	_KERNEL_MODULE_
-	close_file(fptr);
+	Ifs1CloseFile(fptr);
 	#else
 	ILCloseFile(fptr);
 	#endif

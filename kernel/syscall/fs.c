@@ -112,7 +112,7 @@ system_call_fs(	IN uint32 func,
 					filename = (int8 *)get_physical_address(tid, 
 															VOID_PTR_SPARAM(sparams->param0));
 					int32 mode = INT32_SPARAM(sparams->param1);
-					FileObject * fptr = open_file(filename, mode);
+					FileObject * fptr = Ifs1OpenFile(filename, mode);
 					task->opened_file_ptrs[ui] = fptr;
 					sparams->param0 = SPARAM(fptr);
 				}
@@ -149,7 +149,7 @@ system_call_fs(	IN uint32 func,
 				if(ui < MAX_TASK_OPENED_FILE_COUNT)
 				{
 					task->opened_file_ptrs[ui] = NULL;
-					BOOL r = close_file(fptr);
+					BOOL r = Ifs1CloseFile(fptr);
 					sparams->param0 = SPARAM(r);
 				}
 				else
@@ -183,7 +183,7 @@ system_call_fs(	IN uint32 func,
 				buffer = (uint8 *)get_physical_address(	tid, 
 														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				BOOL r = write_file(fptr, buffer, len);
+				BOOL r = Ifs1WriteFile(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
 			}
 			else
@@ -211,7 +211,7 @@ system_call_fs(	IN uint32 func,
 				buffer = (uint8 *)get_physical_address(	tid, 
 														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				uint32 real_len = read_file(fptr, buffer, len);
+				uint32 real_len = Ifs1ReadFile(fptr, buffer, len);
 				sparams->param0 = SPARAM(real_len);
 			}
 			else
@@ -239,7 +239,7 @@ system_call_fs(	IN uint32 func,
 				buffer = (uint8 *)get_physical_address(	tid, 
 														VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
-				BOOL r = append_file(fptr, buffer, len);
+				BOOL r = Ifs1AppendFile(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
 			}
 			else
@@ -258,7 +258,7 @@ system_call_fs(	IN uint32 func,
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(check_priviledge(tid, fptr))
-				reset_file(fptr);
+				Ifs1ResetFile(fptr);
 			break;
 		}
 		//确认文件或文件夹是否存在
@@ -272,7 +272,7 @@ system_call_fs(	IN uint32 func,
 			int8 * path = NULL;
 			path = (int8 *)get_physical_address(sparams->tid,
 												VOID_PTR_SPARAM(sparams->param0));
-			BOOL r = exists_df(path);
+			BOOL r = Ifs1Exists(path);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -291,7 +291,7 @@ system_call_fs(	IN uint32 func,
 			int8 * name = NULL;
 			name = (int8 *)get_physical_address(sparams->tid,
 												VOID_PTR_SPARAM(sparams->param1));
-			BOOL r = create_dir(path, name);
+			BOOL r = Ifs1CreateDir(path, name);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -310,7 +310,7 @@ system_call_fs(	IN uint32 func,
 			int8 * name = NULL;
 			name = (int8 *)get_physical_address(sparams->tid,
 												VOID_PTR_SPARAM(sparams->param1));
-			BOOL r = create_file(path, name);
+			BOOL r = Ifs1CreateFile(path, name);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -325,7 +325,7 @@ system_call_fs(	IN uint32 func,
 			int8 * path = NULL;
 			path = (int8 *)get_physical_address(sparams->tid,
 												VOID_PTR_SPARAM(sparams->param0));
-			BOOL r = del_dir(path);
+			BOOL r = Ifs1DeleteDir(path);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -340,7 +340,7 @@ system_call_fs(	IN uint32 func,
 			int8 * path = NULL;
 			path = (int8 *)get_physical_address(sparams->tid,
 												VOID_PTR_SPARAM(sparams->param0));
-			BOOL r = del_file(path);
+			BOOL r = Ifs1DeleteFile(path);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -355,7 +355,7 @@ system_call_fs(	IN uint32 func,
 			int8 * path = NULL;
 			path = (int8 *)get_physical_address(sparams->tid,
 												VOID_PTR_SPARAM(sparams->param0));
-			BOOL r = del_dirs(path);
+			BOOL r = Ifs1DeleteDirRecursively(path);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -374,7 +374,7 @@ system_call_fs(	IN uint32 func,
 			int8 * new_name = NULL;
 			new_name = (int8 *)get_physical_address(sparams->tid,
 													VOID_PTR_SPARAM(sparams->param1));
-			BOOL r = rename_dir(path, new_name);
+			BOOL r = Ifs1RenameDir(path, new_name);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -393,7 +393,7 @@ system_call_fs(	IN uint32 func,
 			int8 * new_name = NULL;
 			new_name = (int8 *)get_physical_address(sparams->tid,
 													VOID_PTR_SPARAM(sparams->param1));
-			BOOL r = rename_file(path, new_name);
+			BOOL r = Ifs1RenameFile(path, new_name);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -463,7 +463,7 @@ system_call_fs(	IN uint32 func,
 			int8 * path = NULL;
 			path = (int8 *)get_physical_address(sparams->tid,
 												VOID_PTR_SPARAM(sparams->param0));
-			int32 count = df_count(path);
+			int32 count = Ifs1GetItemCount(path);
 			sparams->param0 = SPARAM(count);
 			break;
 		}
@@ -485,7 +485,7 @@ system_call_fs(	IN uint32 func,
 																	VOID_PTR_SPARAM(sparams->param1));
 			uint32 max = 0;
 			max = UINT32_SPARAM(sparams->param2);
-			int32 count = df(path, raw_blocks, max);
+			int32 count = Ifs1GetItems(path, raw_blocks, max);
 			sparams->param0 = SPARAM(count);
 			break;
 		}
@@ -505,7 +505,7 @@ system_call_fs(	IN uint32 func,
 			int8 * new_path = NULL;
 			new_path = (int8 *)get_physical_address(sparams->tid,
 													VOID_PTR_SPARAM(sparams->param1));
-			BOOL r = fix_path(path, task->working_dir, new_path);
+			BOOL r = Ifs1GetAbsolutePath(path, task->working_dir, new_path);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -559,7 +559,7 @@ system_call_fs(	IN uint32 func,
 			FileObject * fptr = (FileObject *)(sparams->param0);
 			BOOL r = FALSE;
 			if(check_priviledge(tid, fptr))
-				r = is_eof(fptr);
+				r = Ifs1IsEOF(fptr);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

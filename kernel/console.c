@@ -625,7 +625,7 @@ format(IN int8 * param)
 		error(FORMAT("format {DA|DB|VA|VB|...}"));
 		return 0;
 	}
-	if(format_disk(param))
+	if(Ifs1Format(param))
 	{
 		print_str("OK!");
 		return 1;
@@ -659,7 +659,7 @@ cdisk(IN int8 * param)
 		return 0;
 	}
 	print_str(param);
-	if(check_disk(param))
+	if(Ifs1Check(param))
 		print_str(" is IFS1!");
 	else
 		error(" is not IFS1!");
@@ -690,18 +690,18 @@ mkdir(	IN int8 * path,
 		error(FORMAT("mkdir {path} {dir name}"));
 		return 0;
 	}
-	if(!is_valid_df_name(name))
+	if(!Ifs1IsValidName(name))
 	{
 		error("Invalid directory name!");
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(create_dir(temp, name))
+	if(Ifs1CreateDir(temp, name))
 	{
 		print_str("OK!");
 		return 1;
@@ -737,18 +737,18 @@ mkfile(	IN int8 * path,
 		error(FORMAT("mkfile {path} {file name}"));
 		return 0;
 	}
-	if(!is_valid_df_name(name))
+	if(!Ifs1IsValidName(name))
 	{
 		error("Invalid file name!");
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(create_file(temp, name))
+	if(Ifs1CreateFile(temp, name))
 	{
 		print_str("OK!");
 		return 1;
@@ -782,12 +782,12 @@ deldir(IN int8 * path)
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(!is_sub_dir(temp, current_path) && del_dir(temp))
+	if(!Ifs1IsChildPath(temp, current_path) && Ifs1DeleteDir(temp))
 	{
 		print_str("OK!");
 		return 1;
@@ -821,12 +821,12 @@ deldirs(IN int8 * path)
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(!is_sub_dir(temp, current_path) && del_dirs(temp))
+	if(!Ifs1IsChildPath(temp, current_path) && Ifs1DeleteDirRecursively(temp))
 	{
 		print_str("OK!");
 		return 1;
@@ -860,12 +860,12 @@ delfile(IN int8 * path)
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(del_file(temp))
+	if(Ifs1DeleteFile(temp))
 	{
 		print_str("OK!");
 		return 1;
@@ -902,12 +902,12 @@ rndir(	IN int8 * path,
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(!is_sub_dir(temp, current_path) && rename_dir(temp, new_name))
+	if(!Ifs1IsChildPath(temp, current_path) && Ifs1RenameDir(temp, new_name))
 	{
 		print_str("OK!");
 		return 1;
@@ -944,12 +944,12 @@ rnfile(	IN int8 * path,
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(rename_file(temp, new_name))
+	if(Ifs1RenameFile(temp, new_name))
 	{
 		print_str("OK!");
 		return 1;
@@ -986,7 +986,7 @@ files(	IN int8 * path,
 	if(strcmp(path, "") == 0)
 		path = current_path;
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
@@ -994,7 +994,7 @@ files(	IN int8 * path,
 	path = temp;
 	uint ui, ui1;
 	DSLLinkedList * list = dsl_lnklst_new();
-	int32 count = dir_list(path, list);
+	int32 count = Ifs1GetItemList(path, list);
 	if(count == -1)
 	{
 		error("Invalid path!");
@@ -1114,17 +1114,17 @@ int32
 cd(IN int8 * path)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
 	int32 type;
 	int8 symbol[3];
-	uint id = parse_path(temp, symbol, &type);
+	uint id = Ifs1ParsePath(temp, symbol, &type);
 	struct DirBlock dir;
 	if(	id == 0xFFFFFFFF
-		|| !get_block(symbol, id, (struct RawBlock *)&dir) 
+		|| !Ifs1GetBlock(symbol, id, (struct RawBlock *)&dir) 
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 	{
@@ -1159,17 +1159,17 @@ cpfile(	IN int8 * src_path,
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	int8 temp1[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(src_path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(src_path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(!fix_path(dst_path, current_path, temp1))
+	if(!Ifs1GetAbsolutePath(dst_path, current_path, temp1))
 	{
 		error("Invalid path!");
 		return 0;
 	}
-	if(copy_file(temp, temp1, name))
+	if(Ifs1CopyFile(temp, temp1, name))
 	{
 		print_str("OK!");
 		return 1;
@@ -1289,7 +1289,7 @@ run(IN int8 * path,
 	}
 	int32 r;
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return -1;
@@ -1330,7 +1330,7 @@ run_wait(	IN int8 * path,
 	}
 	int32 r = -1;
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return -1;
@@ -1373,7 +1373,7 @@ static
 int32
 help(void)
 {
-	FileObject * fptr = open_file(SYSTEM_HELP_FILE, FILE_MODE_READ);
+	FileObject * fptr = Ifs1OpenFile(SYSTEM_HELP_FILE, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		error("Cannot open file '"SYSTEM_HELP_FILE"'!");
@@ -1383,14 +1383,14 @@ help(void)
 	if(text == NULL)
 	{
 		error("No enough memory!");
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		return 0;
 	}
 	text[flen(fptr)] = '\0';
-	if(!read_file(fptr, text, flen(fptr)))
+	if(!Ifs1ReadFile(fptr, text, flen(fptr)))
 	{
 		error("Cannot read file '"SYSTEM_HELP_FILE"'!");
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		return 0;
 	}
 	int8 chr;
@@ -1420,7 +1420,7 @@ help(void)
 		if(chr == '\n')
 			line++;
 	}
-	close_file(fptr);
+	Ifs1CloseFile(fptr);
 	return 1;
 }
 
@@ -1484,31 +1484,31 @@ vmode(IN int8 * mode)
 {
 	FileObject * fptr = NULL;
 	if(strcmp(mode, "text") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrtm.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrtm.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa320_200") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_320_200.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_320_200.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa640_400") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_640_400.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_640_400.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa640_480") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_640_480.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_640_480.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa800_500") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_800_500.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_800_500.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa800_600") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_800_600.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_800_600.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa896_672") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_896_672.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_896_672.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1024_640") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1024_640.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_1024_640.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1024_768") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1024_768.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_1024_768.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1152_720") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1152_720.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_1152_720.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1280_1024") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1280_1024.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_1280_1024.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1440_900") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1440_900.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_1440_900.bin", FILE_MODE_READ);
 	else if(strcmp(mode, "vesa1600_1200") == 0)
-		fptr = open_file(SYSTEM_PATH"kernelldrs/kernelldrgm_1600_1200.bin", FILE_MODE_READ);
+		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_1600_1200.bin", FILE_MODE_READ);
 	else
 	{
 		error(FORMAT(	"vmode {text"
@@ -1524,13 +1524,13 @@ vmode(IN int8 * mode)
 	}
 	uint8 * buffer = alloc_memory((flen(fptr) / 512 + 1) * 512);
 	uint r;
-	if(buffer == NULL || !(r = read_file(fptr, buffer, flen(fptr))) )
+	if(buffer == NULL || !(r = Ifs1ReadFile(fptr, buffer, flen(fptr))) )
 	{
 		error("Failed to change video mode!");
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		return 0;
 	}
-	close_file(fptr);
+	Ifs1CloseFile(fptr);
 	if(!write_sectors(SYSTEM_DISK, 1, flen(fptr) / 512 + 1, buffer))
 	{
 		error("Failed to change video mode!");
@@ -1727,12 +1727,12 @@ mkslink(IN int8 * path,
 		return FALSE;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return FALSE;
 	}
-	if(create_slink(temp, name, link))
+	if(Ifs1CreateSLink(temp, name, link))
 	{
 		print_str("OK!");
 		return TRUE;
@@ -1766,12 +1766,12 @@ delslink(IN int8 * path)
 		return FALSE;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return FALSE;
 	}
-	if(del_slink(temp))
+	if(Ifs1DeleteSLink(temp))
 	{
 		print_str("OK!");
 		return TRUE;
@@ -1805,14 +1805,14 @@ slink(IN int8 * path)
 		return FALSE;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return FALSE;
 	}
 	int8 link[1024];
 	link[1023] = '\0';
-	if(get_slink_link(temp, 1023, link))
+	if(Ifs1GetSLinkTarget(temp, 1023, link))
 	{
 		print_str(link);
 		return TRUE;
@@ -1847,7 +1847,7 @@ int32
 _batch(IN int8 * path)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	if(!fix_path(path, current_path, temp))
+	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
 		error("Invalid path!");
 		return 0;
@@ -1856,7 +1856,7 @@ _batch(IN int8 * path)
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	if(local_vars_s == NULL)
 		return 0;
-	FileObject * fptr = open_file(temp, FILE_MODE_READ);
+	FileObject * fptr = Ifs1OpenFile(temp, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
 		free_vars(local_vars_s);
@@ -1866,12 +1866,12 @@ _batch(IN int8 * path)
 	int8 * cmds = (int8 *)alloc_memory(file_len);
 	if(cmds == NULL)
 	{
-		close_file(fptr);
+		Ifs1CloseFile(fptr);
 		free_vars(local_vars_s);
 		return 0;
 	}
-	read_file(fptr, cmds, file_len);
-	close_file(fptr);
+	Ifs1ReadFile(fptr, cmds, file_len);
+	Ifs1CloseFile(fptr);
 	uint32 ui;
 	int8 cmd[BATCH_MAX_CMD_LEN];
 	int8 * lines = alloc_memory(BATCH_MAX_CMD_LINES * BATCH_MAX_CMD_LEN);
@@ -2259,7 +2259,7 @@ exec(	IN int8 * cmd,
 									10 * 1024);
 			split_string(NULL, NULL, 0, 0);
 			while(split_string(path, buffer, ';', 1024) != NULL)
-				if(exists_file(path, src_path))
+				if(Ifs1FileExists(path, src_path))
 				{
 					int8 temp[1024];
 					strcpy_safe(temp, sizeof(temp), path);
@@ -2426,7 +2426,7 @@ exec(	IN int8 * cmd,
 		{
 			ASCCHAR path[1024];
 			parse_cmd(NULL, path, 1023);
-			fix_path(path, current_path, path);
+			Ifs1GetAbsolutePath(path, current_path, path);
 			detail_window_show(path);
 		}
 		#ifdef _KERNEL_DEBUG_
@@ -2623,11 +2623,11 @@ exec(	IN int8 * cmd,
 			int32 remainedlen = parse_cmd(NULL, stderr, 1023);
 			int32 len = strlen(cmd) - remainedlen;
 			if(strcmp(stdin, "%") != 0)
-				fix_path(stdin, current_path, stdin);
+				Ifs1GetAbsolutePath(stdin, current_path, stdin);
 			if(strcmp(stdout, "%") != 0)
-				fix_path(stdout, current_path, stdout);
+				Ifs1GetAbsolutePath(stdout, current_path, stdout);
 			if(strcmp(stderr, "%") != 0)
-				fix_path(stderr, current_path, stderr);
+				Ifs1GetAbsolutePath(stderr, current_path, stderr);
 			parse_cmd(NULL, app, 1023);
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];
@@ -2638,7 +2638,7 @@ exec(	IN int8 * cmd,
 									10 * 1024);
 			split_string(NULL, NULL, 0, 0);
 			while(split_string(path, buffer, ';', 1024) != NULL)
-				if(exists_file(path, app))
+				if(Ifs1FileExists(path, app))
 				{
 					int8 temp[1024];
 					strcpy_safe(temp, sizeof(temp), path);
@@ -2660,7 +2660,7 @@ exec(	IN int8 * cmd,
 									10 * 1024);
 			split_string(NULL, NULL, 0, 0);
 			while(split_string(path, buffer, ';', 1024) != NULL)
-				if(exists_file(path, name))
+				if(Ifs1FileExists(path, name))
 				{
 					int8 temp[1024];
 					strcpy_safe(temp, sizeof(temp), path);
@@ -2683,7 +2683,7 @@ exec(	IN int8 * cmd,
 									10 * 1024);
 			split_string(NULL, NULL, 0, 0);
 			while(split_string(path, buffer, ';', 1024) != NULL)
-				if(exists_file(path, name))
+				if(Ifs1FileExists(path, name))
 				{
 					int8 temp[1024];
 					strcpy_safe(temp, sizeof(temp), path);

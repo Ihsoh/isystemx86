@@ -219,7 +219,7 @@ main(void)
 
 	config_init();
 
-	ifs1fs_init();
+	Ifs1Init();
 	console_init();
 
 	timer_init();
@@ -258,7 +258,7 @@ main(void)
 		pic_unmask_all();
 	}
 
-	ifs1blks_init();
+	Ifs1InitBlocks();
 
 	/*
 	uint32 vidtr_addr = (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_VIDTR);
@@ -429,16 +429,16 @@ static
 void
 disk_va_init(void)
 {
-	format_disk("VA");
-	create_dir("VA:/", "data");
+	Ifs1Format("VA");
+	Ifs1CreateDir("VA:/", "data");
 	
-	create_file("VA:/data/", "pci.dat");
+	Ifs1CreateFile("VA:/data/", "pci.dat");
 	pci_write_to_file("VA:/data/pci.dat");
 	
-	create_file("VA:/data/", "cpu.dat");
+	Ifs1CreateFile("VA:/data/", "cpu.dat");
 	cpu_write_to_file("VA:/data/cpu.dat");
 
-	create_file("VA:/data/", "madt.dat");
+	Ifs1CreateFile("VA:/data/", "madt.dat");
 	madt_write_to_file("VA:/data/madt.dat");
 }
 
@@ -3379,28 +3379,28 @@ enter_system(void)
 	print_str("Checking system...\n");
 
 	//检查文件系统
-	FileObject * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
+	FileObject * fptr = Ifs1OpenFile(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
 	if(fptr != NULL)
 		if(flen(fptr) != 0)
 		{
-			close_file(fptr);
+			Ifs1CloseFile(fptr);
 			print_str("The file system has some error!\n");
 			if(get_disk_size("DA") != 0)
-				if(repair_ifs1("DA"))
+				if(Ifs1Repair("DA"))
 					print_str("The file system(DA) has been repaired!\n");
 				else				
 					print_str("Failed to repair the file system(DA)!\n");
 			if(get_disk_size("DB") != 0)
-				if(repair_ifs1("DB"))
+				if(Ifs1Repair("DB"))
 					print_str("The file system(DB) has been repaired!\n");
 				else				
 					print_str("Failed to repair the file system(DB)!\n");
 		}
 		else
 		{
-			write_file(fptr, "1", 1);
+			Ifs1WriteFile(fptr, "1", 1);
 			print_str("The file system is OK!\n");
-			close_file(fptr);
+			Ifs1CloseFile(fptr);
 		}
 	else
 	{
@@ -3424,11 +3424,11 @@ static
 void
 leave_system(void)
 {
-	FileObject * fptr = open_file(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
+	FileObject * fptr = Ifs1OpenFile(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
 	if(fptr != NULL)
 	{
-		write_file(fptr, "", 0);
-		close_file(fptr);
+		Ifs1WriteFile(fptr, "", 0);
+		Ifs1CloseFile(fptr);
 	}
 	log(LOG_NORMAL, "Leave system.");
 	free_log();
