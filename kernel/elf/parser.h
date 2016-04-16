@@ -5,60 +5,94 @@
 
 typedef struct
 {
-	int					valid;
-	unsigned int		file_size;
-	unsigned char *		file_content;
+	int32				valid;
+	uint32				file_size;
+	uint8 *				file_content;
 	Elf32_Ehdr *		header;
 	// Section Header Table。
 	Elf32_Shdr *		shdr;
 	Elf32_Shdr *		itr_shdr;
-	unsigned int		n_shdr;
+	uint32				n_shdr;
 	Elf32_Shdr *		shstrtab;
-	const char *		shstrtab_offset;
+	const uint8 *		shstrtab_offset;
 	Elf32_Shdr *		strtab;
 	Elf32_Shdr *		dynstr;
-	const char *		strtab_offset;
+	const uint8 *		strtab_offset;
 	Elf32_Shdr *		dynsym;
-	const char *		dynstr_offset;
+	const uint8 *		dynstr_offset;
 	Elf32_Sym *			itr_dynsym_sym;
-	unsigned int		n_dynsym_sym;
+	uint32				n_dynsym_sym;
 	// .rel.dyn。
 	Elf32_Shdr *		rel_dyn;
 	Elf32_Rel *			itr_rel_dyn;
-	unsigned int		n_rel_dyn;
+	uint32				n_rel_dyn;
 	// .rel.plt。
 	Elf32_Shdr *		rel_plt;
 	Elf32_Rel *			itr_rel_plt;
-	unsigned int		n_rel_plt;
+	uint32				n_rel_plt;
 
 	// Program Header Table。
 	Elf32_Phdr * 		phdr;
 	Elf32_Phdr * 		itr_phdr;
-	unsigned int		n_phdr;
+	uint32				n_phdr;
 
 	// 以下部分用于ELF SO。
-	unsigned char *		elf_knl;
-	unsigned char *		elf_usr;	
+	uint8 *				elf_knl;
+	uint8 *				elf_usr;	
 } ELFContext, * ELFContextPtr;
 
-extern int elf_parse(const char * path, ELFContextPtr ctx);
-extern void elf_free(ELFContextPtr ctx);
+extern
+int32
+ElfParse(	IN CASCTEXT path,
+			OUT ELFContextPtr ctx);
 
-extern void elf_reset_shdr(ELFContextPtr ctx);
-extern Elf32_Shdr * elf_next_shdr(ELFContextPtr ctx);
+extern 
+void
+ElfFree(IN ELFContextPtr ctx);
 
-extern void elf_reset_phdr(ELFContextPtr ctx);
-extern Elf32_Phdr * elf_next_phdr(ELFContextPtr ctx);
+extern
+void
+ElfResetSHDR(IN OUT ELFContextPtr ctx);
 
-extern void elf_reset_dynsym(ELFContextPtr ctx);
-extern Elf32_Sym * elf_next_dynsym_sym(ELFContextPtr ctx);
-extern const char * elf_parse_dynsym_sym_name(	ELFContextPtr ctx,
-												Elf32_Sym * sym);
+extern
+Elf32_Shdr *
+ElfNextSHDR(IN OUT ELFContextPtr ctx);
 
-extern void elf_reset_rel_dyn(ELFContextPtr ctx);
-extern Elf32_Rel * elf_next_rel_dyn(ELFContextPtr ctx);
+extern
+void
+ElfResetPHDR(IN OUT ELFContextPtr ctx);
 
-extern void elf_reset_rel_plt(ELFContextPtr ctx);
-extern Elf32_Rel * elf_next_rel_plt(ELFContextPtr ctx);
+extern
+Elf32_Phdr *
+ElfNextPHDR(IN OUT ELFContextPtr ctx);
+
+extern
+void
+ElfResetDynsym(IN OUT ELFContextPtr ctx);
+
+extern
+Elf32_Sym *
+ElfNextDynsymSymbol(IN OUT ELFContextPtr ctx);
+
+extern
+const int8 *
+ElfParseDynsymSymbolName(	IN ELFContextPtr ctx,
+							IN Elf32_Sym * sym);
+
+extern
+void
+ElfResetRelDyn(IN OUT ELFContextPtr ctx);
+
+extern
+Elf32_Rel *
+ElfNextRelDyn(IN OUT ELFContextPtr ctx);
+
+extern
+void
+ElfResetRelPlt(IN OUT ELFContextPtr ctx);
+
+extern
+Elf32_Rel *
+ElfNextRelPlt(IN OUT ELFContextPtr ctx);
 
 #endif

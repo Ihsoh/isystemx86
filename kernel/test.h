@@ -42,7 +42,7 @@
 
 #define	RUN_UNIT_TEST(_name)	\
 	{	\
-		if(_name##_test())	\
+		if(_name##Test())	\
 		{	\
 			print_str(_name##_get_test_file());	\
 			print_str_p(" [OK]\n", CC_GREEN);	\

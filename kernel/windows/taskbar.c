@@ -125,23 +125,23 @@ _timer_event(void)
 	get_cmos_date_time(&dt);
 	ASCCHAR buffer[1024] = "";
 	ASCCHAR temp[10];
-	strcat_safe(buffer, sizeof(buffer), itos(temp, dt.year));
-	strcat_safe(buffer, sizeof(buffer), "-");
-	strcat_safe(buffer, sizeof(buffer), itos(temp, dt.month));
-	strcat_safe(buffer, sizeof(buffer), "-");
-	strcat_safe(buffer, sizeof(buffer), itos(temp, dt.day));
-	strcat_safe(buffer, sizeof(buffer), " ");
-	strcat_safe(buffer, sizeof(buffer), _weeks[dt.day_of_week]);
-	strcat_safe(buffer, sizeof(buffer), " ");
-	strcat_safe(buffer, sizeof(buffer), itos(temp, dt.hour));
-	strcat_safe(buffer, sizeof(buffer), ":");
-	strcat_safe(buffer, sizeof(buffer), itos(temp, dt.minute));
-	strcat_safe(buffer, sizeof(buffer), ":");
-	strcat_safe(buffer, sizeof(buffer), itos(temp, dt.second));
+	UtlConcatString(buffer, sizeof(buffer), itos(temp, dt.year));
+	UtlConcatString(buffer, sizeof(buffer), "-");
+	UtlConcatString(buffer, sizeof(buffer), itos(temp, dt.month));
+	UtlConcatString(buffer, sizeof(buffer), "-");
+	UtlConcatString(buffer, sizeof(buffer), itos(temp, dt.day));
+	UtlConcatString(buffer, sizeof(buffer), " ");
+	UtlConcatString(buffer, sizeof(buffer), _weeks[dt.day_of_week]);
+	UtlConcatString(buffer, sizeof(buffer), " ");
+	UtlConcatString(buffer, sizeof(buffer), itos(temp, dt.hour));
+	UtlConcatString(buffer, sizeof(buffer), ":");
+	UtlConcatString(buffer, sizeof(buffer), itos(temp, dt.minute));
+	UtlConcatString(buffer, sizeof(buffer), ":");
+	UtlConcatString(buffer, sizeof(buffer), itos(temp, dt.second));
 	uint32 ui;
 	uint32 len = strlen(buffer);
 	for(ui = 0; ui < _MAX_TIME_STR_LEN - len; ui++)
-		strcat_safe(buffer, sizeof(buffer), " ");
+		UtlConcatString(buffer, sizeof(buffer), " ");
 	SET_BUTTON_TEXT(_btn_time, buffer);
 }
 

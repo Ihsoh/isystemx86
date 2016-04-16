@@ -12,7 +12,7 @@
 #include "../kernel.h"
 
 /**
-	@Function:		system_call_mouse
+	@Function:		_ScMouseProcess
 	@Access:		Public
 	@Description:
 		鼠标的系统调用处理程序。
@@ -26,9 +26,9 @@
 	@Return:	
 */
 void
-system_call_mouse(	IN uint32 func,
-					IN uint32 base,
-					IN OUT struct SParams * sparams)
+_ScMouseProcess(IN uint32 func,
+				IN uint32 base,
+				IN OUT struct SParams * sparams)
 {
 	switch(func)
 	{

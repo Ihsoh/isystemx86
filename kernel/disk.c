@@ -129,9 +129,9 @@ get_disk_symbol(IN uint32 index,
 	if(symbol == NULL)
 		return;
 	if(index < 0 || index >= MAX_DISK_COUNT)
-		strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, "");
+		UtlCopyString(symbol, DISK_SYMBOL_BUFFER_SIZE, "");
 	else
-		strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk_list[index]);
+		UtlCopyString(symbol, DISK_SYMBOL_BUFFER_SIZE, disk_list[index]);
 }
 
 /**
@@ -252,7 +252,7 @@ init_disk(IN int8 * symbol)
 	{
 		init_vdisk(symbol);
 		_INIT_DISK_RWBYTES(disk_count);
-		strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, symbol);
+		UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, symbol);
 	}
 	else if(strcmp(symbol, "VS") == 0)
 		init_disk(EXPLICIT_SYSTEM_DISK);
@@ -263,22 +263,22 @@ init_disk(IN int8 * symbol)
 		if(r & ATA_DISK0)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
-			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK0_SYMBOL);
+			UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK0_SYMBOL);
 		}
 		if(r & ATA_DISK1)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
-			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK1_SYMBOL);
+			UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK1_SYMBOL);
 		}
 		if(r & ATA_DISK2)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
-			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK2_SYMBOL);
+			UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK2_SYMBOL);
 		}
 		if(r & ATA_DISK3)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
-			strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK3_SYMBOL);
+			UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, ATA_DISK3_SYMBOL);
 		}
 
 		// AHCI。
@@ -289,7 +289,7 @@ init_disk(IN int8 * symbol)
 			for(ui = 0; ui < ahci_port_count() && ui < 26; ui++, sym[1]++)
 			{
 				_INIT_DISK_RWBYTES(disk_count);
-				strcpy_safe(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, sym);
+				UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, sym);
 			}
 		}
 

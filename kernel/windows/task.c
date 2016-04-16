@@ -142,13 +142,13 @@ task_window_show(int32 tid)
 	if(_window != NULL)
 	{
 		ASCCHAR buffer[sizeof(_lbl_info->text)];
-		strcpy_safe(buffer, sizeof(buffer), "");
-		strcat_safe(buffer, sizeof(buffer), "Name: ");
-		strcat_safe(buffer, sizeof(buffer), task->name);
-		strcat_safe(buffer, sizeof(buffer), "\n");
-		strcat_safe(buffer, sizeof(buffer), "Command: ");
-		strcat_safe(buffer, sizeof(buffer), task->param);
-		strcat_safe(buffer, sizeof(buffer), "\n");
+		UtlCopyString(buffer, sizeof(buffer), "");
+		UtlConcatString(buffer, sizeof(buffer), "Name: ");
+		UtlConcatString(buffer, sizeof(buffer), task->name);
+		UtlConcatString(buffer, sizeof(buffer), "\n");
+		UtlConcatString(buffer, sizeof(buffer), "Command: ");
+		UtlConcatString(buffer, sizeof(buffer), task->param);
+		UtlConcatString(buffer, sizeof(buffer), "\n");
 		SET_LABEL_TEXT(_lbl_info, buffer);
 		_window->state = WINDOW_STATE_SHOW;
 		set_top_window(_window);

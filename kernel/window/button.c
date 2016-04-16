@@ -80,7 +80,7 @@ button_init(OUT ButtonPtr button,
 	button->uwcid = -1;
 	button->x = x;
 	button->y = y;
-	strcpy_safe(button->text, sizeof(button->text), text);
+	UtlCopyString(button->text, sizeof(button->text), text);
 	button->color = color;
 	button->bgcolor = bgcolor;
 	button->colorh = colorh;
@@ -258,7 +258,7 @@ button_set_text(OUT ButtonPtr button,
 		|| text == NULL
 		|| strlen(text) > MAX_BUTTON_TEXT_LEN)
 		return FALSE;
-	strcpy_safe(button->text, sizeof(button->text), text);
+	UtlCopyString(button->text, sizeof(button->text), text);
 	button->old_len = button->len;
 	button->len = strlen(text);
 	button->width = _BUTTON_WIDTH(button);

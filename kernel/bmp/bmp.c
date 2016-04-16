@@ -6,7 +6,7 @@
 
 static
 int32
-ctz(IN int32 x)
+_BmpCTZ(IN int32 x)
 {
 	int32 cnt = 0;
 	for(; ~x & 1; x >>= 1)
@@ -16,22 +16,22 @@ ctz(IN int32 x)
 
 static
 int32
-shake(IN int32 mask)
+_BmpShake(IN int32 mask)
 {
-	int32 cnt, shift = ctz(mask);
+	int32 cnt, shift = _BmpCTZ(mask);
 	mask = (mask >> shift) + 1;
-	if((cnt = ctz(mask)) < 8)
+	if((cnt = _BmpCTZ(mask)) < 8)
 		shift -= 8 - cnt;
 	return shift;
 }
 
 static
 void
-apply_mask(	IN IMGLBMPPtr bmpobj,
-			IN int32 color, 
-			OUT int32 * r,
-			OUT int32 * g,
-			OUT int32 * b)
+_BmpApplyMask(	IN IMGLBMPPtr bmpobj,
+				IN int32 color, 
+				OUT int32 * r,
+				OUT int32 * g,
+				OUT int32 * b)
 {
 	*r = color & bmpobj->red_mask;
 	*g = color & bmpobj->green_mask;
@@ -45,7 +45,7 @@ apply_mask(	IN IMGLBMPPtr bmpobj,
 }
 
 IMGLBMPPtr
-imgl_bmp_create(IN CASCTEXT file)
+BmpCreate(IN CASCTEXT file)
 {
 	IMGLBMPPtr bmpobj = (IMGLBMPPtr)alloc_memory(sizeof(IMGLBMP));
 	if(bmpobj == NULL)
@@ -61,19 +61,19 @@ imgl_bmp_create(IN CASCTEXT file)
 	bmpobj->palette_r = dsl_lst_new();
 	if(bmpobj->palette_r == NULL)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 	bmpobj->palette_g = dsl_lst_new();
 	if(bmpobj->palette_g == NULL)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 	bmpobj->palette_b = dsl_lst_new();
 	if(bmpobj->palette_b == NULL)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
@@ -81,7 +81,7 @@ imgl_bmp_create(IN CASCTEXT file)
 
 	if(bmpobj->imgfile_ptr == NULL)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
@@ -94,12 +94,12 @@ imgl_bmp_create(IN CASCTEXT file)
 
 	if((int32)Ifs1ReadFile(bmpobj->imgfile_ptr, head, 0xe) != 0xe)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 	if(head[0] != 'B' || head[1] != 'M')
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 	actual_size = (int32)*(uint32 *)(head + 0x2);
@@ -108,12 +108,12 @@ imgl_bmp_create(IN CASCTEXT file)
 	bmpobj->data_ptr = (uint8 *)alloc_memory(actual_size - 0xe);
 	if(bmpobj->data_ptr == NULL)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 	if((int32)Ifs1ReadFile(bmpobj->imgfile_ptr, bmpobj->data_ptr, actual_size - 0xe) != actual_size - 0xe)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
@@ -121,21 +121,21 @@ imgl_bmp_create(IN CASCTEXT file)
 	
 	if(header_size < 40)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
 	bmpobj->width = *(int32 *)(bmpobj->data_ptr + 0x4);
 	if(bmpobj->width <= 0)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
 	bmpobj->height = *(int32 *)(bmpobj->data_ptr + 0x8);
 	if(bmpobj->height == 0)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
@@ -144,7 +144,7 @@ imgl_bmp_create(IN CASCTEXT file)
 
 	if(bmpobj->compression != BI_RGB && bmpobj->compression != BI_BITFIELDS)
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
@@ -164,13 +164,13 @@ imgl_bmp_create(IN CASCTEXT file)
 		bmpobj->red_mask = (int32)*(uint32 *)(bmpobj->data_ptr + 0x28);
 		bmpobj->green_mask = (int32)*(uint32 *)(bmpobj->data_ptr + 0x2c);
 		bmpobj->blue_mask = (int32)*(uint32 *)(bmpobj->data_ptr + 0x30);
-		bmpobj->red_shift = shake(bmpobj->red_mask);
-		bmpobj->green_shift = shake(bmpobj->green_mask);
-		bmpobj->blue_shift = shake(bmpobj->blue_mask);
+		bmpobj->red_shift = _BmpShake(bmpobj->red_mask);
+		bmpobj->green_shift = _BmpShake(bmpobj->green_mask);
+		bmpobj->blue_shift = _BmpShake(bmpobj->blue_mask);
 	}
 	else
 	{
-		imgl_bmp_destroy(bmpobj);
+		BmpDestroy(bmpobj);
 		return NULL;
 	}
 
@@ -184,7 +184,7 @@ imgl_bmp_create(IN CASCTEXT file)
 
 		for(int32 i = 0; i < bmpobj->palette_size; ++i)
 		{
-			apply_mask(bmpobj, *palette_ptr, &r, &g, &b);
+			_BmpApplyMask(bmpobj, *palette_ptr, &r, &g, &b);
 			DSLValuePtr val_r = dsl_val_int32(r);
 			dsl_lst_add_value(bmpobj->palette_r, val_r); 
 			DSLValuePtr val_g = dsl_val_int32(g);
@@ -201,9 +201,9 @@ imgl_bmp_create(IN CASCTEXT file)
 
 	return bmpobj;
 }
-
+ 
 BOOL
-imgl_bmp_destroy(IN IMGLBMPPtr bmpobj)
+BmpDestroy(IN IMGLBMPPtr bmpobj)
 {
 	if(bmpobj == NULL)
 		return FALSE;
@@ -231,7 +231,7 @@ imgl_bmp_destroy(IN IMGLBMPPtr bmpobj)
 }
 
 int32
-imgl_bmp_get_width(IN IMGLBMPPtr bmpobj)
+BmpGetWidth(IN IMGLBMPPtr bmpobj)
 {
 	if(bmpobj == NULL)
 		return 0;
@@ -239,7 +239,7 @@ imgl_bmp_get_width(IN IMGLBMPPtr bmpobj)
 }
 
 int32
-imgl_bmp_get_height(IN IMGLBMPPtr bmpobj)
+BmpGetHeight(IN IMGLBMPPtr bmpobj)
 {
 	if(bmpobj == NULL)
 		return 0;
@@ -247,7 +247,7 @@ imgl_bmp_get_height(IN IMGLBMPPtr bmpobj)
 }
 
 uint32
-imgl_bmp_get_color(	IN IMGLBMPPtr bmpobj,
+BmpGetPixel(	IN IMGLBMPPtr bmpobj,
 					IN int32 x, 
 					IN int32 y)
 {
@@ -278,7 +278,7 @@ imgl_bmp_get_color(	IN IMGLBMPPtr bmpobj,
 	}
 	else
 	{
-		apply_mask(bmpobj, ret, &r, &g, &b);
+		_BmpApplyMask(bmpobj, ret, &r, &g, &b);
 		return (uint32)((r << 16) | (g << 8) | b);
 	}
 }

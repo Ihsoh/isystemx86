@@ -13,7 +13,7 @@
 #include "../tasks.h"
 
 /**
-	@Function:		system_call_keyboard
+	@Function:		_ScKbdProcess
 	@Access:		Public
 	@Description:
 		键盘的系统调用处理程序。
@@ -26,9 +26,9 @@
 			系统调用参数。
 	@Return:	
 */
-void system_call_keyboard(	IN uint32 func,
-							IN uint32 base,
-							IN OUT struct SParams * sparams)
+void _ScKbdProcess(	IN uint32 func,
+					IN uint32 base,
+					IN OUT struct SParams * sparams)
 {
 	switch(func)
 	{

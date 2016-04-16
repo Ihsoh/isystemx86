@@ -10,7 +10,7 @@
 #include "../types.h"
 
 void
-dump(void)
+Dump(void)
 {
 
 

@@ -188,7 +188,7 @@ _pad(IN OUT ASCTEXT text)
 		int32 len = _ITEM_MAX_LEN - slen;
 		int32 i;
 		for(i = 0; i < len; i++)
-			strcat_safe(text, _ITEM_MAX_LEN + 1, " ");
+			UtlConcatString(text, _ITEM_MAX_LEN + 1, " ");
 	}
 	else if(slen > _ITEM_MAX_LEN)
 	{
@@ -226,13 +226,13 @@ taskmgr_window_init(void)
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
 				_control_event);
 	ASCCHAR text[MAX_BUTTON_TEXT_LEN + 1];
-	strcpy_safe(text, sizeof(text), "Up");
+	UtlCopyString(text, sizeof(text), "Up");
 	_pad(text);
 	SET_LIST_TEXT(_lst_taskmgr, _ITEM_ID_UP, text);
-	strcpy_safe(text, sizeof(text), "Down");
+	UtlCopyString(text, sizeof(text), "Down");
 	_pad(text);
 	SET_LIST_TEXT(_lst_taskmgr, _ITEM_ID_DOWN, text);
-	strcpy_safe(text, sizeof(text), "Close");
+	UtlCopyString(text, sizeof(text), "Close");
 	_pad(text);
 	SET_LIST_TEXT(_lst_taskmgr, _ITEM_ID_CLOSE, text);
 	uint32 ui;
@@ -301,11 +301,11 @@ taskmgr_window_update(IN uint32 offset)
 			ASCCHAR title[MAX_BUTTON_TEXT_LEN + 1];
 			int32 tid = tasks[tindex];
 			itos(title, tid);
-			strcat_safe(title, sizeof(title), "# ");
+			UtlConcatString(title, sizeof(title), "# ");
 			struct Task * task = get_task_info_ptr(tid);
 			if(task != NULL)
 			{
-				strcat_safe(title, sizeof(title), task->name);
+				UtlConcatString(title, sizeof(title), task->name);
 				_pad(title);
 			}
 			SET_LIST_TEXT(_lst_taskmgr, index, title);

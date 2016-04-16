@@ -173,7 +173,7 @@ new_var(IN OUT struct Vars * vars_s,
 	if(index == vars_s->max_var_count)
 		return FALSE;
 	vars[index].used = 1;
-	strcpy_safe(vars[index].name, sizeof(vars[index].name), name);
+	UtlCopyString(vars[index].name, sizeof(vars[index].name), name);
 	vars[index].value[0] = '\0';
 	return TRUE;
 }
@@ -208,7 +208,7 @@ set_var_value(	IN OUT struct Vars * vars_s,
 	struct Var * var = get_var(vars_s, name);
 	if(var == NULL)
 		return FALSE;
-	strcpy_safe(var->value, sizeof(var->value), value);
+	UtlCopyString(var->value, sizeof(var->value), value);
 	return TRUE;
 }
 

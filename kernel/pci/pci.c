@@ -16,7 +16,7 @@ static PCIDeviceInfoPtr _devices	= NULL;
 static uint32 _devcount				= 0;
 
 /**
-	@Function:		_scan_devices
+	@Function:		_PciScanDevices
 	@Access:		Private
 	@Description:
 		扫描所有总线的所有槽来检测设备。
@@ -27,7 +27,7 @@ static uint32 _devcount				= 0;
 */
 static
 BOOL
-_scan_devices(void)
+_PciScanDevices(void)
 {
 	uint32 bus;
 	uint32 slot;
@@ -74,7 +74,7 @@ err:
 }
 
 /**
-	@Function:		pci_init_devices
+	@Function:		PciInitDevices
 	@Access:		Public
 	@Description:
 		初始化PCI设备所需的资源，并扫描总线获取设备信息。
@@ -84,16 +84,16 @@ err:
 			返回TRUE则成功，否则失败。
 */
 BOOL
-pci_init_devices(void)
+PciInitDevices(void)
 {
 	_devices = (PCIDeviceInfoPtr)alloc_memory(PCI_MAX_DEVICE_COUNT * sizeof(PCIDeviceInfo));
 	if(_devices == NULL)
 		return FALSE;
-	return _scan_devices();
+	return _PciScanDevices();
 }
 
 /**
-	@Function:		pci_free_devices
+	@Function:		PciFreeDevices
 	@Access:		Public
 	@Description:
 		释放PCI设备所占用的资源。
@@ -101,7 +101,7 @@ pci_init_devices(void)
 	@Return:
 */
 void
-pci_free_devices(void)
+PciFreeDevices(void)
 {
 	if(_devices == NULL)
 		return;
@@ -117,7 +117,7 @@ pci_free_devices(void)
 }
 
 /**
-	@Function:		pci_device_count
+	@Function:		PciGetDeviceCount
 	@Access:		Public
 	@Description:
 		获取PCI设备的数量。
@@ -127,13 +127,13 @@ pci_free_devices(void)
 			PCI设备的数量。
 */
 uint32
-pci_device_count(void)
+PciGetDeviceCount(void)
 {
 	return _devcount;
 }
 
 /**
-	@Function:		pci_device
+	@Function:		PciGetDevice
 	@Access:		Public
 	@Description:
 		获取PCI设备的信息。
@@ -145,7 +145,7 @@ pci_device_count(void)
 			指向PCI设备信息对象的指针。
 */
 PCIDeviceInfoPtr
-pci_device(IN uint32 index)
+PciGetDevice(IN uint32 index)
 {
 	if(index >= _devcount)
 		return NULL;

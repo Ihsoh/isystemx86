@@ -3,12 +3,13 @@
 #include "../types.h"
 #include "../fs/ifs1/fs.h"
 
-unsigned int elf_get_file_size(const char * path)
+uint32
+ElfGetFileSize(IN CASCTEXT path)
 {
-	FileObjectPtr foptr = Ifs1OpenFile((char *)path, FILE_MODE_READ);
+	FileObjectPtr foptr = Ifs1OpenFile((CASCTEXT)path, FILE_MODE_READ);
 	if(foptr == NULL)
 		return 0;
-	unsigned int length = flen(foptr);
+	uint32 length = flen(foptr);
 	Ifs1CloseFile(foptr);
 	return length;
 }

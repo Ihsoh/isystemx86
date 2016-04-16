@@ -22,31 +22,31 @@
 
 extern
 SFSTR_RESULT
-strlen_safe(OUT uint32 * len,
-			IN CASCTEXT str);
+UtlGetStringLength(	OUT uint32 * len,
+					IN CASCTEXT str);
 
 extern
 SFSTR_RESULT
-strcmp_safe(IN CASCTEXT str0,
-			IN CASCTEXT str1);
+UtlCompareString(	IN CASCTEXT str0,
+					IN CASCTEXT str1);
 
 extern
 SFSTR_RESULT
-strcpy_safe(OUT ASCTEXT dst,
-			IN uint32 size,
-			IN CASCTEXT src);
+UtlCopyString(	OUT ASCTEXT dst,
+				IN uint32 size,
+				IN CASCTEXT src);
 
 extern
 SFSTR_RESULT
-strcat_safe(IN OUT ASCTEXT dst,
-			IN uint32 size,
-			IN CASCTEXT src);
+UtlConcatString(IN OUT ASCTEXT dst,
+				IN uint32 size,
+				IN CASCTEXT src);
 
 extern
 SFSTR_RESULT
-memcpy_safe(OUT void * dst,
-			IN uint32 size,
-			IN void * src,
-			IN uint32 n);
+UtlCopyMemory(	OUT void * dst,
+				IN uint32 size,
+				IN void * src,
+				IN uint32 n);
 
 #endif

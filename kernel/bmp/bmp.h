@@ -23,20 +23,20 @@ typedef	struct
 } IMGLBMP, * IMGLBMPPtr;
 
 IMGLBMPPtr
-imgl_bmp_create(IN CASCTEXT file);
+BmpCreate(IN CASCTEXT file);
 
 BOOL
-imgl_bmp_destroy(IN IMGLBMPPtr bmpobj);
+BmpDestroy(IN IMGLBMPPtr bmpobj);
 
 int32
-imgl_bmp_get_width(IN IMGLBMPPtr bmpobj);
+BmpGetWidth(IN IMGLBMPPtr bmpobj);
 
 int32
-imgl_bmp_get_height(IN IMGLBMPPtr bmpobj);
+BmpGetHeight(IN IMGLBMPPtr bmpobj);
 
 uint32
-imgl_bmp_get_color(	IN IMGLBMPPtr bmpobj,
-					IN int32 x, 
-					IN int32 y);
+BmpGetPixel(IN IMGLBMPPtr bmpobj,
+			IN int32 x, 
+			IN int32 y);
 
 #endif

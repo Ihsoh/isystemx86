@@ -176,9 +176,9 @@ _create_task(	IN int8 * name,
 		for(ui = 0; ui < MAX_TASK_ELF_SO_COUNT; ui++)
 			task->elf_so_ctx[ui] = NULL;
 
-		strcpy_safe(task->name, 1024, name);
-		strcpy_safe(task->param, 1024, param);
-		strcpy_safe(task->working_dir, 1024, working_dir);
+		UtlCopyString(task->name, 1024, name);
+		UtlCopyString(task->param, 1024, param);
+		UtlCopyString(task->working_dir, 1024, working_dir);
 		task->app_len = app_len;
 		uint32 real_task_len = 3 * 1024 * 1024 + app_len;
 		task->addr = (uint8 *)alloc_memory(real_task_len);
@@ -490,7 +490,7 @@ _kill_task(IN int32 tid)
 		task->on_exit(tid, task->retvalue);
 
 	if(task->fs_lock)
-		system_call_fs_unlock_fs();
+		ScFsUnlockFileSystem();
 
 	if(task->stdin != NULL)
 		Ifs1CloseFile(task->stdin);
@@ -506,7 +506,7 @@ _kill_task(IN int32 tid)
 	for(ui = 0; ui < MAX_TASK_ELF_SO_COUNT; ui++)
 		if(task->elf_so_ctx[ui] != NULL)
 		{
-			elf_free(task->elf_so_ctx[ui]);
+			ElfFree(task->elf_so_ctx[ui]);
 			DELETE(task->elf_so_ctx[ui]);
 			task->elf_so_ctx[ui] = NULL;
 		}
@@ -1291,15 +1291,15 @@ tasks_load_elf(	IN int32 tid,
 	if(task->elf != NULL)
 		return 0;	// 如果已经载入了ELF程序，则不执行载入逻辑。
 	ELFContext ctx;
-	if(!elf_parse(path, &ctx))
+	if(!ElfParse(path, &ctx))
 		goto err;
 	ctx_inited = TRUE;
 	uint32 vbase = 0xffffffff;
 	uint32 max_vaddr = 0x00000000;	// 储存PHDR表中最大的虚拟地址。
 	uint32 max_msize = 0;			// 拥有最大的虚拟地址的PHDR的内存大小。
 	Elf32_Phdr * phdr = NULL;
-	elf_reset_phdr(&ctx);
-	while((phdr = elf_next_phdr(&ctx)) != NULL)
+	ElfResetPHDR(&ctx);
+	while((phdr = ElfNextPHDR(&ctx)) != NULL)
 	{
 		if(	phdr->p_type == PT_LOAD
 			&& phdr->p_vaddr < vbase)
@@ -1322,13 +1322,13 @@ tasks_load_elf(	IN int32 tid,
 								(uint32)task->elf,
 								RW_RWE))
 		goto err;
-	elf_reset_phdr(&ctx);
-	while((phdr = elf_next_phdr(&ctx)) != NULL)
+	ElfResetPHDR(&ctx);
+	while((phdr = ElfNextPHDR(&ctx)) != NULL)
 		if(phdr->p_type == PT_LOAD)
 			memcpy(	task->elf + (phdr->p_vaddr - vbase),
 					ctx.file_content + phdr->p_offset,
 					phdr->p_filesz);
-	elf_free(&ctx);
+	ElfFree(&ctx);
 	return ctx.header->e_entry;
 err:
 	if(task->elf != NULL)
@@ -1337,7 +1337,7 @@ err:
 		task->elf = NULL;
 	}
 	if(ctx_inited)
-		elf_free(&ctx);
+		ElfFree(&ctx);
 	return 0;
 }
 
@@ -1385,7 +1385,7 @@ tasks_load_elf_so(	IN int32 tid,
 	if(ctx == NULL)
 		goto err;
 	task->elf_so_ctx[ctx_idx] = ctx;
-	if(!elf_parse(path, ctx))
+	if(!ElfParse(path, ctx))
 		goto err;
 	
 	// 把Program Header Table内的LOAD类型Program Header加载进内存。
@@ -1393,8 +1393,8 @@ tasks_load_elf_so(	IN int32 tid,
 	uint32 max_vaddr = 0x00000000;	// 储存PHDR表中最大的虚拟地址。
 	uint32 max_msize = 0;			// 拥有最大的虚拟地址的PHDR的内存大小。
 	Elf32_Phdr * phdr = NULL;
-	elf_reset_phdr(ctx);
-	while((phdr = elf_next_phdr(ctx)) != NULL)
+	ElfResetPHDR(ctx);
+	while((phdr = ElfNextPHDR(ctx)) != NULL)
 	{
 		if(	phdr->p_type == PT_LOAD
 			&& phdr->p_vaddr < vbase)
@@ -1411,8 +1411,8 @@ tasks_load_elf_so(	IN int32 tid,
 	if(elf_knl == NULL)
 		goto err;
 	memset(elf_knl, 0, msize);
-	elf_reset_phdr(ctx);
-	while((phdr = elf_next_phdr(ctx)) != NULL)
+	ElfResetPHDR(ctx);
+	while((phdr = ElfNextPHDR(ctx)) != NULL)
 		if(phdr->p_type == PT_LOAD)
 			memcpy(	elf_knl + (phdr->p_vaddr - vbase),
 					ctx->file_content + phdr->p_offset,
@@ -1423,9 +1423,9 @@ tasks_load_elf_so(	IN int32 tid,
 	// 修正动态重定向符号的地址（.rel.dyn）。
 	if(ctx->rel_dyn != NULL)
 	{
-		elf_reset_rel_dyn(ctx);
+		ElfResetRelDyn(ctx);
 		Elf32_Rel * rel = NULL;
-		while((rel = elf_next_rel_dyn(ctx)) != NULL)
+		while((rel = ElfNextRelDyn(ctx)) != NULL)
 		{
 			uint32 sym_idx = ELF32_R_SYM(rel->r_info);
 			Elf32_Sym * sym = (Elf32_Sym *)(ctx->file_content + ctx->dynsym->sh_offset) + sym_idx;
@@ -1437,9 +1437,9 @@ tasks_load_elf_so(	IN int32 tid,
 	// 修正动态重定向符号的地址（.rel.plt）。
 	if(ctx->rel_plt != NULL)
 	{
-		elf_reset_rel_plt(ctx);
+		ElfResetRelPlt(ctx);
 		Elf32_Rel * rel = NULL;
-		while((rel = elf_next_rel_plt(ctx)) != NULL)
+		while((rel = ElfNextRelPlt(ctx)) != NULL)
 		{
 			uint32 sym_idx = ELF32_R_SYM(rel->r_info);
 			Elf32_Sym * sym = (Elf32_Sym *)(ctx->file_content + ctx->dynsym->sh_offset) + sym_idx;
@@ -1456,7 +1456,7 @@ err:
 	{
 		if(ctx_idx < MAX_TASK_ELF_SO_COUNT)
 			task->elf_so_ctx[ctx_idx] = NULL;
-		elf_free(ctx);
+		ElfFree(ctx);
 		DELETE(ctx);
 	}
 	return 0xffffffff;
@@ -1496,12 +1496,12 @@ tasks_get_elf_so_symbol(IN int32 tid,
 	ctx = task->elf_so_ctx[ctx_idx];
 
 	uint32 symaddr = 0;
-	elf_reset_dynsym(ctx);
+	ElfResetDynsym(ctx);
 	Elf32_Sym * sym = NULL;
-	while((sym = elf_next_dynsym_sym(ctx)) != NULL)
-		if(strcmp_safe(elf_parse_dynsym_sym_name(ctx, sym), name) == SFSTR_R_EQUAL)
+	while((sym = ElfNextDynsymSymbol(ctx)) != NULL)
+		if(UtlCompareString(ElfParseDynsymSymbolName(ctx, sym), name) == SFSTR_R_EQUAL)
 			symaddr = sym->st_value;
-	elf_reset_dynsym(ctx);
+	ElfResetDynsym(ctx);
 	if(symaddr == 0)
 		goto err;
 	return (void *)(ctx->elf_usr + symaddr);
@@ -1545,7 +1545,7 @@ tasks_unload_elf_so(IN int32 tid,
 	tasks_free_memory(tid, ctx->elf_usr);
 	ctx->elf_usr = NULL;
 	ctx->elf_knl = NULL;
-	elf_free(ctx);
+	ElfFree(ctx);
 	DELETE(ctx);
 	
 	return TRUE;

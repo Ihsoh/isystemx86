@@ -714,22 +714,22 @@ init_screen(void)
 				config_gui_get_string("Background1024x768", bgfile, sizeof(bgfile));
 			else if(screen_width == 1280 && screen_height == 1024)
 				config_gui_get_string("Background1280x1024", bgfile, sizeof(bgfile));
-			IMGLBMPPtr bgbmpobj = imgl_bmp_create(bgfile);
+			IMGLBMPPtr bgbmpobj = BmpCreate(bgfile);
 			if(bgbmpobj != NULL)
 			{
 				int32 bgbmp_width, bgbmp_height;
 				int32 x, y;
 				destroy_common_image(&bg_image);
 				new_empty_image0(&bg_image, screen_width, screen_height);
-				bgbmp_width = imgl_bmp_get_width(bgbmpobj);
-				bgbmp_height = imgl_bmp_get_height(bgbmpobj);
+				bgbmp_width = BmpGetWidth(bgbmpobj);
+				bgbmp_height = BmpGetHeight(bgbmpobj);
 				for(x = 0; x < (int32)screen_width && x < bgbmp_width; x++)
 					for(y = 0; y < (int32)screen_height && y < bgbmp_height; y++)
 					{
-						uint32 pixel = imgl_bmp_get_color(bgbmpobj, x, y);
+						uint32 pixel = BmpGetPixel(bgbmpobj, x, y);
 						set_pixel_common_image(&bg_image, x, y, pixel);
 					}
-				imgl_bmp_destroy(bgbmpobj);
+				BmpDestroy(bgbmpobj);
 			}
 		}
 
@@ -742,14 +742,14 @@ init_screen(void)
 		ASCCHAR pointer_file[1024];
 		IMGLBMPPtr pointer_bmpobj = NULL;
 		config_gui_get_string("Pointer", pointer_file, sizeof(pointer_file));
-		pointer_bmpobj = imgl_bmp_create(pointer_file);
-		int32 pointer_width = imgl_bmp_get_width(pointer_bmpobj);
-		int32 pointer_height = imgl_bmp_get_height(pointer_bmpobj);
+		pointer_bmpobj = BmpCreate(pointer_file);
+		int32 pointer_width = BmpGetWidth(pointer_bmpobj);
+		int32 pointer_height = BmpGetHeight(pointer_bmpobj);
 		new_empty_image0(&pointer_image, pointer_width, pointer_height);
 		if(pointer_bmpobj != NULL)
 		{
-			img_draw_bmp_to_cimage(pointer_bmpobj, pointer_width, pointer_height, &pointer_image);
-			imgl_bmp_destroy(pointer_bmpobj);
+			UtlConvertBmpToCommonImage(pointer_bmpobj, pointer_width, pointer_height, &pointer_image);
+			BmpDestroy(pointer_bmpobj);
 		}
 
 		//Window Mode
@@ -1102,7 +1102,7 @@ create_window(	IN uint32		width,
 	window->over_close_button = 0;
 	window->over_hidden_button = 0;
 	window->style = style;
-	strcpy_safe(window->title, sizeof(window->title), title);
+	UtlCopyString(window->title, sizeof(window->title), title);
 	window->event = event;
 	window->cb_key_press = NULL;
 	window->locked = FALSE;

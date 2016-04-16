@@ -18,26 +18,43 @@
 
 #include <ilib/string.h>
 
-static BOOL lock = FALSE;
+static BOOL _lock = FALSE;
 
+/**
+	@Function:		_ScFsLockFileSystem
+	@Access:		Private
+	@Description:
+		锁定文件系统功能的系统调用。
+	@Parameters:
+	@Return:
+		返回TRUE则锁定成功，否则失败。
+*/
 static
 BOOL
-lock_fs(void)
+_ScFsLockFileSystem(void)
 {
-	if(lock)
+	if(_lock)
 		return FALSE;
-	lock = TRUE;
+	_lock = TRUE;
 	return TRUE;
 }
 
+/**
+	@Function:		ScFsUnlockFileSystem
+	@Access:		Public
+	@Description:
+		解锁文件系统功能的系统调用的锁。
+	@Parameters:
+	@Return:
+*/
 void
-system_call_fs_unlock_fs(void)
+ScFsUnlockFileSystem(void)
 {
-	lock = FALSE;
+	_lock = FALSE;
 }
 
 /**
-	@Function:		check_priviledge
+	@Function:		_ScFsCheckPrivilege
 	@Access:		Private
 	@Description:
 		检查任务是否包含有文件指针的所有权。
@@ -52,7 +69,7 @@ system_call_fs_unlock_fs(void)
 */
 static
 BOOL
-check_priviledge(	IN int32 tid,
+_ScFsCheckPrivilege(IN int32 tid,
 					IN FileObject * fptr)
 {
 	struct Task * task = get_task_info_ptr(tid);
@@ -69,7 +86,7 @@ check_priviledge(	IN int32 tid,
 }
 
 /**
-	@Function:		system_call_fs
+	@Function:		_ScFsProcess
 	@Access:		Public
 	@Description:
 		文件系统的系统调用处理程序。
@@ -83,7 +100,7 @@ check_priviledge(	IN int32 tid,
 	@Return:	
 */
 void
-system_call_fs(	IN uint32 func,
+_ScFsProcess(	IN uint32 func,
 				IN uint32 base,
 				IN OUT struct SParams * sparams)
 {
@@ -177,7 +194,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				uint8 * buffer = NULL;
 				buffer = (uint8 *)get_physical_address(	tid, 
@@ -205,7 +222,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				uint8 * buffer = NULL;
 				buffer = (uint8 *)get_physical_address(	tid, 
@@ -233,7 +250,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				uint8 * buffer = NULL;
 				buffer = (uint8 *)get_physical_address(	tid, 
@@ -257,7 +274,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 				Ifs1ResetFile(fptr);
 			break;
 		}
@@ -407,7 +424,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 				sparams->param0 = SPARAM(flen(fptr));
 			else
 			{
@@ -425,7 +442,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				struct CMOSDateTime * dt = NULL;
 				dt = (struct CMOSDateTime *)get_physical_address(	tid, 
@@ -443,7 +460,7 @@ system_call_fs(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				struct CMOSDateTime * dt = NULL;
 				dt = (struct CMOSDateTime *)get_physical_address(	tid, 
@@ -516,13 +533,13 @@ system_call_fs(	IN uint32 func,
 		case SCALL_LOCK_FS:
 		{
 			int32 tid = sparams->tid;
-			BOOL r = lock_fs();
+			BOOL r = _ScFsLockFileSystem();
 			if(r)
 			{
 				struct Task * task = get_task_info_ptr(tid);
 				if(task == NULL)
 				{
-					system_call_fs_unlock_fs();
+					ScFsUnlockFileSystem();
 					r = FALSE;
 				}
 				else
@@ -535,7 +552,7 @@ system_call_fs(	IN uint32 func,
 		//
 		case SCALL_UNLOCK_FS:
 		{
-			system_call_fs_unlock_fs();
+			ScFsUnlockFileSystem();
 			break;
 		}
 		//获取文件系统的锁的状态。
@@ -544,7 +561,7 @@ system_call_fs(	IN uint32 func,
 		//	Param0=返回TRUE则文件系统被锁住，否则没有被锁住。
 		case SCALL_FS_LOCK_STATE:
 		{
-			sparams->param0 = SPARAM(lock);
+			sparams->param0 = SPARAM(_lock);
 			break;
 		}
 		//检测是否已经到达文件尾
@@ -558,7 +575,7 @@ system_call_fs(	IN uint32 func,
 			int32 tid = sparams->tid;
 			FileObject * fptr = (FileObject *)(sparams->param0);
 			BOOL r = FALSE;
-			if(check_priviledge(tid, fptr))
+			if(_ScFsCheckPrivilege(tid, fptr))
 				r = Ifs1IsEOF(fptr);
 			sparams->param0 = SPARAM(r);
 			break;

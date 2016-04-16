@@ -22,7 +22,7 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		system_call_system
+	@Function:		_ScSysProcess
 	@Access:		Public
 	@Description:
 		系统功能的系统调用处理程序。
@@ -36,7 +36,9 @@
 	@Return:	
 */
 void
-system_call_system(uint32 func, uint32 base, struct SParams * sparams)
+_ScSysProcess(	IN uint32 func,
+				IN uint32 base,
+				IN OUT struct SParams * sparams)
 {
 	switch(func)
 	{
@@ -352,12 +354,12 @@ system_call_system(uint32 func, uint32 base, struct SParams * sparams)
 			int8 * param = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
 			int8 buffer[1024];
 			if(strlen(path) < sizeof(buffer))
-				strcpy_safe(buffer, sizeof(buffer), path);
+				UtlCopyString(buffer, sizeof(buffer), path);
 			if(strlen(param) != 0)
 				if(strlen(buffer) + 1 + strlen(param) < sizeof(buffer))
 				{
-					strcat_safe(buffer, sizeof(buffer), " ");
-					strcat_safe(buffer, sizeof(buffer), param);
+					UtlConcatString(buffer, sizeof(buffer), " ");
+					UtlConcatString(buffer, sizeof(buffer), param);
 				}
 				else
 				{

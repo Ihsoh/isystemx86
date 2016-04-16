@@ -289,11 +289,11 @@ void
 _check_all_devices(void)
 {
 	_devcnt = 0;
-	uint32 count = pci_device_count();
+	uint32 count = PciGetDeviceCount();
 	uint32 index;
 	for(index = 0; index < count; index++)
 	{
-		PCIDeviceInfoPtr device = pci_device(index);
+		PCIDeviceInfoPtr device = PciGetDevice(index);
 		if(	device != NULL
 			&& device->header->cfg_hdr.cc[2] == PCI_CLS_MASS_STORAGE_CONTROLLER
 			&& device->header->cfg_hdr.cc[1] == 0x06
@@ -571,7 +571,7 @@ _probe_port(void)
 	uint32 devidx;
 	for(devidx = 0; devidx < _devcnt; devidx++)
 	{
-		PCIDeviceInfoPtr device = pci_device(_devices[devidx]);
+		PCIDeviceInfoPtr device = PciGetDevice(_devices[devidx]);
 		if(device == NULL)
 			return;
 		HBA_MEM * abar = (HBA_MEM *)device->header->cfg_hdr.abar;

@@ -80,18 +80,18 @@ typedef struct
 
 extern
 BOOL
-pci_init_devices(void);
+PciInitDevices(void);
 
 extern
 void
-pci_free_devices(void);
+PciFreeDevices(void);
 
 extern
 uint32
-pci_device_count(void);
+PciGetDeviceCount(void);
 
 extern
 PCIDeviceInfoPtr
-pci_device(IN uint32 index);
+PciGetDevice(IN uint32 index);
 
 #endif

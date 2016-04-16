@@ -79,11 +79,11 @@ log(IN const int8 * type,
 	{
 		write_log_to_disk();
 		clear_log();
-		strcpy_safe(log_buffer, LOG_BUFFER_SIZE, buffer);
+		UtlCopyString(log_buffer, LOG_BUFFER_SIZE, buffer);
 	}
 	else
 	{
-		strcat_safe(log_buffer, LOG_BUFFER_SIZE, buffer);
+		UtlConcatString(log_buffer, LOG_BUFFER_SIZE, buffer);
 		if(write_in_rt)
 		{
 			write_log_to_disk();

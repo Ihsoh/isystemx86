@@ -16,7 +16,7 @@
 #include "../image.h"
 
 /**
-	@Function:		system_call_screen
+	@Function:		_ScScrProcess
 	@Access:		Public
 	@Description:
 		屏幕的系统调用处理程序。
@@ -30,9 +30,9 @@
 	@Return:	
 */
 void
-system_call_screen(	IN uint32 func,
-					IN uint32 base,
-					IN OUT struct SParams * sparams)
+_ScScrProcess(	IN uint32 func,
+				IN uint32 base,
+				IN OUT struct SParams * sparams)
 {
 	switch(func)
 	{

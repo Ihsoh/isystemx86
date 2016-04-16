@@ -15,12 +15,12 @@
 
 extern
 void
-system_call_fs(	IN uint32 func,
+_ScFsProcess(	IN uint32 func,
 				IN uint32 base,
 				IN OUT struct SParams * sparams);
 
 extern
 void
-system_call_fs_unlock_fs(void);
+ScFsUnlockFileSystem(void);
 
 #endif

@@ -116,8 +116,8 @@ message_window_show(IN CASCTEXT title,
 	{
 		ASCCHAR line0[_MAX_CHAR];
 		ASCCHAR line1[_MAX_CHAR];
-		memcpy_safe(line0, sizeof(line0), text, _MAX_CHAR);
-		memcpy_safe(line1, sizeof(line1), text + _MAX_CHAR, len - _MAX_CHAR);
+		UtlCopyMemory(line0, sizeof(line0), text, _MAX_CHAR);
+		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, len - _MAX_CHAR);
 		uint8 * enfont = get_enfont_ptr();
 		text_common_image(	workspace,
 							_LPADDING, 
@@ -139,9 +139,9 @@ message_window_show(IN CASCTEXT title,
 		ASCCHAR line0[_MAX_CHAR];
 		ASCCHAR line1[_MAX_CHAR];
 		ASCCHAR line2[_MAX_CHAR];
-		memcpy_safe(line0, sizeof(line0), text, _MAX_CHAR);
-		memcpy_safe(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
-		memcpy_safe(line2, sizeof(line2), text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
+		UtlCopyMemory(line0, sizeof(line0), text, _MAX_CHAR);
+		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
+		UtlCopyMemory(line2, sizeof(line2), text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
 		uint8 * enfont = get_enfont_ptr();
 		text_common_image(	workspace,
 							_LPADDING, 
@@ -171,10 +171,10 @@ message_window_show(IN CASCTEXT title,
 		ASCCHAR line1[_MAX_CHAR];
 		ASCCHAR line2[_MAX_CHAR];
 		ASCCHAR line3[_MAX_CHAR];
-		memcpy_safe(line0, sizeof(line0), text, _MAX_CHAR);
-		memcpy_safe(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
-		memcpy_safe(line2, sizeof(line2), text + _MAX_CHAR * 2, _MAX_CHAR);
-		memcpy_safe(line3, sizeof(line3), text + _MAX_CHAR * 3, len - _MAX_CHAR * 3);
+		UtlCopyMemory(line0, sizeof(line0), text, _MAX_CHAR);
+		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
+		UtlCopyMemory(line2, sizeof(line2), text + _MAX_CHAR * 2, _MAX_CHAR);
+		UtlCopyMemory(line3, sizeof(line3), text + _MAX_CHAR * 3, len - _MAX_CHAR * 3);
 		uint8 * enfont = get_enfont_ptr();
 		text_common_image(	workspace,
 							_LPADDING, 
@@ -211,9 +211,9 @@ message_window_show(IN CASCTEXT title,
 		ASCCHAR line1[_MAX_CHAR];
 		ASCCHAR line2[_MAX_CHAR];
 		ASCCHAR line3[_MAX_CHAR];
-		memcpy_safe(line0, sizeof(line0), text, _MAX_CHAR);
-		memcpy_safe(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
-		memcpy_safe(line2, sizeof(line2), text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
+		UtlCopyMemory(line0, sizeof(line0), text, _MAX_CHAR);
+		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
+		UtlCopyMemory(line2, sizeof(line2), text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
 		uint8 * enfont = get_enfont_ptr();
 		text_common_image(	workspace,
 							_LPADDING, 

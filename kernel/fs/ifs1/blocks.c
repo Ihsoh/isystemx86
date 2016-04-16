@@ -414,7 +414,7 @@ Ifs1FillDirBlock(	IN int8 * name,
 	get_cmos_date_time(&dt);
 	dir->used = 1;
 	dir->type = BLOCK_TYPE_DIR;
-	strcpy_safe(dir->dirname, sizeof(dir->dirname), name);
+	UtlCopyString(dir->dirname, sizeof(dir->dirname), name);
 	memcpy(&(dir->create), &dt, sizeof(struct CMOSDateTime));
 	memcpy(&(dir->change), &dt, sizeof(struct CMOSDateTime));
 	for(ui = 0; ui < sizeof(dir->reserve); ui++)
@@ -452,7 +452,7 @@ Ifs1FillFileBlock(	IN int8 * name,
 	file->used = 1;
 	file->type = BLOCK_TYPE_FILE;
 	file->length = 0;
-	strcpy_safe(file->filename, sizeof(file->filename), name);
+	UtlCopyString(file->filename, sizeof(file->filename), name);
 	memcpy(&(file->create), &dt, sizeof(struct CMOSDateTime));
 	memcpy(&(file->change), &dt, sizeof(struct CMOSDateTime));
 	file->lock = 0;
@@ -491,10 +491,10 @@ Ifs1FillSLinkBlock(	IN int8 * name,
 		return FALSE;
 	slink->used = 1;
 	slink->type = BLOCK_TYPE_SLINK;
-	strcpy_safe(slink->filename, sizeof(slink->filename), name);
+	UtlCopyString(slink->filename, sizeof(slink->filename), name);
 	uint32 ui;
 	for(ui = 0; ui < sizeof(slink->reserve); ui++)
 		slink->reserve[ui] = 0;
-	strcpy_safe(slink->link, sizeof(slink->filename), link);
+	UtlCopyString(slink->link, sizeof(slink->filename), link);
 	return TRUE;
 }

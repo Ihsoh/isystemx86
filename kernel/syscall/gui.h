@@ -18,7 +18,7 @@
 
 extern
 void
-system_call_gui(IN uint32 func,
+_ScGuiProcess(	IN uint32 func,
 				IN uint32 base,
 				IN OUT struct SParams * sparams);
 

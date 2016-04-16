@@ -13,9 +13,9 @@
 
 extern
 BOOL
-img_draw_bmp_to_cimage(	IN OUT IMGLBMPPtr bmpobj,
-						IN int32 width,
-						IN int32 height,
-						IN struct CommonImage * cimage);
+UtlConvertBmpToCommonImage(	IN OUT IMGLBMPPtr bmpobj,
+							IN int32 width,
+							IN int32 height,
+							IN struct CommonImage * cimage);
 
 #endif

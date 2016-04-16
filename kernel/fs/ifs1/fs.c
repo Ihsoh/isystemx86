@@ -669,7 +669,7 @@ _Ifs1RenameDir(	IN int8 * symbol,
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
-	strcpy_safe(dir.dirname, sizeof(dir.dirname), new_name);
+	UtlCopyString(dir.dirname, sizeof(dir.dirname), new_name);
 	return Ifs1SetBlock(symbol, id, (struct RawBlock *)&dir);
 }
 
@@ -704,7 +704,7 @@ _Ifs1RenameFile(IN int8 * symbol,
 		|| file.used == 0
 		|| file.type != BLOCK_TYPE_FILE)
 		return FALSE;
-	strcpy_safe(file.filename, sizeof(file.filename), new_name);
+	UtlCopyString(file.filename, sizeof(file.filename), new_name);
 	return Ifs1SetBlock(symbol, id, (struct RawBlock *)&file);
 }
 
@@ -935,14 +935,14 @@ Ifs1ParsePathEx(IN int8 * path,
 				if(	block.type == BLOCK_TYPE_FILE
 					&& strcmp(((struct FileBlock *)&block)->filename, name) == 0)
 				{
-					strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
+					UtlCopyString(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
 					return block_id;
 				}
 				else if(block.type == BLOCK_TYPE_SLINK
 						&& strcmp(((struct SLinkBlock *)&block)->filename, name) == 0)
 					if(ret_slnk)
 					{
-						strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
+						UtlCopyString(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
 						return block_id;
 					}
 					else
@@ -958,7 +958,7 @@ Ifs1ParsePathEx(IN int8 * path,
 		}
 		return INVALID_BLOCK_ID;
 	}
-	strcpy_safe(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
+	UtlCopyString(symbol, DISK_SYMBOL_BUFFER_SIZE, disk);
 	return blockid;
 }
 
@@ -1248,8 +1248,8 @@ Ifs1DeleteDirRecursively(IN int8 * path)
 			{
 				struct FileBlock * file = (struct FileBlock *)sub;
 				int8 temp[MAX_PATH_BUFFER_LEN];
-				strcpy_safe(temp, sizeof(temp), path);
-				strcat_safe(temp, sizeof(temp), file->filename);
+				UtlCopyString(temp, sizeof(temp), path);
+				UtlConcatString(temp, sizeof(temp), file->filename);
 				if(!Ifs1DeleteFile(temp))
 					return FALSE;
 			}
@@ -1257,9 +1257,9 @@ Ifs1DeleteDirRecursively(IN int8 * path)
 			{
 				struct DirBlock * dir = (struct DirBlock *)sub;
 				int8 temp[MAX_PATH_BUFFER_LEN];
-				strcpy_safe(temp, sizeof(temp), path);
-				strcat_safe(temp, sizeof(temp), dir->dirname);
-				strcat_safe(temp, sizeof(temp), "/");
+				UtlCopyString(temp, sizeof(temp), path);
+				UtlConcatString(temp, sizeof(temp), dir->dirname);
+				UtlConcatString(temp, sizeof(temp), "/");
 				if(!Ifs1DeleteDirRecursively(temp))
 					return FALSE;
 			}
@@ -1343,7 +1343,7 @@ BOOL
 Ifs1GetParentDir(	IN int8 * path, 
 					OUT int8 * new_path)
 {
-	strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
+	UtlCopyString(new_path, MAX_PATH_BUFFER_LEN, path);
 	uint32 len = strlen(new_path);
 	if(len > 4)
 	{
@@ -1376,7 +1376,7 @@ BOOL
 Ifs1GetFileLocation(IN int8 * path, 
 					OUT int8 * new_path)
 {
-	strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
+	UtlCopyString(new_path, MAX_PATH_BUFFER_LEN, path);
 	uint32 len = strlen(new_path);
 	if(len > 4)
 	{
@@ -1519,22 +1519,22 @@ Ifs1GetAbsolutePath(IN int8 * path,
 {
 	if(strlen(path) == 4 && path[2] == ':' && path[3] == '/')
 	{
-		strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, path);
+		UtlCopyString(new_path, MAX_PATH_BUFFER_LEN, path);
 		return TRUE;
 	}
 	else if(strcmp(path, "/") == 0 && strcmp(current_path, "") != 0)
 	{
-		strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, current_path);
+		UtlCopyString(new_path, MAX_PATH_BUFFER_LEN, current_path);
 		new_path[4] = '\0';
 		return TRUE;
 	}
 	else if(strcmp(current_path, "") != 0 || (strlen(path) > 4 && path[2] == ':' && path[3] == '/'))
 	{
 		int8 temp[MAX_PATH_BUFFER_LEN];
-		strcpy_safe(temp, sizeof(temp), current_path);
+		UtlCopyString(temp, sizeof(temp), current_path);
 		if(strlen(path) > 4 && path[2] == ':' && path[3] == '/')
 		{
-			memcpy_safe(temp, sizeof(temp), path, 4);
+			UtlCopyMemory(temp, sizeof(temp), path, 4);
 			temp[4] = '\0';
 			path += 4;
 		}
@@ -1565,8 +1565,8 @@ Ifs1GetAbsolutePath(IN int8 * path,
 					;
 				else
 				{
-					strcat_safe(temp, sizeof(temp), name);
-					strcat_safe(temp, sizeof(temp), "/");
+					UtlConcatString(temp, sizeof(temp), name);
+					UtlConcatString(temp, sizeof(temp), "/");
 				}
 				n = name;
 				name[0] = '\0';
@@ -1578,8 +1578,8 @@ Ifs1GetAbsolutePath(IN int8 * path,
 			else if(strcmp(name, ".") == 0)
 				;
 			else
-				strcat_safe(temp, sizeof(temp), name);
-		strcpy_safe(new_path, MAX_PATH_BUFFER_LEN, temp);
+				UtlConcatString(temp, sizeof(temp), name);
+		UtlCopyString(new_path, MAX_PATH_BUFFER_LEN, temp);
 		return TRUE;
 	}
 	else
@@ -1608,7 +1608,7 @@ Ifs1IsChildPath(IN int8 * dir,
 	if(strlen(sub_dir) < dir_len)
 		return FALSE;
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	memcpy_safe(temp, sizeof(temp), sub_dir, dir_len);
+	UtlCopyMemory(temp, sizeof(temp), sub_dir, dir_len);
 	temp[dir_len] = '\0';
 	if(strcmp(dir, temp) == 0)
 		return TRUE;
@@ -1638,8 +1638,8 @@ Ifs1CopyFile(	IN int8 * src_path,
 				IN int8 * dst_name)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
-	strcpy_safe(temp, sizeof(temp), dst_path);	
-	strcat_safe(temp, sizeof(temp), dst_name);
+	UtlCopyString(temp, sizeof(temp), dst_path);	
+	UtlConcatString(temp, sizeof(temp), dst_name);
 	if(	!Ifs1Exists(src_path)
 		|| Ifs1Exists(temp)
 		|| !Ifs1CreateFile(dst_path, dst_name))
@@ -1759,11 +1759,11 @@ Ifs1Exists(IN int8 * path)
 		int8 temp[MAX_PATH_BUFFER_LEN];
 		int8 name[MAX_DIRNAME_BUFFER_LEN];
 		int32 i;
-		strcpy_safe(temp, sizeof(temp), path);
+		UtlCopyString(temp, sizeof(temp), path);
 		temp[len - 1] = '\0';
 		len--;
 		for(i = len - 1; i >= 0 && temp[i] != '/'; i--);
-		strcpy_safe(name, sizeof(name), temp + i + 1);
+		UtlCopyString(name, sizeof(name), temp + i + 1);
 		temp[i + 1] = '\0';
 		return Ifs1DirExists(temp, name);
 	}
@@ -1772,10 +1772,10 @@ Ifs1Exists(IN int8 * path)
 		int8 temp[MAX_PATH_BUFFER_LEN];
 		int8 name[MAX_FILENAME_BUFFER_LEN];
 		int32 i;
-		strcpy_safe(temp, sizeof(temp), path);
+		UtlCopyString(temp, sizeof(temp), path);
 		for(i = len - 1; i >= 0 && path[i] != '/'; i--);
 		temp[i + 1] = '\0';
-		strcpy_safe(name, sizeof(name), path + i + 1);
+		UtlCopyString(name, sizeof(name), path + i + 1);
 		return Ifs1FileExists(temp, name);
 	}
 }
@@ -1811,7 +1811,7 @@ _Ifs1OpenFileUnsafely(	IN int8 * path,
 		return NULL;
 	}
 	fptr->mode = mode;
-	strcpy_safe(fptr->symbol, sizeof(fptr->symbol), symbol);
+	UtlCopyString(fptr->symbol, sizeof(fptr->symbol), symbol);
 	fptr->file_block_id = id;
 	fptr->next_block_index = 0;
 	fptr->next_block_pos = 0;
@@ -2535,8 +2535,8 @@ _Ifs1RepairFiles(	IN int8 * symbol,
 	uint32 ui;
 	if(strcmp(dir->dirname, "/") != 0)
 	{
-		strcat_safe(repairing_path, sizeof(repairing_path), dir->dirname);
-		strcat_safe(repairing_path, sizeof(repairing_path), "/");
+		UtlConcatString(repairing_path, sizeof(repairing_path), dir->dirname);
+		UtlConcatString(repairing_path, sizeof(repairing_path), "/");
 	}
 	for(ui = 0; ui < sizeof(dir->blockids) / sizeof(uint32); ui++)
 	{		
@@ -2560,8 +2560,8 @@ _Ifs1RepairFiles(	IN int8 * symbol,
 					{
 						file_block->lock = 0;
 						int8 temp_path[MAX_PATH_BUFFER_LEN];
-						strcpy_safe(temp_path, sizeof(temp_path), repairing_path);
-						strcat_safe(temp_path, sizeof(temp_path), file_block->filename);
+						UtlCopyString(temp_path, sizeof(temp_path), repairing_path);
+						UtlConcatString(temp_path, sizeof(temp_path), file_block->filename);
 						if(Ifs1SetBlock(symbol, id, &raw_block))
 						{
 							print_str_p("Unlocked ", CC_GREEN);
@@ -2612,7 +2612,7 @@ Ifs1Repair(IN int8 * symbol)
 		|| dir.used == 0
 		|| dir.type != BLOCK_TYPE_DIR)
 		return FALSE;
-	strcpy_safe(repairing_path, sizeof(repairing_path), symbol);
-	strcat_safe(repairing_path, sizeof(repairing_path), ":/");
+	UtlCopyString(repairing_path, sizeof(repairing_path), symbol);
+	UtlConcatString(repairing_path, sizeof(repairing_path), ":/");
 	return _Ifs1RepairFiles(symbol, &dir);
 }

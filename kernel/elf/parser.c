@@ -5,7 +5,9 @@
 #include "../memory.h"
 #include "../fs/ifs1/fs.h"
 
-static int _parse_header(ELFContextPtr ctx)
+static
+int32
+_ElfParseHeader(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		goto err;
@@ -41,14 +43,16 @@ err:
 	return 0;
 }
 
-static int _parse_sht(ELFContextPtr ctx)
+static
+int32
+_ElfParseSHT(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		goto err;
 	Elf32_Shdr * shdr = NULL;
-	while((shdr = elf_next_shdr(ctx)) != NULL)
+	while((shdr = ElfNextSHDR(ctx)) != NULL)
 	{
-		const char * name = "";
+		const int8 * name = "";
 		if((ctx->shstrtab_offset + shdr->sh_name)[0] != '\0')
 			name = ctx->shstrtab_offset + shdr->sh_name;
 		if(strcmp(name, ".strtab") == 0)
@@ -64,39 +68,43 @@ static int _parse_sht(ELFContextPtr ctx)
 		else if(strcmp(name, ".dynsym") == 0)
 		{
 			ctx->dynsym = shdr;
-			elf_reset_dynsym(ctx);
+			ElfResetDynsym(ctx);
 		}
 		else if(strcmp(name, ".rel.dyn") == 0)
 		{
 			ctx->rel_dyn = shdr;
-			elf_reset_rel_dyn(ctx);
+			ElfResetRelDyn(ctx);
 		}
 		else if(strcmp(name, ".rel.plt") == 0)
 		{
 			ctx->rel_plt = shdr;
-			elf_reset_rel_plt(ctx);
+			ElfResetRelPlt(ctx);
 		}
 	}
-	elf_reset_shdr(ctx);
+	ElfResetSHDR(ctx);
 	return 1;
 err:
 	return 0;
 }
 
-static int _parse(ELFContextPtr ctx)
+static
+int32
+_ElfParse(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		goto err;
-	if(!_parse_header(ctx))
+	if(!_ElfParseHeader(ctx))
 		goto err;
-	if(!_parse_sht(ctx))
+	if(!_ElfParseSHT(ctx))
 		goto err;
 	return 1;
 err:
 	return 0;
 }
 
-int elf_parse(const char * path, ELFContextPtr ctx)
+int32
+ElfParse(	IN CASCTEXT path,
+			OUT ELFContextPtr ctx)
 {
 	// 初始化上下文。
 	memset(ctx, 0, sizeof(ELFContext));
@@ -111,7 +119,7 @@ int elf_parse(const char * path, ELFContextPtr ctx)
 	if(Ifs1ReadFile(foptr, ctx->file_content, ctx->file_size) != ctx->file_size)
 		goto err;
 	Ifs1CloseFile(foptr);
-	if(!_parse(ctx))
+	if(!_ElfParse(ctx))
 		goto err;
 	ctx->valid = 1;
 	return 1;
@@ -123,7 +131,8 @@ err:
 	return 0;
 }
 
-void elf_free(ELFContextPtr ctx)
+void
+ElfFree(IN ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		return;
@@ -131,7 +140,8 @@ void elf_free(ELFContextPtr ctx)
 		free_memory(ctx->file_content);
 }
 
-void elf_reset_shdr(ELFContextPtr ctx)
+void
+ElfResetSHDR(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		return;
@@ -139,7 +149,8 @@ void elf_reset_shdr(ELFContextPtr ctx)
 	ctx->n_shdr = ctx->header->e_shnum;
 }
 
-Elf32_Shdr * elf_next_shdr(ELFContextPtr ctx)
+Elf32_Shdr *
+ElfNextSHDR(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL || ctx->n_shdr == 0)
 		return NULL;
@@ -147,7 +158,8 @@ Elf32_Shdr * elf_next_shdr(ELFContextPtr ctx)
 	return ctx->itr_shdr++;
 }
 
-void elf_reset_phdr(ELFContextPtr ctx)
+void
+ElfResetPHDR(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		return;
@@ -155,7 +167,8 @@ void elf_reset_phdr(ELFContextPtr ctx)
 	ctx->n_phdr = ctx->header->e_phnum;
 }
 
-Elf32_Phdr * elf_next_phdr(ELFContextPtr ctx)
+Elf32_Phdr *
+ElfNextPHDR(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL || ctx->n_phdr == 0)
 		return NULL;
@@ -163,7 +176,8 @@ Elf32_Phdr * elf_next_phdr(ELFContextPtr ctx)
 	return ctx->itr_phdr++;
 }
 
-void elf_reset_dynsym(ELFContextPtr ctx)
+void
+ElfResetDynsym(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		return;
@@ -171,7 +185,8 @@ void elf_reset_dynsym(ELFContextPtr ctx)
 	ctx->n_dynsym_sym = ctx->dynsym->sh_size / ctx->dynsym->sh_entsize;
 }
 
-Elf32_Sym * elf_next_dynsym_sym(ELFContextPtr ctx)
+Elf32_Sym *
+ElfNextDynsymSymbol(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL || ctx->n_dynsym_sym == 0)
 		return NULL;
@@ -179,8 +194,9 @@ Elf32_Sym * elf_next_dynsym_sym(ELFContextPtr ctx)
 	return ctx->itr_dynsym_sym++;
 }
 
-const char * elf_parse_dynsym_sym_name(	ELFContextPtr ctx,
-										Elf32_Sym * sym)
+const int8 *
+ElfParseDynsymSymbolName(	IN ELFContextPtr ctx,
+							IN Elf32_Sym * sym)
 {
 	if(	ctx == NULL
 		|| sym == NULL
@@ -189,7 +205,8 @@ const char * elf_parse_dynsym_sym_name(	ELFContextPtr ctx,
 	return ctx->dynstr_offset + sym->st_name;
 }
 
-void elf_reset_rel_dyn(ELFContextPtr ctx)
+void
+ElfResetRelDyn(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		return;
@@ -197,7 +214,8 @@ void elf_reset_rel_dyn(ELFContextPtr ctx)
 	ctx->n_rel_dyn = ctx->rel_dyn->sh_size / ctx->rel_dyn->sh_entsize;
 }
 
-Elf32_Rel * elf_next_rel_dyn(ELFContextPtr ctx)
+Elf32_Rel *
+ElfNextRelDyn(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL || ctx->n_rel_dyn == 0)
 		return NULL;
@@ -205,7 +223,8 @@ Elf32_Rel * elf_next_rel_dyn(ELFContextPtr ctx)
 	return ctx->itr_rel_dyn++;
 }
 
-void elf_reset_rel_plt(ELFContextPtr ctx)
+void
+ElfResetRelPlt(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL)
 		return;
@@ -213,7 +232,8 @@ void elf_reset_rel_plt(ELFContextPtr ctx)
 	ctx->n_rel_plt = ctx->rel_plt->sh_size / ctx->rel_plt->sh_entsize;
 }
 
-Elf32_Rel * elf_next_rel_plt(ELFContextPtr ctx)
+Elf32_Rel *
+ElfNextRelPlt(IN OUT ELFContextPtr ctx)
 {
 	if(ctx == NULL || ctx->n_rel_plt == 0)
 		return NULL;

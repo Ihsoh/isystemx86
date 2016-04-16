@@ -16,8 +16,8 @@
 
 extern
 void
-system_call_system(	IN uint32 func,
-					IN uint32 base,
-					IN OUT struct SParams * sparams);
+_ScSysProcess(	IN uint32 func,
+				IN uint32 base,
+				IN OUT struct SParams * sparams);
 
 #endif

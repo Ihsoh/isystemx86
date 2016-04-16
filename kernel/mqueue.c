@@ -118,7 +118,7 @@ mqueue_new(IN int8 * name)
 		free_memory(queue);
 		return NULL;
 	}
-	strcpy_safe(queue->name, sizeof(queue->name), name);
+	UtlCopyString(queue->name, sizeof(queue->name), name);
 	return queue;
 }
 

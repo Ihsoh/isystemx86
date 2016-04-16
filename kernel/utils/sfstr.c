@@ -11,7 +11,7 @@
 #include "../types.h"
 
 /**
-	@Function:		strlen_safe
+	@Function:		UtlGetStringLength
 	@Access:		Public
 	@Description:
 		安全地获取字符串的长度。
@@ -25,8 +25,8 @@
 			字符串操作结果。
 */
 SFSTR_RESULT
-strlen_safe(OUT uint32 * len,
-			IN CASCTEXT str)
+UtlGetStringLength(	OUT uint32 * len,
+					IN CASCTEXT str)
 {
 	if(len == NULL || str == NULL)
 		return SFSTR_R_NULL;
@@ -37,7 +37,7 @@ strlen_safe(OUT uint32 * len,
 }
 
 /**
-	@Function:		strcmp_safe
+	@Function:		UtlCompareString
 	@Access:		Public
 	@Description:
 		安全地比较两个字符串。
@@ -52,17 +52,17 @@ strlen_safe(OUT uint32 * len,
 			如果两个字符串不相等，则返回SFSTR_R_NOT_EQUAL。
 */
 SFSTR_RESULT
-strcmp_safe(IN CASCTEXT str0,
-			IN CASCTEXT str1)
+UtlCompareString(	IN CASCTEXT str0,
+					IN CASCTEXT str1)
 {
 	if(str0 == NULL || str1 == NULL)
 		return SFSTR_R_NULL;
 	uint32 str0len = 0;
 	uint32 str1len = 0;
 	SFSTR_RESULT r;
-	if((r = strlen_safe(&str0len, str0)) != SFSTR_R_OK)
+	if((r = UtlGetStringLength(&str0len, str0)) != SFSTR_R_OK)
 		return r; 
-	if((r = strlen_safe(&str1len, str1)) != SFSTR_R_OK)
+	if((r = UtlGetStringLength(&str1len, str1)) != SFSTR_R_OK)
 		return r; 
 	if(str0len != str1len)
 		return SFSTR_R_NOT_EQUAL;
@@ -78,7 +78,7 @@ strcmp_safe(IN CASCTEXT str0,
 }
 
 /**
-	@Function:		strcpy_safe
+	@Function:		UtlCopyString
 	@Access:		Public
 	@Description:
 		安全地复制字符串。
@@ -94,9 +94,9 @@ strcmp_safe(IN CASCTEXT str0,
 			字符串操作结果。
 */
 SFSTR_RESULT
-strcpy_safe(OUT ASCTEXT dst,
-			IN uint32 size,
-			IN CASCTEXT src)
+UtlCopyString(	OUT ASCTEXT dst,
+				IN uint32 size,
+				IN CASCTEXT src)
 {
 	if(dst == NULL || src == NULL)
 		return SFSTR_R_NULL;
@@ -113,7 +113,7 @@ strcpy_safe(OUT ASCTEXT dst,
 }
 
 /**
-	@Function:		strcat_safe
+	@Function:		UtlConcatString
 	@Access:		Public
 	@Description:
 		安全地把一个字符串追加到另一个字符串的结尾。
@@ -129,23 +129,23 @@ strcpy_safe(OUT ASCTEXT dst,
 			字符串操作结果。
 */
 SFSTR_RESULT
-strcat_safe(IN OUT ASCTEXT dst,
-			IN uint32 size,
-			IN CASCTEXT src)
+UtlConcatString(IN OUT ASCTEXT dst,
+				IN uint32 size,
+				IN CASCTEXT src)
 {
 	uint32 dst_len;
-	SFSTR_RESULT r = strlen_safe(&dst_len, dst);
+	SFSTR_RESULT r = UtlGetStringLength(&dst_len, dst);
 	if(r == SFSTR_R_OK)
 	{
 		uint32 remain = size - dst_len;
-		return strcpy_safe(dst + dst_len, remain, src);
+		return UtlCopyString(dst + dst_len, remain, src);
 	}
 	else
 		return r;
 }
 
 /**
-	@Function:		memcpy_safe
+	@Function:		UtlCopyMemory
 	@Access:		Public
 	@Description:
 		安全地把一个缓冲区的数据复制到另一个缓冲区。
@@ -163,10 +163,10 @@ strcat_safe(IN OUT ASCTEXT dst,
 			字符串操作结果。
 */
 SFSTR_RESULT
-memcpy_safe(OUT void * dst,
-			IN uint32 size,
-			IN void * src,
-			IN uint32 n)
+UtlCopyMemory(	OUT void * dst,
+				IN uint32 size,
+				IN void * src,
+				IN uint32 n)
 {
 	uint8 * d = (uint8 *)dst;
 	const uint8 * s = (const uint8 *)src;
@@ -186,17 +186,17 @@ memcpy_safe(OUT void * dst,
 
 #include "../test.h"
 
-TEST_CONTEXT(utils_sfstr)
+TEST_CONTEXT(UtlSfstr)
 
-TEST_FUNC_BEGIN(strlen_safe)
+TEST_FUNC_BEGIN(UtlGetStringLength)
 	CASCTEXT str = "ABC";
 	uint32 len = 0;
 	TEST_BEGIN(0)
-		if(strlen_safe(NULL, NULL) != SFSTR_R_NULL)
+		if(UtlGetStringLength(NULL, NULL) != SFSTR_R_NULL)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(1)
-		if(strlen_safe(&len, str) == SFSTR_R_OK)
+		if(UtlGetStringLength(&len, str) == SFSTR_R_OK)
 		{
 			if(len != 3)
 				TEST_FAILED();
@@ -206,40 +206,40 @@ TEST_FUNC_BEGIN(strlen_safe)
 	TEST_END
 TEST_FUNC_END
 
-TEST_FUNC_BEGIN(strcmp_safe)
+TEST_FUNC_BEGIN(UtlCompareString)
 	TEST_BEGIN(0)
-		if(strcmp_safe(NULL, NULL) != SFSTR_R_NULL)
+		if(UtlCompareString(NULL, NULL) != SFSTR_R_NULL)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(1)
-		if(strcmp_safe("ABC", "ABC") != SFSTR_R_EQUAL)
+		if(UtlCompareString("ABC", "ABC") != SFSTR_R_EQUAL)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(2)
-		if(strcmp_safe("ABCD", "ABC") != SFSTR_R_NOT_EQUAL)
+		if(UtlCompareString("ABCD", "ABC") != SFSTR_R_NOT_EQUAL)
 			TEST_FAILED();
 	TEST_END
 TEST_FUNC_END
 
-TEST_FUNC_BEGIN(strcpy_safe)
+TEST_FUNC_BEGIN(UtlCopyString)
 	ASCCHAR buffer[4];
 	TEST_BEGIN(0)
-		if(strcpy_safe(NULL, 0, NULL) != SFSTR_R_NULL)
+		if(UtlCopyString(NULL, 0, NULL) != SFSTR_R_NULL)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(1)
-		if(strcpy_safe(buffer, sizeof(buffer), "ABC") == SFSTR_R_OK)
+		if(UtlCopyString(buffer, sizeof(buffer), "ABC") == SFSTR_R_OK)
 		{
-			if(strcmp_safe(buffer, "ABC") != SFSTR_R_EQUAL)
+			if(UtlCompareString(buffer, "ABC") != SFSTR_R_EQUAL)
 				TEST_FAILED();
 		}
 		else
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(2)
-		if(strcpy_safe(buffer, sizeof(buffer), "ABCD") == SFSTR_R_TOO_LONG)
+		if(UtlCopyString(buffer, sizeof(buffer), "ABCD") == SFSTR_R_TOO_LONG)
 		{
-			if(strcmp_safe(buffer, "ABC") != SFSTR_R_EQUAL)
+			if(UtlCompareString(buffer, "ABC") != SFSTR_R_EQUAL)
 				TEST_FAILED();
 		}
 		else
@@ -247,55 +247,55 @@ TEST_FUNC_BEGIN(strcpy_safe)
 	TEST_END
 TEST_FUNC_END
 
-TEST_FUNC_BEGIN(strcat_safe)
+TEST_FUNC_BEGIN(UtlConcatString)
 	ASCCHAR buffer[4];
 	buffer[0] = '\0';
 	TEST_BEGIN(0)
-		if(strcat_safe(NULL, 0, NULL) != SFSTR_R_NULL)
+		if(UtlConcatString(NULL, 0, NULL) != SFSTR_R_NULL)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(1)
-		if(strcat_safe(buffer, sizeof(buffer), "AB") != SFSTR_R_OK)
+		if(UtlConcatString(buffer, sizeof(buffer), "AB") != SFSTR_R_OK)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(2)
-		if(strcat_safe(buffer, sizeof(buffer), "CD") != SFSTR_R_TOO_LONG)
+		if(UtlConcatString(buffer, sizeof(buffer), "CD") != SFSTR_R_TOO_LONG)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(3)
-		if(strcmp_safe(buffer, "ABC") != SFSTR_R_EQUAL)
+		if(UtlCompareString(buffer, "ABC") != SFSTR_R_EQUAL)
 			TEST_FAILED();
 	TEST_END
 TEST_FUNC_END
 
-TEST_FUNC_BEGIN(memcpy_safe)
+TEST_FUNC_BEGIN(UtlCopyMemory)
 	ASCCHAR buffer[4];
 	TEST_BEGIN(0)
-		if(memcpy_safe(NULL, 0, NULL, 0) != SFSTR_R_NULL)
+		if(UtlCopyMemory(NULL, 0, NULL, 0) != SFSTR_R_NULL)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(1)
-		if(memcpy_safe(buffer, sizeof(buffer), "ABC", sizeof("ABC")) != SFSTR_R_OK)
+		if(UtlCopyMemory(buffer, sizeof(buffer), "ABC", sizeof("ABC")) != SFSTR_R_OK)
 			TEST_FAILED();
-		if(strcmp_safe(buffer, "ABC") != SFSTR_R_EQUAL)
+		if(UtlCompareString(buffer, "ABC") != SFSTR_R_EQUAL)
 			TEST_FAILED();
 	TEST_END
 	TEST_BEGIN(2)
-		if(memcpy_safe(buffer, sizeof(buffer), "ABC\0DEF", sizeof("ABC\0DEF")) != SFSTR_R_TOO_LONG)
+		if(UtlCopyMemory(buffer, sizeof(buffer), "ABC\0DEF", sizeof("ABC\0DEF")) != SFSTR_R_TOO_LONG)
 			TEST_FAILED();
-		if(strcmp_safe(buffer, "ABC") != SFSTR_R_EQUAL)
+		if(UtlCompareString(buffer, "ABC") != SFSTR_R_EQUAL)
 			TEST_FAILED();
 	TEST_END
 TEST_FUNC_END
 
 BOOL
-utils_sfstr_test(void)
+UtlSfstrTest(void)
 {
-	return 	TEST(strlen_safe)
-			&& TEST(strcmp_safe)
-			&& TEST(strcpy_safe)
-			&& TEST(strcat_safe)
-			&& TEST(memcpy_safe);
+	return 	TEST(UtlGetStringLength)
+			&& TEST(UtlCompareString)
+			&& TEST(UtlCopyString)
+			&& TEST(UtlConcatString)
+			&& TEST(UtlCopyMemory);
 }
 
 #endif

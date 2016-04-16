@@ -106,51 +106,51 @@ init_window_resources(void)
 	ASCCHAR imgfile[1024];
 	IMGLBMPPtr bmpobj = NULL;
 	config_gui_get_string("CloseButton", imgfile, sizeof(imgfile));
-	bmpobj = imgl_bmp_create(imgfile);
+	bmpobj = BmpCreate(imgfile);
 	if(bmpobj != NULL)
 	{
-		img_draw_bmp_to_cimage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button);
-		imgl_bmp_destroy(bmpobj);
+		UtlConvertBmpToCommonImage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button);
+		BmpDestroy(bmpobj);
 	}
 
 	config_gui_get_string("CloseButtonHover", imgfile, sizeof(imgfile));
-	bmpobj = imgl_bmp_create(imgfile);
+	bmpobj = BmpCreate(imgfile);
 	if(bmpobj != NULL)
 	{
-		img_draw_bmp_to_cimage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button_hover);
-		imgl_bmp_destroy(bmpobj);
+		UtlConvertBmpToCommonImage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button_hover);
+		BmpDestroy(bmpobj);
 	}
 
 	config_gui_get_string("CloseButtonBlur", imgfile, sizeof(imgfile));
-	bmpobj = imgl_bmp_create(imgfile);
+	bmpobj = BmpCreate(imgfile);
 	if(bmpobj != NULL)
 	{
-		img_draw_bmp_to_cimage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button_blur);
-		imgl_bmp_destroy(bmpobj);
+		UtlConvertBmpToCommonImage(bmpobj, CLOSE_BUTTON_WIDTH, CLOSE_BUTTON_HEIGHT, &close_button_blur);
+		BmpDestroy(bmpobj);
 	}
 
 	config_gui_get_string("HiddenButton", imgfile, sizeof(imgfile));
-	bmpobj = imgl_bmp_create(imgfile);
+	bmpobj = BmpCreate(imgfile);
 	if(bmpobj != NULL)
 	{
-		img_draw_bmp_to_cimage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button);
-		imgl_bmp_destroy(bmpobj);
+		UtlConvertBmpToCommonImage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button);
+		BmpDestroy(bmpobj);
 	}
 
 	config_gui_get_string("HiddenButtonHover", imgfile, sizeof(imgfile));
-	bmpobj = imgl_bmp_create(imgfile);
+	bmpobj = BmpCreate(imgfile);
 	if(bmpobj != NULL)
 	{
-		img_draw_bmp_to_cimage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button_hover);
-		imgl_bmp_destroy(bmpobj);
+		UtlConvertBmpToCommonImage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button_hover);
+		BmpDestroy(bmpobj);
 	}
 
 	config_gui_get_string("HiddenButtonBlur", imgfile, sizeof(imgfile));
-	bmpobj = imgl_bmp_create(imgfile);
+	bmpobj = BmpCreate(imgfile);
 	if(bmpobj != NULL)
 	{
-		img_draw_bmp_to_cimage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button_blur);
-		imgl_bmp_destroy(bmpobj);
+		UtlConvertBmpToCommonImage(bmpobj, HIDDEN_BUTTON_WIDTH, HIDDEN_BUTTON_HEIGHT, &hidden_button_blur);
+		BmpDestroy(bmpobj);
 	}
 }
 

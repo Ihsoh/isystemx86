@@ -16,8 +16,8 @@
 
 extern
 void
-system_call_keyboard(	IN uint32 func,
-						IN uint32 base,
-						IN OUT struct SParams * sparams);
+_ScKbdProcess(	IN uint32 func,
+				IN uint32 base,
+				IN OUT struct SParams * sparams);
 
 #endif

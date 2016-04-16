@@ -260,7 +260,7 @@ _pad(IN OUT ASCTEXT text)
 		int32 len = _ITEM_MAX_LEN - slen;
 		int32 i;
 		for(i = 0; i < len; i++)
-			strcat_safe(text, _ITEM_MAX_LEN + 1, " ");
+			UtlConcatString(text, _ITEM_MAX_LEN + 1, " ");
 	}
 	else if(slen > _ITEM_MAX_LEN)
 	{
@@ -295,7 +295,7 @@ wmgr_window_update(IN uint32 offset)
 		if(windex < window_count)
 		{
 			ASCCHAR title[sizeof(windows[windex]->title)];
-			strcpy_safe(title, sizeof(title), windows[windex]->title);
+			UtlCopyString(title, sizeof(title), windows[windex]->title);
 			_pad(title);
 			SET_LIST_TEXT(_lst_wmgr, index, title);
 			ENABLE_BUTTON(&_lst_wmgr->buttons[index]);

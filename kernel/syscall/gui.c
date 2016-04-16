@@ -14,8 +14,22 @@
 #include "../gui.h"
 #include "../image.h"
 
+/**
+	@Function:		_ScGuiProcess
+	@Access:		Public
+	@Description:
+		GUI的系统调用处理程序。
+	@Parameters:
+		func, uint32, IN
+			功能号。
+		base, uint32, IN
+			任务的基地址。该地址为物理地址。
+		sparams, struct SParams *, IN OUT
+			系统调用参数。
+	@Return:	
+*/
 void
-system_call_gui(IN uint32 func,
+_ScGuiProcess(	IN uint32 func,
 				IN uint32 base,
 				IN OUT struct SParams * sparams)
 {

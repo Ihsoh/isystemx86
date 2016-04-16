@@ -355,7 +355,7 @@ init_cpu(void)
 void
 get_vendor_id_string(OUT int8 * buffer)
 {
-	strcpy_safe(buffer, sizeof(vendor_id_string), vendor_id_string);
+	UtlCopyString(buffer, sizeof(vendor_id_string), vendor_id_string);
 }
 
 /**
@@ -372,7 +372,7 @@ get_vendor_id_string(OUT int8 * buffer)
 void
 get_brand_string(OUT int8 * buffer)
 {
-	strcpy_safe(buffer, sizeof(brand_string), brand_string);
+	UtlCopyString(buffer, sizeof(brand_string), brand_string);
 }
 
 /**

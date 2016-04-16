@@ -199,7 +199,7 @@ main(void)
 	init_interrupt();
 
 	// 初始化PCI。
-	pci_init_devices();
+	PciInitDevices();
 
 	init_disk("VA");
 	init_disk("VB");
@@ -1654,22 +1654,22 @@ system_call(void)
 	switch(eax >> 16)
 	{
 		case SCALL_SCREEN:
-			system_call_screen(eax & 0xffff, base, sparams);
+			_ScScrProcess(eax & 0xffff, base, sparams);
 			break;
 		case SCALL_KEYBOARD:
-			system_call_keyboard(eax & 0xffff, base, sparams);
+			_ScKbdProcess(eax & 0xffff, base, sparams);
 			break;
 		case SCALL_FS:
-			system_call_fs(eax & 0xffff, base, sparams);
+			_ScFsProcess(eax & 0xffff, base, sparams);
 			break;
 		case SCALL_SYSTEM:
-			system_call_system(eax & 0xffff, base, sparams);
+			_ScSysProcess(eax & 0xffff, base, sparams);
 			break;
 		case SCALL_MOUSE:
-			system_call_mouse(eax & 0xffff, base, sparams);
+			_ScMouseProcess(eax & 0xffff, base, sparams);
 			break;
 		case SCALL_GUI:
-			system_call_gui(eax & 0xffff, base, sparams);
+			_ScGuiProcess(eax & 0xffff, base, sparams);
 			break;
 	}
 	// }
@@ -2724,7 +2724,7 @@ gp_int(void)
 						timer_tss.ds, timer_tss.fs, timer_tss.gs,
 						timer_tss.cs, timer_tss.eip,
 						timer_tss.esp);
-			strcat_safe(buffer, sizeof(buffer), buffer00);
+			UtlConcatString(buffer, sizeof(buffer), buffer00);
 			log(LOG_ERROR, buffer);
 
 			print_str_p(buffer, CC_RED);
