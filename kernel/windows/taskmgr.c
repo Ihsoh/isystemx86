@@ -42,7 +42,7 @@ static ListPtr _lst_taskmgr	= NULL;
 static uint32 _offset		= 0;
 
 /**
-	@Function:		_get_tasks
+	@Function:		_WinTskmgrGetTasks
 	@Access:		Private
 	@Description:
 		获取所有任务的ID。
@@ -55,7 +55,7 @@ static uint32 _offset		= 0;
 */
 static
 int32 *
-_get_tasks(OUT uint32 * count)
+_WinTskmgrGetTasks(OUT uint32 * count)
 {
 	static int32 tasks[MAX_TASK_COUNT];
 	if(count == NULL)
@@ -68,7 +68,7 @@ _get_tasks(OUT uint32 * count)
 }
 
 /**
-	@Function:		_control_event
+	@Function:		_WinTskmgrControlEvent
 	@Access:		Private
 	@Description:
 		控件的事件函数。
@@ -83,9 +83,9 @@ _get_tasks(OUT uint32 * count)
 */
 static
 void
-_control_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_WinTskmgrControlEvent(	IN uint32 id,
+						IN uint32 type,
+						IN void * param)
 {
 	if(id == _lst_taskmgr->id)
 	{
@@ -97,28 +97,28 @@ _control_event(	IN uint32 id,
 				case _ITEM_ID_UP:
 					if(_offset > 0)
 						_offset--;
-					taskmgr_window_update(_offset);
+					WinTskmgrUpdate(_offset);
 					break;
 				case _ITEM_ID_DOWN:
 				{
 					uint32 task_count = 0;
-					_get_tasks(&task_count);
+					_WinTskmgrGetTasks(&task_count);
 					if(_offset + _TITLE_COUNT < task_count)
 						_offset++;
-					taskmgr_window_update(_offset);
+					WinTskmgrUpdate(_offset);
 					break;
 				}
 				case _ITEM_ID_CLOSE:
-					taskmgr_window_hide();
+					WinTskmgrHide();
 					break;
 				default:
 					if(id >= _ITEM_ID_BEGIN && id <= _ITEM_ID_END)
 					{
 						uint32 tindex = _offset + id - _ITEM_ID_BEGIN;
 						uint32 task_count = 0;
-						int32 * tasks = _get_tasks(&task_count);
+						int32 * tasks = _WinTskmgrGetTasks(&task_count);
 						if(tindex < task_count)
-							task_window_show(tasks[tindex]);
+							WinTaskShow(tasks[tindex]);
 					}
 					break;
 			}
@@ -127,7 +127,7 @@ _control_event(	IN uint32 id,
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_WinTskmgrEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -140,7 +140,7 @@ _control_event(	IN uint32 id,
 */
 static
 void
-_window_event(	IN struct Window * window,
+_WinTskmgrEvent(IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -151,7 +151,7 @@ _window_event(	IN struct Window * window,
 			static int32 counter = 0;
 			if(++counter == 20)
 			{
-				taskmgr_window_update(_offset);
+				WinTskmgrUpdate(_offset);
 				counter = 0;
 			}
 			LIST(_lst_taskmgr, &window->workspace, params, TRUE);
@@ -159,14 +159,14 @@ _window_event(	IN struct Window * window,
 		}
 		case WINDOW_EVENT_WILL_CLOSE:
 		{
-			taskmgr_window_hide();
+			WinTskmgrHide();
 			break;
 		}
 	}
 }
 
 /**
-	@Function:		_pad
+	@Function:		_WinTskmgrRPadString
 	@Access:		Private
 	@Description:
 		如果字符串的长度小于_ITEM_MAX_LEN，
@@ -180,7 +180,7 @@ _window_event(	IN struct Window * window,
 */
 static
 void
-_pad(IN OUT ASCTEXT text)
+_WinTskmgrRPadString(IN OUT ASCTEXT text)
 {
 	int32 slen = (int32)strlen(text);
 	if(slen < _ITEM_MAX_LEN)
@@ -200,7 +200,7 @@ _pad(IN OUT ASCTEXT text)
 }
 
 /**
-	@Function:		taskmgr_window_init
+	@Function:		WinTskmgrInit
 	@Access:		Public
 	@Description:
 		初始化任务管理器窗口。
@@ -208,7 +208,7 @@ _pad(IN OUT ASCTEXT text)
 	@Return:
 */
 void
-taskmgr_window_init(void)
+WinTskmgrInit(void)
 {
 	_window = create_window(_WIDTH, _HEIGHT,
 							0xff222222,
@@ -216,35 +216,35 @@ taskmgr_window_init(void)
 								| WINDOW_STYLE_MINIMIZE
 								| WINDOW_STYLE_NO_WMGR,
 							_TITLE,
-							_window_event);
+							_WinTskmgrEvent);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xffffffff);
 	_lst_taskmgr = NEW(List);
-	list_init(	_lst_taskmgr, 0,
+	CtrlListInit(	_lst_taskmgr, 0,
 				_ITEM_COUNT,
 				0, 0,
 				"",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_control_event);
+				_WinTskmgrControlEvent);
 	ASCCHAR text[MAX_BUTTON_TEXT_LEN + 1];
 	UtlCopyString(text, sizeof(text), "Up");
-	_pad(text);
+	_WinTskmgrRPadString(text);
 	SET_LIST_TEXT(_lst_taskmgr, _ITEM_ID_UP, text);
 	UtlCopyString(text, sizeof(text), "Down");
-	_pad(text);
+	_WinTskmgrRPadString(text);
 	SET_LIST_TEXT(_lst_taskmgr, _ITEM_ID_DOWN, text);
 	UtlCopyString(text, sizeof(text), "Close");
-	_pad(text);
+	_WinTskmgrRPadString(text);
 	SET_LIST_TEXT(_lst_taskmgr, _ITEM_ID_CLOSE, text);
 	uint32 ui;
 	for(ui = 0; ui < _lst_taskmgr->count; ui++)
 		_lst_taskmgr->buttons[ui].style = BUTTON_STYLE_REFRESH;
 	for(ui = _ITEM_ID_BEGIN; ui <= _ITEM_ID_END; ui++)
 		_lst_taskmgr->buttons[ui].bgcolor = 0xff333333;
-	taskmgr_window_update(_offset);
+	WinTskmgrUpdate(_offset);
 }
 
 /**
-	@Function:		taskmgr_window_show
+	@Function:		WinTskmgrShow
 	@Access:		Public
 	@Description:
 		显示任务管理器窗口。
@@ -252,17 +252,17 @@ taskmgr_window_init(void)
 	@Return:
 */
 void
-taskmgr_window_show(void)
+WinTskmgrShow(void)
 {
 	if(_window == NULL)
 		return;
 	_window->state = WINDOW_STATE_SHOW;
 	set_top_window(_window);
-	wmgr_window_update(0);
+	WinWmgrUpdate(0);
 }
 
 /**
-	@Function:		taskmgr_window_hide
+	@Function:		WinTskmgrHide
 	@Access:		Public
 	@Description:
 		隐藏任务管理器窗口。
@@ -270,13 +270,13 @@ taskmgr_window_show(void)
 	@Return:
 */
 void
-taskmgr_window_hide(void)
+WinTskmgrHide(void)
 {
 	_window->state = WINDOW_STATE_HIDDEN;
 }
 
 /**
-	@Function:		taskmgr_window_update
+	@Function:		WinTskmgrUpdate
 	@Access:		Public
 	@Description:
 		更新任务管理器窗口显示的内容。
@@ -288,10 +288,10 @@ taskmgr_window_hide(void)
 	@Return:
 */
 void
-taskmgr_window_update(IN uint32 offset)
+WinTskmgrUpdate(IN uint32 offset)
 {
 	uint32 task_count = 0;
-	int32 * tasks = _get_tasks(&task_count);
+	int32 * tasks = _WinTskmgrGetTasks(&task_count);
 	uint32 index;
 	for(index = _ITEM_ID_BEGIN; index <= _ITEM_ID_END; index++)
 	{
@@ -306,7 +306,7 @@ taskmgr_window_update(IN uint32 offset)
 			if(task != NULL)
 			{
 				UtlConcatString(title, sizeof(title), task->name);
-				_pad(title);
+				_WinTskmgrRPadString(title);
 			}
 			SET_LIST_TEXT(_lst_taskmgr, index, title);
 			ENABLE_BUTTON(&_lst_taskmgr->buttons[index]);
@@ -315,7 +315,7 @@ taskmgr_window_update(IN uint32 offset)
 		{
 			ASCCHAR title[MAX_BUTTON_TEXT_LEN + 1];
 			title[0] = '\0';
-			_pad(title);
+			_WinTskmgrRPadString(title);
 			SET_LIST_TEXT(	_lst_taskmgr,
 							index,
 							title);

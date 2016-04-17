@@ -11,15 +11,9 @@
 #include "types.h"
 
 BOOL
-acpi_init(void);
+AcpiInit(void);
 
 BOOL
-acpi_power_off(void);
-
-BOOL
-apic_stop_timer(void);
-
-BOOL
-apic_start_timer(void);
+AcpiPowerOff(void);
 
 #endif

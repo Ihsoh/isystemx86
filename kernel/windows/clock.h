@@ -12,10 +12,10 @@
 
 extern
 BOOL
-init_clock_window(void);
+WinClockInit(void);
 
 extern
 void
-show_clock_window(void);
+WinClockShow(void);
 
 #endif

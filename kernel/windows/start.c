@@ -41,7 +41,7 @@ static WindowPtr _window	= NULL;
 static ListPtr _lst_start	= NULL;
 
 /**
-	@Function:		_pad
+	@Function:		_WinStartRPadString
 	@Access:		Private
 	@Description:
 		如果字符串的长度小于MESSAGE_BOX_MAX_CHAR，
@@ -53,7 +53,7 @@ static ListPtr _lst_start	= NULL;
 */
 static
 void
-_pad(IN OUT ASCTEXT text)
+_WinStartRPadString(IN OUT ASCTEXT text)
 {
 	int32 len = (int32)MESSAGE_BOX_MAX_CHAR - (int32)strlen(text);
 	int32 i;
@@ -62,7 +62,7 @@ _pad(IN OUT ASCTEXT text)
 }
 
 /**
-	@Function:		_control_event
+	@Function:		_WinStartControlEvent
 	@Access:		Private
 	@Description:
 		控件的事件函数。
@@ -77,9 +77,9 @@ _pad(IN OUT ASCTEXT text)
 */
 static
 void
-_control_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_WinStartControlEvent(	IN uint32 id,
+						IN uint32 type,
+						IN void * param)
 {
 	if(id == _lst_start->id)
 	{
@@ -97,14 +97,14 @@ _control_event(	IN uint32 id,
 					config_system_get_string("Version", version, sizeof(version));
 					config_system_get_string("Group", group, sizeof(group));
 					ASCCHAR buffer[KB(1)];
-					_pad(name);
-					_pad(platform);
-					_pad(version);
+					_WinStartRPadString(name);
+					_WinStartRPadString(platform);
+					_WinStartRPadString(version);
 					UtlCopyString(buffer, sizeof(buffer), name);
 					UtlConcatString(buffer, sizeof(buffer), platform);
 					UtlConcatString(buffer, sizeof(buffer), version);
 					UtlConcatString(buffer, sizeof(buffer), group);
-					message_window_show("About System",
+					WinMsgShow("About System",
 										buffer,
 										MESSAGE_WINDOW_STYLE_CENTER | MESSAGE_WINDOW_STYLE_TOP,
 										0, 0,
@@ -113,26 +113,26 @@ _control_event(	IN uint32 id,
 				}
 				case _ITEM_ID_TASKMGR:
 				{
-					taskmgr_window_show();
+					WinTskmgrShow();
 					break;
 				}
 				case _ITEM_ID_RUN:
 				{
-					run_window_show();
+					WinRunShow();
 					break;
 				}
 				case _ITEM_ID_POWER:
-					power_window_show();
+					WinPwrShow();
 					break;
 				case _ITEM_ID_CLOSE:
-					start_window_hide();
+					WinStartHide();
 					break;		
 			}
 	}
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_WinStartEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -145,7 +145,7 @@ _control_event(	IN uint32 id,
 */
 static
 void
-_window_event(	IN struct Window * window,
+_WinStartEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -154,11 +154,11 @@ _window_event(	IN struct Window * window,
 		LIST(_lst_start, &window->workspace, params, TRUE);
 	}
 	else if(params->event_type == WINDOW_EVENT_UNFOCUS)
-		start_window_hide();
+		WinStartHide();
 }
 
 /**
-	@Function:		start_window_init
+	@Function:		WinStartInit
 	@Access:		Public
 	@Description:
 		初始化开始菜单。
@@ -168,7 +168,7 @@ _window_event(	IN struct Window * window,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-start_window_init(void)
+WinStartInit(void)
 {
 	_window = create_window(_WIDTH, _HEIGHT,
 							0xff222222,
@@ -176,15 +176,15 @@ start_window_init(void)
 								| WINDOW_STYLE_NO_WMGR
 								| WINDOW_STYLE_NO_BORDER,
 							"Start",
-							_window_event);
+							_WinStartEvent);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
 	_lst_start = NEW(List);
-	list_init(	_lst_start, 0,
+	CtrlListInit(	_lst_start, 0,
 				_ITEM_COUNT,
 				0, 0,
 				"",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_control_event);
+				_WinStartControlEvent);
 	SET_LIST_TEXT(_lst_start, _ITEM_ID_SETTING,		"Setting           > ");
 	SET_LIST_TEXT(_lst_start, _ITEM_ID_EXPLORER,	"Explorer          > ");
 	SET_LIST_TEXT(_lst_start, _ITEM_ID_POWER,		"Power             > ");
@@ -198,7 +198,7 @@ start_window_init(void)
 }
 
 /**
-	@Function:		start_window_show
+	@Function:		WinStartShow
 	@Access:		Public
 	@Description:
 		显示开始菜单。
@@ -212,8 +212,8 @@ start_window_init(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-start_window_show(	IN int32 x,
-					IN int32 taskbar_y)
+WinStartShow(	IN int32 x,
+				IN int32 taskbar_y)
 {
 	_window->x = x;
 	_window->y = taskbar_y - _HEIGHT;
@@ -223,7 +223,7 @@ start_window_show(	IN int32 x,
 }
 
 /**
-	@Function:		start_window_hide
+	@Function:		WinStartHide
 	@Access:		Public
 	@Description:
 		隐藏开始菜单。
@@ -233,7 +233,7 @@ start_window_show(	IN int32 x,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-start_window_hide(void)
+WinStartHide(void)
 {
 	_window->state = WINDOW_STATE_HIDDEN;
 	return TRUE;

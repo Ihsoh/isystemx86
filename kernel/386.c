@@ -11,7 +11,7 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		outb
+	@Function:		KnlOutByte
 	@Access:		Public
 	@Description:
 		向指定端口输出一个字节的数据。
@@ -23,7 +23,7 @@
 	@Return:		
 */
 void
-outb(	IN uint16 port,
+KnlOutByte(	IN uint16 port,
 		IN uint8 data)
 {
 	asm volatile (
@@ -37,7 +37,7 @@ outb(	IN uint16 port,
 }
 
 /**
-	@Function:		inb
+	@Function:		KnlInByte
 	@Access:		Public
 	@Description:
 		从指定端口读取一个字节的数据。
@@ -49,7 +49,7 @@ outb(	IN uint16 port,
 			数据。	
 */
 uint8 
-inb(IN uint16 port)
+KnlInByte(IN uint16 port)
 {
 	uint8 data;
 	asm volatile ("inb	%%dx, %%al"
@@ -59,7 +59,7 @@ inb(IN uint16 port)
 }
 
 /**
-	@Function:		outw
+	@Function:		KnlOutWord
 	@Access:		Public
 	@Description:
 		向指定端口输出一个字的数据。
@@ -71,7 +71,7 @@ inb(IN uint16 port)
 	@Return:		
 */
 void 
-outw(	IN uint16 port,
+KnlOutWord(	IN uint16 port,
 		IN uint16 data)
 {
 	asm volatile (
@@ -85,7 +85,7 @@ outw(	IN uint16 port,
 }
 
 /**
-	@Function:		inw
+	@Function:		KnlInWord
 	@Access:		Public
 	@Description:
 		从指定端口读取一个字的数据。
@@ -97,7 +97,7 @@ outw(	IN uint16 port,
 			数据。	
 */
 uint16 
-inw(IN uint16 port)
+KnlInWord(IN uint16 port)
 {
 	uint16 data;
 	asm volatile ("inw	%%dx, %%ax"
@@ -107,7 +107,7 @@ inw(IN uint16 port)
 }
 
 /**
-	@Function:		outl
+	@Function:		KnlOutLong
 	@Access:		Public
 	@Description:
 		向指定端口输出一个双字的数据。
@@ -119,8 +119,8 @@ inw(IN uint16 port)
 	@Return:		
 */
 void 
-outl(	IN uint16 port,
-		IN uint32 data)
+KnlOutLong(	IN uint16 port,
+			IN uint32 data)
 {
 	asm volatile (
 		"outl	%%eax, %%dx\n\t"
@@ -133,7 +133,7 @@ outl(	IN uint16 port,
 }
 
 /**
-	@Function:		inl
+	@Function:		KnlInLong
 	@Access:		Public
 	@Description:
 		从指定端口读取一个双字的数据。
@@ -145,7 +145,7 @@ outl(	IN uint16 port,
 			数据。	
 */
 uint32
-inl(IN uint16 port)
+KnlInLong(IN uint16 port)
 {
 	uint32 data;
 	asm volatile ("inl	%%dx, %%eax"
@@ -155,7 +155,7 @@ inl(IN uint16 port)
 }
 
 /**
-	@Function:		outsb
+	@Function:		KnlOutBytes
 	@Access:		Public
 	@Description:
 		向指定端口输出指定数量的字节的数据。
@@ -171,20 +171,20 @@ inl(IN uint16 port)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-outsb(	IN uint16 port, 
-		IN uint8 * buffer,
-		IN uint32 count)
+KnlOutBytes(IN uint16 port, 
+			IN uint8 * buffer,
+			IN uint32 count)
 {
 	if(buffer == NULL)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)
-		outb(port, buffer[ui]);
+		KnlOutByte(port, buffer[ui]);
 	return TRUE;
 }
 
 /**
-	@Function:		insb
+	@Function:		KnlInBytes
 	@Access:		Public
 	@Description:
 		从指定端口读取指定数量的字节的数据。
@@ -200,20 +200,20 @@ outsb(	IN uint16 port,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-insb(	IN uint16 port,
-		OUT uint8 * buffer,
-		IN uint32 count)
+KnlInBytes(	IN uint16 port,
+			OUT uint8 * buffer,
+			IN uint32 count)
 {
 	if(buffer == NULL)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)
-		buffer[ui] = inb(port);
+		buffer[ui] = KnlInByte(port);
 	return TRUE;
 }
 
 /**
-	@Function:		outsw
+	@Function:		KnlOutWords
 	@Access:		Public
 	@Description:
 		向指定端口输出指定数量的字的数据。
@@ -229,20 +229,20 @@ insb(	IN uint16 port,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-outsw(	IN uint16 port, 
-		IN uint16 * buffer,
-		IN uint32 count)
+KnlOutWords(IN uint16 port, 
+			IN uint16 * buffer,
+			IN uint32 count)
 {
 	if(buffer == NULL)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)
-		outw(port, buffer[ui]);
+		KnlOutWord(port, buffer[ui]);
 	return TRUE;
 }
 
 /**
-	@Function:		insw
+	@Function:		KnlInWords
 	@Access:		Public
 	@Description:
 		从指定端口读取指定数量的字的数据。
@@ -258,20 +258,20 @@ outsw(	IN uint16 port,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-insw(	IN uint16 port,
-		OUT uint16 * buffer,
-		IN uint32 count)
+KnlInWords(	IN uint16 port,
+			OUT uint16 * buffer,
+			IN uint32 count)
 {
 	if(buffer == NULL)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)
-		buffer[ui] = inw(port);
+		buffer[ui] = KnlInWord(port);
 	return TRUE;
 }
 
 /**
-	@Function:		outsl
+	@Function:		KnlOutLongs
 	@Access:		Public
 	@Description:
 		向指定端口输出指定数量的双字的数据。
@@ -287,20 +287,20 @@ insw(	IN uint16 port,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-outsl(	IN uint16 port, 
-		IN uint32 * buffer,
-		IN uint32 count)
+KnlOutLongs(IN uint16 port, 
+			IN uint32 * buffer,
+			IN uint32 count)
 {
 	if(buffer == NULL)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)
-		outl(port, buffer[ui]);
+		KnlOutLong(port, buffer[ui]);
 	return TRUE;
 }
 
 /**
-	@Function:		insl
+	@Function:		KnlInLongs
 	@Access:		Public
 	@Description:
 		从指定端口读取指定数量的双字的数据。
@@ -316,20 +316,20 @@ outsl(	IN uint16 port,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-insl(	IN uint16 port,
-		OUT uint32 * buffer,
-		IN uint32 count)
+KnlInLongs(	IN uint16 port,
+			OUT uint32 * buffer,
+			IN uint32 count)
 {
 	if(buffer == NULL)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)
-		buffer[ui] = inl(port);
+		buffer[ui] = KnlInLong(port);
 	return TRUE;
 }
 
 /**
-	@Function:		get_msr
+	@Function:		KnlGetCpuMSR
 	@Access:		Public
 	@Description:
 		读取 MSR 寄存器。
@@ -343,9 +343,9 @@ insl(	IN uint16 port,
 	@Return:
 */
 void
-get_msr(IN uint32 msr,
-		OUT uint32 * lo,
-		OUT uint32 * hi)
+KnlGetCpuMSR(	IN uint32 msr,
+				OUT uint32 * lo,
+				OUT uint32 * hi)
 {
 	asm volatile("pushal");
 	asm volatile(
@@ -356,7 +356,7 @@ get_msr(IN uint32 msr,
 }
 
 /**
-	@Function:		set_msr
+	@Function:		KnlSetCpuMSR
 	@Access:		Public
 	@Description:
 		设置 MSR 寄存器。
@@ -370,9 +370,9 @@ get_msr(IN uint32 msr,
 	@Return:
 */
 void
-set_msr(IN uint32 msr,
-		IN uint32 lo,
-		IN uint32 hi)
+KnlSetCpuMSR(	IN uint32 msr,
+				IN uint32 lo,
+				IN uint32 hi)
 {
 	asm volatile("pushal");
 	asm volatile(
@@ -383,7 +383,7 @@ set_msr(IN uint32 msr,
 }
 
 /**
-	@Function:		set_int
+	@Function:		KnlSetInterrupt
 	@Access:		Public
 	@Description:
 		设置相应中断处理函数。
@@ -396,8 +396,8 @@ set_msr(IN uint32 msr,
 	@Return:	
 */
 void
-set_int(IN uint8 n,
-		IN uint32 addr)
+KnlSetInterrupt(IN uint8 n,
+				IN uint32 addr)
 {
 	struct Gate gate;
 	gate.offsetl = (uint16)(addr & 0x0000ffff);
@@ -405,11 +405,11 @@ set_int(IN uint8 n,
 	gate.dcount = 0;
 	gate.selector = KERNEL_C_DESC | RPL0;
 	gate.attr = AT386TGATE | DPL3;
-	set_gate_to_idt(n, &gate);
+	KnlSetGateToIDT(n, &gate);
 }
 
 /**
-	@Function:		set_int_intrgate
+	@Function:		KnlSetInterruptGate
 	@Access:		Public
 	@Description:
 		设置相应中断处理函数。
@@ -422,7 +422,7 @@ set_int(IN uint8 n,
 	@Return:	
 */
 void
-set_int_intrgate(	IN uint8 n,
+KnlSetInterruptGate(IN uint8 n,
 					IN uint32 addr)
 {
 	struct Gate gate;
@@ -431,11 +431,11 @@ set_int_intrgate(	IN uint8 n,
 	gate.dcount = 0;
 	gate.selector = KERNEL_C_DESC | RPL0;
 	gate.attr = AT386IGATE | DPL3;
-	set_gate_to_idt(n, &gate);
+	KnlSetGateToIDT(n, &gate);
 }
 
 /**
-	@Function:		set_desc_to_gdt
+	@Function:		KnlSetDescToGDT
 	@Access:		Public
 	@Description:
 		设置GDT中的描述符。
@@ -449,7 +449,7 @@ set_int_intrgate(	IN uint8 n,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-set_desc_to_gdt(IN uint32 index,
+KnlSetDescToGDT(IN uint32 index,
 				IN uint8 * desc)
 {
 	if(index >= MAX_DESC_COUNT || desc == NULL)
@@ -464,7 +464,7 @@ set_desc_to_gdt(IN uint32 index,
 }
 
 /**
-	@Function:		get_desc_from_gdt
+	@Function:		KnlGetDescFromGDT
 	@Access:		Public
 	@Description:
 		获取GDT中的描述符。
@@ -478,7 +478,7 @@ set_desc_to_gdt(IN uint32 index,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-get_desc_from_gdt(	IN uint32 index, 
+KnlGetDescFromGDT(	IN uint32 index, 
 					OUT uint8 * desc)
 {
 	if(index >= MAX_DESC_COUNT || desc == NULL)
@@ -493,7 +493,7 @@ get_desc_from_gdt(	IN uint32 index,
 }
 
 /**
-	@Function:		set_gate_to_idt
+	@Function:		KnlSetGateToIDT
 	@Access:		Public
 	@Description:
 		设置IDT中的门描述符。
@@ -507,7 +507,7 @@ get_desc_from_gdt(	IN uint32 index,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-set_gate_to_idt(IN uint32 index, 
+KnlSetGateToIDT(IN uint32 index, 
 				IN uint8 * gate)
 {
 	if(index >= MAX_DESC_COUNT || gate == NULL)
@@ -522,7 +522,7 @@ set_gate_to_idt(IN uint32 index,
 }
 
 /**
-	@Function:		get_gate_from_idt
+	@Function:		KnlGetGateFromIDT
 	@Access:		Public
 	@Description:
 		获取IDT中的门描述符。
@@ -536,7 +536,7 @@ set_gate_to_idt(IN uint32 index,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-get_gate_from_idt(	IN uint32 index,
+KnlGetGateFromIDT(	IN uint32 index,
 					OUT uint8 * gate)
 {
 	if(index >= MAX_DESC_COUNT || gate == NULL)
@@ -551,7 +551,7 @@ get_gate_from_idt(	IN uint32 index,
 }
 
 /**
-	@Function:		reset_cpu
+	@Function:		KnlResetCpu
 	@Access:		Public
 	@Description:
 		重置CPU。
@@ -559,7 +559,7 @@ get_gate_from_idt(	IN uint32 index,
 	@Return:
 */
 void
-reset_cpu(void)
+KnlResetCpu(void)
 {
 	asm volatile (
 		"wait_ib:\n\t"
@@ -573,7 +573,7 @@ reset_cpu(void)
 }
 
 /**
-	@Function:		halt_cpu
+	@Function:		KnlHaltCpu
 	@Access:		Public
 	@Description:
 		停止CPU。
@@ -581,57 +581,9 @@ reset_cpu(void)
 	@Return:
 */
 void
-halt_cpu(void)
+KnlHaltCpu(void)
 {
 	asm volatile (
 		"cli\n\t"
 		"hlt\n\t");
-}
-
-void
-pause(void)
-{
-	uint32 delay_count = 0x00010000;
-	while(--delay_count)
-		asm volatile (
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t"
-			"pause\n\t");
 }

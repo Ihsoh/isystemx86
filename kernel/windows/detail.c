@@ -21,7 +21,7 @@ static ASCCHAR path[1024];
 
 static
 void
-_detail_window_event(IN struct Window * window,
+_WinDetailEvent(	IN struct Window * window,
 					IN struct WindowEventParams * params)
 {
 	if(params->event_type == WINDOW_EVENT_PAINT)
@@ -30,27 +30,27 @@ _detail_window_event(IN struct Window * window,
 }
 
 BOOL
-detail_window_init(void)
+WinDetailInit(void)
 {
 	_window = create_window(_WIDTH,
 							_HEIGHT,
 							0xffffffff,
 							WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_NO_WMGR,
 							"Detail",
-							_detail_window_event);
+							_WinDetailEvent);
 	if(_window == NULL)
 		return FALSE;
 	return TRUE;
 }
 
 BOOL
-detail_window_show(IN CASCTEXT path)
+WinDetailShow(IN CASCTEXT path)
 {
 	if(_window == NULL || strlen(path) >= 1024)
 		return FALSE;
 	if(!Ifs1Exists(path))
 	{
-		message_window_show(	"The path does not exists!",
+		WinMsgShow(	"The path does not exists!",
 								"The path does not exists!",
 								MESSAGE_WINDOW_STYLE_CENTER
 								| MESSAGE_WINDOW_STYLE_TOP,

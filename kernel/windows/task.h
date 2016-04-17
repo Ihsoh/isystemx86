@@ -13,6 +13,6 @@
 
 extern
 void
-task_window_show(int32 tid);
+WinTaskShow(int32 tid);
 
 #endif

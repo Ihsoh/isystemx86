@@ -24,13 +24,13 @@ static
 void
 serial_enable(IN uint16 port)
 {
-	outb(port + 1, 0x00);    // Disable all interrupts
-	outb(port + 3, 0x80);    // Enable DLAB (set baud rate divisor)
-	outb(port + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
-	outb(port + 1, 0x00);    //                  (hi byte)
-	outb(port + 3, 0x03);    // 8 bits, no parity, one stop bit
-	outb(port + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
-	outb(port + 4, 0x0B);    // IRQs enabled, RTS/DSR set
+	KnlOutByte(port + 1, 0x00);    // Disable all interrupts
+	KnlOutByte(port + 3, 0x80);    // Enable DLAB (set baud rate divisor)
+	KnlOutByte(port + 0, 0x03);    // Set divisor to 3 (lo byte) 38400 baud
+	KnlOutByte(port + 1, 0x00);    //                  (hi byte)
+	KnlOutByte(port + 3, 0x03);    // 8 bits, no parity, one stop bit
+	KnlOutByte(port + 2, 0xC7);    // Enable FIFO, clear them, with 14-byte threshold
+	KnlOutByte(port + 4, 0x0B);    // IRQs enabled, RTS/DSR set
 }
 
 /**
@@ -52,8 +52,8 @@ BOOL
 serial_write(	IN uint16 port,
 				IN int8 c)
 {
-	while(!(inb(port + 5) & 0x20));
-	outb(port, c);
+	while(!(KnlInByte(port + 5) & 0x20));
+	KnlOutByte(port, c);
 	if(c == '\n')
 		serial_write(port, '\r');
 	return TRUE;
@@ -106,7 +106,7 @@ serial_write_buffer(IN uint16 port,
 BOOL
 serial_has_data(IN uint16 port)
 {
-	return (inb(port + 5) & 1) != 0;
+	return (KnlInByte(port + 5) & 1) != 0;
 }
 
 /**
@@ -132,7 +132,7 @@ serial_read(IN uint16 port,
 {
 	if(serial_has_data(port))
 	{
-		*c = inb(port);
+		*c = KnlInByte(port);
 		return TRUE;
 	}
 	else

@@ -14,14 +14,14 @@
 
 extern
 BOOL
-power_window_init(void);
+WinPwrInit(void);
 
 extern
 BOOL
-power_window_show(void);
+WinPwrShow(void);
 
 extern
 BOOL
-power_window_hide(void);
+WinPwrHide(void);
 
 #endif

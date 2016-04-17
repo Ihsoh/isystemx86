@@ -59,7 +59,7 @@
 #define	_MAX_DEVICE_COUNT	4
 #define	_MAX_PORT_COUNT		16
 
-typedef struct 
+typedef struct
 {
 	HBA_PORT *	port;
 	HBA_MEM *	abar;
@@ -73,36 +73,36 @@ static void * _ahci_base = NULL;
 
 static
 HBA_MEM *
-_get_abar_by_port(IN HBA_PORT * port);
+_AhciGetAbarByPort(IN HBA_PORT * port);
 
 static
 void
-_check_all_devices(void);
+_AhciCheckAllDevices(void);
 
 static
 int32
-_check_type(IN HBA_PORT * port);
+_AhciCheckType(IN HBA_PORT * port);
 
 static
 void
-_start_cmd(IN OUT HBA_PORT * port);
+_AhciStartCommand(IN OUT HBA_PORT * port);
 
 static
 void
-_stop_cmd(IN OUT HBA_PORT * port);
+_AhciStopCommand(IN OUT HBA_PORT * port);
 
 static
 void
-_port_rebase(	IN OUT HBA_PORT * port,
+_AhciRebasePort(IN OUT HBA_PORT * port,
 				IN uint32 portno);
 
 static
 void
-_probe_port(void);
+_AhciProbePort(void);
 
 static
 int32
-_find_cmdslot(IN HBA_PORT * port);
+_AhciFindCommandSlot(IN HBA_PORT * port);
 
 #define	MAX_RETRY		0x100
 #define	MAX_LOCK_RETRY	0x00100000
@@ -117,7 +117,7 @@ static BOOL _lock = FALSE;
 static int32 _lock_tid	= _LOCK_TID_NONE;
 
 /**
-	@Function:		_ahci_lock
+	@Function:		_AhciLock
 	@Access:		Private
 	@Description:
 		锁住AHCI驱动。
@@ -128,7 +128,7 @@ static int32 _lock_tid	= _LOCK_TID_NONE;
 */
 static
 BOOL
-_ahci_lock(void)
+_AhciLock(void)
 {
 	// 在规定重试次数内尝试获取锁。
 	int32 i;
@@ -153,7 +153,7 @@ _ahci_lock(void)
 }
 
 /**
-	@Function:		_ahci_unlock
+	@Function:		_AhciUnlock
 	@Access:		Private
 	@Description:
 		解锁AHCI驱动。
@@ -162,14 +162,14 @@ _ahci_lock(void)
 */
 static
 void
-_ahci_unlock(void)
+_AhciUnlock(void)
 {
 	_lock = FALSE;
 	_lock_tid = _LOCK_TID_NONE;
 }
 
 /**
-	@Function:		ahci_locked
+	@Function:		AhciIsLocked
 	@Access:		Public
 	@Description:
 		获取AHCI驱动的锁的状态。
@@ -179,13 +179,13 @@ _ahci_unlock(void)
 			返回TRUE则代表AHCI驱动的锁被锁定中。
 */
 BOOL
-ahci_locked(void)
+AhciIsLocked(void)
 {
 	return _lock;
 }
 
 /**
-	@Function:		ahci_lock_tid
+	@Function:		AhciGetLockTid
 	@Access:		Public
 	@Description:
 		获取正在占用AHCI驱动的任务ID。
@@ -195,13 +195,13 @@ ahci_locked(void)
 			正在占用AHCI驱动的任务ID。
 */
 int32
-ahci_lock_tid(void)
+AhciGetLockTid(void)
 {
 	return _lock_tid;
 }
 
 /**
-	@Function:		ahci_attempt_to_unlock
+	@Function:		AhciAttemptToUnlock
 	@Access:		Public
 	@Description:
 		尝试解除AHCI驱动的锁。
@@ -211,14 +211,14 @@ ahci_lock_tid(void)
 	@Return:
 */
 void
-ahci_attempt_to_unlock(IN int32 tid)
+AhciAttemptToUnlock(IN int32 tid)
 {
 	if(tid == _lock_tid)
-		_ahci_unlock();
+		_AhciUnlock();
 }
 
 /**
-	@Function:		ahci_port_count
+	@Function:		AhciGetPortCount
 	@Access:		Public
 	@Description:
 		获取AHCI端口的数量。
@@ -228,13 +228,13 @@ ahci_attempt_to_unlock(IN int32 tid)
 			AHCI端口的数量。
 */
 uint32
-ahci_port_count(void)
+AhciGetPortCount(void)
 {
 	return _prtcnt;
 }
 
 /**
-	@Function:		ahci_port
+	@Function:		AhciGetPort
 	@Access:		Public
 	@Description:
 		通过索引获取AHCI端口。
@@ -246,7 +246,7 @@ ahci_port_count(void)
 			指向AHCI端口对象的指针。
 */
 HBA_PORT *
-ahci_port(IN uint32 index)
+AhciGetPort(IN uint32 index)
 {
 	if(index >= _prtcnt)
 		return NULL;
@@ -254,7 +254,7 @@ ahci_port(IN uint32 index)
 }
 
 /**
-	@Function:		_get_abar_by_port
+	@Function:		_AhciGetAbarByPort
 	@Access:		Private
 	@Description:
 		获取AHCI端口的AHCI Base Address。
@@ -267,7 +267,7 @@ ahci_port(IN uint32 index)
 */
 static
 HBA_MEM *
-_get_abar_by_port(IN HBA_PORT * port)
+_AhciGetAbarByPort(IN HBA_PORT * port)
 {
 	uint32 ui;
 	for(ui = 0; ui < _prtcnt; ui++)
@@ -277,7 +277,7 @@ _get_abar_by_port(IN HBA_PORT * port)
 }
 
 /**
-	@Function:		_check_all_devices
+	@Function:		_AhciCheckAllDevices
 	@Access:		Private
 	@Description:
 		获取所有AHCI设备。
@@ -286,7 +286,7 @@ _get_abar_by_port(IN HBA_PORT * port)
 */
 static
 void
-_check_all_devices(void)
+_AhciCheckAllDevices(void)
 {
 	_devcnt = 0;
 	uint32 count = PciGetDeviceCount();
@@ -303,7 +303,7 @@ _check_all_devices(void)
 }
 
 /**
-	@Function:		_check_type
+	@Function:		_AhciCheckType
 	@Access:		Private
 	@Description:
 		检查AHCI设备的类型。
@@ -315,7 +315,7 @@ _check_all_devices(void)
 */
 static
 int32
-_check_type(IN HBA_PORT * port)
+_AhciCheckType(IN HBA_PORT * port)
 {
 	DWORD ssts = port->ssts;
 	BYTE ipm = (ssts >> 8) & 0x0f;
@@ -342,7 +342,7 @@ _check_type(IN HBA_PORT * port)
 }
 
 /**
-	@Function:		_start_cmd
+	@Function:		_AhciStartCommand
 	@Access:		Private
 	@Description:
 		启动命令执行引擎。
@@ -353,7 +353,7 @@ _check_type(IN HBA_PORT * port)
 */
 static
 void
-_start_cmd(IN OUT HBA_PORT * port)
+_AhciStartCommand(IN OUT HBA_PORT * port)
 {
 	// 等待CR被清除。如果未被清除，则代表命令列表运行中。
 	while (port->cmd & HBA_PxCMD_CR);
@@ -364,7 +364,7 @@ _start_cmd(IN OUT HBA_PORT * port)
 }
 
 /**
-	@Function:		_stop_cmd
+	@Function:		_AhciStopCommand
 	@Access:		Private
 	@Description:
 		停止命令执行引擎。
@@ -375,7 +375,7 @@ _start_cmd(IN OUT HBA_PORT * port)
 */
 static
 void
-_stop_cmd(IN OUT HBA_PORT * port)
+_AhciStopCommand(IN OUT HBA_PORT * port)
 {
 	// 清除ST，关闭命令执行。
 	port->cmd &= ~HBA_PxCMD_ST;
@@ -395,7 +395,7 @@ _stop_cmd(IN OUT HBA_PORT * port)
 }
 
 /**
-	@Function:		_ahci_sector_count
+	@Function:		_AhciGetSectorCount
 	@Access:		Private
 	@Description:
 		获取扇区数。
@@ -408,7 +408,7 @@ _stop_cmd(IN OUT HBA_PORT * port)
 */
 static
 uint64
-_ahci_sector_count(IN OUT HBA_PORT * port)
+_AhciGetSectorCount(IN OUT HBA_PORT * port)
 {
 	// 用于保存ATA_CMD_IDENTIFY命令的结果。
 	uint8 id_buf[ATA_ID_SIZE];
@@ -416,7 +416,7 @@ _ahci_sector_count(IN OUT HBA_PORT * port)
 	uint16 * buf = (uint16 *)id_buf;
 
 	// 获取空闲的命令槽并初始化命令头。
-	int32 slot = _find_cmdslot(port);
+	int32 slot = _AhciFindCommandSlot(port);
 	HBA_CMD_HEADER * cmdheader = (HBA_CMD_HEADER *)port->clb;
 	cmdheader += slot;
 	cmdheader->cfl = sizeof(FIS_REG_H2D) / sizeof(DWORD);
@@ -474,7 +474,7 @@ _ahci_sector_count(IN OUT HBA_PORT * port)
 }
 
 /**
-	@Function:		ahci_sector_count
+	@Function:		AhciGetSectorCount
 	@Access:		Public
 	@Description:
 		获取扇区数。
@@ -486,20 +486,20 @@ _ahci_sector_count(IN OUT HBA_PORT * port)
 			扇区数。
 */
 uint64
-ahci_sector_count(IN uint32 portno)
+AhciGetSectorCount(IN uint32 portno)
 {
-	HBA_PORT * port = ahci_port(portno);
+	HBA_PORT * port = AhciGetPort(portno);
 	if(port == NULL)
 		return 0;
-	if(!_ahci_lock())
+	if(!_AhciLock())
 		return 0;
-	uint32 sector_count = _ahci_sector_count(port);
-	_ahci_unlock();
+	uint32 sector_count = _AhciGetSectorCount(port);
+	_AhciUnlock();
 	return sector_count;
 }
 
 /**
-	@Function:		_port_rebase
+	@Function:		_AhciRebasePort
 	@Access:		Private
 	@Description:
 		重置AHCI端口的地址。
@@ -512,10 +512,10 @@ ahci_sector_count(IN uint32 portno)
 */
 static
 void
-_port_rebase(	IN OUT HBA_PORT * port,
+_AhciRebasePort(	IN OUT HBA_PORT * port,
 				IN uint32 portno)
 {
-	_stop_cmd(port);	// Stop command engine
+	_AhciStopCommand(port);	// Stop command engine
  
 	uint32 fis_off, tmp_off;
 	
@@ -553,11 +553,11 @@ _port_rebase(	IN OUT HBA_PORT * port,
 		memset((void *)cmdheader[ui].ctba, 0, 256);
 	}
  
-	_start_cmd(port);	// Start command engine
+	_AhciStartCommand(port);	// Start command engine
 }
 
 /**
-	@Function:		_probe_port
+	@Function:		_AhciProbePort
 	@Access:		Private
 	@Description:
 		探测AHCI端口。
@@ -566,7 +566,7 @@ _port_rebase(	IN OUT HBA_PORT * port,
 */
 static
 void
-_probe_port(void)
+_AhciProbePort(void)
 {
 	uint32 devidx;
 	for(devidx = 0; devidx < _devcnt; devidx++)
@@ -580,7 +580,7 @@ _probe_port(void)
 		for(ui = 0; ui < 32; ui++)
 			if((pi >> ui) & 0x1)
 			{
-				int32 dt = _check_type((HBA_PORT *)&abar->ports[ui]);
+				int32 dt = _AhciCheckType((HBA_PORT *)&abar->ports[ui]);
 				switch(dt)
 				{
 					case AHCI_DEV_SATA:
@@ -588,7 +588,7 @@ _probe_port(void)
 						AHCIPortPtr port = &_ports[_prtcnt++];
 						port->abar = abar;
 						port->port = (HBA_PORT *)&abar->ports[ui];
-						_port_rebase(port->port, ui);
+						_AhciRebasePort(port->port, ui);
 						if(_prtcnt == _MAX_PORT_COUNT)
 							return;
 						break;
@@ -611,7 +611,7 @@ _probe_port(void)
 }
 
 /**
-	@Function:		_find_cmdslot
+	@Function:		_AhciFindCommandSlot
 	@Access:		Private
 	@Description:
 		查找AHCI端口可用的命令槽。
@@ -625,13 +625,13 @@ _probe_port(void)
 */
 static
 int32
-_find_cmdslot(IN HBA_PORT * port)
+_AhciFindCommandSlot(IN HBA_PORT * port)
 {
 	// 如果SACT和CI都没有被设置，则代表该槽为空闲。
 	DWORD slots = (port->sact | port->ci);
 
 	// 获取AHCI端口支持的命令槽数量。
-	HBA_MEM * abar = _get_abar_by_port(port);
+	HBA_MEM * abar = _AhciGetAbarByPort(port);
 	int32 n = (abar->cap & 0x0f00) >> 8;
 
 	// 查找可用的命令槽（SACT和CI都没有被设置）。
@@ -647,7 +647,7 @@ _find_cmdslot(IN HBA_PORT * port)
 }
 
 /**
-	@Function:		_ahci_read
+	@Function:		_AhciRead
 	@Access:		Private
 	@Description:
 		读AHCI设备。
@@ -666,7 +666,7 @@ _find_cmdslot(IN HBA_PORT * port)
 */
 static
 BOOL
-_ahci_read(	IN OUT HBA_PORT * port,
+_AhciRead(	IN OUT HBA_PORT * port,
 			IN DWORD startl,
 			IN DWORD starth,
 			IN DWORD count,
@@ -674,7 +674,7 @@ _ahci_read(	IN OUT HBA_PORT * port,
 {
 	port->is = (DWORD)-1;
 	int32 spin = 0;
-	int32 slot = _find_cmdslot(port);
+	int32 slot = _AhciFindCommandSlot(port);
 	if(slot == -1)
 		return FALSE;
 
@@ -753,7 +753,7 @@ _ahci_read(	IN OUT HBA_PORT * port,
 }
 
 /**
-	@Function:		ahci_read
+	@Function:		AhciRead
 	@Access:		Public
 	@Description:
 		读AHCI设备。
@@ -771,33 +771,33 @@ _ahci_read(	IN OUT HBA_PORT * port,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-ahci_read(	IN uint32 portno,
+AhciRead(	IN uint32 portno,
 			IN DWORD startl,
 			IN DWORD starth,
 			IN DWORD count,
 			OUT WORD * buf)
 {
-	HBA_PORT * port = ahci_port(portno);
+	HBA_PORT * port = AhciGetPort(portno);
 	if(port == NULL)
 		return FALSE;
-	if(!_ahci_lock())
+	if(!_AhciLock())
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
 	{
-		BOOL r = _ahci_read(port, startl, starth, count, buf);
+		BOOL r = _AhciRead(port, startl, starth, count, buf);
 		if(r)
 		{
-			_ahci_unlock();
+			_AhciUnlock();
 			return TRUE;
 		}
 	}
-	_ahci_unlock();
+	_AhciUnlock();
 	return FALSE;
 }
 
 /**
-	@Function:		_ahci_write
+	@Function:		_AhciWrite
 	@Access:		Private
 	@Description:
 		写AHCI设备。
@@ -816,7 +816,7 @@ ahci_read(	IN uint32 portno,
 */
 static
 BOOL
-_ahci_write(IN OUT HBA_PORT * port,
+_AhciWrite(	IN OUT HBA_PORT * port,
 			IN DWORD startl,
 			IN DWORD starth,
 			IN DWORD count,
@@ -824,7 +824,7 @@ _ahci_write(IN OUT HBA_PORT * port,
 {
 	port->is = (DWORD)-1;
 	int32 spin = 0;
-	int32 slot = _find_cmdslot(port);
+	int32 slot = _AhciFindCommandSlot(port);
 	if(slot == -1)
 		return FALSE;
 
@@ -903,7 +903,7 @@ _ahci_write(IN OUT HBA_PORT * port,
 }
 
 /**
-	@Function:		ahci_write
+	@Function:		AhciWrite
 	@Access:		Public
 	@Description:
 		写AHCI设备。
@@ -921,33 +921,33 @@ _ahci_write(IN OUT HBA_PORT * port,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-ahci_write(	IN uint32 portno,
+AhciWrite(	IN uint32 portno,
 			IN DWORD startl,
 			IN DWORD starth,
 			IN DWORD count,
 			IN WORD * buf)
 {
-	HBA_PORT * port = ahci_port(portno);
+	HBA_PORT * port = AhciGetPort(portno);
 	if(port == NULL)
 		return FALSE;
-	if(!_ahci_lock())
+	if(!_AhciLock())
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < MAX_RETRY; ui++)
 	{
-		BOOL r = _ahci_write(port, startl, starth, count, buf);
+		BOOL r = _AhciWrite(port, startl, starth, count, buf);
 		if(r)
 		{
-			_ahci_unlock();
+			_AhciUnlock();
 			return TRUE;
 		}
 	}
-	_ahci_unlock();
+	_AhciUnlock();
 	return FALSE;
 }
 
 /**
-	@Function:		ahci_init
+	@Function:		AhciInit
 	@Access:		Public
 	@Description:
 		初始化AHCI。
@@ -957,12 +957,12 @@ ahci_write(	IN uint32 portno,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-ahci_init(void)
+AhciInit(void)
 {
 	_ahci_base = alloc_memory(MB(1));
 	if(_ahci_base == NULL)
 		return NULL;
-	_check_all_devices();
-	_probe_port();
+	_AhciCheckAllDevices();
+	_AhciProbePort();
 	return TRUE;
 }

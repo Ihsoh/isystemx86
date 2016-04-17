@@ -13,10 +13,10 @@
 
 extern
 void
-run_window_init(void);
+WinRunInit(void);
 
 extern
 BOOL
-run_window_show(void);
+WinRunShow(void);
 
 #endif

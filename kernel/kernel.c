@@ -207,8 +207,6 @@ main(void)
 	init_ide();
 	init_ide1();
 
-	// ahci_init();
-
 	// 初始化外部库。DSLIB，JSONLIB，PATHLIB, MEMPOOLLIB。 
 	init_dsl();
 	init_jsonl();
@@ -220,7 +218,7 @@ main(void)
 	config_init();
 
 	Ifs1Init();
-	console_init();
+	ConInit();
 
 	timer_init();
 	init_enfont();
@@ -239,7 +237,7 @@ main(void)
 	enable_paging();
 	init_log();
 	mqueue_init();
-	acpi_init();
+	AcpiInit();
 	serial_init();
 	gui_init();
 
@@ -247,10 +245,10 @@ main(void)
 	//如果初始化失败则使用 PIC。
 	BOOL enable_apic = TRUE;
 	config_system_get_bool("EnableAPIC", &enable_apic);
-	if(enable_apic && apic_init())
+	if(enable_apic && ApicInit())
 	{
 		pic_mask_all();
-		apic_enable();
+		ApicEnable();
 	}
 	else
 	{
@@ -293,17 +291,17 @@ main(void)
 
 	config_system_get_bool(	"UseRTCForTaskScheduler", 
 							&use_rtc_for_task_scheduler);
-	if(enable_apic && apic_is_enable())
+	if(enable_apic && ApicIsEnabled())
 		if(use_rtc_for_task_scheduler)
 		{
 			double temp;
 			if(config_system_get_number("RTCRate", &temp))
 				rtc_rate = (uint8)temp;
-			set_rtc_rate(rtc_rate);
-			enable_rtc();
+			CmosSetRtcRate(rtc_rate);
+			CmosEnableRtc();
 		}
 		else
-			apic_start_timer();
+			ApicStartTimer();
 	mouse_loop_was_enabled = TRUE;
 	keyboard_loop_was_enabled = TRUE;
 
@@ -321,7 +319,7 @@ main(void)
 	task_ready(sys_timer_tid);
 	common_unlock();
 
-	console();
+	ConEnterConsole();
 }
 
 DEFINE_LOCK_IMPL(kernel)
@@ -375,9 +373,9 @@ reset_all_exceptions(void)
 	struct Desc tss_desc;
 
 	#define RESET_EXCEPTION(__desc_idx, __tss, __eip, __esp)	\
-		get_desc_from_gdt(__desc_idx, &tss_desc);	\
+		KnlGetDescFromGDT(__desc_idx, &tss_desc);	\
 		tss_desc.attr = AT386TSS + DPL0;	\
-		set_desc_to_gdt(__desc_idx, &tss_desc);	\
+		KnlSetDescToGDT(__desc_idx, &tss_desc);	\
 		fill_tss(__tss, __eip, __esp);
 
 	// 除以0。
@@ -598,13 +596,13 @@ static
 void
 irq_ack(IN uint32 no)
 {
-	if(apic_is_enable())
-		apic_eoi();
+	if(ApicIsEnabled())
+		ApicEOI();
 	else
 	{
 		if(no >= 8)
-			outb(0xa0, 0x20);
-		outb(0x20, 0x20);
+			KnlOutByte(0xa0, 0x20);
+		KnlOutByte(0x20, 0x20);
 	}
 }
 
@@ -621,9 +619,9 @@ void
 init_interrupt(void)
 {
 	uint32 fpu_error_int_addr = (uint32)&fpu_error_int;
-	set_int(0x07, fpu_error_int_addr);
+	KnlSetInterrupt(0x07, fpu_error_int_addr);
 	uint32 system_call_int_addr = (uint32)&system_call_int;
-	set_int(0xa0, system_call_int_addr);
+	KnlSetInterrupt(0xa0, system_call_int_addr);
 }
 
 /**
@@ -723,7 +721,7 @@ init_timer(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(10, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(10, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
@@ -733,12 +731,12 @@ init_timer(void)
 	task_gate.attr = ATTASKGATE | DPL3;
 	
 	// IRQ 0
-	//set_gate_to_idt(0x40, (uint8 *)&task_gate);
-	set_desc_to_gdt(161, (uint8 *)&task_gate);
-	set_int_intrgate(0x40, _irq0);
+	//KnlSetGateToIDT(0x40, (uint8 *)&task_gate);
+	KnlSetDescToGDT(161, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x40, _irq0);
 
 	// IRQ 8
-	set_gate_to_idt(0x70, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x70, (uint8 *)&task_gate);
 	
 
 	fill_tss(tss, (uint32)timer_int, (uint32)stack);
@@ -773,7 +771,7 @@ init_mouse(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(19, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(19, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
@@ -783,9 +781,9 @@ init_mouse(void)
 	task_gate.attr = ATTASKGATE | DPL3;
 
 	// IRQ12
-	//set_gate_to_idt(0x74, (uint8 *)&task_gate);
-	set_desc_to_gdt(163, (uint8 *)&task_gate);
-	set_int_intrgate(0x74, _irq12);
+	//KnlSetGateToIDT(0x74, (uint8 *)&task_gate);
+	KnlSetDescToGDT(163, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x74, _irq12);
 
 	fill_tss(tss, (uint32)mouse_int, (uint32)stack);
 }
@@ -819,7 +817,7 @@ init_keyboard(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(12, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(12, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
@@ -829,9 +827,9 @@ init_keyboard(void)
 	task_gate.attr = ATTASKGATE | DPL3;
 	
 	// IRQ1
-	// set_gate_to_idt(0x41, (uint8 *)&task_gate);
-	set_int_intrgate(0x41, _irq1);
-	set_desc_to_gdt(162, (uint8 *)&task_gate);
+	// KnlSetGateToIDT(0x41, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x41, _irq1);
+	KnlSetDescToGDT(162, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)keyboard_int, (uint32)stack);
 }
@@ -865,7 +863,7 @@ init_ide(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(13, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(13, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
@@ -875,9 +873,9 @@ init_ide(void)
 	task_gate.attr = ATTASKGATE | DPL3;
 	
 	// IRQ14
-	//set_gate_to_idt(0x76, (uint8 *)&task_gate);
-	set_desc_to_gdt(164, (uint8 *)&task_gate);
-	set_int_intrgate(0x76, _irq14);
+	//KnlSetGateToIDT(0x76, (uint8 *)&task_gate);
+	KnlSetDescToGDT(164, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x76, _irq14);
 
 	fill_tss(tss, (uint32)ide_int, (uint32)stack);
 }
@@ -911,7 +909,7 @@ init_ide1(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(14, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(14, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
@@ -921,9 +919,9 @@ init_ide1(void)
 	task_gate.attr = ATTASKGATE | DPL3;
 	
 	// IRQ15
-	//set_gate_to_idt(0x77, (uint8 *)&task_gate);
-	set_desc_to_gdt(166, (uint8 *)&task_gate);
-	set_int_intrgate(0x77, _irq15);
+	//KnlSetGateToIDT(0x77, (uint8 *)&task_gate);
+	KnlSetDescToGDT(166, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x77, _irq15);
 
 	fill_tss(tss, (uint32)ide1_int, (uint32)stack);
 }
@@ -957,7 +955,7 @@ init_fpu(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(16, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(16, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
@@ -967,9 +965,9 @@ init_fpu(void)
 	task_gate.attr = ATTASKGATE | DPL3;
 
 	// IRQ13
-	//set_gate_to_idt(0x75, (uint8 *)&task_gate);
-	set_desc_to_gdt(165, (uint8 *)&task_gate);
-	set_int_intrgate(0x75, _irq13);
+	//KnlSetGateToIDT(0x75, (uint8 *)&task_gate);
+	KnlSetDescToGDT(165, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x75, _irq13);
 	
 	fill_tss(tss, (uint32)fpu_int, (uint32)stack);
 }
@@ -990,9 +988,9 @@ free_system_call_tss(void)
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
 	{
 		struct Desc system_call_tss_desc;
-		get_desc_from_gdt(30 + ui * 2, (uint8 *)&system_call_tss_desc);
+		KnlGetDescFromGDT(30 + ui * 2, (uint8 *)&system_call_tss_desc);
 		system_call_tss_desc.attr = AT386TSS + DPL3; 
-		set_desc_to_gdt(30 + ui * 2, (uint8 *)&system_call_tss_desc);
+		KnlSetDescToGDT(30 + ui * 2, (uint8 *)&system_call_tss_desc);
 	}
 }
 
@@ -1012,9 +1010,9 @@ free_task_tss(void)
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
 	{
 		struct Desc tss_desc;
-		get_desc_from_gdt(400 + ui * 5 + 0, (uint8 *)&tss_desc);
+		KnlGetDescFromGDT(400 + ui * 5 + 0, (uint8 *)&tss_desc);
 		tss_desc.attr = AT386TSS + DPL3;
-		set_desc_to_gdt(400 + ui * 5 + 0, (uint8 *)&tss_desc);
+		KnlSetDescToGDT(400 + ui * 5 + 0, (uint8 *)&tss_desc);
 	}
 }
 
@@ -1052,8 +1050,8 @@ timer_int(void)
 
 		timer_inc_ticks();
 
-		if(!use_rtc_for_task_scheduler && apic_is_enable())
-			apic_stop_timer();
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStopTimer();
 		kt_jk_lock = FALSE;
 		if(will_reset_all_exceptions)
 		{
@@ -1062,7 +1060,7 @@ timer_int(void)
 		}
 		if(--clock_counter == 0)
 		{
-			console_clock();
+			ConUpdateClock();
 			clock_counter = 100;
 		}
 		int32 running_tid = get_running_tid();
@@ -1105,16 +1103,16 @@ timer_int(void)
 
 			// 释放内核的TSS。
 			struct Desc kernel_tss_desc;
-			get_desc_from_gdt(6, (uint8 *)&kernel_tss_desc);
+			KnlGetDescFromGDT(6, (uint8 *)&kernel_tss_desc);
 			kernel_tss_desc.attr = AT386TSS + DPL0; 
-			set_desc_to_gdt(6, (uint8 *)&kernel_tss_desc);
+			KnlSetDescToGDT(6, (uint8 *)&kernel_tss_desc);
 
 			// 释放所有系统调用的TSS。
 			free_system_call_tss();
 
-			if(!use_rtc_for_task_scheduler && apic_is_enable())
-				apic_start_timer();
-			end_of_rtc();
+			if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+				ApicStartTimer();
+			CmosEndOfRtc();
 			unlock_without_sti();
 			if(use_rtc_for_task_scheduler)
 				irq_ack(8);
@@ -1159,9 +1157,9 @@ timer_int(void)
 			}
 			set_task_ran_state(tid);
 			free_system_call_tss();
-			if(!use_rtc_for_task_scheduler && apic_is_enable())
-				apic_start_timer();
-			end_of_rtc();
+			if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+				ApicStartTimer();
+			CmosEndOfRtc();
 			unlock_without_sti();
 			if(use_rtc_for_task_scheduler)
 				irq_ack(8);
@@ -1254,11 +1252,11 @@ timer_int(void)
 			{
 				struct Desc tss_desc;
 				struct Gate task_gate;
-				get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
-				get_desc_from_gdt(400 + tid * 5 + 1, (uint8 *)&task_gate);
+				KnlGetDescFromGDT(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+				KnlGetDescFromGDT(400 + tid * 5 + 1, (uint8 *)&task_gate);
 				tss_desc.attr = AT386TSS + DPL3;
-				set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
-				set_desc_to_gdt(11, (uint8 *)&task_gate);
+				KnlSetDescToGDT(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+				KnlSetDescToGDT(11, (uint8 *)&task_gate);
 				asm volatile ("ljmp	$88, $0;");
 			}
 		}
@@ -1298,14 +1296,14 @@ mouse_int(void)
 	while(1)
 	{
 		lock();
-		uint8 status = inb(MOUSE_STATUS);
+		uint8 status = KnlInByte(MOUSE_STATUS);
 		while(status & MOUSE_BBIT)
 		{
 			if(status & MOUSE_F_BIT)
 			{
 				int32 max_screen_width = vesa_get_width();
 				int32 max_screen_height = vesa_get_height();
-				uint8 data = inb(MOUSE_DEVICE);
+				uint8 data = KnlInByte(MOUSE_DEVICE);
 
 				if(mouse_loop_was_enabled)
 					switch(mouse_count)
@@ -1343,7 +1341,7 @@ mouse_int(void)
 							break;
 					}
 			}
-			status = inb(MOUSE_STATUS);
+			status = KnlInByte(MOUSE_STATUS);
 		}
 end:
 		unlock_without_sti();
@@ -1439,8 +1437,8 @@ keyboard_int(void)
 	{
 		lock();
 		uint8 scan_code = 0;
-		while(inb(KEYBOARD_PENDING) & 2);
-		scan_code = inb(KEYBOARD_DEVICE);
+		while(KnlInByte(KEYBOARD_PENDING) & 2);
+		scan_code = KnlInByte(KEYBOARD_DEVICE);
 		if(keyboard_loop_was_enabled)
 			tran_key(scan_code);
 		unlock_without_sti();
@@ -1464,11 +1462,11 @@ ide_int(void)
 	while(1)
 	{
 		lock();
-		if(!use_rtc_for_task_scheduler && apic_is_enable())
-			apic_stop_timer();
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStopTimer();
 		_ide0_signal++;
-		if(!use_rtc_for_task_scheduler && apic_is_enable())
-			apic_start_timer();
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStartTimer();
 		unlock_without_sti();
 		irq_ack(14);
 		asm volatile ("iret;");
@@ -1490,11 +1488,11 @@ ide1_int(void)
 	while(1)
 	{
 		lock();
-		if(!use_rtc_for_task_scheduler && apic_is_enable())
-			apic_stop_timer();
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStopTimer();
 		_ide1_signal++;
-		if(!use_rtc_for_task_scheduler && apic_is_enable())
-			apic_start_timer();
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStartTimer();
 		unlock_without_sti();
 		irq_ack(15);
 		asm volatile ("iret;");
@@ -1516,11 +1514,11 @@ fpu_int(void)
 	while(1)
 	{
 		lock();
-		if(!use_rtc_for_task_scheduler && apic_is_enable())
-			apic_stop_timer();
-		outb(0xf0, 0x00);
-		if(!use_rtc_for_task_scheduler && apic_is_enable())
-			apic_start_timer();
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStopTimer();
+		KnlOutByte(0xf0, 0x00);
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStartTimer();
 		unlock_without_sti();
 		irq_ack(13);
 		asm volatile ("iret;");
@@ -1579,14 +1577,14 @@ reset_syscall(IN int32 tid)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL3;
-	set_desc_to_gdt(30 + tid * 2 + 0, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(30 + tid * 2 + 0, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = ((30 + tid * 2 + 0) << 3) | RPL3;
 	task_gate.attr = ATTASKGATE | DPL3;
-	set_desc_to_gdt(30 + tid * 2 + 1, (uint8 *)&task_gate);
+	KnlSetDescToGDT(30 + tid * 2 + 1, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)system_call, (uint32)stack);
 
@@ -1871,9 +1869,9 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 		task_ready(sys_pci_tid);
 	}
 
-	int32 wait_app_tid = get_wait_app_tid();
+	int32 wait_app_tid = ConGetCurrentApplicationTid();
 	if(tid == wait_app_tid)
-		set_wait_app_tid(-1);
+		ConSetCurrentApplicationTid(-1);
 	
 	kill_sys_task(tid);
 
@@ -1882,7 +1880,7 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 	will_reset_all_exceptions = TRUE;	//需要重设所有异常处理程序的状态。
 	unlock();
 	if(!use_rtc_for_task_scheduler)
-		apic_start_timer();
+		ApicStartTimer();
 	while(kt_jk_lock);					//任务调度器会把kt_jk_lock设置为FALSE。
 	asm volatile ("cli");
 }
@@ -1966,14 +1964,14 @@ init_dividing_by_zero(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(21, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(21, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (21 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x00, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x00, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)dividing_by_zero_int, (uint32)stack);
 }
@@ -2003,7 +2001,7 @@ dividing_by_zero_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2057,14 +2055,14 @@ init_bound_check(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(22, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(22, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (22 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x05, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x05, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)bound_check_int, (uint32)stack);
 }
@@ -2093,7 +2091,7 @@ bound_check_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2147,14 +2145,14 @@ init_invalid_opcode(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(23, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(23, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (23 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x06, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x06, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)invalid_opcode_int, (uint32)stack);
 }
@@ -2183,7 +2181,7 @@ invalid_opcode_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2237,14 +2235,14 @@ init_double_fault(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(28, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(28, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (28 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x08, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x08, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)double_fault_int, (uint32)stack);
 }
@@ -2316,14 +2314,14 @@ init_invalid_tss(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(24, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(24, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (24 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x0a, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x0a, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)invalid_tss_int, (uint32)stack);
 }
@@ -2352,7 +2350,7 @@ invalid_tss_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			uint32 errcode = 0;
@@ -2415,14 +2413,14 @@ init_invalid_seg(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(25, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(25, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (25 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x0b, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x0b, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)invalid_seg_int, (uint32)stack);
 }
@@ -2451,7 +2449,7 @@ invalid_seg_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			uint32 errcode = 0;
@@ -2514,14 +2512,14 @@ init_invalid_stack(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(26, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(26, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (26 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x0c, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x0c, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)invalid_stack_int, (uint32)stack);
 }
@@ -2550,7 +2548,7 @@ invalid_stack_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			uint32 errcode = 0;
@@ -2613,14 +2611,14 @@ init_gp(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(18, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(18, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (18 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x0d, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x0d, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)gp_int, (uint32)stack);
 }
@@ -2649,11 +2647,11 @@ gp_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 			struct TSS * syscall_tss = scall_tss + current_tid;
 			struct Desc syscall_tss_desc;
-			get_desc_from_gdt(30 + current_tid * 2, &syscall_tss_desc);
+			KnlGetDescFromGDT(30 + current_tid * 2, &syscall_tss_desc);
 
 			uint32 errcode = 0;
 			GET_ERROR_CODE(&errcode);
@@ -2769,14 +2767,14 @@ init_pf(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(20, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(20, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (20 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x0e, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x0e, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)pf_int, (uint32)stack);
 }
@@ -2805,7 +2803,7 @@ pf_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			// 获取导致异常的线性地址。
@@ -2892,14 +2890,14 @@ init_mf(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(29, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(29, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (29 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x10, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x10, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)mf_int, (uint32)stack);
 }
@@ -2928,7 +2926,7 @@ mf_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -2980,14 +2978,14 @@ init_ac(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(158, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(158, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (158 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x11, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x11, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)ac_int, (uint32)stack);
 }
@@ -3016,7 +3014,7 @@ ac_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -3068,14 +3066,14 @@ init_mc(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(159, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(159, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (159 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x12, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x12, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)mc_int, (uint32)stack);
 }
@@ -3147,14 +3145,14 @@ init_xf(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL0;
-	set_desc_to_gdt(160, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(160, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (160 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(0x13, (uint8 *)&task_gate);
+	KnlSetGateToIDT(0x13, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)xf_int, (uint32)stack);
 }
@@ -3183,7 +3181,7 @@ xf_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 
 			int8 buffer[1024];
@@ -3234,14 +3232,14 @@ init_noimpl(void)
 	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 	tss_desc.attr = AT386TSS + DPL3;
-	set_desc_to_gdt(17, (uint8 *)&tss_desc);
+	KnlSetDescToGDT(17, (uint8 *)&tss_desc);
 
 	task_gate.offsetl = 0;
 	task_gate.offseth = 0;
 	task_gate.dcount = 0;
 	task_gate.selector = (17 << 3) | RPL3;
 	task_gate.attr = ATTASKGATE | DPL3;
-	set_desc_to_gdt(27, (uint8 *)&task_gate);
+	KnlSetDescToGDT(27, (uint8 *)&task_gate);
 
 	fill_tss(tss, (uint32)noimpl_int, (uint32)stack);
 }
@@ -3268,7 +3266,7 @@ set_noimpl(IN uint32 int_num)
 	task_gate.dcount = 0;
 	task_gate.selector = (17 << 3) | RPL0;
 	task_gate.attr = ATTASKGATE | DPL0;
-	set_gate_to_idt(int_num, (uint8 *)&task_gate);
+	KnlSetGateToIDT(int_num, (uint8 *)&task_gate);
 }
 
 /**
@@ -3304,7 +3302,7 @@ noimpl_int(void)
 		{
 			lock();
 			if(!use_rtc_for_task_scheduler)
-				apic_stop_timer();
+				ApicStopTimer();
 			struct Task * task = get_task_info_ptr(current_tid);
 			int32 intn = get_unimpl_intn();
 
@@ -3339,8 +3337,8 @@ void
 shutdown_system(void)
 {
 	leave_system();
-	acpi_power_off();
-	halt_cpu();
+	AcpiPowerOff();
+	KnlHaltCpu();
 }
 
 /**
@@ -3355,7 +3353,7 @@ void
 reboot_system(void)
 {
 	leave_system();
-	reset_cpu();
+	KnlResetCpu();
 }
 
 #define	press_key_to_continue()	\

@@ -1990,7 +1990,7 @@ _Ifs1WriteFileUnsafely(	IN FileObject * fptr,
 		fptr->file_block->blockids[index++] = data_block_id;
 	}
 	fptr->file_block->length = len;
-	get_cmos_date_time(&(fptr->file_block->change));
+	CmosGetDateTime(&(fptr->file_block->change));
 
 	if((fptr->mode & FILE_MODE_READ) != 0)
 	{
@@ -2402,7 +2402,7 @@ _Ifs1AppendFileWithoutBufferUnsafely(	IN FileObject * fptr,
 		}
 	}
 	fptr->file_block->length += append_len;
-	get_cmos_date_time(&(fptr->file_block->change));
+	CmosGetDateTime(&(fptr->file_block->change));
 
 	if((fptr->mode & FILE_MODE_READ) != 0)
 	{

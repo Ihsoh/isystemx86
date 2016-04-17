@@ -52,11 +52,14 @@ static uint8 prompts_color 						= 7;
 static BOOL _exit_batch							= FALSE;
 static BOOL _run_in_batch						= FALSE;
 
-#define	parse_cmd(cmd, word, n) (_parse_cmd(cmd, word, n, 1, local_vars_s))
-#define	parse_cmd_nv(cmd, word, n) (_parse_cmd(cmd, word, n, 0, NULL))
+#define	_PARSE_COMMAND(cmd, word, n)	\
+	(_ConParseCommand(cmd, word, n, 1, local_vars_s))
+
+#define	_PARSE_COMMAND_WITHOUT_VAR(cmd, word, n)	\
+	(_ConParseCommand(cmd, word, n, 0, NULL))
 
 /**
-	@Function:		_parse_cmd
+	@Function:		_ConParseCommand
 	@Access:		Private
 	@Description:
 		解析命令。依次获取命令中得每一部分。
@@ -77,11 +80,11 @@ static BOOL _run_in_batch						= FALSE;
 */
 static
 int32
-_parse_cmd(	IN int8 * cmd,
-			OUT int8 * word,
-			IN uint32 n,
-			IN int32 process_var,
-			IN struct Vars * local_vars_s)
+_ConParseCommand(	IN int8 * cmd,
+					OUT int8 * word,
+					IN uint32 n,
+					IN int32 process_var,
+					IN struct Vars * local_vars_s)
 {
 	static uint32 len = 0;
 	static uint8 buffer[1024];
@@ -179,7 +182,7 @@ _parse_cmd(	IN int8 * cmd,
 }
 
 /**
-	@Function:		ver
+	@Function:		_ConCmdVer
 	@Access:		Private
 	@Description:
 		打印版本信息。
@@ -188,7 +191,7 @@ _parse_cmd(	IN int8 * cmd,
 */
 static
 void
-ver(void)
+_ConCmdVer(void)
 {
 	int8 name[KB(1)]		= "ISystem";
 	int8 platform[KB(1)]	= "Unknow platform";
@@ -210,7 +213,7 @@ ver(void)
 }
 
 /**
-	@Function:		print
+	@Function:		_ConCmdPrint
 	@Access:		Private
 	@Description:
 		打印文本。打印完毕后不会进行换行。
@@ -221,13 +224,13 @@ ver(void)
 */
 static
 void
-print(IN int8 * text)
+_ConCmdPrint(IN int8 * text)
 {
 	print_str(text);
 }
 
 /**
-	@Function:		error
+	@Function:		_ConCmdError
 	@Access:		Private
 	@Description:
 		打印错误信息。打印完毕后会进行换行。
@@ -238,14 +241,14 @@ print(IN int8 * text)
 */
 static
 void
-error(IN int8 * text)
+_ConCmdError(IN int8 * text)
 {
 	print_err_str_p(text, CC_RED);
 	print_err_str("\n");
 }
 
 /**
-	@Function:		disks
+	@Function:		_ConCmdShowDiskInfo
 	@Access:		Private
 	@Description:
 		打印所有磁盘的信息。
@@ -256,7 +259,7 @@ error(IN int8 * text)
 */
 static
 int32
-disks(void)
+_ConCmdShowDiskInfo(void)
 {
 	uint32 disk_count = get_disk_count();
 	uint32 ui;
@@ -297,7 +300,7 @@ disks(void)
 }
 
 /**
-	@Function:		mm
+	@Function:		_ConCmdShowMemoryInfo
 	@Access:		Private
 	@Description:
 		打印内存相关信息。
@@ -308,7 +311,7 @@ disks(void)
 */
 static
 int32
-mm(void)
+_ConCmdShowMemoryInfo(void)
 {
 	uint64 max_memory_byte = get_memory_size();
 	uint32 max_memory_mbyte = (uint32)max_memory_byte == 0 ? 4096 : (uint32)max_memory_byte / 1024 / 1024;
@@ -341,7 +344,7 @@ mm(void)
 }
 
 /**
-	@Function:		date
+	@Function:		_ConCmdShowDate
 	@Access:		Private
 	@Description:
 		打印日期。
@@ -352,11 +355,11 @@ mm(void)
 */
 static
 int32
-date(void)
+_ConCmdShowDate(void)
 {
 	int8 weeks[][10] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 	struct CMOSDateTime dt;
-	get_cmos_date_time(&dt);
+	CmosGetDateTime(&dt);
 	printn(dt.year);
 	print_str("-");
 	printn(dt.month);
@@ -368,7 +371,7 @@ date(void)
 }
 
 /**
-	@Function:		time
+	@Function:		_ConCmdShowTime
 	@Access:		Private
 	@Description:
 		打印时间。
@@ -381,10 +384,10 @@ date(void)
 */
 static
 int32
-time(IN int32 display_second)
+_ConCmdShowTime(IN int32 display_second)
 {
 	struct CMOSDateTime dt;
-	get_cmos_date_time(&dt);
+	CmosGetDateTime(&dt);
 	printn(dt.hour);
 	print_str(":");
 	printn(dt.minute);
@@ -397,7 +400,7 @@ time(IN int32 display_second)
 }
 
 /**
-	@Function:		datetime
+	@Function:		_ConCmdShowDateTime
 	@Access:		Private
 	@Description:
 		打印日期和时间。
@@ -408,16 +411,16 @@ time(IN int32 display_second)
 */
 static
 int32
-datetime(void)
+_ConCmdShowDateTime(void)
 {
-	date();
+	_ConCmdShowDate();
 	print_str("\n");
-	time(1);
+	_ConCmdShowTime(1);
 	return 1;
 }
 
 /**
-	@Function:		_set_date
+	@Function:		_ConSetDate
 	@Access:		Private
 	@Description:
 		设置日期。这个版本的函数不会输出错误信息。
@@ -428,7 +431,7 @@ datetime(void)
 */
 static
 BOOL
-_set_date(IN const int8 * str)
+_ConSetDate(IN const int8 * str)
 {
 	if(str == NULL)
 		return FALSE;
@@ -472,12 +475,12 @@ _set_date(IN const int8 * str)
 			+ (y3 - '0');
 	month =	(m0 - '0') * 10 + (m1 - '0');
 	day = (d0 - '0') * 10 + (d1 - '0');
-	BOOL r = set_cmos_date(year, month, day);
+	BOOL r = CmosSetDate(year, month, day);
 	return r;
 }
 
 /**
-	@Function:		set_date
+	@Function:		_ConCmdSetDate
 	@Access:		Private
 	@Description:
 		设置日期。这个版本的函数会输出错误信息。
@@ -488,18 +491,18 @@ _set_date(IN const int8 * str)
 */
 static
 BOOL
-set_date(IN const int8 * str)
+_ConCmdSetDate(IN const int8 * str)
 {
-	BOOL r = _set_date(str);
+	BOOL r = _ConSetDate(str);
 	if(r)
-		print("OK!");
+		_ConCmdPrint("OK!");
 	else
-		error("A error was occured when setting date. The date format is YYYY-MM-DD.");
+		_ConCmdError("A error was occured when setting date. The date format is YYYY-MM-DD.");
 	return r;
 }
 
 /**
-	@Function:		_set_time
+	@Function:		_ConSetTime
 	@Access:		Private
 	@Description:
 		设置时间。这个版本的函数不会输出错误信息。
@@ -510,7 +513,7 @@ set_date(IN const int8 * str)
 */
 static
 BOOL
-_set_time(IN const int8 * str)
+_ConSetTime(IN const int8 * str)
 {
 	if(str == NULL)
 		return FALSE;
@@ -545,12 +548,12 @@ _set_time(IN const int8 * str)
 	hour = (h0 - '0') * 10 + (h1 - '0');
 	minute = (m0 - '0') * 10 + (m1 - '0');
 	second = (s0 - '0') * 10 + (s1 - '0');
-	BOOL r = set_cmos_time(hour, minute, second);
+	BOOL r = CmosSetTime(hour, minute, second);
 	return r;
 }
 
 /**
-	@Function:		set_time
+	@Function:		_ConCmdSetTime
 	@Access:		Private
 	@Description:
 		设置时间。这个版本的函数会输出错误信息。
@@ -561,18 +564,18 @@ _set_time(IN const int8 * str)
 */
 static
 BOOL
-set_time(IN const int8 * str)
+_ConCmdSetTime(IN const int8 * str)
 {
-	BOOL r = _set_time(str);
+	BOOL r = _ConSetTime(str);
 	if(r)
-		print("OK!");
+		_ConCmdPrint("OK!");
 	else
-		error("A error was occured when setting time. The date format is HH-MM-SS.");
+		_ConCmdError("A error was occured when setting time. The date format is HH-MM-SS.");
 	return r;
 }
 
 /**
-	@Function:		clock
+	@Function:		_ConCmdSetClock
 	@Access:		Private
 	@Description:
 		设置控制台的时间的显示或关闭。
@@ -585,7 +588,7 @@ set_time(IN const int8 * str)
 */
 static
 int32
-clock(IN int8 * param)
+_ConCmdSetClock(IN int8 * param)
 {
 	if(strcmp(param, "on") == 0)
 	{
@@ -599,13 +602,13 @@ clock(IN int8 * param)
 	}	
 	else
 	{
-		error(FORMAT("clock {on|off}"));
+		_ConCmdError(FORMAT("clock {on|off}"));
 		return 0;
 	}
 }
 
 /**
-	@Function:		format
+	@Function:		_ConCmdFormatDisk
 	@Access:		Private
 	@Description:
 		格式化磁盘。
@@ -618,11 +621,11 @@ clock(IN int8 * param)
 */
 static
 int32
-format(IN int8 * param)
+_ConCmdFormatDisk(IN int8 * param)
 {
 	if(strcmp(param, "") == 0)
 	{
-		error(FORMAT("format {DA|DB|VA|VB|...}"));
+		_ConCmdError(FORMAT("format {DA|DB|VA|VB|...}"));
 		return 0;
 	}
 	if(Ifs1Format(param))
@@ -632,13 +635,13 @@ format(IN int8 * param)
 	}
 	else
 	{
-		error("Failed to format disk!");		
+		_ConCmdError("Failed to format disk!");		
 		return 0;
 	}
 }
 
 /**
-	@Function:		cdisk
+	@Function:		_ConCmdCheckDisk
 	@Access:		Private
 	@Description:
 		检查磁盘是否为IFS1，并显示相关信息。
@@ -651,23 +654,23 @@ format(IN int8 * param)
 */
 static
 int32
-cdisk(IN int8 * param)
+_ConCmdCheckDisk(IN int8 * param)
 {
 	if(strcmp(param, "") == 0)
 	{
-		error(FORMAT("cdisk {DA|DB|VA|VB|...}"));
+		_ConCmdError(FORMAT("cdisk {DA|DB|VA|VB|...}"));
 		return 0;
 	}
 	print_str(param);
 	if(Ifs1Check(param))
 		print_str(" is IFS1!");
 	else
-		error(" is not IFS1!");
+		_ConCmdError(" is not IFS1!");
 	return 1;
 }
 
 /**
-	@Function:		mkdir
+	@Function:		_ConCmdCreateDir
 	@Access:		Private
 	@Description:
 		创建目录。
@@ -682,23 +685,23 @@ cdisk(IN int8 * param)
 */
 static
 int32
-mkdir(	IN int8 * path, 
+_ConCmdCreateDir(	IN int8 * path, 
 		IN int8 * name)
 {
 	if(strcmp(path, "") == 0 || strcmp(name, "") == 0)
 	{
-		error(FORMAT("mkdir {path} {dir name}"));
+		_ConCmdError(FORMAT("mkdir {path} {dir name}"));
 		return 0;
 	}
 	if(!Ifs1IsValidName(name))
 	{
-		error("Invalid directory name!");
+		_ConCmdError("Invalid directory name!");
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(Ifs1CreateDir(temp, name))
@@ -708,13 +711,13 @@ mkdir(	IN int8 * path,
 	}
 	else
 	{
-		error("Failed to create a directory!");
+		_ConCmdError("Failed to create a directory!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		mkfile
+	@Function:		_ConCmdCreateFile
 	@Access:		Private
 	@Description:
 		创建文件。
@@ -729,23 +732,23 @@ mkdir(	IN int8 * path,
 */
 static
 int32
-mkfile(	IN int8 * path,
-		IN int8 * name)
+_ConCmdCreateFile(	IN int8 * path,
+					IN int8 * name)
 {
 	if(strcmp(path, "") == 0 || strcmp(name, "") == 0)
 	{
-		error(FORMAT("mkfile {path} {file name}"));
+		_ConCmdError(FORMAT("mkfile {path} {file name}"));
 		return 0;
 	}
 	if(!Ifs1IsValidName(name))
 	{
-		error("Invalid file name!");
+		_ConCmdError("Invalid file name!");
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(Ifs1CreateFile(temp, name))
@@ -755,13 +758,13 @@ mkfile(	IN int8 * path,
 	}
 	else
 	{
-		error("Failed to create a file!");
+		_ConCmdError("Failed to create a file!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		deldir
+	@Function:		_ConCmdDeleteDir
 	@Access:		Private
 	@Description:
 		删除目录。但是该目录必须为空。
@@ -774,17 +777,17 @@ mkfile(	IN int8 * path,
 */
 static
 int32
-deldir(IN int8 * path)
+_ConCmdDeleteDir(IN int8 * path)
 {
 	if(strcmp(path, "") == 0)
 	{
-		error(FORMAT("deldir {path}"));
+		_ConCmdError(FORMAT("deldir {path}"));
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(!Ifs1IsChildPath(temp, current_path) && Ifs1DeleteDir(temp))
@@ -794,13 +797,13 @@ deldir(IN int8 * path)
 	}
 	else
 	{
-		error("Failed to delete a directory!");
+		_ConCmdError("Failed to delete a directory!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		deldirs
+	@Function:		_ConCmdDeleteDirRecursively
 	@Access:		Private
 	@Description:
 		删除目录。包括该目录下的所有内容。
@@ -813,17 +816,17 @@ deldir(IN int8 * path)
 */
 static
 int32
-deldirs(IN int8 * path)
+_ConCmdDeleteDirRecursively(IN int8 * path)
 {
 	if(strcmp(path, "") == 0)
 	{
-		error(FORMAT("deldirs {path}"));
+		_ConCmdError(FORMAT("deldirs {path}"));
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(!Ifs1IsChildPath(temp, current_path) && Ifs1DeleteDirRecursively(temp))
@@ -833,13 +836,13 @@ deldirs(IN int8 * path)
 	}
 	else
 	{
-		error("Failed to delete directorys!");
+		_ConCmdError("Failed to delete directorys!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		delfile
+	@Function:		_ConCmdDeleteFile
 	@Access:		Private
 	@Description:
 		删除文件。
@@ -852,17 +855,17 @@ deldirs(IN int8 * path)
 */
 static
 int32
-delfile(IN int8 * path)
+_ConCmdDeleteFile(IN int8 * path)
 {
 	if(strcmp(path, "") == 0)
 	{
-		error(FORMAT("delfile {path}"));
+		_ConCmdError(FORMAT("delfile {path}"));
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(Ifs1DeleteFile(temp))
@@ -872,13 +875,13 @@ delfile(IN int8 * path)
 	}
 	else
 	{
-		error("Failed to delete a file!");
+		_ConCmdError("Failed to delete a file!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		rndir
+	@Function:		_ConCmdRenameDir
 	@Access:		Private
 	@Description:
 		重命名文件夹。
@@ -893,18 +896,18 @@ delfile(IN int8 * path)
 */
 static
 int32
-rndir(	IN int8 * path, 
-		IN int8 * new_name)
+_ConCmdRenameDir(	IN int8 * path, 
+					IN int8 * new_name)
 {
 	if(strcmp(path, "") == 0 || strcmp(new_name, "") == 0)
 	{
-		error(FORMAT("rndir {path} {new name}"));
+		_ConCmdError(FORMAT("rndir {path} {new name}"));
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(!Ifs1IsChildPath(temp, current_path) && Ifs1RenameDir(temp, new_name))
@@ -914,13 +917,13 @@ rndir(	IN int8 * path,
 	}
 	else
 	{
-		error("Failed to rename directory!");
+		_ConCmdError("Failed to rename directory!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		rnfile
+	@Function:		_ConCmdRenameFile
 	@Access:		Private
 	@Description:
 		重命名文件。
@@ -935,18 +938,18 @@ rndir(	IN int8 * path,
 */
 static
 int32
-rnfile(	IN int8 * path, 
-		IN int8 * new_name)
+_ConCmdRenameFile(	IN int8 * path, 
+					IN int8 * new_name)
 {
 	if(strcmp(path, "") == 0 || strcmp(new_name, "") == 0)
 	{
-		error(FORMAT("rnfiler {path} {new name}"));
+		_ConCmdError(FORMAT("rnfiler {path} {new name}"));
 		return 0;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(Ifs1RenameFile(temp, new_name))
@@ -956,13 +959,13 @@ rnfile(	IN int8 * path,
 	}
 	else
 	{
-		error("Failed to rename file!");
+		_ConCmdError("Failed to rename file!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		files
+	@Function:		_ConCmdShowFileInfo
 	@Access:		Private
 	@Description:
 		打印指定路径下的所有文件和目录信息。
@@ -979,16 +982,16 @@ rnfile(	IN int8 * path,
 */
 static
 int32
-files(	IN int8 * path, 
-		IN int32 simple, 
-		IN int32 part)
+_ConCmdShowFileInfo(IN int8 * path, 
+					IN int32 simple, 
+					IN int32 part)
 {
 	if(strcmp(path, "") == 0)
 		path = current_path;
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	path = temp;
@@ -997,7 +1000,7 @@ files(	IN int8 * path,
 	int32 count = Ifs1GetItemList(path, list);
 	if(count == -1)
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	for(ui = 0; ui < count; ui++)
@@ -1098,7 +1101,7 @@ files(	IN int8 * path,
 }
 
 /**
-	@Function:		cd
+	@Function:		_ConCmdChangeDir
 	@Access:		Private
 	@Description:
 		切换当前目录。
@@ -1111,12 +1114,12 @@ files(	IN int8 * path,
 */
 static
 int32
-cd(IN int8 * path)
+_ConCmdChangeDir(IN int8 * path)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	int32 type;
@@ -1128,7 +1131,7 @@ cd(IN int8 * path)
 		|| dir.used == 0 
 		|| dir.type != BLOCK_TYPE_DIR)
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	UtlCopyString(current_path, sizeof(current_path), temp);
@@ -1136,7 +1139,7 @@ cd(IN int8 * path)
 }
 
 /**
-	@Function:		cpfile
+	@Function:		_ConCmdCopyFile
 	@Access:		Private
 	@Description:
 		复制文件。
@@ -1153,20 +1156,20 @@ cd(IN int8 * path)
 */
 static
 int32
-cpfile(	IN int8 * src_path, 
-		IN int8 * dst_path, 
-		IN int8 * name)
+_ConCmdCopyFile(IN int8 * src_path, 
+				IN int8 * dst_path, 
+				IN int8 * name)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	int8 temp1[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(src_path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(!Ifs1GetAbsolutePath(dst_path, current_path, temp1))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	if(Ifs1CopyFile(temp, temp1, name))
@@ -1176,13 +1179,13 @@ cpfile(	IN int8 * src_path,
 	}
 	else
 	{
-		error("Failed to copy a file");
+		_ConCmdError("Failed to copy a file");
 		return 0;
 	}
 }
 
 /**
-	@Function:		kill
+	@Function:		_ConCmdKillTask
 	@Access:		Private
 	@Description:
 		杀死任务。
@@ -1195,16 +1198,16 @@ cpfile(	IN int8 * src_path,
 */
 static
 int32
-kill(IN int8 * tid_s)
+_ConCmdKillTask(IN int8 * tid_s)
 {
 	if(strcmp(tid_s, "") == 0)
 	{
-		error(FORMAT("kill {task id}"));
+		_ConCmdError(FORMAT("kill {task id}"));
 		return 0;
 	}
 	if(!is_valid_uint(tid_s))
 	{
-		error("Task id must unsigned integer!");
+		_ConCmdError("Task id must unsigned integer!");
 		return 0;
 	}
 	int32 tid = (int32)stol(tid_s);
@@ -1215,13 +1218,13 @@ kill(IN int8 * tid_s)
 	}
 	else
 	{
-		error("Failed to kill a task!");
+		_ConCmdError("Failed to kill a task!");
 		return 0;
 	}
 }
 
 /**
-	@Function:		tasks
+	@Function:		_ConCmdShowTaskInfo
 	@Access:		Private
 	@Description:
 		打印所有正在运行的任务信息。
@@ -1234,7 +1237,7 @@ kill(IN int8 * tid_s)
 */
 static
 int32
-tasks(IN int32 part)
+_ConCmdShowTaskInfo(IN int32 part)
 {
 	int32 i;
 	uint32 ui;
@@ -1264,7 +1267,7 @@ tasks(IN int32 part)
 }
 
 /**
-	@Function:		run
+	@Function:		_ConCmdExecuteApplication
 	@Access:		Private
 	@Description:
 		运行一个程序。
@@ -1279,23 +1282,23 @@ tasks(IN int32 part)
 */
 static
 int32
-run(IN int8 * path, 
-	IN int8 * cmd)
+_ConCmdExecuteApplication(	IN int8 * path, 
+							IN int8 * cmd)
 {
 	if(strcmp(path, "") == 0)
 	{
-		error(FORMAT("run {path}"));
+		_ConCmdError(FORMAT("run {path}"));
 		return -1;
 	}
 	int32 r;
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return -1;
 	}
 	if((r = create_task_by_file(temp, cmd, current_path)) == -1)
-		error("Failed to run application!");
+		_ConCmdError("Failed to run application!");
 	else
 		task_ready(r);
 	return r;
@@ -1325,14 +1328,14 @@ run_wait(	IN int8 * path,
 {
 	if(strcmp(path, "") == 0)
 	{
-		error(FORMAT("{application path}"));
+		_ConCmdError(FORMAT("{application path}"));
 		return -1;
 	}
 	int32 r = -1;
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return -1;
 	}
 
@@ -1344,7 +1347,7 @@ run_wait(	IN int8 * path,
 	if((r = create_task_by_file(temp, cmd, current_path)) == -1)
 	{
 		unlock();
-		error("Failed to run application!");
+		_ConCmdError("Failed to run application!");
 		return -1;
 	}
 	if(strcmp(stdin, "%") != 0)
@@ -1360,7 +1363,7 @@ run_wait(	IN int8 * path,
 }
 
 /**
-	@Function:		help
+	@Function:		_ConCmdShowHelpInfo
 	@Access:		Private
 	@Description:
 		显示帮助信息。
@@ -1371,25 +1374,25 @@ run_wait(	IN int8 * path,
 */
 static
 int32
-help(void)
+_ConCmdShowHelpInfo(void)
 {
 	FileObject * fptr = Ifs1OpenFile(SYSTEM_HELP_FILE, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
-		error("Cannot open file '"SYSTEM_HELP_FILE"'!");
+		_ConCmdError("Cannot open file '"SYSTEM_HELP_FILE"'!");
 		return 0;
 	}
 	int8 * text = (char *)alloc_memory(flen(fptr) + 1);
 	if(text == NULL)
 	{
-		error("No enough memory!");
+		_ConCmdError("No enough memory!");
 		Ifs1CloseFile(fptr);
 		return 0;
 	}
 	text[flen(fptr)] = '\0';
 	if(!Ifs1ReadFile(fptr, text, flen(fptr)))
 	{
-		error("Cannot read file '"SYSTEM_HELP_FILE"'!");
+		_ConCmdError("Cannot read file '"SYSTEM_HELP_FILE"'!");
 		Ifs1CloseFile(fptr);
 		return 0;
 	}
@@ -1425,7 +1428,7 @@ help(void)
 }
 
 /**
-	@Function:		reboot
+	@Function:		_ConCmdReboot
 	@Access:		Private
 	@Description:
 		重启计算机。
@@ -1434,7 +1437,7 @@ help(void)
 */
 static
 void
-reboot(void)
+_ConCmdReboot(void)
 {
 	print_str("Killing all tasks...\n");
 	//
@@ -1446,7 +1449,7 @@ reboot(void)
 }
 
 /**
-	@Function:		shutdown
+	@Function:		_ConCmdShutdown
 	@Access:		Private
 	@Description:
 		关闭计算机。
@@ -1455,7 +1458,7 @@ reboot(void)
 */
 static
 void
-shutdown(void)
+_ConCmdShutdown(void)
 {
 	print_str("Killing all tasks...\n");
 	//
@@ -1467,7 +1470,7 @@ shutdown(void)
 }
 
 /**
-	@Function:		vmode
+	@Function:		_ConCmdChangeVideoMode
 	@Access:		Private
 	@Description:
 		修改显示模式。
@@ -1480,7 +1483,7 @@ shutdown(void)
 */
 static
 int32
-vmode(IN int8 * mode)
+_ConCmdChangeVideoMode(IN int8 * mode)
 {
 	FileObject * fptr = NULL;
 	if(strcmp(mode, "text") == 0)
@@ -1511,7 +1514,7 @@ vmode(IN int8 * mode)
 		fptr = Ifs1OpenFile(SYSTEM_PATH"kernelldrs/kernelldrgm_1600_1200.bin", FILE_MODE_READ);
 	else
 	{
-		error(FORMAT(	"vmode {text"
+		_ConCmdError(FORMAT(	"vmode {text"
 						"|vesa320_200|vesa640_400|vesa640_480|vesa800_500"
 						"|vesa800_600|vesa896_672|vesa1024_640|vesa1024_768"
 						"|vesa1152_720|vesa1280_1024|vesa1440_900|vesa1600_1200}"));
@@ -1519,21 +1522,21 @@ vmode(IN int8 * mode)
 	}
 	if(fptr == NULL)
 	{
-		error("Failed to change video mode!");
+		_ConCmdError("Failed to change video mode!");
 		return 0;
 	}
 	uint8 * buffer = alloc_memory((flen(fptr) / 512 + 1) * 512);
 	uint r;
 	if(buffer == NULL || !(r = Ifs1ReadFile(fptr, buffer, flen(fptr))) )
 	{
-		error("Failed to change video mode!");
+		_ConCmdError("Failed to change video mode!");
 		Ifs1CloseFile(fptr);
 		return 0;
 	}
 	Ifs1CloseFile(fptr);
 	if(!write_sectors(SYSTEM_DISK, 1, flen(fptr) / 512 + 1, buffer))
 	{
-		error("Failed to change video mode!");
+		_ConCmdError("Failed to change video mode!");
 		free_memory(buffer);
 		return 0;
 	}
@@ -1546,7 +1549,7 @@ vmode(IN int8 * mode)
 }
 
 /**
-	@Function:		cpuid
+	@Function:		_ConCmdShowCpuInfo
 	@Access:		Private
 	@Description:
 		打印CPU相关信息。
@@ -1557,7 +1560,7 @@ vmode(IN int8 * mode)
 */
 static
 int32
-cpuid(void)
+_ConCmdShowCpuInfo(void)
 {
 	int8 vendor_id_string[13];
 	int8 brand_string[49];
@@ -1668,7 +1671,7 @@ cpuid(void)
 }
 
 /**
-	@Function:		set
+	@Function:		_ConCmdSetProperty
 	@Access:		Private
 	@Description:
 		设置系统属性。
@@ -1683,8 +1686,8 @@ cpuid(void)
 */
 static
 int32
-set(IN int8 * property, 
-	IN int8 * value)
+_ConCmdSetProperty(	IN int8 * property, 
+					IN int8 * value)
 {
 	if(strcmp(property, "cursor_color") == 0)
 		set_cursor_color((uchar)stoi(value));
@@ -1692,7 +1695,7 @@ set(IN int8 * property,
 		set_char_color((uchar)stoi(value));
 	else
 	{
-		error("Failed to set property!");
+		_ConCmdError("Failed to set property!");
 		return 0;
 	}
 	print_str("OK!");
@@ -1700,7 +1703,7 @@ set(IN int8 * property,
 }
 
 /**
-	@Function:		mkslink
+	@Function:		_ConCmdCreateSLink
 	@Access:		Private
 	@Description:
 		创建软链接。
@@ -1717,19 +1720,19 @@ set(IN int8 * property,
 */
 static
 BOOL
-mkslink(IN int8 * path,
-		IN int8 * name,
-		IN int8 * link)
+_ConCmdCreateSLink(	IN int8 * path,
+					IN int8 * name,
+					IN int8 * link)
 {
 	if(strcmp(path, "") == 0 || strcmp(name, "") == 0 || strcmp(link, "") == 0)
 	{
-		error(FORMAT("mkslink {path} {name} {link}"));
+		_ConCmdError(FORMAT("mkslink {path} {name} {link}"));
 		return FALSE;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return FALSE;
 	}
 	if(Ifs1CreateSLink(temp, name, link))
@@ -1739,13 +1742,13 @@ mkslink(IN int8 * path,
 	}
 	else
 	{
-		error("Failed to create a soft link!");
+		_ConCmdError("Failed to create a soft link!");
 		return FALSE;
 	}
 }
 
 /**
-	@Function:		delslink
+	@Function:		_ConCmdDeleteSLink
 	@Access:		Private
 	@Description:
 		删除软链接。
@@ -1758,17 +1761,17 @@ mkslink(IN int8 * path,
 */
 static
 BOOL
-delslink(IN int8 * path)
+_ConCmdDeleteSLink(IN int8 * path)
 {
 	if(strcmp(path, "") == 0)
 	{
-		error(FORMAT("delslink {path}"));
+		_ConCmdError(FORMAT("delslink {path}"));
 		return FALSE;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return FALSE;
 	}
 	if(Ifs1DeleteSLink(temp))
@@ -1778,13 +1781,13 @@ delslink(IN int8 * path)
 	}
 	else
 	{
-		error("Failed to delete a soft link!");
+		_ConCmdError("Failed to delete a soft link!");
 		return FALSE;
 	}
 }
 
 /**
-	@Function:		slink
+	@Function:		_ConCmdShowSLinkTarget
 	@Access:		Private
 	@Description:
 		显示软链接的链接目标。
@@ -1797,17 +1800,17 @@ delslink(IN int8 * path)
 */
 static
 BOOL
-slink(IN int8 * path)
+_ConCmdShowSLinkTarget(IN int8 * path)
 {
 	if(strcmp(path, "") == 0)
 	{
-		error(FORMAT("slink {path}"));
+		_ConCmdError(FORMAT("slink {path}"));
 		return FALSE;
 	}
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return FALSE;
 	}
 	int8 link[1024];
@@ -1819,19 +1822,19 @@ slink(IN int8 * path)
 	}
 	else
 	{
-		error("Failed to show link target of soft link!");
+		_ConCmdError("Failed to show link target of soft link!");
 		return FALSE;
 	}
 }
 
-static int exec(char * cmd, char * lines, uint * pointer, uint line, struct Vars * local_vars_s);
+static int32 _ConExecuteCommand(int8 * cmd, int8 * lines, uint32 * pointer, uint32 line, struct Vars * local_vars_s);
 
 #define	BATCH_MAX_CMD_LEN		1024	//脚本的命令缓冲区的最大长度
 #define	BATCH_MAX_CMD_LINES		1024	//脚本的命令的最大行数
 #define	BATCH_MAX_VARS_COUNT	1024	//脚本的变量的最大数量
 
 /**
-	@Function:		_batch
+	@Function:		__ConExecuteBatchScript
 	@Access:		Private
 	@Description:
 		运行脚本。
@@ -1844,12 +1847,12 @@ static int exec(char * cmd, char * lines, uint * pointer, uint line, struct Vars
 */
 static
 int32
-_batch(IN int8 * path)
+__ConExecuteBatchScript(IN int8 * path)
 {
 	int8 temp[MAX_PATH_BUFFER_LEN];
 	if(!Ifs1GetAbsolutePath(path, current_path, temp))
 	{
-		error("Invalid path!");
+		_ConCmdError("Invalid path!");
 		return 0;
 	}
 	struct Vars * local_vars_s;
@@ -1913,7 +1916,7 @@ _batch(IN int8 * path)
 		}
 
 		int8 * current_cmd = lines + pointer * BATCH_MAX_CMD_LEN;
-		if(!exec(current_cmd, lines, &pointer, line, local_vars_s))
+		if(!_ConExecuteCommand(current_cmd, lines, &pointer, line, local_vars_s))
 		{
 			print_str_p("\nBatch have error. Command:\n\t", CC_RED);
 			print_str_p(current_cmd, CC_RED);
@@ -1938,7 +1941,7 @@ _batch(IN int8 * path)
 }
 
 /**
-	@Function:		batch
+	@Function:		_ConExecuteBatchScript
 	@Access:		Private
 	@Description:
 		运行脚本。
@@ -1952,42 +1955,16 @@ _batch(IN int8 * path)
 */
 static
 int32
-batch(IN int8 * path)
+_ConExecuteBatchScript(IN int8 * path)
 {
 	_run_in_batch = TRUE;
-	int32 r = _batch(path);
+	int32 r = __ConExecuteBatchScript(path);
 	_run_in_batch = FALSE;
 	return r;
 }
 
-static uint32 _ticks = 0;
-
-static
-void
-_test_timer(IN WindowPtr window,
-			IN struct WindowEventParams * params)
-{
-	ASCCHAR buffer[256];
-	uitos(buffer, _ticks);
-	rect_common_image(params->screen, 0, 0, 200, 40, 0xffffffff);
-	text_common_image(	params->screen,
-						0, 
-						0, 
-						get_enfont_ptr(),
-						buffer,
-						strlen(buffer),
-						0xff000000);
-}
-
-static
-void
-_timer_event(void)
-{
-	_ticks++;
-}
-
 /**
-	@Function:		exec
+	@Function:		_ConExecuteCommand
 	@Access:		Private
 	@Description:
 		执行一条命令。
@@ -2008,161 +1985,161 @@ _timer_event(void)
 */
 static
 int32
-exec(	IN int8 * cmd, 
-		IN int8 * lines, 
-		IN OUT uint32 * pointer, 
-		IN uint32 line, 
-		IN struct Vars * local_vars_s)
+_ConExecuteCommand(	IN int8 * cmd, 
+					IN int8 * lines, 
+					IN OUT uint32 * pointer, 
+					IN uint32 line, 
+					IN struct Vars * local_vars_s)
 {
 	int32 r = 1;
 	int8 word[1024];
-	parse_cmd(cmd, word, 1023);
-	if(parse_cmd(NULL, word, 1023) != 0 || strlen(word) != 0)
+	_PARSE_COMMAND(cmd, word, 1023);
+	if(_PARSE_COMMAND(NULL, word, 1023) != 0 || strlen(word) != 0)
 	{
 		int8 * name = word;
 		if(strcmp(name, "ver") == 0)
-			ver();
+			_ConCmdVer();
 		else if(strcmp(name, "print") == 0)
-			if(parse_cmd(NULL, word, 1023) != 0 || strlen(word) != 0)
+			if(_PARSE_COMMAND(NULL, word, 1023) != 0 || strlen(word) != 0)
 			{
-				print(word);
+				_ConCmdPrint(word);
 				r = 1;
 				print_str("\n");
 			}
 			else
 			{
-				error(FORMAT("print {message}"));
+				_ConCmdError(FORMAT("print {message}"));
 				r = 0;			
 			}
 		else if(strcmp(name, "error") == 0)
 		{
-			parse_cmd(NULL, word, 1023);
-			error(word);
+			_PARSE_COMMAND(NULL, word, 1023);
+			_ConCmdError(word);
 			r = 1;
 		}
 		else if(strcmp(name, "disks") == 0)
 		{
-			r = disks();
+			r = _ConCmdShowDiskInfo();
 			print_str("\n");
 		}
 		else if(strcmp(name, "mm") == 0)
 		{
-			r = mm();
+			r = _ConCmdShowMemoryInfo();
 			print_str("\n");
 		}
 		else if(strcmp(name, "date") == 0)
 		{
-			r = date();
+			r = _ConCmdShowDate();
 			print_str("\n");
 		}
 		else if(strcmp(name, "time") == 0)
 		{
-			r = time(1);
+			r = _ConCmdShowTime(1);
 			print_str("\n");
 		}
 		else if(strcmp(name, "dt") == 0)
 		{
-			r = datetime();
+			r = _ConCmdShowDateTime();
 			print_str("\n");
 		}
 		else if(strcmp(name, "setdate") == 0)
 		{
-			parse_cmd(NULL, word, 1023);
-			r = set_date(word);
+			_PARSE_COMMAND(NULL, word, 1023);
+			r = _ConCmdSetDate(word);
 			print_str("\n");
 		}
 		else if(strcmp(name, "settime") == 0)
 		{
-			parse_cmd(NULL, word, 1023);
-			r = set_time(word);
+			_PARSE_COMMAND(NULL, word, 1023);
+			r = _ConCmdSetTime(word);
 			print_str("\n");
 		}
 		else if(strcmp(name, "clock") == 0)
 		{
-			parse_cmd(NULL, word, 1023);
-			r = clock(word);
+			_PARSE_COMMAND(NULL, word, 1023);
+			r = _ConCmdSetClock(word);
 			print_str("\n");
 		}
 		else if(strcmp(name, "format") == 0)
 		{
-			parse_cmd(NULL, word, 1023);
+			_PARSE_COMMAND(NULL, word, 1023);
 			trim(word);
-			r = format(word);
+			r = _ConCmdFormatDisk(word);
 			print_str("\n");
 		}
 		else if(strcmp(name, "cdisk") == 0)
 		{
-			parse_cmd(NULL, word, 1023);
+			_PARSE_COMMAND(NULL, word, 1023);
 			trim(word);
-			r = cdisk(word);
+			r = _ConCmdCheckDisk(word);
 			print_str("\n");
 		}
 		else if(strcmp(name, "mkdir") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
 			int8 name[MAX_DIRNAME_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
-			parse_cmd(NULL, name, MAX_DIRNAME_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, name, MAX_DIRNAME_LEN);
 			trim(path);
 			trim(name);
-			r = mkdir(path, name);
+			r = _ConCmdCreateDir(path, name);
 			print_str("\n");
 		}
 		else if(strcmp(name, "mkfile") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
 			int8 name[MAX_FILENAME_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
-			parse_cmd(NULL, name, MAX_FILENAME_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, name, MAX_FILENAME_LEN);
 			trim(path);
 			trim(name);
-			r = mkfile(path, name);
+			r = _ConCmdCreateFile(path, name);
 			print_str("\n");
 		}
 		else if(strcmp(name, "deldir") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
-			r = deldir(path);
+			r = _ConCmdDeleteDir(path);
 			print_str("\n");
 		}
 		else if(strcmp(name, "deldirs") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
-			r = deldirs(path);
+			r = _ConCmdDeleteDirRecursively(path);
 			print_str("\n");
 		}
 		else if(strcmp(name, "delfile") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
-			r = delfile(path);
+			r = _ConCmdDeleteFile(path);
 			print_str("\n");
 		}
 		else if(strcmp(name, "rndir") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
 			int8 new_name[MAX_DIRNAME_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
-			parse_cmd(NULL, new_name, MAX_DIRNAME_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, new_name, MAX_DIRNAME_LEN);
 			trim(path);
 			trim(new_name);
-			r = rndir(path, new_name);
+			r = _ConCmdRenameDir(path, new_name);
 			print_str("\n");
 		}
 		else if(strcmp(name, "rnfile") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
 			int8 new_name[MAX_FILENAME_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
-			parse_cmd(NULL, new_name, MAX_FILENAME_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, new_name, MAX_FILENAME_LEN);
 			trim(path);
 			trim(new_name);
-			r = rnfile(path, new_name);
+			r = _ConCmdRenameFile(path, new_name);
 			print_str("\n");
 		}
 		else if(strcmp(name, "files") == 0)
@@ -2174,10 +2151,10 @@ exec(	IN int8 * cmd,
 			path[0] = '\0';
 			while(1)
 			{
-				parse_cmd(NULL, word, 1023);
+				_PARSE_COMMAND(NULL, word, 1023);
 				if(strcmp(word, "-d") == 0)
 				{
-					parse_cmd(NULL, path, MAX_PATH_LEN);
+					_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 					trim(path);
 				}
 				else if(strcmp(word, "-s") == 0)
@@ -2188,22 +2165,22 @@ exec(	IN int8 * cmd,
 					break;
 				else
 				{
-					error("Invalid option!");
+					_ConCmdError("Invalid option!");
 					err = 1;
 					r = 0;
 					break;
 				}
 			}
 			if(!err)
-				r = files(path, simple, part);
+				r = _ConCmdShowFileInfo(path, simple, part);
 			print_str("\n");
 		}
 		else if(strcmp(name, "cd") == 0)
 		{
 			int8 path[MAX_PATH_BUFFER_LEN];
-			parse_cmd(NULL, path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
-			r = cd(path);
+			r = _ConCmdChangeDir(path);
 			print_str("\n");
 		}
 		else if(strcmp(name, "cpfile") == 0)
@@ -2211,17 +2188,17 @@ exec(	IN int8 * cmd,
 			int8 src_path[MAX_PATH_BUFFER_LEN];
 			int8 dst_path[MAX_PATH_BUFFER_LEN];
 			int8 dst_name[MAX_FILENAME_BUFFER_LEN];
-			parse_cmd(NULL, src_path, MAX_PATH_LEN);
-			parse_cmd(NULL, dst_path, MAX_PATH_LEN);
-			parse_cmd(NULL, dst_name, MAX_FILENAME_LEN);
-			r = cpfile(src_path, dst_path, dst_name);
+			_PARSE_COMMAND(NULL, src_path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, dst_path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, dst_name, MAX_FILENAME_LEN);
+			r = _ConCmdCopyFile(src_path, dst_path, dst_name);
 			print_str("\n");
 		}
 		else if(strcmp(name, "kill") == 0)
 		{
 			int8 tid_s[30];
-			parse_cmd(NULL, tid_s, 29);
-			r = kill(tid_s);
+			_PARSE_COMMAND(NULL, tid_s, 29);
+			r = _ConCmdKillTask(tid_s);
 			print_str("\n");
 		}
 		else if(strcmp(name, "tasks") == 0)
@@ -2230,26 +2207,26 @@ exec(	IN int8 * cmd,
 			int32 err = 0;
 			while(1)
 			{
-				parse_cmd(NULL, word, 1023);
+				_PARSE_COMMAND(NULL, word, 1023);
 				if(strcmp(word, "-p") == 0)
 					part = 1;
 				else if(strcmp(word, "") == 0)
 					break;
 				else
 				{
-					error("Invalid option!");
+					_ConCmdError("Invalid option!");
 					err = 1;
 					r = 0;
 				}
 			}
 			if(!err)
-				r = tasks(part);
+				r = _ConCmdShowTaskInfo(part);
 			print_str("\n");
 		}
 		else if(strcmp(name, "run") == 0)
 		{
 			int8 src_path[MAX_PATH_BUFFER_LEN];
-			parse_cmd(NULL, src_path, MAX_PATH_LEN);
+			_PARSE_COMMAND(NULL, src_path, MAX_PATH_LEN);
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];
 			int8 path[1024];
@@ -2264,11 +2241,11 @@ exec(	IN int8 * cmd,
 					int8 temp[1024];
 					UtlCopyString(temp, sizeof(temp), path);
 					UtlConcatString(temp, sizeof(temp), src_path);
-					r = run(temp, cmd) == -1 ? 0 : 1;
+					r = _ConCmdExecuteApplication(temp, cmd) == -1 ? 0 : 1;
 					ran = TRUE;
 				}
 			if(!ran)
-				r = run(src_path, cmd) == -1 ? 0 : 1;
+				r = _ConCmdExecuteApplication(src_path, cmd) == -1 ? 0 : 1;
 		}
 		else if(strcmp(name, "clear") == 0)
 		{
@@ -2277,32 +2254,32 @@ exec(	IN int8 * cmd,
 		}
 		else if(strcmp(name, "help") == 0 || strcmp(name, "?") == 0)
 		{
-			help();
+			_ConCmdShowHelpInfo();
 			r = 1;
 			print_str("\n");
 		}
 		else if(strcmp(name, "reboot") == 0)
-			reboot();
+			_ConCmdReboot();
 		else if(strcmp(name, "shutdown") == 0)
-			shutdown();
+			_ConCmdShutdown();
 		else if(strcmp(name, "vmode") == 0)
 		{
-			parse_cmd(NULL, word, 1023);
-			r = vmode(word);
+			_PARSE_COMMAND(NULL, word, 1023);
+			r = _ConCmdChangeVideoMode(word);
 			print_str("\n");
 		}
 		else if(strcmp(name, "cpuid") == 0)
 		{
-			r = cpuid();
+			r = _ConCmdShowCpuInfo();
 			print_str("\n");
 		}
 		else if(strcmp(name, "set") == 0)
 		{
 			int8 property[1024];
 			int8 value[1024];
-			parse_cmd(NULL, property, 1023);
-			parse_cmd(NULL, value, 1023);
-			r = set(property, value);
+			_PARSE_COMMAND(NULL, property, 1023);
+			_PARSE_COMMAND(NULL, value, 1023);
+			r = _ConCmdSetProperty(property, value);
 			print_str("\n");
 		}
 		else if(strcmp(name, "flushlog") == 0)
@@ -2317,24 +2294,24 @@ exec(	IN int8 * cmd,
 			int8 path[1024];
 			int8 name[1024];
 			int8 link[1024];
-			parse_cmd(NULL, path, 1023);
-			parse_cmd(NULL, name, 1023);
-			parse_cmd(NULL, link, 1023);
-			r = mkslink(path, name, link);
+			_PARSE_COMMAND(NULL, path, 1023);
+			_PARSE_COMMAND(NULL, name, 1023);
+			_PARSE_COMMAND(NULL, link, 1023);
+			r = _ConCmdCreateSLink(path, name, link);
 			print_str("\n");
 		}
 		else if(strcmp(name, "delslink") == 0)
 		{
 			int8 path[1024];
-			parse_cmd(NULL, path, 1023);
-			r = delslink(path);
+			_PARSE_COMMAND(NULL, path, 1023);
+			r = _ConCmdDeleteSLink(path);
 			print_str("\n");
 		}
 		else if(strcmp(name, "slink") == 0)
 		{
 			int8 path[1024];
-			parse_cmd(NULL, path, 1023);
-			r = slink(path);
+			_PARSE_COMMAND(NULL, path, 1023);
+			r = _ConCmdShowSLinkTarget(path);
 			print_str("\n");
 		}
 
@@ -2346,7 +2323,7 @@ exec(	IN int8 * cmd,
 			#include <encryptionlib/sha512.h>
 
 			int8 text[1024];
-			parse_cmd(NULL, text, 1023);
+			_PARSE_COMMAND(NULL, text, 1023);
 
 			print_str_p("MD5:    ", CC_GREEN);
 			Md5Context md5_context;
@@ -2411,23 +2388,23 @@ exec(	IN int8 * cmd,
 		{
 			ASCCHAR title[1024];
 			ASCCHAR text[1024];
-			parse_cmd(NULL, title, 1023);
-			parse_cmd(NULL, text, 1023);
-			message_window_show(title,
-								text,
-								MESSAGE_WINDOW_STYLE_CENTER
-								| MESSAGE_WINDOW_STYLE_TOP,
-								0,
-								0,
-								0xff000000,
-								0xffffffff);
+			_PARSE_COMMAND(NULL, title, 1023);
+			_PARSE_COMMAND(NULL, text, 1023);
+			WinMsgShow(	title,
+						text,
+						MESSAGE_WINDOW_STYLE_CENTER
+						| MESSAGE_WINDOW_STYLE_TOP,
+						0,
+						0,
+						0xff000000,
+						0xffffffff);
 		}
 		else if(strcmp(name, "detail") == 0)
 		{
 			ASCCHAR path[1024];
-			parse_cmd(NULL, path, 1023);
+			_PARSE_COMMAND(NULL, path, 1023);
 			Ifs1GetAbsolutePath(path, current_path, path);
-			detail_window_show(path);
+			WinDetailShow(path);
 		}
 		#ifdef _KERNEL_DEBUG_
 		// Kernel Unit Test
@@ -2441,7 +2418,7 @@ exec(	IN int8 * cmd,
 		else if(strcmp(name, "goto") == 0)
 		{
 			uint32 ui;
-			parse_cmd(NULL, word, 1023);
+			_PARSE_COMMAND(NULL, word, 1023);
 			r = 0;
 			for(ui = 0; ui < line; ui++)
 			{
@@ -2462,7 +2439,7 @@ exec(	IN int8 * cmd,
 		{
 			int8 var_name[MAX_VAR_NAME_BUFFER_LEN];
 			int8 var_value[MAX_VAR_VALUE_BUFFER_LEN];
-			parse_cmd_nv(NULL, var_name, MAX_VAR_NAME_LEN);
+			_PARSE_COMMAND_WITHOUT_VAR(NULL, var_name, MAX_VAR_NAME_LEN);
 			if(strlen(var_name) < 2)
 				r = 0;
 			else
@@ -2474,7 +2451,7 @@ exec(	IN int8 * cmd,
 					vars_s = global_vars_s;
 				if(new_var(vars_s, var_name + 1))
 				{
-					parse_cmd_nv(NULL, var_value, MAX_VAR_VALUE_LEN);
+					_PARSE_COMMAND_WITHOUT_VAR(NULL, var_value, MAX_VAR_VALUE_LEN);
 					if(set_var_value(vars_s, var_name + 1, var_value))
 						r = 1;
 					else
@@ -2490,10 +2467,10 @@ exec(	IN int8 * cmd,
 			int32 stack_top = -1;
 			int8 result[1024];
 			double n_r = 0.0;
-			parse_cmd_nv(NULL, result, 1023);
+			_PARSE_COMMAND_WITHOUT_VAR(NULL, result, 1023);
 			while(1)
 			{
-				parse_cmd(NULL, word, 1023);
+				_PARSE_COMMAND(NULL, word, 1023);
 				if(strcmp(word, "") == 0)
 					break;
 				else if(strcmp(word, "seq") == 0)
@@ -2618,9 +2595,9 @@ exec(	IN int8 * cmd,
 			int8 stdout[1024];
 			int8 stderr[1024];
 			int8 app[1024];
-			parse_cmd(NULL, stdin, 1023);
-			parse_cmd(NULL, stdout, 1023);
-			int32 remainedlen = parse_cmd(NULL, stderr, 1023);
+			_PARSE_COMMAND(NULL, stdin, 1023);
+			_PARSE_COMMAND(NULL, stdout, 1023);
+			int32 remainedlen = _PARSE_COMMAND(NULL, stderr, 1023);
 			int32 len = strlen(cmd) - remainedlen;
 			if(strcmp(stdin, "%") != 0)
 				Ifs1GetAbsolutePath(stdin, current_path, stdin);
@@ -2628,7 +2605,7 @@ exec(	IN int8 * cmd,
 				Ifs1GetAbsolutePath(stdout, current_path, stdout);
 			if(strcmp(stderr, "%") != 0)
 				Ifs1GetAbsolutePath(stderr, current_path, stderr);
-			parse_cmd(NULL, app, 1023);
+			_PARSE_COMMAND(NULL, app, 1023);
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];
 			int8 path[1024];
@@ -2665,12 +2642,12 @@ exec(	IN int8 * cmd,
 					int8 temp[1024];
 					UtlCopyString(temp, sizeof(temp), path);
 					UtlConcatString(temp, sizeof(temp), name);
-					r = batch(temp);
+					r = _ConExecuteBatchScript(temp);
 					ran = TRUE;
 					break;
 				}
 			if(!ran)
-				r = batch(name);
+				r = _ConExecuteBatchScript(name);
 		}
 		else
 		{
@@ -2714,7 +2691,7 @@ exec(	IN int8 * cmd,
 }
 
 /**
-	@Function:		call_init_bat
+	@Function:		_ConExecuteInitBatchScript
 	@Access:		Private
 	@Description:
 		调用初始化脚本。
@@ -2723,7 +2700,7 @@ exec(	IN int8 * cmd,
 */
 static
 void
-call_init_bat(void)
+_ConExecuteInitBatchScript(void)
 {
 	int8 buffer[100];
 	//__video_mode__
@@ -2752,11 +2729,11 @@ call_init_bat(void)
 	new_var(global_vars_s, "__slave_ver__");
 	set_var_value(global_vars_s, "__slave_ver__", SLAVE_VER);
 
-	batch(SYSTEM_INIT_BAT);
+	_ConExecuteBatchScript(SYSTEM_INIT_BAT);
 }
 
 /**
-	@Function:		console
+	@Function:		ConEnterConsole
 	@Access:		Public
 	@Description:
 		控制台入口函数。
@@ -2764,29 +2741,29 @@ call_init_bat(void)
 	@Return:		
 */
 void
-console(void)
+ConEnterConsole(void)
 {	
 	int8 command[1024];
 	global_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	struct Vars * local_vars_s;
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
-	call_init_bat();
+	_ConExecuteInitBatchScript();
 	BOOL bvalue = FALSE;
 	if(config_system_console_get_bool("ShowVerInfoWhenBoot", &bvalue) && bvalue)
-		ver();
+		_ConCmdVer();
 	if(config_system_console_get_bool("ShowDiskInfoWhenBoot", &bvalue) && bvalue)
 	{
-		disks();
+		_ConCmdShowDiskInfo();
 		print_str("\n");
 	}
 	if(config_system_console_get_bool("ShowMemoryInfoWhenBoot", &bvalue) && bvalue)
 	{
-		mm();
+		_ConCmdShowMemoryInfo();
 		print_str("\n");
 	}
 	if(config_system_console_get_bool("ShowCPUInfoWhenBoot", &bvalue) && bvalue)
 	{
-		cpuid();
+		_ConCmdShowCpuInfo();
 		print_str("\n");
 	}
 	print_str("\n");
@@ -2805,12 +2782,12 @@ console(void)
 			print_str_p(prompt, prompts_color);
 		}
 		get_strn(command, 1023);
-		exec(command, NULL, 0, 0, local_vars_s);
+		_ConExecuteCommand(command, NULL, 0, 0, local_vars_s);
 	}
 }
 
 /**
-	@Function:		console_clock
+	@Function:		ConUpdateClock
 	@Access:		Public
 	@Description:
 		该函数可以在控制台右上角显示当前日期时间。
@@ -2818,7 +2795,7 @@ console(void)
 	@Return:		
 */
 void
-console_clock(void)
+ConUpdateClock(void)
 {
 	if(enable_clock)
 	{
@@ -2833,16 +2810,16 @@ console_clock(void)
 		for(ui = 0; ui < max_chars; ui++)
 			print_str(" ");
 		set_cursor_pos(startx, 0);
-		date();
+		_ConCmdShowDate();
 		print_str(" ");
-		time(0);
+		_ConCmdShowTime(0);
 		set_cursor_pos(x, y);
 		unlock_cursor();
 	}
 }
 
 /**
-	@Function:		get_wait_app_tid
+	@Function:		ConGetCurrentApplicationTid
 	@Access:		Public
 	@Description:
 		获取控制台正在等待的任务的任务ID。
@@ -2852,13 +2829,13 @@ console_clock(void)
 			控制台正在等待的任务的任务ID。		
 */
 int32
-get_wait_app_tid(void)
+ConGetCurrentApplicationTid(void)
 {
 	return wait_app_tid;
 }
 
 /**
-	@Function:		set_wait_app_tid
+	@Function:		ConSetCurrentApplicationTid
 	@Access:		Public
 	@Description:
 		设置控制台正在等待的任务的任务ID。
@@ -2868,13 +2845,13 @@ get_wait_app_tid(void)
 	@Return:	
 */
 void
-set_wait_app_tid(IN int32 tid)
+ConSetCurrentApplicationTid(IN int32 tid)
 {
 	wait_app_tid = tid;
 }
 
 /**
-	@Function:		set_clock
+	@Function:		ConSetClock
 	@Access:		Public
 	@Description:
 		设置控制台的时钟是否可用。
@@ -2884,13 +2861,13 @@ set_wait_app_tid(IN int32 tid)
 	@Return:	
 */
 void
-set_clock(IN int32 enable)
+ConSetClock(IN int32 enable)
 {
 	enable_clock = enable;
 }
 
 /**
-	@Function:		get_current_path
+	@Function:		ConGetCurrentDir
 	@Access:		Public
 	@Description:
 		获取当前目录路径。
@@ -2901,13 +2878,13 @@ set_clock(IN int32 enable)
 	@Return:	
 */
 void
-get_current_path(OUT int8 * path)
+ConGetCurrentDir(OUT int8 * path)
 {
 	UtlCopyString(path, MAX_PATH_BUFFER_LEN, current_path);
 }
 
 /**
-	@Function:		console_init
+	@Function:		ConInit
 	@Access:		Public
 	@Description:
 		初始化控制台。
@@ -2915,7 +2892,7 @@ get_current_path(OUT int8 * path)
 	@Return:	
 */
 BOOL
-console_init(void)
+ConInit(void)
 {
 	config_system_console_get_bool("ShowClock", &enable_clock);
 	config_system_console_get_string(	"PromptWhenDirIsNotSelected", 
@@ -2933,7 +2910,7 @@ console_init(void)
 }
 
 /**
-	@Function:		exit_batch
+	@Function:		ConExitBatchScript
 	@Access:		Public
 	@Description:
 		退出批处理。
@@ -2941,14 +2918,14 @@ console_init(void)
 	@Return:	
 */
 void
-exit_batch(void)
+ConExitBatchScript(void)
 {
 	if(_run_in_batch)
 		_exit_batch = TRUE;
 }
 
 /**
-	@Function:		console_exec_cmd
+	@Function:		ConExecuteCommand
 	@Access:		Public
 	@Description:
 		执行命令。
@@ -2959,13 +2936,13 @@ exit_batch(void)
 		返回0则失败，否则成功。
 */
 int32
-console_exec_cmd(IN CASCTEXT cmd)
+ConExecuteCommand(IN CASCTEXT cmd)
 {
 	struct Vars * local_vars_s = NULL;
 	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
 	if(local_vars_s == NULL)
 		goto err;
-	int32 r = exec(cmd, NULL, 0, 0, local_vars_s);
+	int32 r = _ConExecuteCommand(cmd, NULL, 0, 0, local_vars_s);
 	free_vars(local_vars_s);
 	return r;
 err:

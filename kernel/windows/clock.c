@@ -30,7 +30,7 @@ static int8 weeks[][10] = {	"Sunday",
 							"Saturday"};
 
 /**
-	@Function:		clock_window_event
+	@Function:		_WinClockEvent
 	@Access:		Private
 	@Description:
 		时钟窗体的事件处理函数。
@@ -43,8 +43,8 @@ static int8 weeks[][10] = {	"Sunday",
 */
 static
 void
-clock_window_event(	IN struct Window * window, 
-					IN struct WindowEventParams * params)
+_WinClockEvent(	IN struct Window * window, 
+				IN struct WindowEventParams * params)
 {
 	/*
 	if(params->event_type == WINDOW_EVENT_PAINT)
@@ -61,7 +61,7 @@ clock_window_event(	IN struct Window * window,
 							WINDOW_HEIGHT, 
 							0xffffffff);
 		struct CMOSDateTime dt;
-		get_cmos_date_time(&dt);
+		CmosGetDateTime(&dt);
 		char buffer[1024] = "";
 		char temp[10];
 		
@@ -90,7 +90,7 @@ clock_window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		init_clock_window
+	@Function:		WinClockInit
 	@Access:		Public
 	@Description:
 		初始化时钟窗体程序。
@@ -100,14 +100,14 @@ clock_window_event(	IN struct Window * window,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-init_clock_window(void)
+WinClockInit(void)
 {
 	clock_window = create_window(	WINDOW_WIDTH, 
 									WINDOW_HEIGHT, 
 									0xffffffff,
 									WINDOW_STYLE_MINIMIZE, 
 									WINDOW_TITLE, 
-									clock_window_event);
+									_WinClockEvent);
 	if(clock_window == NULL)
 		return FALSE;
 
@@ -121,7 +121,7 @@ init_clock_window(void)
 }
 
 /**
-	@Function:		show_clock_window
+	@Function:		WinClockShow
 	@Access:		Public
 	@Description:
 		显示时钟窗体。
@@ -129,7 +129,7 @@ init_clock_window(void)
 	@Return:
 */
 void
-show_clock_window(void)
+WinClockShow(void)
 {
 	clock_window->state = WINDOW_STATE_SHOW;
 }

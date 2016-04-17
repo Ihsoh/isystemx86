@@ -25,7 +25,7 @@ static WindowPtr _window	= NULL;
 static EditPtr _edt_dbgout	= NULL;
 
 /**
-	@Function:		_window_event
+	@Function:		WinDbgoutEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -38,7 +38,7 @@ static EditPtr _edt_dbgout	= NULL;
 */
 static
 void
-_window_event(	IN struct Window * window,
+WinDbgoutEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -58,7 +58,7 @@ _window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		dbgout_window_init
+	@Function:		WinDbgoutInit
 	@Access:		Public
 	@Description:
 		初始化调试输出窗体。
@@ -66,7 +66,7 @@ _window_event(	IN struct Window * window,
 	@Return:
 */
 void
-dbgout_window_init(void)
+WinDbgoutInit(void)
 {
 	_edt_dbgout = NEW(Edit);
 	if(!INIT_EDIT(	_edt_dbgout,
@@ -87,7 +87,7 @@ dbgout_window_init(void)
 								| WINDOW_STYLE_MINIMIZE
 								| WINDOW_STYLE_NO_WMGR,
 							_TITLE,
-							_window_event);
+							WinDbgoutEvent);
 	if(_window == NULL)
 		goto err;
 	return;
@@ -106,7 +106,7 @@ err:
 }
 
 /**
-	@Function:		dbgout_window_show
+	@Function:		WinDbgoutShow
 	@Access:		Public
 	@Description:
 		显示调试输出窗体。
@@ -114,7 +114,7 @@ err:
 	@Return:
 */
 void
-dbgout_window_show(void)
+WinDbgoutShow(void)
 {
 	if(_window == NULL)
 		return;
@@ -122,7 +122,7 @@ dbgout_window_show(void)
 }
 
 /**
-	@Function:		dbgout_window_output
+	@Function:		WinDbgoutOutput
 	@Access:		Public
 	@Description:
 		把文本输出到调试输出窗体的文本框。
@@ -132,7 +132,7 @@ dbgout_window_show(void)
 	@Return:
 */
 void
-dbgout_window_output(IN CASCTEXT text)
+WinDbgoutOutput(IN CASCTEXT text)
 {
 	if(	_edt_dbgout == NULL
 		|| _window == NULL)

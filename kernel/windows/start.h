@@ -14,15 +14,15 @@
 
 extern
 BOOL
-start_window_init(void);
+WinStartInit(void);
 
 extern
 BOOL
-start_window_show(	IN int32 x,
-					IN int32 taskbar_y);
+WinStartShow(	IN int32 x,
+				IN int32 taskbar_y);
 
 extern
 BOOL
-start_window_hide(void);
+WinStartHide(void);
 
 #endif

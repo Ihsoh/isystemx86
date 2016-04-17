@@ -21,12 +21,12 @@
 
 extern
 WindowPtr
-message_window_show(IN CASCTEXT title,
-					IN CASCTEXT text,
-					IN uint32 style,
-					IN int32 x,
-					IN int32 y,
-					IN uint32 color,
-					IN uint32 bgcolor);
+WinMsgShow(	IN CASCTEXT title,
+			IN CASCTEXT text,
+			IN uint32 style,
+			IN int32 x,
+			IN int32 y,
+			IN uint32 color,
+			IN uint32 bgcolor);
 
 #endif

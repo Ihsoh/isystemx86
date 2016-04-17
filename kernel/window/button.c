@@ -20,7 +20,7 @@
 #define	_BUTTON_WIDTH(_btn) (BUTTON_LPADDING + (_btn)->len * ENFONT_WIDTH + BUTTON_RPADDING)
 
 /**
-	@Function:		button_init
+	@Function:		CtrlBtnInit
 	@Access:		Public
 	@Description:
 		初始化Button。
@@ -54,7 +54,7 @@
 			返回TRUE则成功，否则失败。
 */
 BOOL
-button_init(OUT ButtonPtr button,
+CtrlBtnInit(OUT ButtonPtr button,
 			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
@@ -104,7 +104,7 @@ button_init(OUT ButtonPtr button,
 }
 
 /**
-	@Function:		button
+	@Function:		CtrlBtnUpdate
 	@Access:		Public
 	@Description:
 		Button的渲染、事件处理函数。
@@ -122,10 +122,10 @@ button_init(OUT ButtonPtr button,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-button(	IN OUT ButtonPtr button,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top)
+CtrlBtnUpdate(	IN OUT ButtonPtr button,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top)
 {
 	if(button == NULL || image == NULL || params == NULL)
 		return FALSE;
@@ -144,7 +144,7 @@ button(	IN OUT ButtonPtr button,
 	if(button->enabled)
 		event = button->event;
 	else
-		event = __dummy_event;
+		event = CtrlDummyEvent;
 	uint32 len = button->len;
 	uint32 width = 0;
 	if(button->width == 0)
@@ -237,7 +237,7 @@ button(	IN OUT ButtonPtr button,
 }
 
 /**
-	@Function:		button_set_text
+	@Function:		CtrlBtnSetText
 	@Access:		Public
 	@Description:
 		设置Button的文本。
@@ -251,7 +251,7 @@ button(	IN OUT ButtonPtr button,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-button_set_text(OUT ButtonPtr button,
+CtrlBtnSetText(	OUT ButtonPtr button,
 				IN CASCTEXT text)
 {
 	if(	button == NULL

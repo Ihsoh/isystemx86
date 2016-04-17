@@ -67,7 +67,7 @@ log(IN const int8 * type,
 		return;
 	int8 buffer[1024];
 	struct CMOSDateTime dt;
-	get_cmos_date_time(&dt);
+	CmosGetDateTime(&dt);
 	sprintf_s(	buffer,
 				1024,
 				"[%s] %d-%d-%d %d:%d:%d %s\n",

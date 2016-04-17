@@ -41,7 +41,7 @@ static uint32 _offset		= 0;
 static WindowPtr _windows[MAX_WINDOW_COUNT];
 
 /**
-	@Function:		_get_windows
+	@Function:		_WinWmgrGetWindows
 	@Access:		Private
 	@Description:
 		获取指向不包含WINDOW_STYLE_NO_WMGR样式，并且被隐藏的窗体的数组的指针。
@@ -54,7 +54,7 @@ static WindowPtr _windows[MAX_WINDOW_COUNT];
 */
 static
 WindowPtr *
-_get_windows(OUT uint32 * count)
+_WinWmgrGetWindows(OUT uint32 * count)
 {
 	uint32 window_count = 0;
 	WindowPtr * windows = get_windows(&window_count);
@@ -68,7 +68,7 @@ _get_windows(OUT uint32 * count)
 }
 
 /**
-	@Function:		_control_event
+	@Function:		_WinWmgrControlEvent
 	@Access:		Private
 	@Description:
 		控件的事件函数。
@@ -83,9 +83,9 @@ _get_windows(OUT uint32 * count)
 */
 static
 void
-_control_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_WinWmgrControlEvent(	IN uint32 id,
+						IN uint32 type,
+						IN void * param)
 {
 	if(id == _lst_wmgr->id)
 	{
@@ -97,29 +97,29 @@ _control_event(	IN uint32 id,
 				case _ITEM_ID_UP:
 					if(_offset > 0)
 						_offset--;
-					wmgr_window_update(_offset);
+					WinWmgrUpdate(_offset);
 					break;
 				case _ITEM_ID_DOWN:
 				{
 					uint32 window_count = 0;
-					_get_windows(&window_count);
+					_WinWmgrGetWindows(&window_count);
 					if(_offset + _TITLE_COUNT < window_count)
 						_offset++;
-					wmgr_window_update(_offset);
+					WinWmgrUpdate(_offset);
 					break;
 				}
 				case _ITEM_ID_CLOSE:
-					wmgr_window_hide();
+					WinWmgrHide();
 					break;
 				default:
 					if(id >= _ITEM_ID_BEGIN && id <= _ITEM_ID_END)
 					{
 						uint32 windex = _offset + id - _ITEM_ID_BEGIN;
 						uint32 window_count = 0;
-						WindowPtr * windows = _get_windows(&window_count);
+						WindowPtr * windows = _WinWmgrGetWindows(&window_count);
 						if(windex < window_count)
 						{
-							wmgr_window_hide();
+							WinWmgrHide();
 							windows[windex]->state = WINDOW_STATE_SHOW;
 							set_top_window(windows[windex]);
 						}
@@ -131,7 +131,7 @@ _control_event(	IN uint32 id,
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_WinWmgrEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -144,7 +144,7 @@ _control_event(	IN uint32 id,
 */
 static
 void
-_window_event(	IN struct Window * window,
+_WinWmgrEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -153,11 +153,11 @@ _window_event(	IN struct Window * window,
 		LIST(_lst_wmgr, &window->workspace, params, TRUE);
 	}
 	else if(params->event_type == WINDOW_EVENT_UNFOCUS)
-		wmgr_window_hide();
+		WinWmgrHide();
 }
 
 /**
-	@Function:		wmgr_window_init
+	@Function:		WinWmgrInit
 	@Access:		Public
 	@Description:
 		初始化窗体管理器。
@@ -167,7 +167,7 @@ _window_event(	IN struct Window * window,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-wmgr_window_init(void)
+WinWmgrInit(void)
 {
 	_window = create_window(_WIDTH, _HEIGHT,
 							0xff222222,
@@ -175,15 +175,15 @@ wmgr_window_init(void)
 								| WINDOW_STYLE_NO_WMGR
 								| WINDOW_STYLE_NO_BORDER,
 							"Window Manager",
-							_window_event);
+							_WinWmgrEvent);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
 	_lst_wmgr = NEW(List);
-	list_init(	_lst_wmgr, 0,
+	CtrlListInit(	_lst_wmgr, 0,
 				_ITEM_COUNT,
 				0, 0,
 				"",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_control_event);
+				_WinWmgrControlEvent);
 	SET_LIST_TEXT(_lst_wmgr, _ITEM_ID_UP, 		"Up                            ");
 	SET_LIST_TEXT(_lst_wmgr, _ITEM_ID_DOWN, 	"Down                          ");
 	SET_LIST_TEXT(_lst_wmgr, _ITEM_ID_CLOSE,	"Close                         ");
@@ -195,7 +195,7 @@ wmgr_window_init(void)
 }
 
 /**
-	@Function:		wmgr_window_show
+	@Function:		WinWmgrShow
 	@Access:		Public
 	@Description:
 		显示窗体管理器。
@@ -209,19 +209,19 @@ wmgr_window_init(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-wmgr_window_show(	IN int32 x,
-					IN int32 taskbar_y)
+WinWmgrShow(IN int32 x,
+			IN int32 taskbar_y)
 {
 	_window->x = x;
 	_window->y = taskbar_y - _HEIGHT;
 	_window->state = WINDOW_STATE_SHOW;
 	set_top_window(_window);
-	wmgr_window_update(0);
+	WinWmgrUpdate(0);
 	return TRUE;
 }
 
 /**
-	@Function:		wmgr_window_hide
+	@Function:		WinWmgrHide
 	@Access:		Public
 	@Description:
 		隐藏窗体管理器。
@@ -231,14 +231,14 @@ wmgr_window_show(	IN int32 x,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-wmgr_window_hide(void)
+WinWmgrHide(void)
 {
 	_window->state = WINDOW_STATE_HIDDEN;
 	return TRUE;
 }
 
 /**
-	@Function:		_pad
+	@Function:		_WinWmgrRPadString
 	@Access:		Private
 	@Description:
 		如果字符串的长度小于_ITEM_MAX_LEN，
@@ -252,7 +252,7 @@ wmgr_window_hide(void)
 */
 static
 void
-_pad(IN OUT ASCTEXT text)
+_WinWmgrRPadString(IN OUT ASCTEXT text)
 {
 	int32 slen = (int32)strlen(text);
 	if(slen < _ITEM_MAX_LEN)
@@ -272,7 +272,7 @@ _pad(IN OUT ASCTEXT text)
 }
 
 /**
-	@Function:		wmgr_window_update
+	@Function:		WinWmgrUpdate
 	@Access:		Public
 	@Description:
 		更新窗体管理器显示的内容。
@@ -284,10 +284,10 @@ _pad(IN OUT ASCTEXT text)
 	@Return:
 */
 void
-wmgr_window_update(IN uint32 offset)
+WinWmgrUpdate(IN uint32 offset)
 {
 	uint32 window_count = 0;
-	WindowPtr * windows = _get_windows(&window_count);
+	WindowPtr * windows = _WinWmgrGetWindows(&window_count);
 	uint32 index;
 	for(index = _ITEM_ID_BEGIN; index <= _ITEM_ID_END; index++)
 	{
@@ -296,7 +296,7 @@ wmgr_window_update(IN uint32 offset)
 		{
 			ASCCHAR title[sizeof(windows[windex]->title)];
 			UtlCopyString(title, sizeof(title), windows[windex]->title);
-			_pad(title);
+			_WinWmgrRPadString(title);
 			SET_LIST_TEXT(_lst_wmgr, index, title);
 			ENABLE_BUTTON(&_lst_wmgr->buttons[index]);
 		}

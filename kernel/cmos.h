@@ -23,50 +23,50 @@ struct CMOSDateTime
 
 extern 
 BOOL
-get_cmos_date_time(OUT struct CMOSDateTime * dt);
+CmosGetDateTime(OUT struct CMOSDateTime * dt);
 
 extern
 BOOL
-set_cmos_date_time(IN struct CMOSDateTime * dt);
+CmosSetDateTime(IN struct CMOSDateTime * dt);
 
 extern
 BOOL
-set_cmos_date(	IN uint16 year,
+CmosSetDate(	IN uint16 year,
 				IN uint8 month,
 				IN uint8 day);
 
 extern
 BOOL
-set_cmos_time(	IN uint8 hour,
+CmosSetTime(	IN uint8 hour,
 				IN uint8 minute,
 				IN uint8 second);
 
 extern
 BOOL
-get_rtc_state(void);
+CmosGetRtcStatus(void);
 
 extern
 BOOL
-enable_rtc(void);
+CmosEnableRtc(void);
 
 extern
 BOOL
-disable_rtc(void);
+CmosDisableRtc(void);
 
 extern
 BOOL
-set_rtc_rate(uint8 rate);
+CmosSetRtcRate(uint8 rate);
 
 extern
 void
-end_of_rtc(void);
+CmosEndOfRtc(void);
 
 extern
 void
-enable_nmi(void);
+CmosEnableNmi(void);
 
 extern
 void
-disable_nmi(void);
+CmosDisableNmi(void);
 
 #endif

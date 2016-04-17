@@ -15,11 +15,11 @@ extern struct Window * console_window;
 
 extern
 BOOL
-init_console_window(void);
+WinConsoleInit(void);
 
 extern
 void
-show_console_window(void);
+WinConsoleShow(void);
 
 extern
 struct Window *

@@ -54,14 +54,14 @@ typedef struct
 #define	BUTTON_STYLE_REFRESH	0x00000001
 
 #define	INIT_BUTTON(_button, _x, _y, _text, _event)	\
-	(button_init((_button), 0, (_x), (_y), (_text),		\
+	(CtrlBtnInit((_button), 0, (_x), (_y), (_text),		\
 		0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb, (_event), 0, 0))
 
 #define	BUTTON(_button, _image, _params, _top)	\
-	(button((_button), (_image), (_params), (_top)))
+	(CtrlBtnUpdate((_button), (_image), (_params), (_top)))
 
 #define	SET_BUTTON_TEXT(_button, _text)	\
-	(button_set_text((_button), (_text)))
+	(CtrlBtnSetText((_button), (_text)))
 
 #define	ENABLE_BUTTON(_button)	\
 	((_button)->enabled = TRUE)
@@ -77,7 +77,7 @@ typedef struct
 
 extern
 BOOL
-button_init(OUT ButtonPtr button,
+CtrlBtnInit(OUT ButtonPtr button,
 			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
@@ -92,14 +92,14 @@ button_init(OUT ButtonPtr button,
 
 extern
 BOOL
-button(	IN OUT ButtonPtr button,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top);
+CtrlBtnUpdate(	IN OUT ButtonPtr button,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top);
 
 extern
 BOOL
-button_set_text(OUT ButtonPtr button,
+CtrlBtnSetText(	OUT ButtonPtr button,
 				IN CASCTEXT text);
 
 #endif

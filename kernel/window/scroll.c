@@ -19,7 +19,7 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		scroll_init
+	@Function:		CtrlScrlInit
 	@Access:		Public
 	@Description:
 		初始化Scroll。
@@ -53,18 +53,18 @@
 			返回TRUE则成功，否则失败。
 */
 BOOL
-scroll_init(OUT ScrollPtr scroll,
-			IN uint32 id,
-			IN uint32 value,
-			IN uint32 min,
-			IN uint32 max,
-			IN uint32 x,
-			IN uint32 y,
-			IN uint32 width,
-			IN uint32 height,
-			IN uint32 color,
-			IN uint32 bgcolor,
-			IN ControlEvent event)
+CtrlScrlInit(	OUT ScrollPtr scroll,
+				IN uint32 id,
+				IN uint32 value,
+				IN uint32 min,
+				IN uint32 max,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 width,
+				IN uint32 height,
+				IN uint32 color,
+				IN uint32 bgcolor,
+				IN ControlEvent event)
 {
 	if(	scroll == NULL
 		|| min >= max
@@ -100,7 +100,7 @@ scroll_init(OUT ScrollPtr scroll,
 }
 
 /**
-	@Function:		scroll
+	@Function:		CtrlScrlUpdate
 	@Access:		Public
 	@Description:
 		Scroll的渲染、事件处理函数。
@@ -118,10 +118,10 @@ scroll_init(OUT ScrollPtr scroll,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-scroll(	IN OUT ScrollPtr scroll,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top)
+CtrlScrlUpdate(	IN OUT ScrollPtr scroll,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				IN BOOL top)
 {
 	if(scroll == NULL || image == NULL || params == NULL)
 		return FALSE;
@@ -188,7 +188,7 @@ scroll(	IN OUT ScrollPtr scroll,
 }
 
 /**
-	@Function:		scroll_set_value
+	@Function:		CtrlScrlSetValue
 	@Access:		Public
 	@Description:
 		设置Scroll的值。
@@ -202,7 +202,7 @@ scroll(	IN OUT ScrollPtr scroll,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-scroll_set_value(	IN OUT ScrollPtr scroll,
+CtrlScrlSetValue(	IN OUT ScrollPtr scroll,
 					IN uint32 value)
 {
 	if(	scroll == NULL

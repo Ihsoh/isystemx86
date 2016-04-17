@@ -174,7 +174,7 @@ get_disk_size(IN int8 * symbol)
 	else if(strcmp(symbol, "VS") == 0)
 		return get_disk_size(EXPLICIT_SYSTEM_DISK);
 	else if(_is_atasym(symbol))
-		return ata_sector_count(symbol);
+		return AtaGetSectorCount(symbol);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
@@ -183,7 +183,7 @@ get_disk_size(IN int8 * symbol)
 	else if(_is_ahcisym(symbol))
 	{
 		uint32 portno = _ahcisym2portno(symbol);
-		return (uint32)((uint64)ahci_sector_count(portno) * 512UL / 1024UL);
+		return (uint32)((uint64)AhciGetSectorCount(portno) * 512UL / 1024UL);
 	}
 	else
 		return 0;
@@ -259,7 +259,7 @@ init_disk(IN int8 * symbol)
 	else if(strcmp(symbol, "HD") == 0)
 	{
 		// ATA。
-		uint32 r = ata_init();
+		uint32 r = AtaInit();
 		if(r & ATA_DISK0)
 		{
 			_INIT_DISK_RWBYTES(disk_count);
@@ -282,11 +282,11 @@ init_disk(IN int8 * symbol)
 		}
 
 		// AHCI。
-		if(ahci_init())
+		if(AhciInit())
 		{
 			ASCCHAR sym[3] = {'S', 'A', '\0'};
 			uint32 ui;
-			for(ui = 0; ui < ahci_port_count() && ui < 26; ui++, sym[1]++)
+			for(ui = 0; ui < AhciGetPortCount() && ui < 26; ui++, sym[1]++)
 			{
 				_INIT_DISK_RWBYTES(disk_count);
 				UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, sym);
@@ -346,7 +346,7 @@ sector_count(IN int8 * symbol)
 	else if(strcmp(symbol, "VS") == 0)
 		return sector_count(EXPLICIT_SYSTEM_DISK);
 	else if(_is_atasym(symbol))
-		return ata_sector_count(symbol);
+		return AtaGetSectorCount(symbol);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
@@ -355,7 +355,7 @@ sector_count(IN int8 * symbol)
 	else if(_is_ahcisym(symbol))
 	{
 		uint32 portno = _ahcisym2portno(symbol);
-		return ahci_sector_count(portno);
+		return AhciGetSectorCount(portno);
 	}
 	else 
 		return 0;
@@ -461,31 +461,31 @@ read_sector(IN int8 * symbol,
 	else if(strcmp(symbol, "VS") == 0)
 		r = read_sector(EXPLICIT_SYSTEM_DISK, pos, buffer);
 	else if(_is_atasym(symbol))
-		r = ata_device_read_sector(symbol, pos, buffer);
+		r = AtaReadSector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0)
-		r = atapi_read_sector512(	ATA_BUS_PRIMARY,
+		r = AtapiReadSector512(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_MASTER,
 									pos,
 									buffer);
 	else if(strcmp(symbol, "CB") == 0)
-		r = atapi_read_sector512(	ATA_BUS_PRIMARY,
+		r = AtapiReadSector512(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_SLAVE,
 									pos,
 									buffer);
 	else if(strcmp(symbol, "CC") == 0)
-		r = atapi_read_sector512(	ATA_BUS_SECONDARY,
+		r = AtapiReadSector512(	ATA_BUS_SECONDARY,
 									ATA_DRIVE_MASTER,
 									pos,
 									buffer);
 	else if(strcmp(symbol, "CD") == 0)
-		r = atapi_read_sector512(	ATA_BUS_SECONDARY,
+		r = AtapiReadSector512(	ATA_BUS_SECONDARY,
 									ATA_DRIVE_SLAVE,
 									pos,
 									buffer);
 	else if(_is_ahcisym(symbol))
 	{
 		uint32 portno = _ahcisym2portno(symbol);
-		r = ahci_read(portno, pos, 0, 1, (WORD *)buffer);
+		r = AhciRead(portno, pos, 0, 1, (WORD *)buffer);
 	}
 	else
 		return FALSE;
@@ -526,7 +526,7 @@ write_sector(	IN int8 * symbol,
 	else if(strcmp(symbol, "VS") == 0)
 		r = write_sector(EXPLICIT_SYSTEM_DISK, pos, buffer);
 	else if(_is_atasym(symbol))
-		r = ata_device_write_sector(symbol, pos, buffer);
+		r = AtaWriteSector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
@@ -535,7 +535,7 @@ write_sector(	IN int8 * symbol,
 	else if(_is_ahcisym(symbol))
 	{
 		uint32 portno = _ahcisym2portno(symbol);
-		r = ahci_write(portno, pos, 0, 1, (WORD *)buffer);
+		r = AhciWrite(portno, pos, 0, 1, (WORD *)buffer);
 	}
 	else
 		return FALSE;
@@ -579,27 +579,27 @@ read_sectors(	IN int8 * symbol,
 	else if(strcmp(symbol, "VS") == 0)
 		r = read_sectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
 	else if(_is_atasym(symbol))
-		r = ata_device_read_sectors(symbol, pos, count, buffer);
+		r = AtaReadSectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0)
-		r = atapi_read_sector512s(	ATA_BUS_PRIMARY,
+		r = AtapiReadSector512s(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_MASTER,
 									pos,
 									count,
 									buffer);
 	else if(strcmp(symbol, "CB") == 0)
-		r = atapi_read_sector512s(	ATA_BUS_PRIMARY,
+		r = AtapiReadSector512s(	ATA_BUS_PRIMARY,
 									ATA_DRIVE_SLAVE,
 									pos,
 									count,
 									buffer);
 	else if(strcmp(symbol, "CC") == 0)
-		r = atapi_read_sector512s(	ATA_BUS_SECONDARY,
+		r = AtapiReadSector512s(	ATA_BUS_SECONDARY,
 									ATA_DRIVE_MASTER,
 									pos,
 									count,
 									buffer);
 	else if(strcmp(symbol, "CD") == 0)
-		r = atapi_read_sector512s(	ATA_BUS_SECONDARY,
+		r = AtapiReadSector512s(	ATA_BUS_SECONDARY,
 									ATA_DRIVE_SLAVE,
 									pos,
 									count,
@@ -607,7 +607,7 @@ read_sectors(	IN int8 * symbol,
 	else if(_is_ahcisym(symbol))
 	{
 		uint32 portno = _ahcisym2portno(symbol);
-		r = ahci_read(portno, pos, 0, count, (WORD *)buffer);
+		r = AhciRead(portno, pos, 0, count, (WORD *)buffer);
 	}
 	else 
 		return FALSE;
@@ -651,7 +651,7 @@ write_sectors(	IN int8 * symbol,
 	else if(strcmp(symbol, "VS") == 0)
 		r = write_sectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
 	else if(_is_atasym(symbol))
-		r = ata_device_write_sectors(symbol, pos, count, buffer);
+		r = AtaWriteSectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
@@ -660,7 +660,7 @@ write_sectors(	IN int8 * symbol,
 	else if(_is_ahcisym(symbol))
 	{
 		uint32 portno = _ahcisym2portno(symbol);
-		r = ahci_write(portno, pos, 0, count, (WORD *)buffer);
+		r = AhciWrite(portno, pos, 0, count, (WORD *)buffer);
 	}
 	else
 		return FALSE;

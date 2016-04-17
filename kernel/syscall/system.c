@@ -50,8 +50,8 @@ _ScSysProcess(	IN uint32 func,
 
 			kill_sys_task(tid);
 
-			if(tid == get_wait_app_tid())
-				set_wait_app_tid(-1);
+			if(tid == ConGetCurrentApplicationTid())
+				ConSetCurrentApplicationTid(-1);
 			break;
 		}
 		//分配内存
@@ -172,7 +172,7 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_GET_DATETIME:
 		{
 			struct CMOSDateTime * dt = (struct CMOSDateTime *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			get_cmos_date_time(dt);
+			CmosGetDateTime(dt);
 			break;
 		}
 		//设置时钟
@@ -181,7 +181,7 @@ _ScSysProcess(	IN uint32 func,
 		//	Param0=0为禁用时钟, 否则启用时钟
 		case SCALL_SET_CLOCK:
 		{
-			set_clock(sparams->param0);
+			ConSetClock(sparams->param0);
 			break;
 		}
 		//服务端，创建消息队列
@@ -321,9 +321,9 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_RUN_IN_BG:
 		{
 			BOOL r = FALSE;
-			if(get_wait_app_tid() == sparams->tid)
+			if(ConGetCurrentApplicationTid() == sparams->tid)
 			{
-				set_wait_app_tid(-1);
+				ConSetCurrentApplicationTid(-1);
 				r = TRUE;
 			}
 			sparams->param0 = SPARAM(r);
@@ -368,7 +368,7 @@ _ScSysProcess(	IN uint32 func,
 					break;
 				}
 			int8 cpath[1024];
-			get_current_path(cpath);
+			ConGetCurrentDir(cpath);
 			int32 new_task_tid = create_task_by_file(path, buffer, cpath);
 			if(new_task_tid != -1)
 			{

@@ -13,18 +13,18 @@
 
 extern
 void
-taskmgr_window_init(void);
+WinTskmgrInit(void);
 
 extern
 void
-taskmgr_window_show(void);
+WinTskmgrShow(void);
 
 extern
 void
-taskmgr_window_hide(void);
+WinTskmgrHide(void);
 
 extern
 void
-taskmgr_window_update(IN uint32 offset);
+WinTskmgrUpdate(IN uint32 offset);
 
 #endif

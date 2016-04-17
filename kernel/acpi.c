@@ -20,7 +20,7 @@ uint16 slp_type_b = 0;
 static struct FADT * fadt = NULL;
 
 /**
-	@Function:		acpi_init
+	@Function:		AcpiInit
 	@Access:		Public
 	@Description:
 		初始化 ACPI。
@@ -30,7 +30,7 @@ static struct FADT * fadt = NULL;
 			初始化成功则返回 TRUE，否则返回 FALSE。
 */
 BOOL
-acpi_init(void)
+AcpiInit(void)
 {
 	if(fadt_init())
 	{
@@ -73,17 +73,17 @@ acpi_init(void)
 			return FALSE;
 
 		//开启ACPI
-		outb((uint16)(fadt->smi_command_port), fadt->acpi_enable);
+		KnlOutByte((uint16)(fadt->smi_command_port), fadt->acpi_enable);
 		BOOL ok = FALSE;
 		for(ui = 0; ui < 0x000fffff; ui++)
-			if((inw((uint16)(fadt->pm1a_control_block)) & SCI_EN) == 1)
+			if((KnlInWord((uint16)(fadt->pm1a_control_block)) & SCI_EN) == 1)
 			{
 				ok = TRUE;
 				break;
 			}
 		if(fadt->pm1b_control_block != 0)
 			for(ui = 0; ui < 0x000fffff; ui++)
-				if((inw((uint16)(fadt->pm1b_control_block)) & SCI_EN) == 1)
+				if((KnlInWord((uint16)(fadt->pm1b_control_block)) & SCI_EN) == 1)
 				{
 					ok = TRUE;
 					break;
@@ -98,7 +98,7 @@ acpi_init(void)
 }
 
 /**
-	@Function:		acpi_power_off
+	@Function:		AcpiPowerOff
 	@Access:		Public
 	@Description:
 		ACPI 关机。
@@ -108,12 +108,12 @@ acpi_init(void)
 			始终返回 FALSE。		
 */
 BOOL
-acpi_power_off(void)
+AcpiPowerOff(void)
 {
 	if(fadt == NULL)
 		return FALSE;
- 	outw((uint16)(fadt->pm1a_control_block), slp_type_a | SLP_EN);
+ 	KnlOutWord((uint16)(fadt->pm1a_control_block), slp_type_a | SLP_EN);
  	if(fadt->pm1b_control_block != 0)
- 		outw((uint16)(fadt->pm1b_control_block), slp_type_b | SLP_EN);
+ 		KnlOutWord((uint16)(fadt->pm1b_control_block), slp_type_b | SLP_EN);
 	return FALSE;
 }

@@ -13,14 +13,14 @@
 
 extern
 void
-dbgout_window_init(void);
+WinDbgoutInit(void);
 
 extern
 void
-dbgout_window_show(void);
+WinDbgoutShow(void);
 
 extern
 void
-dbgout_window_output(IN CASCTEXT text);
+WinDbgoutOutput(IN CASCTEXT text);
 
 #endif

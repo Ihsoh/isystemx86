@@ -1818,7 +1818,7 @@ gui_enable_list_item(	IN int32 tid,
 {
 	_WINSTANCE_FALSE
 	_CONTROL_FALSE
-	return list_enable_item((ListPtr)control, index);
+	return CtrlListEnableItem((ListPtr)control, index);
 }
 
 /**
@@ -1846,7 +1846,7 @@ gui_disable_list_item(	IN int32 tid,
 {
 	_WINSTANCE_FALSE
 	_CONTROL_FALSE
-	return list_disable_item((ListPtr)control, index);
+	return CtrlListDisableItem((ListPtr)control, index);
 }
 
 /**

@@ -13,10 +13,10 @@
 
 extern
 BOOL
-init_sfunc_window(void);
+WinSfuncInit(void);
 
 extern
 void
-show_sfunc_window(void);
+WinSfuncShow(void);
 
 #endif

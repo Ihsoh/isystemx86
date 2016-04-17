@@ -13,39 +13,39 @@
 
 extern
 void
-console(void);
+ConEnterConsole(void);
 
 extern
 void
-console_clock(void);
+ConUpdateClock(void);
 
 extern
 int32
-get_wait_app_tid(void);
+ConGetCurrentApplicationTid(void);
 
 extern
 void
-set_wait_app_tid(int32 tid);
+ConSetCurrentApplicationTid(int32 tid);
 
 extern
 void
-set_clock(int32 enable);
+ConSetClock(int32 enable);
 
 extern
 void
-get_current_path(OUT int8 * path);
+ConGetCurrentDir(OUT int8 * path);
 
 extern
 BOOL
-console_init(void);
+ConInit(void);
 
 extern
 void
-exit_batch(void);
+ConExitBatchScript(void);
 
 extern
 int32
-console_exec_cmd(IN CASCTEXT cmd);
+ConExecuteCommand(IN CASCTEXT cmd);
 
 DEFINE_LOCK_EXTERN(console)
 

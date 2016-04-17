@@ -13,10 +13,10 @@
 
 extern
 BOOL
-detail_window_init(void);
+WinDetailInit(void);
 
 extern
 BOOL
-detail_window_show(IN CASCTEXT path);
+WinDetailShow(IN CASCTEXT path);
 
 #endif

@@ -32,7 +32,7 @@ static EditPtr _edt_cmd;
 static ButtonPtr _btn_run;
 
 /**
-	@Function:		run_window_init
+	@Function:		WinRunInit
 	@Access:		Public
 	@Description:
 		初始化运行窗体。
@@ -40,7 +40,7 @@ static ButtonPtr _btn_run;
 	@Return:
 */
 void
-run_window_init(void)
+WinRunInit(void)
 {
 	_window = NULL;
 	_edt_cmd = NULL;
@@ -48,7 +48,7 @@ run_window_init(void)
 }
 
 /**
-	@Function:		_run_cmd
+	@Function:		_WinRunExecuteCommand
 	@Access:		Private
 	@Description:
 		运行文本框中的命令。
@@ -57,16 +57,16 @@ run_window_init(void)
 */
 static
 void
-_run_cmd(void)
+_WinRunExecuteCommand(void)
 {
 	ASCCHAR cmd[1024];
-	if(edit_get_text(_edt_cmd, cmd, sizeof(cmd)))
-		console_exec_cmd(cmd);
+	if(CtrlEditGetText(_edt_cmd, cmd, sizeof(cmd)))
+		ConExecuteCommand(cmd);
 	_window->state = WINDOW_STATE_HIDDEN;
 }
 
 /**
-	@Function:		_control_event
+	@Function:		_WinRunControlEvent
 	@Access:		Private
 	@Description:
 		控件的事件函数。
@@ -81,14 +81,14 @@ _run_cmd(void)
 */
 static
 void
-_control_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_WinRunControlEvent(IN uint32 id,
+					IN uint32 type,
+					IN void * param)
 {
 	if(id == _btn_run->id)
 	{
 		if(type == BUTTON_LBUP)
-			_run_cmd();
+			_WinRunExecuteCommand();
 	}
 	else if(id == _edt_cmd->id)
 	{
@@ -96,13 +96,13 @@ _control_event(	IN uint32 id,
 		{
 			uint32 * data = (uint32 *)param;
 			if(data[0] == '\n')
-				_run_cmd();
+				_WinRunExecuteCommand();
 		}
 	}
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_WinRunEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -115,7 +115,7 @@ _control_event(	IN uint32 id,
 */
 static
 void
-_window_event(	IN struct Window * window,
+_WinRunEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -136,7 +136,7 @@ _window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		run_window_show
+	@Function:		WinRunShow
 	@Access:		Public
 	@Description:
 		显示运行窗体。
@@ -146,7 +146,7 @@ _window_event(	IN struct Window * window,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-run_window_show(void)
+WinRunShow(void)
 {
 	if(_window == NULL)
 	{
@@ -154,7 +154,7 @@ run_window_show(void)
 								0xffffffff,
 								WINDOW_STYLE_CLOSE | WINDOW_STYLE_MINIMIZE,
 								_TITLE,
-								_window_event);
+								_WinRunEvent);
 		if(_window == NULL)
 			return FALSE;
 		_window->x = 0;
@@ -166,13 +166,13 @@ run_window_show(void)
 					1,
 					_COLUMN,
 					EDIT_STYLE_SINGLE_LINE,
-					_control_event);
+					_WinRunControlEvent);
 		_btn_run = NEW(Button);
 		INIT_BUTTON(_btn_run,
 					0,
 					0,
 					"Run",
-					_control_event);
+					_WinRunControlEvent);
 		_btn_run->x = _WIDTH - 10 - GET_BUTTON_WIDTH(_btn_run);
 		_btn_run->y = _HEIGHT - 10 - GET_BUTTON_HEIGHT(_btn_run);
 	}

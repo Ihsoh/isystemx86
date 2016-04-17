@@ -94,7 +94,7 @@ static uint32 ioapic_address = 0;
 static BOOL apic_timer_disabled = FALSE;
 
 /**
-	@Function:		ioapic_write_register
+	@Function:		_IoApicWriteRegister
 	@Access:		Private
 	@Description:
 		写 I/O APIC 的寄存器。
@@ -107,7 +107,7 @@ static BOOL apic_timer_disabled = FALSE;
 */
 static
 void
-ioapic_write_register(	IN uint32 reg,
+_IoApicWriteRegister(	IN uint32 reg,
 						IN uint32 value)
 {
 	uint32 volatile * ioapic = (uint32 *)ioapic_address;
@@ -116,7 +116,7 @@ ioapic_write_register(	IN uint32 reg,
 }
 
 /**
-	@Function:		ioapic_read_register
+	@Function:		_IoApicReadRegister
 	@Access:		Private
 	@Description:
 		读 I/O APIC 的寄存器。
@@ -129,7 +129,7 @@ ioapic_write_register(	IN uint32 reg,
 */
 static
 uint32
-ioapic_read_register(IN uint32 reg)
+_IoApicReadRegister(IN uint32 reg)
 {
 	uint32 volatile * ioapic = (uint32 *)ioapic_address;
 	ioapic[0] = reg & 0xff;
@@ -137,7 +137,7 @@ ioapic_read_register(IN uint32 reg)
 }
 
 /**
-	@Function:		lapic_write_register
+	@Function:		_LApicWriteRegister
 	@Access:		Private
 	@Description:
 		写 Local APIC 的寄存器。
@@ -150,15 +150,15 @@ ioapic_read_register(IN uint32 reg)
 */
 static
 void
-lapic_write_register(	IN uint32 reg,
-						IN uint32 value)
+_LApicWriteRegister(IN uint32 reg,
+					IN uint32 value)
 {
 	uint8 * lapic = (uint8 *)lapic_address;
 	*(uint32 *)(lapic + reg) = value;
 }
 
 /**
-	@Function:		lapic_read_register
+	@Function:		_LApicReadRegister
 	@Access:		Private
 	@Description:
 		读 Local APIC 的寄存器。
@@ -171,14 +171,14 @@ lapic_write_register(	IN uint32 reg,
 */
 static
 uint32
-lapic_read_register(IN uint32 reg)
+_LApicReadRegister(IN uint32 reg)
 {
 	uint8 * lapic = (uint8 *)lapic_address;
 	return *(uint32 *)(lapic + reg);
 }
 
 /**
-	@Function:		apic_init
+	@Function:		ApicInit
 	@Access:		Public
 	@Description:
 		初始化 APIC。
@@ -188,7 +188,7 @@ lapic_read_register(IN uint32 reg)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-apic_init(void)
+ApicInit(void)
 {
 	if(!madt_init())
 		return FALSE;
@@ -197,7 +197,7 @@ apic_init(void)
 	if(e == NULL)
 		return FALSE;
 	ioapic_address = e->ioapic_address;
-	uint32 ioapicver = ioapic_read_register(IOAPIC_REG_VER);
+	uint32 ioapicver = _IoApicReadRegister(IOAPIC_REG_VER);
 	apic_ver = (uint8)ioapicver;
 	apic_irq_count = (uint8)((ioapicver >> 16) & 0xff) + 1;
 	uint8 irq;
@@ -229,14 +229,14 @@ apic_init(void)
 				| (0x00 << 16);		// Interrupt Mask, Not Masked
 			h =						// Reserved
 				(0x00 << 24);		// Destination Field, APIC ID = 0
-			ioapic_write_register(lindex, l);
-			ioapic_write_register(hindex, h);
+			_IoApicWriteRegister(lindex, l);
+			_IoApicWriteRegister(hindex, h);
 		}
 	return TRUE;
 }
 
 /**
-	@Function:		apic_set_base
+	@Function:		_ApicSetBase
 	@Access:		Private
 	@Description:
 		为 Local APIC 寄存器设置物理地址。
@@ -247,15 +247,15 @@ apic_init(void)
 */
 static
 void
-apic_set_base(IN uint32 apic)
+_ApicSetBase(IN uint32 apic)
 {
 	uint32 edx = 0;
 	uint32 eax = (apic & 0xfffff100) | IA32_APIC_BASE_MSR_ENABLE;
-	set_msr(IA32_APIC_BASE_MSR, eax, edx);
+	KnlSetCpuMSR(IA32_APIC_BASE_MSR, eax, edx);
 }
 
 /**
-	@Function:		apic_get_base
+	@Function:		_ApicGetBase
 	@Access:		Private
 	@Description:
 		获取 Local APIC 寄存器页的物理地址。
@@ -266,15 +266,15 @@ apic_set_base(IN uint32 apic)
 */
 static
 uint32
-apic_get_base(void)
+_ApicGetBase(void)
 {
 	uint32 eax, edx;
-	get_msr(IA32_APIC_BASE_MSR, &eax, &edx);
+	KnlGetCpuMSR(IA32_APIC_BASE_MSR, &eax, &edx);
 	return eax & 0xfffff000;
 }
 
 /**
-	@Function:		apic_enable
+	@Function:		ApicEnable
 	@Access:		Public
 	@Description:
 		启用 APIC。
@@ -284,17 +284,17 @@ apic_get_base(void)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-apic_enable(void)
+ApicEnable(void)
 {
-	apic_set_base(apic_get_base());
-	lapic_write_register(	LAPIC_REG_SPRS_INT_VEC, 
-							lapic_read_register(LAPIC_REG_SPRS_INT_VEC) | 0x100);
+	_ApicSetBase(_ApicGetBase());
+	_LApicWriteRegister(	LAPIC_REG_SPRS_INT_VEC, 
+							_LApicReadRegister(LAPIC_REG_SPRS_INT_VEC) | 0x100);
 	apic_ok = TRUE;
 	return TRUE;
 }
 
 /**
-	@Function:		apic_stop_timer
+	@Function:		ApicStopTimer
 	@Access:		Public
 	@Description:
 		停止计时器。
@@ -304,16 +304,16 @@ apic_enable(void)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-apic_stop_timer(void)
+ApicStopTimer(void)
 {
 	if(!apic_ok)
 		return FALSE;
-	lapic_write_register(LAPIC_LVT_TIMER, 0);
+	_LApicWriteRegister(LAPIC_LVT_TIMER, 0);
 	return TRUE;
 }
 
 /**
-	@Function:		apic_start_timer
+	@Function:		ApicStartTimer
 	@Access:		Public
 	@Description:
 		开始计时器。
@@ -323,18 +323,18 @@ apic_stop_timer(void)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-apic_start_timer(void)
+ApicStartTimer(void)
 {
 	if(!apic_ok)
 		return FALSE;
-	lapic_write_register(LAPIC_INIT_COUNT, LTIMER_DEFAULT_COUNT);
-	lapic_write_register(LAPIC_DIVIDE_CONFIG, LTIMER_DIVIDE_BY_16);
-	lapic_write_register(LAPIC_LVT_TIMER, LTIMER_PERIODIC | 0x40);
+	_LApicWriteRegister(LAPIC_INIT_COUNT, LTIMER_DEFAULT_COUNT);
+	_LApicWriteRegister(LAPIC_DIVIDE_CONFIG, LTIMER_DIVIDE_BY_16);
+	_LApicWriteRegister(LAPIC_LVT_TIMER, LTIMER_PERIODIC | 0x40);
 	return TRUE;
 }
 
 /**
-	@Function:		apic_is_enable
+	@Function:		ApicIsEnabled
 	@Access:		Public
 	@Description:
 		确认 APIC 是否已经启用。
@@ -344,13 +344,13 @@ apic_start_timer(void)
 			返回 TRUE 则已启用，否则未启用。
 */
 BOOL
-apic_is_enable(void)
+ApicIsEnabled(void)
 {
 	return apic_ok;
 }
 
 /**
-	@Function:		apic_eoi
+	@Function:		ApicEOI
 	@Access:		Public
 	@Description:
 		End Of Interrupt。
@@ -360,11 +360,11 @@ apic_is_enable(void)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-apic_eoi(void)
+ApicEOI(void)
 {
 	if(apic_ok)
 	{
-		lapic_write_register(LAPIC_REG_EOI, 0);
+		_LApicWriteRegister(LAPIC_REG_EOI, 0);
 		return TRUE;
 	}
 	return FALSE;

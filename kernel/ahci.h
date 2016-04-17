@@ -277,31 +277,31 @@ typedef volatile struct
 
 extern
 BOOL
-ahci_locked(void);
+AhciIsLocked(void);
 
 extern
 int32
-ahci_lock_tid(void);
+AhciGetLockTid(void);
 
 extern
 void
-ahci_attempt_to_unlock(IN int32 tid);
+AhciAttemptToUnlock(IN int32 tid);
 
 extern
 uint32
-ahci_port_count(void);
+AhciGetPortCount(void);
 
 extern
 HBA_PORT *
-ahci_port(IN uint32 index);
+AhciGetPort(IN uint32 index);
 
 extern
 uint64
-ahci_sector_count(IN uint32 portno);
+AhciGetSectorCount(IN uint32 portno);
 
 extern
 BOOL
-ahci_read(	IN uint32 portno,
+AhciRead(	IN uint32 portno,
 			IN DWORD startl,
 			IN DWORD starth,
 			IN DWORD count,
@@ -309,7 +309,7 @@ ahci_read(	IN uint32 portno,
 
 extern
 BOOL
-ahci_write(	IN uint32 portno,
+AhciWrite(	IN uint32 portno,
 			IN DWORD startl,
 			IN DWORD starth,
 			IN DWORD count,
@@ -317,6 +317,6 @@ ahci_write(	IN uint32 portno,
 
 extern
 BOOL
-ahci_init(void);
+AhciInit(void);
 
 #endif

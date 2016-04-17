@@ -32,79 +32,79 @@ typedef	struct
 } List, * ListPtr;
 
 #define	INIT_LIST(_list, _count, _x, _y, _text, _event)	\
-	(list_init((_list), 0, (_count), (_x), (_y), (_text), 0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb, (_event)))
+	(CtrlListInit((_list), 0, (_count), (_x), (_y), (_text), 0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb, (_event)))
 
 #define	LIST(_list, _image, _params, _top)	\
-	(list((_list), (_image), (_params), (_top)))
+	(CtrlListUpdate((_list), (_image), (_params), (_top)))
 
 #define	SET_LIST_TEXT(_list, _index, _text)	\
-	(list_set_text((_list), (_index), (_text)))
+	(CtrlListSetText((_list), (_index), (_text)))
 
 #define	ENABLE_LIST(_list)	\
-	(list_enable((_list)))
+	(CtrlListEnable((_list)))
 
 #define	DISABLE_LIST(_list)	\
-	(list_disable((_list)))
+	(CtrlListDisable((_list)))
 
 #define	ENABLE_LIST_ITEM(_list, _index)	\
-	(list_enable_item((_list), (_index)))
+	(CtrlListEnableItem((_list), (_index)))
 
 #define	DISABLE_LIST_ITEM(_list, _index)	\
-	(list_disable_item((_list), (_index)))
+	(CtrlListDisableItem((_list), (_index)))
 
 #define	GET_LIST_WIDTH(_list)	\
-	(list_get_width((_list)))
+	(CtrlListGetWidth((_list)))
 
 #define	GET_LIST_HEIGHT(_list)	\
 	((_list)->count * BUTTON_HEIGHT)
 
 extern
 BOOL
-list_init(	OUT ListPtr list,
-			IN uint32 id,
-			IN uint32 count,
-			IN uint32 x,
-			IN uint32 y,
-			IN CASCTEXT text,
-			IN uint32 color,
-			IN uint32 bgcolor,
-			IN uint32 colorh,
-			IN uint32 bgcolorh,
-			IN ControlEvent event);
+CtrlListInit(	OUT ListPtr list,
+				IN uint32 id,
+				IN uint32 count,
+				IN uint32 x,
+				IN uint32 y,
+				IN CASCTEXT text,
+				IN uint32 color,
+				IN uint32 bgcolor,
+				IN uint32 colorh,
+				IN uint32 bgcolorh,
+				IN ControlEvent event);
 
 extern
 BOOL
-list(	IN OUT ListPtr list,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top);
+CtrlListUpdate(	IN OUT ListPtr list,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top);
 
 extern
 BOOL
-list_set_text(	IN OUT ListPtr list,
+CtrlListSetText(IN OUT ListPtr list,
 				IN uint32 index,
 				IN CASCTEXT text);
 
 extern
 BOOL
-list_enable(IN OUT ListPtr list);
+CtrlListEnable(IN OUT ListPtr list);
 
 extern
 BOOL
-list_disable(IN OUT ListPtr list);
+CtrlListDisable(IN OUT ListPtr list);
 
 extern
 BOOL
-list_enable_item(	IN OUT ListPtr list,
+CtrlListEnableItem(	IN OUT ListPtr list,
 					IN uint32 index);
 
 extern
 BOOL
-list_disable_item(	IN OUT ListPtr list,
+CtrlListDisableItem(IN OUT ListPtr list,
 					IN uint32 index);
 
 extern
 uint32
-list_get_width(IN ListPtr list);
+CtrlListGetWidth(IN ListPtr list);
 
 #endif

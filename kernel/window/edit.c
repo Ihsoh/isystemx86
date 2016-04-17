@@ -30,41 +30,41 @@
 
 static
 BOOL
-_init(	OUT EditPtr edit,
-		IN uint32 scr_column,
-		IN uint32 scr_row);
+_CtrlEditInit(	OUT EditPtr edit,
+				IN uint32 scr_column,
+				IN uint32 scr_row);
 
 static
 void
-_uninit(IN EditPtr edit);
+_CtrlEditUninit(IN EditPtr edit);
 
 static
 uint32
-_get_line_len(	IN EditPtr edit,
-				IN uint32 line);
+_CtrlEditGetLineLength(	IN EditPtr edit,
+						IN uint32 line);
 
 static
 void
-_edit(	IN OUT EditPtr edit,
-		IN uint32 chr,
-		IN uint32 chr1);
+_CtrlEditUpdate(IN OUT EditPtr edit,
+				IN uint32 chr,
+				IN uint32 chr1);
 
 static
 void
-_strcpy_sbuffer(OUT ASCCHAR * dest,
-				IN CASCCHAR * src);
+_CtrlEditCopyScreenBuffer(	OUT ASCCHAR * dest,
+							IN CASCCHAR * src);
 
 static
 void
-_render(IN EditPtr edit,
-		IN OUT ImagePtr image);
+_CtrlEditRender(IN EditPtr edit,
+				IN OUT ImagePtr image);
 
 static
 void
-_flush(IN OUT EditPtr edit);
+_CtrlEditFlush(IN OUT EditPtr edit);
 
 /**
-	@Function:		_init
+	@Function:		_CtrlEditInit
 	@Access:		Private
 	@Description:
 		初始化EDIT控件。
@@ -81,9 +81,9 @@ _flush(IN OUT EditPtr edit);
 */
 static
 BOOL
-_init(	OUT EditPtr edit,
-		IN uint32 scr_row,
-		IN uint32 scr_column)
+_CtrlEditInit(	OUT EditPtr edit,
+				IN uint32 scr_row,
+				IN uint32 scr_column)
 {
 	if(edit == NULL)
 		return FALSE;
@@ -118,7 +118,7 @@ _init(	OUT EditPtr edit,
 }
 
 /**
-	@Function:		_uninit
+	@Function:		_CtrlEditUninit
 	@Access:		Private
 	@Description:
 		释放EDIT控件的内容缓冲区和显示缓冲区。
@@ -129,7 +129,7 @@ _init(	OUT EditPtr edit,
 */
 static
 void
-_uninit(IN EditPtr edit)
+_CtrlEditUninit(IN EditPtr edit)
 {
 	if(edit == NULL)
 		return;
@@ -140,7 +140,7 @@ _uninit(IN EditPtr edit)
 }
 
 /**
-	@Function:		_get_line_len
+	@Function:		_CtrlEditGetLineLength
 	@Access:		Private
 	@Description:
 		获取指定行的长度。
@@ -154,8 +154,8 @@ _uninit(IN EditPtr edit)
 */
 static
 uint32
-_get_line_len(	IN EditPtr edit,
-				IN uint32 line)
+_CtrlEditGetLineLength(	IN EditPtr edit,
+						IN uint32 line)
 {
 	if(edit == NULL)
 		return 0;
@@ -165,7 +165,7 @@ _get_line_len(	IN EditPtr edit,
 }
 
 /**
-	@Function:		_edit
+	@Function:		_CtrlEditUpdate
 	@Access:		Private
 	@Description:
 		处理输入的按键。
@@ -180,9 +180,9 @@ _get_line_len(	IN EditPtr edit,
 */
 static
 void
-_edit(	IN OUT EditPtr edit,
-		IN uint32 chr,
-		IN uint32 chr1)
+_CtrlEditUpdate(IN OUT EditPtr edit,
+				IN uint32 chr,
+				IN uint32 chr1)
 {
 	if(edit == NULL)
 		return;
@@ -246,8 +246,8 @@ _edit(	IN OUT EditPtr edit,
 						edit->top_column--;
 				}
 				else if(edit->top_row + EDITAREA_Y(edit) != 0 
-						&& (prev_line_len = _get_line_len(edit, edit->top_row + EDITAREA_Y(edit) - 1)) 
-												+ (curr_line_len = _get_line_len(edit, edit->top_row + EDITAREA_Y(edit))) 
+						&& (prev_line_len = _CtrlEditGetLineLength(edit, edit->top_row + EDITAREA_Y(edit) - 1)) 
+												+ (curr_line_len = _CtrlEditGetLineLength(edit, edit->top_row + EDITAREA_Y(edit))) 
 								< MAX_COLUMN)
 				{
 					memcpy(	_SBROW(edit, edit->top_row + EDITAREA_Y(edit) - 1) + prev_line_len,
@@ -324,7 +324,7 @@ _edit(	IN OUT EditPtr edit,
 }
 
 /**
-	@Function:		_strcpy_sbuffer
+	@Function:		_CtrlEditCopyScreenBuffer
 	@Access:		Private
 	@Description:
 		复制文本到显示缓冲区。
@@ -337,8 +337,8 @@ _edit(	IN OUT EditPtr edit,
 */
 static
 void
-_strcpy_sbuffer(OUT ASCCHAR * dest,
-				IN CASCCHAR * src)
+_CtrlEditCopyScreenBuffer(	OUT ASCCHAR * dest,
+							IN CASCCHAR * src)
 {
 	while(*src != '\0')
 	{
@@ -349,7 +349,7 @@ _strcpy_sbuffer(OUT ASCCHAR * dest,
 }
 
 /**
-	@Function:		_flush
+	@Function:		_CtrlEditFlush
 	@Access:		Private
 	@Description:
 		把当前的内容缓冲区的部分更新到显示缓冲区。
@@ -360,7 +360,7 @@ _strcpy_sbuffer(OUT ASCCHAR * dest,
 */
 static
 void
-_flush(IN OUT EditPtr edit)
+_CtrlEditFlush(IN OUT EditPtr edit)
 {
 	uint32 ui, ui1;
 	for(ui = edit->top_row; ui < edit->top_row + edit->row; ui++)
@@ -380,7 +380,7 @@ _flush(IN OUT EditPtr edit)
 }
 
 /**
-	@Function:		_render
+	@Function:		_CtrlEditRender
 	@Access:		Private
 	@Description:
 		渲染显示缓冲区。
@@ -393,10 +393,10 @@ _flush(IN OUT EditPtr edit)
 */
 static
 void
-_render(IN EditPtr edit,
-		IN OUT ImagePtr image)
+_CtrlEditRender(IN EditPtr edit,
+				IN OUT ImagePtr image)
 {
-	_flush(edit);
+	_CtrlEditFlush(edit);
 	render_text_buffer_ex(	image,
 							edit->x,
 							edit->y,
@@ -408,7 +408,7 @@ _render(IN EditPtr edit,
 }
 
 /**
-	@Function:		edit_init
+	@Function:		_CtrlEditInit
 	@Access:		Public
 	@Description:
 		渲染显示缓冲区。
@@ -434,14 +434,14 @@ _render(IN EditPtr edit,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-edit_init(	OUT EditPtr edit,
-			IN uint32 id,
-			IN uint32 x,
-			IN uint32 y,
-			IN uint32 row,
-			IN uint32 column,
-			IN uint32 style,
-			IN ControlEvent event)
+CtrlEditInit(	OUT EditPtr edit,
+				IN uint32 id,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 row,
+				IN uint32 column,
+				IN uint32 style,
+				IN ControlEvent event)
 {
 	if(edit == NULL)
 		return FALSE;
@@ -460,12 +460,12 @@ edit_init(	OUT EditPtr edit,
 
 	edit->_forced_flush = TRUE;
 
-	_init(edit, row, column);
+	_CtrlEditInit(edit, row, column);
 	return TRUE;
 }
 
 /**
-	@Function:		edit_uninit
+	@Function:		_CtrlEditUninit
 	@Access:		Public
 	@Description:
 		销毁EDIT的资源。
@@ -475,13 +475,13 @@ edit_init(	OUT EditPtr edit,
 	@Return:
 */
 void
-edit_uninit(IN EditPtr edit)
+CtrlEditUninit(IN EditPtr edit)
 {
-	_uninit(edit);
+	_CtrlEditUninit(edit);
 }
 
 /**
-	@Function:		nmledit
+	@Function:		_CtrlEditUpdate
 	@Access:		Public
 	@Description:
 		EDIT的渲染、事件处理函数。
@@ -499,10 +499,10 @@ edit_uninit(IN EditPtr edit)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-nmledit(IN OUT EditPtr edit,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top)
+CtrlEditUpdate(	IN OUT EditPtr edit,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top)
 {
 	if(edit == NULL || image == NULL || params == NULL)
 		return FALSE;
@@ -533,22 +533,22 @@ nmledit(IN OUT EditPtr edit,
 			{
 				while(!window_has_key(window));
 				uint8 chr1 = window_get_key(window);
-				_edit(edit, chr, chr1);
+				_CtrlEditUpdate(edit, chr, chr1);
 			}
 			else
-				_edit(edit, chr, 0);
+				_CtrlEditUpdate(edit, chr, 0);
 			changed = TRUE;
 		}
 	if(changed || edit->_forced_flush)
 	{
-		_render(edit, image);
+		_CtrlEditRender(edit, image);
 		edit->_forced_flush = FALSE;
 	}
 	return TRUE;
 }
 
 /**
-	@Function:		edit_get_text
+	@Function:		CtrlEditGetText
 	@Access:		Public
 	@Description:
 		获取EDIT控件的文本。
@@ -564,7 +564,7 @@ nmledit(IN OUT EditPtr edit,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-edit_get_text(	IN EditPtr edit,
+CtrlEditGetText(IN EditPtr edit,
 				OUT ASCTEXT text,
 				IN uint32 size)
 {
@@ -605,7 +605,7 @@ end:
 }
 
 /**
-	@Function:		edit_set_text
+	@Function:		CtrlEditSetText
 	@Access:		Public
 	@Description:
 		设置EDIT控件的文本。
@@ -619,7 +619,7 @@ end:
 			返回TRUE则成功，否则失败。
 */
 BOOL
-edit_set_text(	IN OUT EditPtr edit,
+CtrlEditSetText(IN OUT EditPtr edit,
 				IN CASCTEXT text)
 {
 	if(	edit == NULL
@@ -651,7 +651,7 @@ edit_set_text(	IN OUT EditPtr edit,
 }
 
 /**
-	@Function:		edit_append_text
+	@Function:		CtrlEditAppendText
 	@Access:		Public
 	@Description:
 		在EDIT控件的最后一行的下一行开始追加文本。
@@ -665,7 +665,7 @@ edit_set_text(	IN OUT EditPtr edit,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-edit_append_text(	IN OUT EditPtr edit,
+CtrlEditAppendText(	IN OUT EditPtr edit,
 					IN CASCTEXT text)
 {
 	if(	edit == NULL
@@ -698,7 +698,7 @@ edit_append_text(	IN OUT EditPtr edit,
 }
 
 /**
-	@Function:		edit_get_width
+	@Function:		CtrlEditGetWidth
 	@Access:		Public
 	@Description:
 		获取EDIT控件的宽度。
@@ -710,7 +710,7 @@ edit_append_text(	IN OUT EditPtr edit,
 			EDIT控件的宽度。
 */
 uint32
-edit_get_width(IN EditPtr edit)
+CtrlEditGetWidth(IN EditPtr edit)
 {
 	if(edit == NULL)
 		return 0;
@@ -718,7 +718,7 @@ edit_get_width(IN EditPtr edit)
 }
 
 /**
-	@Function:		edit_get_height
+	@Function:		CtrlEditGetHeight
 	@Access:		Public
 	@Description:
 		获取EDIT控件的高度。
@@ -730,7 +730,7 @@ edit_get_width(IN EditPtr edit)
 			EDIT控件的高度。
 */
 uint32
-edit_get_height(IN EditPtr edit)
+CtrlEditGetHeight(IN EditPtr edit)
 {
 	if(edit == NULL)
 		return 0;

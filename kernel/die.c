@@ -31,7 +31,7 @@ die(IN struct die_info * info)
 {
 	asm volatile ("cli");
 	lock_level = 0x7fffffff;
-	apic_stop_timer();
+	ApicStopTimer();
 	pic_mask_all();
 	write_log_to_disk();
 	uint16 us;

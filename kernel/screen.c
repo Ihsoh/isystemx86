@@ -272,10 +272,10 @@ set_cursor(	IN uint16 x,
 			uint16 off = y * COLUMN + x;
 			uint8 offl = (uint8)off;
 			uint8 offh = (uint8)(off >> 8);
-			outb(0x3d4, 0x0e);
-			outb(0x3d5, offh);
-			outb(0x3d4, 0x0f);
-			outb(0x3d5, offl);
+			KnlOutByte(0x3d4, 0x0e);
+			KnlOutByte(0x3d5, offh);
+			KnlOutByte(0x3d4, 0x0f);
+			KnlOutByte(0x3d5, offl);
 		}
 }
 
@@ -772,18 +772,18 @@ init_screen(void)
 			windows[ui]->id = 0;
 		}
 
-		taskbar_window_init();
-		start_window_init();
-		power_window_init();
-		wmgr_window_init();
-		// init_sfunc_window();
-		init_console_window();
-		// init_clock_window();
-		detail_window_init();
-		explorer_window_init();
-		run_window_init();
-		dbgout_window_init();
-		taskmgr_window_init();
+		WinTskbrInit();
+		WinStartInit();
+		WinPwrInit();
+		WinWmgrInit();
+		// WinSfuncInit();
+		WinConsoleInit();
+		// WinClockInit();
+		WinDetailInit();
+		WinExplInit();
+		WinRunInit();
+		WinDbgoutInit();
+		WinTskmgrInit();
 	}
 }
 

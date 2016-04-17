@@ -34,7 +34,7 @@ mouse_wait(uint8 a_type)
 	if(!a_type)
 	{
 		while(--timeout)
-			if((inb(MOUSE_STATUS) & MOUSE_BBIT) == 1)
+			if((KnlInByte(MOUSE_STATUS) & MOUSE_BBIT) == 1)
 				return;
 		print_str("<mouse timeout>\n");
 		asm volatile ("hlt;");
@@ -43,7 +43,7 @@ mouse_wait(uint8 a_type)
 	else
 	{
 		while(--timeout)
-			if(!((inb(MOUSE_STATUS) & MOUSE_ABIT)))
+			if(!((KnlInByte(MOUSE_STATUS) & MOUSE_ABIT)))
 				return;
 		print_str("<mouse timeout>\n");
 		asm volatile ("hlt;");
@@ -56,9 +56,9 @@ void
 mouse_write(uint8 write)
 {
 	mouse_wait(1);
-	outb(MOUSE_STATUS, MOUSE_WRITE);
+	KnlOutByte(MOUSE_STATUS, MOUSE_WRITE);
 	mouse_wait(1);
-	outb(MOUSE_PORT, write);
+	KnlOutByte(MOUSE_PORT, write);
 }
 
 static
@@ -66,7 +66,7 @@ uint8
 mouse_read(void)
 {
 	mouse_wait(0);
-	int8 t = inb(MOUSE_PORT);
+	int8 t = KnlInByte(MOUSE_PORT);
 	return t;
 }
 
@@ -75,28 +75,28 @@ mouse_init(void)
 {
 	/*
 	//允许鼠标接口
-	outb(0x64, 0xa8);
+	KnlOutByte(0x64, 0xa8);
 	//通知8042下一个字节的0x60的数据发送给鼠标
-	outb(0x64, 0xd4);
+	KnlOutByte(0x64, 0xd4);
 	//允许鼠标发送数据
-	outb(0x60, 0xf4);
+	KnlOutByte(0x60, 0xf4);
 	//通知8042下一个字节发向0x60的数据应方向8042的命令寄存器
-	outb(0x64, 0x60);
+	KnlOutByte(0x64, 0x60);
 	//许可键盘及鼠标接口及中断
-	outb(0x60, 0x47);
+	KnlOutByte(0x60, 0x47);
 	*/
 
 	uint8 status, result;
 	mouse_wait(1);
-	outb(MOUSE_STATUS, 0xA8);
+	KnlOutByte(MOUSE_STATUS, 0xA8);
 	mouse_wait(1);
-	outb(MOUSE_STATUS, 0x20);
+	KnlOutByte(MOUSE_STATUS, 0x20);
 	mouse_wait(0);
-	status = inb(0x60) | 2;
+	status = KnlInByte(0x60) | 2;
 	mouse_wait(1);
-	outb(MOUSE_STATUS, 0x60);
+	KnlOutByte(MOUSE_STATUS, 0x60);
 	mouse_wait(1);
-	outb(MOUSE_PORT, status);
+	KnlOutByte(MOUSE_PORT, status);
 	mouse_write(0xF6);
 	mouse_read();
 	mouse_write(0xF4);
@@ -107,10 +107,10 @@ mouse_init(void)
 
 
 
-	uint8 tmp = inb(0x61);
-	outb(0x61, tmp | 0x80);
-	outb(0x61, tmp & 0x7F);
-	inb(0x60);
+	uint8 tmp = KnlInByte(0x61);
+	KnlOutByte(0x61, tmp | 0x80);
+	KnlOutByte(0x61, tmp & 0x7F);
+	KnlInByte(0x60);
 
 	return TRUE;
 }

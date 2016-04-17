@@ -31,7 +31,7 @@ static LabelPtr _lbl_info	= NULL;
 static int32 _tid			= -1;
 
 /**
-	@Function:		_control_event
+	@Function:		_WinTaskControlEvent
 	@Access:		Private
 	@Description:
 		控件的事件函数。
@@ -46,9 +46,9 @@ static int32 _tid			= -1;
 */
 static
 void
-_control_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_WinTaskControlEvent(	IN uint32 id,
+						IN uint32 type,
+						IN void * param)
 {
 	if(id == _btn_kill->id)
 	{
@@ -64,7 +64,7 @@ _control_event(	IN uint32 id,
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_WinTaskEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -77,7 +77,7 @@ _control_event(	IN uint32 id,
 */
 static
 void
-_window_event(	IN struct Window * window,
+_WinTaskEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -98,7 +98,7 @@ _window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		task_window_show
+	@Function:		WinTaskShow
 	@Access:		Public
 	@Description:
 		显示任务信息窗口。
@@ -106,7 +106,7 @@ _window_event(	IN struct Window * window,
 	@Return:
 */
 void
-task_window_show(int32 tid)
+WinTaskShow(int32 tid)
 {
 	struct Task * task = get_task_info_ptr(tid);
 	if(task == NULL)
@@ -118,7 +118,7 @@ task_window_show(int32 tid)
 								0xffffffff,
 								WINDOW_STYLE_CLOSE | WINDOW_STYLE_MINIMIZE,
 								_TITLE,
-								_window_event);
+								_WinTaskEvent);
 		if(_window == NULL)
 			return;
 		rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xffffffff);
@@ -127,7 +127,7 @@ task_window_show(int32 tid)
 					0,
 					0,
 					"Kill",
-					_control_event);
+					_WinTaskControlEvent);
 		_btn_kill->x = 10;
 		_btn_kill->y = 10;
 		_lbl_info = NEW(Label);
@@ -135,7 +135,7 @@ task_window_show(int32 tid)
 					0,
 					0,
 					"Task Infomation",
-					_control_event);
+					_WinTaskControlEvent);
 		_lbl_info->x = 10;
 		_lbl_info->y = 10 + GET_BUTTON_HEIGHT(_btn_kill) + 10;
 	}

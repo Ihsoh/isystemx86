@@ -12,120 +12,116 @@
 
 extern
 void
-outb(	IN uint16 port, 
-		IN uint8 data);
+KnlOutByte(	IN uint16 port, 
+			IN uint8 data);
 
 extern
 uint8
-inb(IN uint16 port);
+KnlInByte(IN uint16 port);
 
 extern
 void
-outw(	IN uint16 port,
-		IN uint16 data);
+KnlOutWord(	IN uint16 port,
+			IN uint16 data);
 
 extern
 uint16
-inw(IN uint16 port);
+KnlInWord(IN uint16 port);
 
 extern
 void 
-outl(	IN uint16 port,
-		IN uint32 data);
+KnlOutLong(	IN uint16 port,
+			IN uint32 data);
 
 extern
 uint32
-inl(IN uint16 port);
+KnlInLong(IN uint16 port);
 
 extern
 BOOL
-outsb(	IN uint16 port, 
-		IN uint8 * buffer,
-		IN uint32 count);
+KnlOutBytes(IN uint16 port, 
+			IN uint8 * buffer,
+			IN uint32 count);
 
 extern
 BOOL
-insb(	IN uint16 port,
-		OUT uint8 * buffer,
-		IN uint32 count);
+KnlInBytes(	IN uint16 port,
+			OUT uint8 * buffer,
+			IN uint32 count);
 
 extern
 BOOL
-outsw(	IN uint16 port, 
-		IN uint16 * buffer,
-		IN uint32 count);
+KnlOutWords(IN uint16 port, 
+			IN uint16 * buffer,
+			IN uint32 count);
 
 extern
 BOOL
-insw(	IN uint16 port,
-		OUT uint16 * buffer,
-		IN uint32 count);
+KnlInWords(	IN uint16 port,
+			OUT uint16 * buffer,
+			IN uint32 count);
 
 extern
 BOOL
-outsl(	IN uint16 port, 
-		IN uint32 * buffer,
-		IN uint32 count);
+KnlOutLongs(IN uint16 port, 
+			IN uint32 * buffer,
+			IN uint32 count);
 
 extern
 BOOL
-insl(	IN uint16 port,
-		OUT uint32 * buffer,
-		IN uint32 count);
+KnlInLongs(	IN uint16 port,
+			OUT uint32 * buffer,
+			IN uint32 count);
 
 extern
 void
-get_msr(IN uint32 msr,
-		OUT uint32 * lo,
-		OUT uint32 * hi);
+KnlGetCpuMSR(	IN uint32 msr,
+				OUT uint32 * lo,
+				OUT uint32 * hi);
 
 extern
 void
-set_msr(IN uint32 msr,
-		IN uint32 lo,
-		IN uint32 hi);
+KnlSetCpuMSR(	IN uint32 msr,
+				IN uint32 lo,
+				IN uint32 hi);
 
 extern
 void
-set_int(IN uint8 n,
-		IN uint32 addr);
+KnlSetInterrupt(IN uint8 n,
+				IN uint32 addr);
 
 extern
 void
-set_int_intrgate(	IN uint8 n,
+KnlSetInterruptGate(IN uint8 n,
 					IN uint32 addr);
 
 extern
 BOOL
-set_desc_to_gdt(IN uint32 index,
+KnlSetDescToGDT(IN uint32 index,
 				IN uint8 * desc);
 
 extern
 BOOL
-get_desc_from_gdt(	IN uint32 index,
+KnlGetDescFromGDT(	IN uint32 index,
 					OUT uint8 * desc);
 
 extern
 BOOL
-set_gate_to_idt(IN uint32 index,
+KnlSetGateToIDT(IN uint32 index,
 				IN uint8 * gate);
 
 extern
 BOOL
-get_gate_from_idt(	IN uint32 index,
+KnlGetGateFromIDT(	IN uint32 index,
 					OUT uint8 * gate);
 
 extern
 void
-reset_cpu(void);
+KnlResetCpu(void);
 
 extern
 void
-halt_cpu(void);
-
-extern
-void
-pause(void);
+KnlHaltCpu(void);
 
 #define	sti() { asm volatile ("sti"); }
 #define	cli() { asm volatile ("cli"); }

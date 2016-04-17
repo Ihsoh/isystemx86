@@ -65,14 +65,14 @@ init_tasks(void)
 		tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
 		tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
 		tss_desc.attr = AT386TSS + DPL3;
-		set_desc_to_gdt(400 + ui * 5 + 0, (uint8 *)&tss_desc);
+		KnlSetDescToGDT(400 + ui * 5 + 0, (uint8 *)&tss_desc);
 	
 		task_gate.offsetl = 0;
 		task_gate.offseth = 0;
 		task_gate.dcount = 0;
 		task_gate.selector = ((400 + ui * 5 + 0) << 3) | RPL3;
 		task_gate.attr = ATTASKGATE | DPL3;
-		set_desc_to_gdt(400 + ui * 5 + 1, (uint8 *)&task_gate);
+		KnlSetDescToGDT(400 + ui * 5 + 1, (uint8 *)&task_gate);
 
 		tasks[ui].opened_file_ptrs = alloc_memory(MAX_TASK_OPENED_FILE_COUNT * sizeof(FileObject *));
 		tasks[ui].memory_block_ptrs = alloc_memory(MAX_TASK_MEMORY_BLOCK_COUNT * sizeof(void *));
@@ -151,9 +151,9 @@ _create_task(	IN int8 * name,
 	if(tid != -1)
 	{
 		struct Desc tss_desc;
-		get_desc_from_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+		KnlGetDescFromGDT(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 		tss_desc.attr = AT386TSS + DPL3;
-		set_desc_to_gdt(400 + tid * 5 + 0, (uint8 *)&tss_desc);
+		KnlSetDescToGDT(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 
 		// 重置与这个任务对应的系统调用。
 		if(!reset_syscall(tid))
@@ -243,9 +243,9 @@ _create_task(	IN int8 * name,
 		data_seg_ring0_desc.baseh = (uint8)((base_addr >> 24) & 0xFF);
 		data_seg_ring0_desc.attr = ATDW | DPL0 | D32 | G | 0x0F00;
 
-		set_desc_to_gdt(code_seg_desc_index, (uint8 *)&code_seg_desc);
-		set_desc_to_gdt(data_seg_desc_index, (uint8 *)&data_seg_desc);
-		set_desc_to_gdt(data_seg_ring0_desc_index, (uint8 *)&data_seg_ring0_desc);
+		KnlSetDescToGDT(code_seg_desc_index, (uint8 *)&code_seg_desc);
+		KnlSetDescToGDT(data_seg_desc_index, (uint8 *)&data_seg_desc);
+		KnlSetDescToGDT(data_seg_ring0_desc_index, (uint8 *)&data_seg_ring0_desc);
 
 		task->tss.back_link = 0;
 		task->tss.esp0 = 0x012ffff0;
@@ -435,22 +435,22 @@ _kill_task(IN int32 tid)
 	while(	
 			(
 				// ATA。
-				(ata_locked() && ata_lock_tid() == tid)
+				(AtaIsLocked() && AtaGetLockTid() == tid)
 				// ATAPI。
-				|| (atapi_locked() && atapi_lock_tid() == tid)
+				|| (AtapiIsLocked() && AtapiGetLockTid() == tid)
 				// AHCI。
-				|| (ahci_locked() && ahci_lock_tid() == tid)
+				|| (AhciIsLocked() && AhciGetLockTid() == tid)
 			)
 			&& --retry != 0);
 	if(ll)
 		LOCK_TASK();
 	// 再次确认。
 	if(	// ATA。
-		(ata_locked() && ata_lock_tid() == tid)
+		(AtaIsLocked() && AtaGetLockTid() == tid)
 		// ATAPI。
-		|| (atapi_locked() && atapi_lock_tid() == tid)
+		|| (AtapiIsLocked() && AtapiGetLockTid() == tid)
 		// AHCI。
-		|| (ahci_locked() && ahci_lock_tid() == tid))
+		|| (AhciIsLocked() && AhciGetLockTid() == tid))
 		return FALSE;
 
 	struct Task * task = tasks + tid;
@@ -515,10 +515,13 @@ _kill_task(IN int32 tid)
 	free_syscall(tid);
 
 	// 尝试释放ATA驱动的锁。
-	ata_attempt_to_unlock(tid);
+	AtaAttemptToUnlock(tid);
 
 	// 尝试释放ATAPI驱动的锁。
-	atapi_attempt_to_unlock(tid);
+	AtapiAttemptToUnlock(tid);
+
+	// 尝试释放AHCI驱动的锁。
+	AhciAttemptToUnlock(tid);
 
 	gui_close_windows(tid);
 

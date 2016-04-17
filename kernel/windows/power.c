@@ -33,7 +33,7 @@ static WindowPtr _window	= NULL;
 static ListPtr _lst_power	= NULL;
 
 /**
-	@Function:		_control_event
+	@Function:		_WinPwrControlEvent
 	@Access:		Private
 	@Description:
 		控件的事件函数。
@@ -48,9 +48,9 @@ static ListPtr _lst_power	= NULL;
 */
 static
 void
-_control_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_WinPwrControlEvent(IN uint32 id,
+					IN uint32 type,
+					IN void * param)
 {
 	if(id == _lst_power->id)
 	{
@@ -64,14 +64,14 @@ _control_event(	IN uint32 id,
 					reboot_system();
 					break;
 				case _ITEM_ID_CANCEL:
-					power_window_hide();
+					WinPwrHide();
 					break;
 			}
 	}
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_WinPwrEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -84,7 +84,7 @@ _control_event(	IN uint32 id,
 */
 static
 void
-_window_event(	IN struct Window * window,
+_WinPwrEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -95,7 +95,7 @@ _window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		power_window_init
+	@Function:		WinPwrInit
 	@Access:		Public
 	@Description:
 		初始化电源管理窗体。
@@ -105,22 +105,22 @@ _window_event(	IN struct Window * window,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-power_window_init(void)
+WinPwrInit(void)
 {
 	_window = create_window(_WIDTH, _HEIGHT,
 							0xff222222,
 							WINDOW_STYLE_NO_TITLE
 								| WINDOW_STYLE_NO_WMGR,
 							"Power",
-							_window_event);
+							_WinPwrEvent);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
 	_lst_power = NEW(List);
-	list_init(	_lst_power, 0,
+	CtrlListInit(	_lst_power, 0,
 				_ITEM_COUNT,
 				0, 0,
 				"",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_control_event);
+				_WinPwrControlEvent);
 	SET_LIST_TEXT(_lst_power, _ITEM_ID_SHUTDOWN,	"      Shutdown      ");
 	SET_LIST_TEXT(_lst_power, _ITEM_ID_REBOOT,		"      Reboot        ");
 	SET_LIST_TEXT(_lst_power, _ITEM_ID_CANCEL,		"      Cancel        ");
@@ -131,7 +131,7 @@ power_window_init(void)
 }
 
 /**
-	@Function:		power_window_show
+	@Function:		WinPwrShow
 	@Access:		Public
 	@Description:
 		显示电源管理窗体。
@@ -141,7 +141,7 @@ power_window_init(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-power_window_show(void)
+WinPwrShow(void)
 {
 	uint32 w = vesa_get_width();
 	uint32 h = vesa_get_height();
@@ -153,7 +153,7 @@ power_window_show(void)
 }
 
 /**
-	@Function:		power_window_hide
+	@Function:		WinPwrHide
 	@Access:		Public
 	@Description:
 		隐藏电源管理窗体。
@@ -163,7 +163,7 @@ power_window_show(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-power_window_hide(void)
+WinPwrHide(void)
 {
 	_window->state = WINDOW_STATE_HIDDEN;
 	return TRUE;

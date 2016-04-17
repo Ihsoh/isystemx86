@@ -19,7 +19,7 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		_list_event
+	@Function:		_CtrlListEvent
 	@Access:		Private
 	@Description:
 		List的事件函数。
@@ -34,7 +34,7 @@
 */
 static
 void
-_list_event(	IN uint32 id,
+_CtrlListEvent(	IN uint32 id,
 				IN uint32 type,
 				IN void * param)
 {
@@ -58,7 +58,7 @@ _list_event(	IN uint32 id,
 }
 
 /**
-	@Function:		list_init
+	@Function:		CtrlListInit
 	@Access:		Public
 	@Description:
 		List的事件函数。
@@ -90,17 +90,17 @@ _list_event(	IN uint32 id,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-list_init(	OUT ListPtr list,
-			IN uint32 id,
-			IN uint32 count,
-			IN uint32 x,
-			IN uint32 y,
-			IN CASCTEXT text,
-			IN uint32 color,
-			IN uint32 bgcolor,
-			IN uint32 colorh,
-			IN uint32 bgcolorh,
-			IN ControlEvent event)
+CtrlListInit(	OUT ListPtr list,
+				IN uint32 id,
+				IN uint32 count,
+				IN uint32 x,
+				IN uint32 y,
+				IN CASCTEXT text,
+				IN uint32 color,
+				IN uint32 bgcolor,
+				IN uint32 colorh,
+				IN uint32 bgcolorh,
+				IN ControlEvent event)
 {
 	if(	list == NULL
 		|| count > MAX_LIST_ITEM_COUNT
@@ -121,12 +121,12 @@ list_init(	OUT ListPtr list,
 	for(ui = 0; ui < count; ui++)
 	{
 		ButtonPtr button = &list->buttons[ui];
-		button_init(button,
+		CtrlBtnInit(button,
 					(uint32)button,
 					x, y + ui * BUTTON_HEIGHT,
 					text,
 					color, bgcolor, colorh, bgcolorh,
-					_list_event,
+					_CtrlListEvent,
 					0, 0);
 		button->vpext = list;
 	}
@@ -134,7 +134,7 @@ list_init(	OUT ListPtr list,
 }
 
 /**
-	@Function:		list
+	@Function:		CtrlListUpdate
 	@Access:		Public
 	@Description:
 		List的渲染、事件处理函数。
@@ -152,10 +152,10 @@ list_init(	OUT ListPtr list,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-list(	IN OUT ListPtr list,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top)
+CtrlListUpdate(	IN OUT ListPtr list,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top)
 {
 	if(list == NULL || image == NULL || params == NULL)
 		return FALSE;
@@ -163,13 +163,13 @@ list(	IN OUT ListPtr list,
 		return TRUE;
 	uint32 ui;
 	for(ui = 0; ui < list->count; ui++)
-		if(!button(&list->buttons[ui], image, params, top))
+		if(!CtrlBtnUpdate(&list->buttons[ui], image, params, top))
 			return FALSE;
 	return TRUE;
 }
 
 /**
-	@Function:		list_set_text
+	@Function:		CtrlListSetText
 	@Access:		Public
 	@Description:
 		设置List的项的文本。
@@ -185,7 +185,7 @@ list(	IN OUT ListPtr list,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-list_set_text(	IN OUT ListPtr list,
+CtrlListSetText(IN OUT ListPtr list,
 				IN uint32 index,
 				IN CASCTEXT text)
 {
@@ -194,11 +194,11 @@ list_set_text(	IN OUT ListPtr list,
 		|| text == NULL)
 		return FALSE;
 	ButtonPtr button = &list->buttons[index];
-	return button_set_text(button, text);
+	return CtrlBtnSetText(button, text);
 }
 
 /**
-	@Function:		list_enable
+	@Function:		CtrlListEnable
 	@Access:		Public
 	@Description:
 		启用List。
@@ -210,7 +210,7 @@ list_set_text(	IN OUT ListPtr list,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-list_enable(IN OUT ListPtr list)
+CtrlListEnable(IN OUT ListPtr list)
 {
 	if(list == NULL)
 		return FALSE;
@@ -221,7 +221,7 @@ list_enable(IN OUT ListPtr list)
 }
 
 /**
-	@Function:		list_disable
+	@Function:		CtrlListDisable
 	@Access:		Public
 	@Description:
 		禁用List。
@@ -233,7 +233,7 @@ list_enable(IN OUT ListPtr list)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-list_disable(IN OUT ListPtr list)
+CtrlListDisable(IN OUT ListPtr list)
 {
 	if(list == NULL)
 		return FALSE;
@@ -244,7 +244,7 @@ list_disable(IN OUT ListPtr list)
 }
 
 /**
-	@Function:		list_enable_item
+	@Function:		CtrlListEnableItem
 	@Access:		Public
 	@Description:
 		启用列表项。
@@ -258,7 +258,7 @@ list_disable(IN OUT ListPtr list)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-list_enable_item(	IN OUT ListPtr list,
+CtrlListEnableItem(	IN OUT ListPtr list,
 					IN uint32 index)
 {
 	if(	list == NULL
@@ -269,7 +269,7 @@ list_enable_item(	IN OUT ListPtr list,
 }
 
 /**
-	@Function:		list_disable_item
+	@Function:		CtrlListDisableItem
 	@Access:		Public
 	@Description:
 		禁用列表项。
@@ -283,7 +283,7 @@ list_enable_item(	IN OUT ListPtr list,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-list_disable_item(	IN OUT ListPtr list,
+CtrlListDisableItem(IN OUT ListPtr list,
 					IN uint32 index)
 {
 	if(	list == NULL
@@ -294,7 +294,7 @@ list_disable_item(	IN OUT ListPtr list,
 }
 
 /**
-	@Function:		list_get_width
+	@Function:		CtrlListGetWidth
 	@Access:		Public
 	@Description:
 		获取列表的宽度。
@@ -306,7 +306,7 @@ list_disable_item(	IN OUT ListPtr list,
 			获取列表的宽度。
 */
 uint32
-list_get_width(IN ListPtr list)
+CtrlListGetWidth(IN ListPtr list)
 {
 	if(list == NULL)
 		return 0;

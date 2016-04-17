@@ -14,7 +14,7 @@
 static BOOL rtc_state = FALSE;	//如果RTC被启用则为TRUE，否则为FALSE。
 
 /**
-	@Function:		get_cmos_date_time
+	@Function:		CmosGetDateTime
 	@Access:		Public
 	@Description:
 		获取CMOS时间。
@@ -24,50 +24,50 @@ static BOOL rtc_state = FALSE;	//如果RTC被启用则为TRUE，否则为FALSE�
 	@Return:	
 */
 BOOL 
-get_cmos_date_time(OUT struct CMOSDateTime * dt)
+CmosGetDateTime(OUT struct CMOSDateTime * dt)
 {
 	if(dt == NULL)
 		return FALSE;
 	common_lock();
 	uint8 temp;
 	//秒。
-	outb(0x70, 0x00);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x00);
+	temp = KnlInByte(0x71);
 	dt->second = (temp >> 4) * 10 + (temp & 0x0f);
 	//分。
-	outb(0x70, 0x02);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x02);
+	temp = KnlInByte(0x71);
 	dt->minute = (temp >> 4) * 10 + (temp & 0x0f);
 	//时。
-	outb(0x70, 0x04);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x04);
+	temp = KnlInByte(0x71);
 	dt->hour = (temp >> 4) * 10 + (temp & 0x0f);
 	//星期。
-	outb(0x70, 0x06);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x06);
+	temp = KnlInByte(0x71);
 	dt->day_of_week = (temp >> 4) * 10 + (temp & 0x0f);
 	//日。
-	outb(0x70, 0x07);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x07);
+	temp = KnlInByte(0x71);
 	dt->day = (temp >> 4) * 10 + (temp & 0x0f);
 	//月。
-	outb(0x70, 0x08);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x08);
+	temp = KnlInByte(0x71);
 	dt->month = (temp >> 4) * 10 + (temp & 0x0f);
 	//年。
-	outb(0x70, 0x09);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x09);
+	temp = KnlInByte(0x71);
 	dt->year = (temp >> 4) * 10 + (temp & 0x0f);
 	//世纪。
-	outb(0x70, 0x32);
-	temp = inb(0x71);
+	KnlOutByte(0x70, 0x32);
+	temp = KnlInByte(0x71);
 	dt->year += ((temp >> 4) * 10 + (temp & 0x0f)) * 100;
 	common_unlock();
 	return TRUE;
 }
 
 /**
-	@Function:		to_bcd8
+	@Function:		_CmosToBcd8
 	@Access:		Public
 	@Description:
 		把一个两位的十进制数转换为BCD数。
@@ -80,7 +80,7 @@ get_cmos_date_time(OUT struct CMOSDateTime * dt)
 */
 static
 uint8
-to_bcd8(uint8 n)
+_CmosToBcd8(uint8 n)
 {
 	uint8 n0 = n % 10;
 	uint8 n1 = (uint8)(n / 10) % 10;
@@ -88,7 +88,7 @@ to_bcd8(uint8 n)
 }
 
 /**
-	@Function:		set_cmos_date_time
+	@Function:		CmosSetDateTime
 	@Access:		Public
 	@Description:
 		设置CMOS时间。
@@ -98,7 +98,7 @@ to_bcd8(uint8 n)
 	@Return:	
 */
 BOOL
-set_cmos_date_time(IN struct CMOSDateTime * dt)
+CmosSetDateTime(IN struct CMOSDateTime * dt)
 {
 	if(dt == NULL)
 		return FALSE;
@@ -114,35 +114,35 @@ set_cmos_date_time(IN struct CMOSDateTime * dt)
 	common_lock();
 	uint8 temp;
 	//秒。
-	outb(0x70, 0x00);
-	outb(0x71, to_bcd8(dt->second));
+	KnlOutByte(0x70, 0x00);
+	KnlOutByte(0x71, _CmosToBcd8(dt->second));
 	//分。
-	outb(0x70, 0x02);
-	outb(0x71, to_bcd8(dt->minute));
+	KnlOutByte(0x70, 0x02);
+	KnlOutByte(0x71, _CmosToBcd8(dt->minute));
 	//时。
-	outb(0x70, 0x04);
-	outb(0x71, to_bcd8(dt->hour));
+	KnlOutByte(0x70, 0x04);
+	KnlOutByte(0x71, _CmosToBcd8(dt->hour));
 	//星期。
-	outb(0x70, 0x06);
-	outb(0x71, to_bcd8(dt->day_of_week));
+	KnlOutByte(0x70, 0x06);
+	KnlOutByte(0x71, _CmosToBcd8(dt->day_of_week));
 	//日。
-	outb(0x70, 0x07);
-	outb(0x71, to_bcd8(dt->day));
+	KnlOutByte(0x70, 0x07);
+	KnlOutByte(0x71, _CmosToBcd8(dt->day));
 	//月。
-	outb(0x70, 0x08);
-	outb(0x71, to_bcd8(dt->month));
+	KnlOutByte(0x70, 0x08);
+	KnlOutByte(0x71, _CmosToBcd8(dt->month));
 	//年。
-	outb(0x70, 0x09);
-	outb(0x71, to_bcd8(dt->year % 100));
+	KnlOutByte(0x70, 0x09);
+	KnlOutByte(0x71, _CmosToBcd8(dt->year % 100));
 	//世纪。
-	outb(0x70, 0x32);
-	outb(0x71, to_bcd8(dt->year / 100));
+	KnlOutByte(0x70, 0x32);
+	KnlOutByte(0x71, _CmosToBcd8(dt->year / 100));
 	common_unlock();
 	return TRUE;
 }
 
 /**
-	@Function:		set_cmos_date
+	@Function:		CmosSetDate
 	@Access:		Public
 	@Description:
 		设置CMOS的日期。
@@ -156,9 +156,9 @@ set_cmos_date_time(IN struct CMOSDateTime * dt)
 	@Return:	
 */
 BOOL
-set_cmos_date(	IN uint16 year,
-				IN uint8 month,
-				IN uint8 day)
+CmosSetDate(IN uint16 year,
+			IN uint8 month,
+			IN uint8 day)
 {
 	uint8 days = get_days_of_month(year, month);
 	if(	days == 0xff 
@@ -168,23 +168,23 @@ set_cmos_date(	IN uint16 year,
 	uint8 day_of_week = get_day_of_week(year, month, day);
 	common_lock();
 	//日。
-	outb(0x70, 0x07);
-	outb(0x71, to_bcd8(day));
+	KnlOutByte(0x70, 0x07);
+	KnlOutByte(0x71, _CmosToBcd8(day));
 	//月。
-	outb(0x70, 0x08);
-	outb(0x71, to_bcd8(month));
+	KnlOutByte(0x70, 0x08);
+	KnlOutByte(0x71, _CmosToBcd8(month));
 	//年。
-	outb(0x70, 0x09);
-	outb(0x71, to_bcd8(year % 100));
+	KnlOutByte(0x70, 0x09);
+	KnlOutByte(0x71, _CmosToBcd8(year % 100));
 	//世纪。
-	outb(0x70, 0x32);
-	outb(0x71, to_bcd8(year / 100));
+	KnlOutByte(0x70, 0x32);
+	KnlOutByte(0x71, _CmosToBcd8(year / 100));
 	common_unlock();
 	return TRUE;
 }
 
 /**
-	@Function:		set_cmos_time
+	@Function:		CmosSetTime
 	@Access:		Public
 	@Description:
 		设置CMOS的时间。
@@ -198,9 +198,9 @@ set_cmos_date(	IN uint16 year,
 	@Return:	
 */
 BOOL
-set_cmos_time(	IN uint8 hour,
-				IN uint8 minute,
-				IN uint8 second)
+CmosSetTime(IN uint8 hour,
+			IN uint8 minute,
+			IN uint8 second)
 {
 	if(	hour >= 60
 		|| minute >= 60
@@ -208,20 +208,20 @@ set_cmos_time(	IN uint8 hour,
 		return FALSE;
 	common_lock();
 	//秒。
-	outb(0x70, 0x00);
-	outb(0x71, to_bcd8(second));
+	KnlOutByte(0x70, 0x00);
+	KnlOutByte(0x71, _CmosToBcd8(second));
 	//分。
-	outb(0x70, 0x02);
-	outb(0x71, to_bcd8(minute));
+	KnlOutByte(0x70, 0x02);
+	KnlOutByte(0x71, _CmosToBcd8(minute));
 	//时。
-	outb(0x70, 0x04);
-	outb(0x71, to_bcd8(hour));
+	KnlOutByte(0x70, 0x04);
+	KnlOutByte(0x71, _CmosToBcd8(hour));
 	common_unlock();
 	return TRUE;
 }
 
 /**
-	@Function:		get_rtc_state
+	@Function:		CmosGetRtcStatus
 	@Access:		Public
 	@Description:
 		获取RTC的状态。
@@ -230,13 +230,13 @@ set_cmos_time(	IN uint8 hour,
 		返回TRUE则开启，否则关闭中。
 */
 BOOL
-get_rtc_state(void)
+CmosGetRtcStatus(void)
 {
 	return rtc_state;
 }
 
 /**
-	@Function:		enable_rtc
+	@Function:		CmosEnableRtc
 	@Access:		Public
 	@Description:
 		启用RTC。
@@ -245,15 +245,15 @@ get_rtc_state(void)
 		返回TRUE则开启成功，否则开启失败。
 */
 BOOL
-enable_rtc(void)
+CmosEnableRtc(void)
 {
 	if(!rtc_state)
 	{
 		common_lock();
-		outb(0x70, 0x0b);
-		uint8 prev = inb(0x71);
-		outb(0x70, 0x0b);
-		outb(0x71, prev | 0x40);
+		KnlOutByte(0x70, 0x0b);
+		uint8 prev = KnlInByte(0x71);
+		KnlOutByte(0x70, 0x0b);
+		KnlOutByte(0x71, prev | 0x40);
 		rtc_state = TRUE;
 		common_unlock();
 	}
@@ -261,7 +261,7 @@ enable_rtc(void)
 }
 
 /**
-	@Function:		disable_rtc
+	@Function:		CmosDisableRtc
 	@Access:		Public
 	@Description:
 		禁用RTC。
@@ -270,15 +270,15 @@ enable_rtc(void)
 		返回TRUE则禁用成功，否则禁用失败。
 */
 BOOL
-disable_rtc(void)
+CmosDisableRtc(void)
 {
 	if(rtc_state)
 	{
 		common_lock();
-		outb(0x70, 0x0b);
-		uint8 prev = inb(0x71);
-		outb(0x70, 0x0b);
-		outb(0x71, prev & ~0x40);
+		KnlOutByte(0x70, 0x0b);
+		uint8 prev = KnlInByte(0x71);
+		KnlOutByte(0x70, 0x0b);
+		KnlOutByte(0x71, prev & ~0x40);
 		rtc_state = FALSE;
 		common_unlock();
 	}
@@ -286,7 +286,7 @@ disable_rtc(void)
 }
 
 /**
-	@Function:		set_rtc_rate
+	@Function:		CmosSetRtcRate
 	@Access:		Public
 	@Description:
 		设置RTC的频率。
@@ -295,21 +295,21 @@ disable_rtc(void)
 		返回TRUE则设置成功，否则设置失败。
 */
 BOOL
-set_rtc_rate(uint8 rate)
+CmosSetRtcRate(uint8 rate)
 {
 	if(rate <= 2 || rate > 15)
 		return FALSE;
 	common_lock();
-	outb(0x70, 0x0a);
-	uint8 prev = inb(0x71);
-	outb(0x70, 0x0a);
-	outb(0x71, (prev & 0xf0) | rate);
+	KnlOutByte(0x70, 0x0a);
+	uint8 prev = KnlInByte(0x71);
+	KnlOutByte(0x70, 0x0a);
+	KnlOutByte(0x71, (prev & 0xf0) | rate);
 	common_unlock();
 	return TRUE;
 }
 
 /**
-	@Function:		end_of_rtc
+	@Function:		CmosEndOfRtc
 	@Access:		Public
 	@Description:
 		IRQ8处理程序结束时需要调用该函数，否则IRQ8不会再次引发。
@@ -317,19 +317,19 @@ set_rtc_rate(uint8 rate)
 	@Return:
 */
 void
-end_of_rtc(void)
+CmosEndOfRtc(void)
 {
 	if(rtc_state)
 	{
 		common_lock();
-		outb(0x70, 0x0c);
-		inb(0x71);
+		KnlOutByte(0x70, 0x0c);
+		KnlInByte(0x71);
 		common_unlock();
 	}
 }
 
 /**
-	@Function:		enable_nmi
+	@Function:		CmosEnableNmi
 	@Access:		Public
 	@Description:
 		启用NMI。
@@ -337,13 +337,13 @@ end_of_rtc(void)
 	@Return:
 */
 void
-enable_nmi(void)
+CmosEnableNmi(void)
 {
-	outb(0x70, inb(0x70) & 0x7f);
+	KnlOutByte(0x70, KnlInByte(0x70) & 0x7f);
 }
 
 /**
-	@Function:		disable_nmi
+	@Function:		CmosDisableNmi
 	@Access:		Public
 	@Description:
 		禁用NMI。
@@ -351,7 +351,7 @@ enable_nmi(void)
 	@Return:
 */
 void
-disable_nmi(void)
+CmosDisableNmi(void)
 {
-	outb(0x70, inb(0x70) | 0x80);
+	KnlOutByte(0x70, KnlInByte(0x70) | 0x80);
 }

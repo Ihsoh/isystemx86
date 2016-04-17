@@ -12,18 +12,21 @@
 #include "types.h"
 
 BOOL
-apic_init(void);
+ApicInit(void);
 
 BOOL
-apic_enable(void);
+ApicEnable(void);
 
 BOOL
-apic_is_enable(void);
+ApicIsEnabled(void);
 
 BOOL
-apic_stop_timer(void);
+ApicStopTimer(void);
 
 BOOL
-apic_eoi(void);
+ApicStartTimer(void);
+
+BOOL
+ApicEOI(void);
 
 #endif

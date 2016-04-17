@@ -46,73 +46,73 @@ typedef	struct
 #define	EDIT_STYLE_READONLY		0x00000004
 
 #define	INIT_EDIT(_edit, _x, _y, _row, _column, _style, _event)	\
-	(edit_init((_edit), 0, (_x), (_y), (_row), (_column), (_style), (_event)))
+	(CtrlEditInit((_edit), 0, (_x), (_y), (_row), (_column), (_style), (_event)))
 
 #define	UNINIT_EDIT(_edit)	\
-	(edit_uninit((_edit)))
+	(CtrlEditUninit((_edit)))
 
 #define	NMLEDIT(_edit, _image, _params, _top)	\
-	(nmledit((_edit), (_image), (_params), (_top)))
+	(CtrlEditUpdate((_edit), (_image), (_params), (_top)))
 
 #define	GET_EDIT_TEXT(_edit, _text, _size)	\
-	(edit_get_text((_edit), (_text), (_size)))
+	(CtrlEditGetText((_edit), (_text), (_size)))
 
 #define	SET_EDIT_TEXT(_edit, _text)	\
-	(edit_set_text((_edit), (_text)))
+	(CtrlEditSetText((_edit), (_text)))
 
 #define	APPEND_EDIT_TEXT(_edit, _text)	\
-	(edit_append_text((_edit), (_text)))
+	(CtrlEditAppendText((_edit), (_text)))
 
 #define	GET_EDIT_WIDTH(_edit)	\
-	(edit_get_width((_edit)))
+	(CtrlEditGetWidth((_edit)))
 
 #define	GET_EDIT_HEIGHT(_edit)	\
-	(edit_get_height((_edit)))
+	(CtrlEditGetHeight((_edit)))
 
 extern
 BOOL
-edit_init(	OUT EditPtr edit,
-			IN uint32 id,
-			IN uint32 x,
-			IN uint32 y,
-			IN uint32 row,
-			IN uint32 column,
-			IN uint32 style,
-			IN ControlEvent event);
+CtrlEditInit(	OUT EditPtr edit,
+				IN uint32 id,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 row,
+				IN uint32 column,
+				IN uint32 style,
+				IN ControlEvent event);
 
 extern
 void
-edit_uninit(IN EditPtr edit);
+CtrlEditUninit(IN EditPtr edit);
 
 extern
 BOOL
-nmledit(IN OUT EditPtr edit,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top);
+CtrlEditUpdate(	IN OUT EditPtr edit,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top);
 
 extern
 BOOL
-edit_get_text(	IN EditPtr edit,
+CtrlEditGetText(	IN EditPtr edit,
 				OUT ASCTEXT text,
 				IN uint32 size);
 
 extern
 BOOL
-edit_set_text(	IN OUT EditPtr edit,
+CtrlEditSetText(	IN OUT EditPtr edit,
 				IN CASCTEXT text);
 
 extern
 BOOL
-edit_append_text(	IN OUT EditPtr edit,
+CtrlEditAppendText(	IN OUT EditPtr edit,
 					IN CASCTEXT text);
 
 extern
 uint32
-edit_get_width(IN EditPtr edit);
+CtrlEditGetWidth(IN EditPtr edit);
 
 extern
 uint32
-edit_get_height(IN EditPtr edit);
+CtrlEditGetHeight(IN EditPtr edit);
 
 #endif

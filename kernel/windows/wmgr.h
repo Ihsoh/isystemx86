@@ -14,20 +14,20 @@
 
 extern
 BOOL
-wmgr_window_init(void);
+WinWmgrInit(void);
 
 extern
 BOOL
-wmgr_window_show(	IN int32 x,
-					IN int32 taskbar_y);
+WinWmgrShow(IN int32 x,
+			IN int32 taskbar_y);
 
 extern
 BOOL
-wmgr_window_hide(void);
+WinWmgrHide(void);
 
 extern
 void
-wmgr_window_update(IN uint32 offset);
+WinWmgrUpdate(IN uint32 offset);
 
 #endif
 		

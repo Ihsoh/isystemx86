@@ -47,8 +47,8 @@ _PciScanDevices(void)
 			uint32 addr = 	0x80000000
 							+ bus * 0x10000
 							+ (slot * 8) * 0x100;
-			outl(PCI_CONFIG_ADDRESS, addr);
-			uint32 data = inl(PCI_CONFIG_DATA);
+			KnlOutLong(PCI_CONFIG_ADDRESS, addr);
+			uint32 data = KnlInLong(PCI_CONFIG_DATA);
 			if(data == 0xffffffff)
 				continue;
 			PCIDeviceInfoPtr dev = &_devices[_devcount++];
@@ -61,8 +61,8 @@ _PciScanDevices(void)
 			uint32 * header = (uint32 *)dev->header;
 			for(ui = 0; ui < sizeof(PCIHeader) / 4; ui++)
 			{
-				outl(PCI_CONFIG_ADDRESS, addr | (ui << 2));
-				header[ui] = inl(PCI_CONFIG_DATA);
+				KnlOutLong(PCI_CONFIG_ADDRESS, addr | (ui << 2));
+				header[ui] = KnlInLong(PCI_CONFIG_DATA);
 			}
 			if(_devcount == PCI_MAX_DEVICE_COUNT)
 				goto ok;

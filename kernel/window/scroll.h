@@ -40,13 +40,13 @@ typedef struct
 } Scroll, * ScrollPtr;
 
 #define	INIT_SCROLL(_scroll, _x, _y, _width, _height, _value, _min, _max, _event)	\
-	(scroll_init((_scroll), 0, (_value), (_min), (_max), (_x), (_y), (_width), (_height), 0xffaaaaaa, 0xff555555, (_event)))
+	(CtrlScrlInit((_scroll), 0, (_value), (_min), (_max), (_x), (_y), (_width), (_height), 0xffaaaaaa, 0xff555555, (_event)))
 
 #define	SCROLL(_scroll, _image, _params, _top)	\
-	(scroll((_scroll), (_image), (_params), (_top)))
+	(CtrlScrlUpdate((_scroll), (_image), (_params), (_top)))
 
 #define	SET_SCROLL_VALUE(_scroll, _value)	\
-	(scroll_set_value((_scroll), (_value)))
+	(CtrlScrlSetValue((_scroll), (_value)))
 
 #define	ENABLE_SCROLL(_scroll)	\
 	((_scroll)->enabled = TRUE)
@@ -62,29 +62,29 @@ typedef struct
 
 extern
 BOOL
-scroll_init(OUT ScrollPtr scroll,
-			IN uint32 id,
-			IN uint32 value,
-			IN uint32 min,
-			IN uint32 max,
-			IN uint32 x,
-			IN uint32 y,
-			IN uint32 width,
-			IN uint32 height,
-			IN uint32 color,
-			IN uint32 bgcolor,
-			IN ControlEvent event);
+CtrlScrlInit(	OUT ScrollPtr scroll,
+				IN uint32 id,
+				IN uint32 value,
+				IN uint32 min,
+				IN uint32 max,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 width,
+				IN uint32 height,
+				IN uint32 color,
+				IN uint32 bgcolor,
+				IN ControlEvent event);
 
 extern
 BOOL
-scroll(	IN OUT ScrollPtr scroll,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top);
+CtrlScrlUpdate(	IN OUT ScrollPtr scroll,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				IN BOOL top);
 
 extern
 BOOL
-scroll_set_value(	IN OUT ScrollPtr scroll,
+CtrlScrlSetValue(	IN OUT ScrollPtr scroll,
 					IN uint32 value);
 
 #endif

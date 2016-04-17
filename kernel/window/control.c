@@ -20,18 +20,18 @@
 static int32 _count = 0;
 
 void
-__dummy_event(uint32 id, uint32 type, void * param)
+CtrlDummyEvent(uint32 id, uint32 type, void * param)
 {
 }
 
 int32
-__new_control_id(void)
+CtrlNewControlId(void)
 {
 	return _count++;
 }
 
 /**
-	@Function:		control_get_width
+	@Function:		CtrlGetWidth
 	@Access:		Public
 	@Description:
 		获取控件宽度。
@@ -43,7 +43,7 @@ __new_control_id(void)
 			控件的宽度。如果失败会为0。
 */
 uint32
-control_get_width(IN void * c)
+CtrlGetWidth(IN void * c)
 {
 	if(c == NULL)
 		return 0;
@@ -68,7 +68,7 @@ control_get_width(IN void * c)
 }
 
 /**
-	@Function:		control_get_height
+	@Function:		CtrlGetHeight
 	@Access:		Public
 	@Description:
 		获取控件高度。
@@ -80,7 +80,7 @@ control_get_width(IN void * c)
 			控件的高度。如果失败会为0。
 */
 uint32
-control_get_height(IN void * c)
+CtrlGetHeight(IN void * c)
 {
 	if(c == NULL)
 		return 0;

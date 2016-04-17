@@ -41,9 +41,9 @@ void
 pic_set_phase(IN int32 hz)
 {
 	int32 divisor = PIT_SCALE / hz;
-	outb(PIT_CONTROL, PIT_SET);
-	outb(PIT_A, divisor & PIT_MASK);
-	outb(PIT_A, (divisor >> 8) & PIT_MASK);
+	KnlOutByte(PIT_CONTROL, PIT_SET);
+	KnlOutByte(PIT_A, divisor & PIT_MASK);
+	KnlOutByte(PIT_A, (divisor >> 8) & PIT_MASK);
 }
 
 /**
@@ -81,9 +81,9 @@ pic_mask(IN uint8 irq)
 	if(irq >= PIC_IRQ_COUNT)
 		return FALSE;
 	if(irq < 8)
-		outb(PIC_MASTER_IMR, inb(PIC_MASTER_IMR) | (uint8)(0x01 << irq));
+		KnlOutByte(PIC_MASTER_IMR, KnlInByte(PIC_MASTER_IMR) | (uint8)(0x01 << irq));
 	else
-		outb(PIC_SLAVE_IMR, inb(PIC_SLAVE_IMR) | (uint8)(0x01 << (irq - 8)));
+		KnlOutByte(PIC_SLAVE_IMR, KnlInByte(PIC_SLAVE_IMR) | (uint8)(0x01 << (irq - 8)));
 	return TRUE;
 }
 
@@ -105,9 +105,9 @@ pic_unmask(IN uint8 irq)
 	if(irq >= PIC_IRQ_COUNT)
 		return FALSE;
 	if(irq < 8)
-		outb(PIC_MASTER_IMR, inb(PIC_MASTER_IMR) & ~(uint8)(0x01 << irq));
+		KnlOutByte(PIC_MASTER_IMR, KnlInByte(PIC_MASTER_IMR) & ~(uint8)(0x01 << irq));
 	else
-		outb(PIC_SLAVE_IMR, inb(PIC_SLAVE_IMR) & ~(uint8)(0x01 << (irq - 8)));
+		KnlOutByte(PIC_SLAVE_IMR, KnlInByte(PIC_SLAVE_IMR) & ~(uint8)(0x01 << (irq - 8)));
 	return TRUE;
 }
 

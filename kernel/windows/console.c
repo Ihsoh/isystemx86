@@ -18,7 +18,7 @@
 struct Window * console_window;
 
 /**
-	@Function:		console_window_event
+	@Function:		_WinConsoleEvent
 	@Access:		Private
 	@Description:
 		控制台窗体程序的事件处理函数。
@@ -31,8 +31,8 @@ struct Window * console_window;
 */
 static
 void
-console_window_event(	IN struct Window * window, 
-						IN struct WindowEventParams * params)
+_WinConsoleEvent(	IN struct Window * window, 
+					IN struct WindowEventParams * params)
 {
 	struct CommonImage * screen = params->screen;
 	if(params->event_type == WINDOW_EVENT_PAINT)
@@ -49,7 +49,7 @@ console_window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		init_console_window
+	@Function:		WinConsoleInit
 	@Access:		Public
 	@Description:
 		初始化控制台窗体程序。
@@ -59,14 +59,14 @@ console_window_event(	IN struct Window * window,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-init_console_window(void)
+WinConsoleInit(void)
 {
 	console_window = create_window(	WINDOW_WIDTH, 
 									WINDOW_HEIGHT, 
 									0xffbbbbbb, 
 									WINDOW_STYLE_MINIMIZE, 
 									WINDOW_TITLE, 
-									console_window_event);
+									_WinConsoleEvent);
 	if(console_window == NULL)
 		return FALSE;
 	
@@ -81,7 +81,7 @@ init_console_window(void)
 }
 
 /**
-	@Function:		show_console_window
+	@Function:		WinConsoleShow
 	@Access:		Public
 	@Description:
 		显示控制台窗体。
@@ -89,7 +89,7 @@ init_console_window(void)
 	@Return:	
 */
 void
-show_console_window(void)
+WinConsoleShow(void)
 {
 	console_window->state = WINDOW_STATE_SHOW;
 }

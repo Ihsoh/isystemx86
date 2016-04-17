@@ -411,7 +411,7 @@ Ifs1FillDirBlock(	IN int8 * name,
 		return FALSE;
 	uint32 ui;
 	struct CMOSDateTime dt;
-	get_cmos_date_time(&dt);
+	CmosGetDateTime(&dt);
 	dir->used = 1;
 	dir->type = BLOCK_TYPE_DIR;
 	UtlCopyString(dir->dirname, sizeof(dir->dirname), name);
@@ -448,7 +448,7 @@ Ifs1FillFileBlock(	IN int8 * name,
 		return FALSE;
 	uint32 ui;
 	struct CMOSDateTime dt;
-	get_cmos_date_time(&dt);
+	CmosGetDateTime(&dt);
 	file->used = 1;
 	file->type = BLOCK_TYPE_FILE;
 	file->length = 0;

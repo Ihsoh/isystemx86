@@ -23,7 +23,7 @@
 #define	_HEIGHT		(_MAX_LINE * ENFONT_HEIGHT + _TPADDING + _BPADDING)
 
 /**
-	@Function:		_message_window_event
+	@Function:		_WinMsgEvent
 	@Access:		Public
 	@Description:
 		空的事件处理函数。
@@ -36,8 +36,8 @@
 */
 static
 void
-_message_window_event(	IN WindowPtr window,
-						IN struct WindowEventParams * params)
+_WinMsgEvent(	IN WindowPtr window,
+				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
 	switch(params->event_type)
@@ -51,7 +51,7 @@ _message_window_event(	IN WindowPtr window,
 }
 
 /**
-	@Function:		message_window_show
+	@Function:		WinMsgShow
 	@Access:		Public
 	@Description:
 		显示一个新的消息窗口。最多支持157个字符。
@@ -77,13 +77,13 @@ _message_window_event(	IN WindowPtr window,
 		WindowPtr
 */
 WindowPtr
-message_window_show(IN CASCTEXT title,
-					IN CASCTEXT text,
-					IN uint32 style,
-					IN int32 x,
-					IN int32 y,
-					IN uint32 color,
-					IN uint32 bgcolor)
+WinMsgShow(	IN CASCTEXT title,
+			IN CASCTEXT text,
+			IN uint32 style,
+			IN int32 x,
+			IN int32 y,
+			IN uint32 color,
+			IN uint32 bgcolor)
 {
 	if(title == NULL || text == NULL)
 		return NULL;
@@ -93,7 +93,7 @@ message_window_show(IN CASCTEXT title,
 							bgcolor,
 							WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_CLOSE,
 							title,
-							_message_window_event);
+							_WinMsgEvent);
 	if(window == NULL)
 		return NULL;
 	struct CommonImage * workspace = &(window->workspace);

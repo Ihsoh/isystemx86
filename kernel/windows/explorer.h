@@ -11,6 +11,12 @@
 
 #include "../types.h"
 
+extern
+BOOL
+WinExplInit(void);
 
+extern
+void
+WinExplShow(void);
 
 #endif

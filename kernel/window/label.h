@@ -53,14 +53,14 @@ typedef	struct
 #define	LABEL_STYLE_REFRESH		0x00000001
 
 #define	INIT_LABEL(_label, _x, _y, _text, _event)	\
-	(label_init((_label), 0, (_x), (_y), (_text),	\
+	(CtrlLblInit((_label), 0, (_x), (_y), (_text),	\
 		0xff000000, WINDOW_DEFBGCOLOR, 0xff000000, WINDOW_DEFBGCOLOR, (_event), 0, 0))
 
 #define	LABEL(_label, _image, _params, _top)	\
-	(label((_label), (_image), (_params), (_top)))
+	(CtrlLblUpdate((_label), (_image), (_params), (_top)))
 
 #define	SET_LABEL_TEXT(_label, _text)	\
-	(label_set_text((_label), (_text)))
+	(CtrlLblSetText((_label), (_text)))
 
 #define	ENABLE_LABEL(_label)	\
 	((_label)->enabled = TRUE)
@@ -76,7 +76,7 @@ typedef	struct
 
 extern
 BOOL
-label_init(	OUT LabelPtr label,
+CtrlLblInit(OUT LabelPtr label,
 			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
@@ -91,14 +91,14 @@ label_init(	OUT LabelPtr label,
 
 extern
 BOOL
-label(	IN OUT LabelPtr label,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top);
+CtrlLblUpdate(	IN OUT LabelPtr label,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top);
 
 extern
 BOOL
-label_set_text(	OUT LabelPtr label,
+CtrlLblSetText(	OUT LabelPtr label,
 				IN CASCTEXT text);
 
 #endif

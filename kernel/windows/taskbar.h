@@ -16,6 +16,6 @@
 
 extern
 BOOL
-taskbar_window_init(void);
+WinTskbrInit(void);
 
 #endif

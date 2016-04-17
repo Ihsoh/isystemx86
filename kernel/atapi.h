@@ -39,7 +39,7 @@
 /* ATA specifies a 400ns delay after drive switching -- often
  * implemented as 4 Alternative Status queries. */
 #define ATA_SELECT_DELAY(bus) \
-  {inb(ATA_DCR(bus));inb(ATA_DCR(bus));inb(ATA_DCR(bus));inb(ATA_DCR(bus));}
+  {KnlInByte(ATA_DCR(bus));KnlInByte(ATA_DCR(bus));KnlInByte(ATA_DCR(bus));KnlInByte(ATA_DCR(bus));}
 
 #define	ATAPI_MAX_SIZE			(MB(700))
 #define	ATAPI_SECTOR_COUNT 		(ATAPI_MAX_SIZE / ATAPI_SECTOR_SIZE)
@@ -47,40 +47,40 @@
 
 extern
 BOOL
-atapi_init(void);
+AtapiInit(void);
 
 extern
 BOOL
-atapi_locked(void);
+AtapiIsLocked(void);
 
 extern
 int32
-atapi_lock_tid(void);
+AtapiGetLockTid(void);
 
 extern
 void
-atapi_attempt_to_unlock(IN int32 tid);
+AtapiAttemptToUnlock(IN int32 tid);
 
 extern
 int32
-atapi_read_sector(	IN uint32 bus,
+AtapiReadSector(	IN uint32 bus,
 					IN uint32 drive,
 					IN uint32 lba,
 					OUT uint8 * buffer);
 
 extern
 BOOL
-atapi_read_sector512(	IN uint32 bus,
-						IN uint32 drive,
-						IN uint32 pos, 
-						OUT uint8 * buffer);
+AtapiReadSector512(	IN uint32 bus,
+					IN uint32 drive,
+					IN uint32 pos, 
+					OUT uint8 * buffer);
 
 extern
 BOOL
-atapi_read_sector512s(	IN uint32 bus,
-						IN uint32 drive,
-						IN uint32 pos,
-						IN uint32 count,
-						OUT uint8 * buffer);
+AtapiReadSector512s(IN uint32 bus,
+					IN uint32 drive,
+					IN uint32 pos,
+					IN uint32 count,
+					OUT uint8 * buffer);
 
 #endif

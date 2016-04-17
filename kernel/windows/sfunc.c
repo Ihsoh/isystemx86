@@ -20,7 +20,7 @@
 static struct Window * sfunc_window;
 
 /**
-	@Function:		sfunc_window_event
+	@Function:		_WinSfuncEvent
 	@Access:		Private
 	@Description:
 		系统功能窗体的事件处理函数。
@@ -33,7 +33,7 @@ static struct Window * sfunc_window;
 */
 static
 void
-sfunc_window_event(struct Window * window, struct WindowEventParams * params)
+_WinSfuncEvent(struct Window * window, struct WindowEventParams * params)
 {
 	struct CommonImage * screen = params->screen;
 	if(params->event_type == WINDOW_EVENT_PAINT)
@@ -53,7 +53,7 @@ sfunc_window_event(struct Window * window, struct WindowEventParams * params)
 								ENFONT_HEIGHT, 
 								0xffbbbbbb);
 			if(is_mouse_left_button_down())
-				show_clock_window();
+				WinClockShow();
 		}		
 		else
 			rect_common_image(	screen, 
@@ -84,7 +84,7 @@ sfunc_window_event(struct Window * window, struct WindowEventParams * params)
 								ENFONT_HEIGHT, 
 								0xffbbbbbb);
 			if(is_mouse_left_button_down())
-				show_console_window();
+				WinConsoleShow();
 		}		
 		else
 			rect_common_image(	screen, 
@@ -104,7 +104,7 @@ sfunc_window_event(struct Window * window, struct WindowEventParams * params)
 }
 
 /**
-	@Function:		init_sfunc_window
+	@Function:		WinSfuncInit
 	@Access:		Public
 	@Description:
 		初始化系统功能窗体程序。
@@ -114,21 +114,21 @@ sfunc_window_event(struct Window * window, struct WindowEventParams * params)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-init_sfunc_window(void)
+WinSfuncInit(void)
 {
 	sfunc_window = create_window(	320, 
 									200, 
 									0xffffffff, 
 									WINDOW_STYLE_MINIMIZE, 
 									"System Function", 
-									sfunc_window_event);
+									_WinSfuncEvent);
 	if(sfunc_window == NULL)
 		return FALSE;
 	return TRUE;
 }
 
 /**
-	@Function:		show_sfunc_window
+	@Function:		WinSfuncShow
 	@Access:		Public
 	@Description:
 		显示系统功能窗体。
@@ -136,7 +136,7 @@ init_sfunc_window(void)
 	@Return:
 */
 void
-show_sfunc_window(void)
+WinSfuncShow(void)
 {
 	sfunc_window->state = WINDOW_STATE_SHOW;
 }

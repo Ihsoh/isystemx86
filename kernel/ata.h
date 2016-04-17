@@ -161,52 +161,52 @@ typedef struct
 
 extern
 BOOL
-ata_locked(void);
+AtaIsLocked(void);
 
 extern
 int32
-ata_lock_tid(void);
+AtaGetLockTid(void);
 
 extern
 void
-ata_attempt_to_unlock(IN int32 tid);
+AtaAttemptToUnlock(IN int32 tid);
 
 extern
 uint32
-ata_init(void);
+AtaInit(void);
 
 extern
 BOOL
-ata_is_existed(IN CASCTEXT symbol);
+AtaDeviceExisted(IN CASCTEXT symbol);
 
 extern
 uint64
-ata_sector_count(IN CASCTEXT symbol);
+AtaGetSectorCount(IN CASCTEXT symbol);
 
 extern
 BOOL
-ata_device_read_sectors(IN CASCTEXT symbol,
-						IN uint32 lba,
-						IN uint8 count,
-						OUT uint8 * buf);
+AtaReadSectors(	IN CASCTEXT symbol,
+				IN uint32 lba,
+				IN uint8 count,
+				OUT uint8 * buf);
 
 extern
 BOOL
-ata_device_write_sectors(	IN CASCTEXT symbol,
-							IN uint32 lba,
-							IN uint8 count,
-							IN uint8 * buf);
+AtaWriteSectors(IN CASCTEXT symbol,
+				IN uint32 lba,
+				IN uint8 count,
+				IN uint8 * buf);
 
 extern
 BOOL
-ata_device_read_sector(	IN CASCTEXT symbol,
-						IN uint32 lba,
-						OUT uint8 * buf);
+AtaReadSector(	IN CASCTEXT symbol,
+				IN uint32 lba,
+				OUT uint8 * buf);
 
 extern
 BOOL
-ata_device_write_sector(IN CASCTEXT symbol,
-						IN uint32 lba,
-						IN uint8 * buf);
+AtaWriteSector(	IN CASCTEXT symbol,
+				IN uint32 lba,
+				IN uint8 * buf);
 
 #endif

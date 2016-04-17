@@ -48,7 +48,7 @@ static int8 _weeks[][10] 	= {	"Sunday",
 								"Saturday"};
 
 /**
-	@Function:		_control_event
+	@Function:		_WinTskbrControlEvent
 	@Access:		Private
 	@Description:
 		控件的事件函数。
@@ -63,28 +63,28 @@ static int8 _weeks[][10] 	= {	"Sunday",
 */
 static
 void
-_control_event(	IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_WinTskbrControlEvent(	IN uint32 id,
+						IN uint32 type,
+						IN void * param)
 {
 	if(id == _btn_start->id)
 	{
 		if(type == BUTTON_LBUP)
 		{
-			start_window_show(_btn_start->x, _window->y);
+			WinStartShow(_btn_start->x, _window->y);
 		}
 	}
 	else if(id == _btn_wmgr->id)
 	{
 		if(type == BUTTON_LBUP)
 		{
-			wmgr_window_show(_btn_wmgr->x, _window->y);
+			WinWmgrShow(_btn_wmgr->x, _window->y);
 		}
 	}
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_WinTskbrEvent
 	@Access:		Private
 	@Description:
 		窗体的事件函数。
@@ -97,7 +97,7 @@ _control_event(	IN uint32 id,
 */
 static
 void
-_window_event(	IN struct Window * window,
+_WinTskbrEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
 	BOOL top = get_top_window() == window;
@@ -110,7 +110,7 @@ _window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		_timer_event
+	@Function:		_WinTskbrTimerEvent
 	@Access:		Private
 	@Description:
 		定时器事件函数。
@@ -119,10 +119,10 @@ _window_event(	IN struct Window * window,
 */
 static
 void
-_timer_event(void)
+_WinTskbrTimerEvent(void)
 {
 	struct CMOSDateTime dt;
-	get_cmos_date_time(&dt);
+	CmosGetDateTime(&dt);
 	ASCCHAR buffer[1024] = "";
 	ASCCHAR temp[10];
 	UtlConcatString(buffer, sizeof(buffer), itos(temp, dt.year));
@@ -146,7 +146,7 @@ _timer_event(void)
 }
 
 /**
-	@Function:		taskbar_window_init
+	@Function:		WinTskbrInit
 	@Access:		Public
 	@Description:
 		初始化任务栏。
@@ -156,7 +156,7 @@ _timer_event(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-taskbar_window_init(void)
+WinTskbrInit(void)
 {
 	uint32 w = vesa_get_width();
 	uint32 h = vesa_get_height();
@@ -166,38 +166,38 @@ taskbar_window_init(void)
 								| WINDOW_STYLE_NO_WMGR
 								| WINDOW_STYLE_NO_BORDER,
 							"Taskbar",
-							_window_event);
+							_WinTskbrEvent);
 	rect_common_image(&_window->workspace, 0, 0, w, _HEIGHT, 0xff222222);
 	_window->y = h - _HEIGHT;
 
 	_btn_start = NEW(Button);
-	button_init(_btn_start, 0,
+	CtrlBtnInit(_btn_start, 0,
 				0, 0,
 				"ISystem",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_control_event,
+				_WinTskbrControlEvent,
 				0, _HEIGHT);
 	_btn_start->style = BUTTON_STYLE_REFRESH;
 
 	_btn_wmgr = NEW(Button);
-	button_init(_btn_wmgr, 0,
+	CtrlBtnInit(_btn_wmgr, 0,
 				_btn_start->width, 0,
 				"Window",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_control_event,
+				_WinTskbrControlEvent,
 				0, _HEIGHT);
 	_btn_wmgr->style = BUTTON_STYLE_REFRESH;
 
 	_btn_time = NEW(Button);
-	button_init(_btn_time, 0,
+	CtrlBtnInit(_btn_time, 0,
 				w - _BTN_TIME_WIDTH, 0,
 				"Time",
 				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_control_event,
+				_WinTskbrControlEvent,
 				_BTN_TIME_WIDTH, 0);
 	_btn_time->style = BUTTON_STYLE_REFRESH;
 
-	_timer = timer_new(800, _timer_event);
+	_timer = timer_new(800, _WinTskbrTimerEvent);
 	timer_start(_timer);
 
 	_window->state = WINDOW_STATE_SHOW;

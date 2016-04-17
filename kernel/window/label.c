@@ -20,7 +20,7 @@
 #define	_LABEL_WIDTH(_lbl) (LABEL_LPADDING + (_lbl)->max_col * ENFONT_WIDTH + LABEL_RPADDING)
 
 /**
-	@Function:		_max
+	@Function:		_CtrlLblGetMaxRowAndColumn
 	@Access:		Private
 	@Description:
 		获取文本的行数和最大列数。
@@ -37,9 +37,9 @@
 */
 static
 void
-_max(	IN CASCTEXT text,
-		OUT uint32 * row,
-		OUT uint32 * col)
+_CtrlLblGetMaxRowAndColumn(	IN CASCTEXT text,
+							OUT uint32 * row,
+							OUT uint32 * col)
 {
 	ASCCHAR chr = '\0';
 	uint32 r = 0, c = 0, cc = 0;
@@ -69,7 +69,7 @@ _max(	IN CASCTEXT text,
 }
 
 /**
-	@Function:		label_init
+	@Function:		CtrlLblInit
 	@Access:		Public
 	@Description:
 		初始化Label。
@@ -103,7 +103,7 @@ _max(	IN CASCTEXT text,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-label_init(	OUT LabelPtr label,
+CtrlLblInit(OUT LabelPtr label,
 			IN uint32 id,
 			IN uint32 x,
 			IN uint32 y,
@@ -140,7 +140,7 @@ label_init(	OUT LabelPtr label,
 	label->lbdown = FALSE;
 	label->rbdown = FALSE;
 	label->hover = FALSE;
-	_max(text, &label->max_row, &label->max_col);
+	_CtrlLblGetMaxRowAndColumn(text, &label->max_row, &label->max_col);
 	label->clean = FALSE;
 	label->old_max_row = 0;
 	label->old_max_col = 0;
@@ -153,7 +153,7 @@ label_init(	OUT LabelPtr label,
 }
 
 /**
-	@Function:		label
+	@Function:		CtrlLblUpdate
 	@Access:		Public
 	@Description:
 		Label的渲染、事件处理函数。
@@ -171,10 +171,10 @@ label_init(	OUT LabelPtr label,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-label(	IN OUT LabelPtr label,
-		OUT ImagePtr image,
-		IN WindowEventParamsPtr params,
-		BOOL top)
+CtrlLblUpdate(	IN OUT LabelPtr label,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				BOOL top)
 {
 	if(label == NULL || image == NULL || params == NULL)
 		return FALSE;
@@ -193,7 +193,7 @@ label(	IN OUT LabelPtr label,
 	if(label->enabled)
 		event = label->event;
 	else
-		event = __dummy_event;
+		event = CtrlDummyEvent;
 	uint32 len = strlen(text);
 	uint32 width = 0;
 	if(label->width == 0)
@@ -288,7 +288,7 @@ label(	IN OUT LabelPtr label,
 }
 
 /**
-	@Function:		label_set_text
+	@Function:		CtrlLblSetText
 	@Access:		Public
 	@Description:
 		设置Label的文本。
@@ -302,7 +302,7 @@ label(	IN OUT LabelPtr label,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-label_set_text(	OUT LabelPtr label,
+CtrlLblSetText(	OUT LabelPtr label,
 				IN CASCTEXT text)
 {
 	if(	label == NULL
@@ -312,7 +312,7 @@ label_set_text(	OUT LabelPtr label,
 	UtlCopyString(label->text, sizeof(label->text), text);
 	label->old_max_row = label->max_row;
 	label->old_max_col = label->max_col;
-	_max(text, &label->max_row, &label->max_col);
+	_CtrlLblGetMaxRowAndColumn(text, &label->max_row, &label->max_col);
 	label->width = _LABEL_WIDTH(label);
 	label->height = LABEL_TPADDING + label->max_row * ENFONT_HEIGHT + LABEL_BPADDING;
 	label->clean = TRUE;

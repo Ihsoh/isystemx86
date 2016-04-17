@@ -34,13 +34,13 @@ typedef struct
 } Progress, * ProgressPtr;
 
 #define	INIT_PROGRESS(_progress, _x, _y, _width, _height, _percent, _event)	\
-	(progress_init((_progress), 0, (_percent), (_x), (_y), (_width), (_height), 0xffaaaaaa, 0xff555555, (_event)))
+	(CtrlPrgrInit((_progress), 0, (_percent), (_x), (_y), (_width), (_height), 0xffaaaaaa, 0xff555555, (_event)))
 
 #define	PROGRESS(_progress, _image, _params, _top)	\
-	(progress((_progress), (_image), (_params), (_top)))
+	(CtrlPrgrUpdate((_progress), (_image), (_params), (_top)))
 
 #define	SET_PROGRESS_PERCENT(_progress, _percent)	\
-	(progress_set_percent((_progress), (_percent)))
+	(CtrlPrgrSetPercent((_progress), (_percent)))
 
 #define	GET_PROGRESS_WIDTH(_progress)	\
 	((_progress)->width)
@@ -50,7 +50,7 @@ typedef struct
 
 extern
 BOOL
-progress_init(	OUT ProgressPtr progress,
+CtrlPrgrInit(	OUT ProgressPtr progress,
 				IN uint32 id,
 				IN uint32 percent,
 				IN uint32 x,
@@ -63,14 +63,14 @@ progress_init(	OUT ProgressPtr progress,
 
 extern
 BOOL
-progress(	IN OUT ProgressPtr progress,
-			OUT ImagePtr image,
-			IN WindowEventParamsPtr params,
-			BOOL top);
+CtrlPrgrUpdate(	IN OUT ProgressPtr progress,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				IN BOOL top);
 
 extern
 BOOL
-progress_set_percent(	OUT ProgressPtr progress,
-						IN uint32 percent);
+CtrlPrgrSetPercent(	OUT ProgressPtr progress,
+					IN uint32 percent);
 
 #endif

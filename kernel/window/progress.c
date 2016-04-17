@@ -18,7 +18,7 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		progress_init
+	@Function:		CtrlPrgrInit
 	@Access:		Public
 	@Description:
 		初始化Progress。
@@ -48,7 +48,7 @@
 			返回TRUE则成功，否则失败。
 */
 BOOL
-progress_init(	OUT ProgressPtr progress,
+CtrlPrgrInit(	OUT ProgressPtr progress,
 				IN uint32 id,
 				IN uint32 percent,
 				IN uint32 x,
@@ -87,7 +87,7 @@ progress_init(	OUT ProgressPtr progress,
 }
 
 /**
-	@Function:		progress
+	@Function:		CtrlPrgrUpdate
 	@Access:		Public
 	@Description:
 		Progress的渲染、事件处理函数。
@@ -105,10 +105,10 @@ progress_init(	OUT ProgressPtr progress,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-progress(	IN OUT ProgressPtr progress,
-			OUT ImagePtr image,
-			IN WindowEventParamsPtr params,
-			BOOL top)
+CtrlPrgrUpdate(	IN OUT ProgressPtr progress,
+				OUT ImagePtr image,
+				IN WindowEventParamsPtr params,
+				IN BOOL top)
 {
 	if(progress == NULL || image == NULL || params == NULL)
 		return FALSE;
@@ -146,7 +146,7 @@ progress(	IN OUT ProgressPtr progress,
 }
 
 /**
-	@Function:		progress_set_percent
+	@Function:		CtrlPrgrSetPercent
 	@Access:		Public
 	@Description:
 		设置Progress的进度的百分比。
@@ -161,8 +161,8 @@ progress(	IN OUT ProgressPtr progress,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-progress_set_percent(	OUT ProgressPtr progress,
-						IN uint32 percent)
+CtrlPrgrSetPercent(	OUT ProgressPtr progress,
+					IN uint32 percent)
 {
 	if(progress == NULL || percent > 100)
 		return FALSE;

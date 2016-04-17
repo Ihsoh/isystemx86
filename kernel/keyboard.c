@@ -529,41 +529,41 @@ tran_key(IN uint8 scan_code)
 			case KEY_F2:
 			{
 				if(alt && vesa_is_valid())
-					run_window_show();
+					WinRunShow();
 				break;
 			}
 			case KEY_F3:
 			{
 				if(alt && control)
 				{
-					int32 tid = get_wait_app_tid();
+					int32 tid = ConGetCurrentApplicationTid();
 					if(tid != -1)
 					{
-						set_wait_app_tid(-1);
+						ConSetCurrentApplicationTid(-1);
 						kill_task(tid);
 						clear_screen();
 					}
 				}
 				else if(alt)
-					set_wait_app_tid(-1);
+					ConSetCurrentApplicationTid(-1);
 				break;
 			}
 			case KEY_F5:
 			{
 				if(alt)
-					exit_batch();
+					ConExitBatchScript();
 				break;
 			}
 			case KEY_F9:
 			{
 				if(alt)
-					taskmgr_window_show();
+					WinTskmgrShow();
 				break;
 			}
 			case KEY_F10:
 			{
 				if(alt)
-					dbgout_window_show();
+					WinDbgoutShow();
 				break;
 			}
 		}
@@ -945,10 +945,10 @@ init_keyboard_driver(void)
 	uint32 ui;
 
 	// 重置PS/2
-	uint8 tmp = inb(0x61);
-	outb(0x61, tmp | 0x80);
-	outb(0x61, tmp & 0x7f);
-	inb(0x60);
+	uint8 tmp = KnlInByte(0x61);
+	KnlOutByte(0x61, tmp | 0x80);
+	KnlOutByte(0x61, tmp & 0x7f);
+	KnlInByte(0x60);
 
 	for(ui = 0; ui < KEY_MAP_SIZE; ui++)
 		key_map[ui] = 0;
