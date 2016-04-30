@@ -62,9 +62,16 @@ $(Target):	bin	\
 	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrgm_1024_768.bin kernel/bin/kernel.bin bin/isystemx86.img isystemx86.dm flat
 	tools/diskmaker/bin/diskmaker -m boot/bin/boot.bin kernelldr/bin/kernelldrgm_1024_768.bin kernel/bin/kernel.bin bin/isystemx86.vhd isystemx86.dm vhd
 
-	-rm -r doc/isystemx86-kernel-doc/*
+	if [ ! -d "doc" ]; then mkdir doc; fi
+
+	if [ ! -d "doc/isystemx86-kernel-doc" ]; then mkdir doc/isystemx86-kernel-doc; fi
+	if [ -f "doc/isystemx86-kernel-doc/*" ]; then rm -r doc/isystemx86-kernel-doc/*; fi
 	cd tools/idoc/ && python idoc.py ../../kernel ../../doc/isystemx86-kernel-doc
-	-rm -r doc/libs/mempoollib-doc/*
+
+	if [ ! -d "doc/libs" ]; then mkdir doc/libs; fi
+
+	if [ ! -d "doc/libs/mempoollib-doc" ]; then mkdir doc/libs/mempoollib-doc; fi
+	if [ -f "doc/mempoollib-doc/*" ]; then rm -r doc/libs/mempoollib-doc/*; fi
 	cd tools/idoc/ && python idoc.py ../../libs/mempoollib ../../doc/libs/mempoollib-doc
 
 bin:
