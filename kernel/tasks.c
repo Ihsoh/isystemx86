@@ -39,7 +39,7 @@ static int32 		task_count 				= 0;
 DEFINE_LOCK_IMPL(tasks)
 
 /**
-	@Function:		init_tasks
+	@Function:		TskmgrInit
 	@Access:		Public
 	@Description:
 		初始化多任务。
@@ -49,7 +49,7 @@ DEFINE_LOCK_IMPL(tasks)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-init_tasks(void)
+TskmgrInit(void)
 {
 	struct die_info info;
 	uint32 ui;
@@ -74,12 +74,12 @@ init_tasks(void)
 		task_gate.attr = ATTASKGATE | DPL3;
 		KnlSetDescToGDT(400 + ui * 5 + 1, (uint8 *)&task_gate);
 
-		tasks[ui].opened_file_ptrs = alloc_memory(MAX_TASK_OPENED_FILE_COUNT * sizeof(FileObject *));
-		tasks[ui].memory_block_ptrs = alloc_memory(MAX_TASK_MEMORY_BLOCK_COUNT * sizeof(void *));
-		tasks[ui].mqueue_ids = alloc_memory(MAX_TASK_MQUEUE_COUNT * sizeof(uint32));
-		tasks[ui].working_dir = alloc_memory(1024);
-		tasks[ui].name = alloc_memory(1024);
-		tasks[ui].param = alloc_memory(1024);
+		tasks[ui].opened_file_ptrs = MemAlloc(MAX_TASK_OPENED_FILE_COUNT * sizeof(FileObject *));
+		tasks[ui].memory_block_ptrs = MemAlloc(MAX_TASK_MEMORY_BLOCK_COUNT * sizeof(void *));
+		tasks[ui].mqueue_ids = MemAlloc(MAX_TASK_MQUEUE_COUNT * sizeof(uint32));
+		tasks[ui].working_dir = MemAlloc(1024);
+		tasks[ui].name = MemAlloc(1024);
+		tasks[ui].param = MemAlloc(1024);
 		if(	tasks[ui].opened_file_ptrs == NULL
 			|| tasks[ui].memory_block_ptrs == NULL
 			|| tasks[ui].mqueue_ids == NULL
@@ -95,7 +95,7 @@ init_tasks(void)
 }
 
 /**
-	@Function:		_create_task
+	@Function:		_TskmgrCreateTask
 	@Access:		Private
 	@Description:
 		创建一个任务。
@@ -124,13 +124,13 @@ init_tasks(void)
 */
 static
 int32
-_create_task(	IN int8 * name,
-				IN int8 * param,
-				IN uint8 * app,
-				IN uint32 app_len,
-				IN int8 * working_dir,
-				IN TaskType task_type,
-				IN TaskAttr task_attr)
+_TskmgrCreateTask(	IN int8 * name,
+					IN int8 * param,
+					IN uint8 * app,
+					IN uint32 app_len,
+					IN int8 * working_dir,
+					IN TaskType task_type,
+					IN TaskAttr task_attr)
 {
 	if(task_type != TASK_TYPE_USER && task_type != TASK_TYPE_SYSTEM)
 		return -1;
@@ -156,7 +156,7 @@ _create_task(	IN int8 * name,
 		KnlSetDescToGDT(400 + tid * 5 + 0, (uint8 *)&tss_desc);
 
 		// 重置与这个任务对应的系统调用。
-		if(!reset_syscall(tid))
+		if(!KnlResetSystemCall(tid))
 			return -1;
 
 		task->used = 1;
@@ -181,11 +181,11 @@ _create_task(	IN int8 * name,
 		UtlCopyString(task->working_dir, 1024, working_dir);
 		task->app_len = app_len;
 		uint32 real_task_len = 3 * 1024 * 1024 + app_len;
-		task->addr = (uint8 *)alloc_memory(real_task_len);
+		task->addr = (uint8 *)MemAlloc(real_task_len);
 		task->used_memory_size = real_task_len;
 		if(task->addr == NULL)
 			return -1;
-		clear_memory((uint8 *)(task->addr), 0, real_task_len);
+		MemClear((uint8 *)(task->addr), 0, real_task_len);
 		memcpy(task->addr + 3 * 1024 * 1024, app, app_len);
 
 		for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
@@ -288,36 +288,39 @@ _create_task(	IN int8 * name,
 		task->tss.trap = 0;
 		task->tss.iobase = sizeof(struct TSS);
 
-		task->pagedt_addr = create_empty_user_pagedt(&task->real_pagedt_addr);
+		task->pagedt_addr = PgCreateEmptyUserPageTable(&task->real_pagedt_addr);
 		if(task->pagedt_addr == NULL)
 		{
-			free_memory(task->addr);
+			MemFree(task->addr);
 			return -1;
 		}
 		// 把程序空间的0x00000000到0x00ffffff映射到物理空间的0x00000000到0x00ffffff。
 		// 权限为读和执行。0x00000000到0x00ffffff为内核空间。
 		// 在执行系统调用时会执行包含对内核空间写操作的代码，但是由于这个操作是在0xa0中断
 		// 程序中进行，并且执行0xa0中断程序时CPL为Ring0，所以写操作为合法。
-		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr, 
-								0x00000000,
-								0x01000000,
-								0x00000000, 
-								RW_RE);
+		PgMapUserPageTableWithPermission(
+			(uint32 *)task->real_pagedt_addr, 
+			0x00000000,
+			0x01000000,
+			0x00000000, 
+			RW_RE);
 		
 		// 把程序空间的0x01000000到(0x01000000 + task_real_len - 1)映射到
 		// 物理空间的(task->addr)~(task->addr + task_real_len - 1)。
-		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
-								0x01000000,
-								real_task_len,
-								task->addr,
-								RW_RWE);
+		PgMapUserPageTableWithPermission(
+			(uint32 *)task->real_pagedt_addr,
+			0x01000000,
+			real_task_len,
+			task->addr,
+			RW_RWE);
 
 		//保护程序空间0x01000000到0x010000000 + 4KB - 1
-		map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
-								0x01000000,
-								KB(4),
-								task->addr,
-								RW_RE);
+		PgMapUserPageTableWithPermission(
+			(uint32 *)task->real_pagedt_addr,
+			0x01000000,
+			KB(4),
+			task->addr,
+			RW_RE);
 
 		task->tss.cr3 = task->real_pagedt_addr;
 		
@@ -330,7 +333,7 @@ _create_task(	IN int8 * name,
 }
 
 /**
-	@Function:		create_task
+	@Function:		TskmgrCreateTask
 	@Access:		Public
 	@Description:
 		创建一个用户任务。
@@ -350,26 +353,26 @@ _create_task(	IN int8 * name,
 			如果失败则返回-1, 否则返回任务的 ID。
 */
 int32
-create_task(IN int8 * name,
-			IN int8 * param,
-			IN uint8 * app,
-			IN uint32 app_len,
-			IN int8 * working_dir)
+TskmgrCreateTask(	IN int8 * name,
+					IN int8 * param,
+					IN uint8 * app,
+					IN uint32 app_len,
+					IN int8 * working_dir)
 {
 	lock();
-	int32 tid = _create_task(name, 
-							param, 
-							app, 
-							app_len, 
-							working_dir, 
-							TASK_TYPE_USER,
-							TASK_ATTR_NONE);
+	int32 tid = _TskmgrCreateTask(	name, 
+									param, 
+									app, 
+									app_len, 
+									working_dir, 
+									TASK_TYPE_USER,
+									TASK_ATTR_NONE);
 	unlock();
 	return tid;
 }
 
 /**
-	@Function:		create_sys_task
+	@Function:		TskmgrCreateSystemTask
 	@Access:		Public
 	@Description:
 		创建一个系统任务。
@@ -389,26 +392,26 @@ create_task(IN int8 * name,
 			如果失败则返回-1, 否则返回任务的 ID。
 */
 int32
-create_sys_task(IN int8 * name,
-				IN int8 * param,
-				IN uint8 * app,
-				IN uint32 app_len,
-				IN int8 * working_dir)
+TskmgrCreateSystemTask(	IN int8 * name,
+						IN int8 * param,
+						IN uint8 * app,
+						IN uint32 app_len,
+						IN int8 * working_dir)
 {
 	lock();
-	int32 tid = _create_task(name, 
-							param, 
-							app, 
-							app_len, 
-							working_dir, 
-							TASK_TYPE_SYSTEM,
-							TASK_ATTR_NONE);
+	int32 tid = _TskmgrCreateTask(	name, 
+									param, 
+									app, 
+									app_len, 
+									working_dir, 
+									TASK_TYPE_SYSTEM,
+									TASK_ATTR_NONE);
 	unlock();
 	return tid;
 }
 
 /**
-	@Function:		_kill_task
+	@Function:		_TskmgrKillTask
 	@Access:		Public
 	@Description:
 		可以杀死一个用户任务或系统任务。
@@ -421,7 +424,7 @@ create_sys_task(IN int8 * name,
 */
 static
 BOOL
-_kill_task(IN int32 tid)
+_TskmgrKillTask(IN int32 tid)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || !tasks[tid].used)
 		return FALSE;
@@ -456,7 +459,7 @@ _kill_task(IN int32 tid)
 	struct Task * task = tasks + tid;
 
 	if(task->addr != NULL)
-		free_memory(task->addr);
+		MemFree(task->addr);
 	
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_OPENED_FILE_COUNT; ui++)
@@ -469,7 +472,7 @@ _kill_task(IN int32 tid)
 	for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT; ui++)
 		if(task->memory_block_ptrs[ui] != NULL)
 		{
-			free_memory(task->memory_block_ptrs[ui]);
+			MemFree(task->memory_block_ptrs[ui]);
 			task->memory_block_ptrs[ui] = NULL;
 		}
 
@@ -478,13 +481,13 @@ _kill_task(IN int32 tid)
 		uint32 id = task->mqueue_ids[ui];
 		if(id != 0)
 		{
-			mqueue_free((MQueuePtr)id);
+			MqFree((MQueuePtr)id);
 			task->mqueue_ids[ui] = 0;
 		}
 	}
 
 	if(task->pagedt_addr != NULL)
-		free_memory(task->pagedt_addr);
+		MemFree(task->pagedt_addr);
 
 	if(task->on_exit != NULL)
 		task->on_exit(tid, task->retvalue);
@@ -500,7 +503,7 @@ _kill_task(IN int32 tid)
 		Ifs1CloseFile(task->stderr);
 
 	if(task->elf != NULL)
-		free_memory(task->elf);
+		MemFree(task->elf);
 
 	// 释放ELF SO槽中的所有ELF上下文。
 	for(ui = 0; ui < MAX_TASK_ELF_SO_COUNT; ui++)
@@ -512,7 +515,7 @@ _kill_task(IN int32 tid)
 		}
 
 	// 释放与这个任务对应的系统调用。
-	free_syscall(tid);
+	KnlFreeSystemCall(tid);
 
 	// 尝试释放ATA驱动的锁。
 	AtaAttemptToUnlock(tid);
@@ -523,7 +526,7 @@ _kill_task(IN int32 tid)
 	// 尝试释放AHCI驱动的锁。
 	AhciAttemptToUnlock(tid);
 
-	gui_close_windows(tid);
+	GuiCloseWindows(tid);
 
 	if(tid == running_tid)
 		running_tid = -1;
@@ -536,7 +539,7 @@ _kill_task(IN int32 tid)
 }
 
 /**
-	@Function:		kill_task
+	@Function:		TskmgrKillTask
 	@Access:		Public
 	@Description:
 		可以杀死一个用户任务，但不能杀死系统任务。
@@ -548,7 +551,7 @@ _kill_task(IN int32 tid)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-kill_task(IN int32 tid)
+TskmgrKillTask(IN int32 tid)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT
@@ -558,13 +561,13 @@ kill_task(IN int32 tid)
 	if(task->type != TASK_TYPE_USER)
 		return FALSE;
 	lock();
-	BOOL r = _kill_task(tid);
+	BOOL r = _TskmgrKillTask(tid);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		kill_sys_task
+	@Function:		TskmgrKillSystemTask
 	@Access:		Public
 	@Description:
 		可以杀死任何类型的任务。
@@ -576,20 +579,20 @@ kill_task(IN int32 tid)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-kill_sys_task(IN int32 tid)
+TskmgrKillSystemTask(IN int32 tid)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT
 		|| !tasks[tid].used)
 		return FALSE;
 	lock();
-	BOOL r = _kill_task(tid);
+	BOOL r = _TskmgrKillTask(tid);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		kill_all_tasks
+	@Function:		TskmgrKillAllTasks
 	@Access:		Public
 	@Description:
 		杀死所有任务。
@@ -597,16 +600,16 @@ kill_sys_task(IN int32 tid)
 	@Return:	
 */
 void
-kill_all_tasks(void)
+TskmgrKillAllTasks(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
 		if(tasks[ui].used)
-			kill_sys_task(ui);
+			TskmgrKillSystemTask(ui);
 }
 
 /**
-	@Function:		get_task_info
+	@Function:		TskmgrGetTaskInfo
 	@Access:		Public
 	@Description:
 		获取任务信息。
@@ -620,8 +623,8 @@ kill_all_tasks(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-get_task_info(	IN int32 tid,
-				OUT struct Task * task)
+TskmgrGetTaskInfo(	IN int32 tid,
+					OUT struct Task * task)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT
@@ -634,7 +637,7 @@ get_task_info(	IN int32 tid,
 }
 
 /**
-	@Function:		set_task_info
+	@Function:		TskmgrSetTaskInfo
 	@Access:		Public
 	@Description:
 		设置任务信息。
@@ -648,8 +651,8 @@ get_task_info(	IN int32 tid,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-set_task_info(	IN int32 tid,
-				IN struct Task * task)
+TskmgrSetTaskInfo(	IN int32 tid,
+					IN struct Task * task)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT
@@ -662,7 +665,7 @@ set_task_info(	IN int32 tid,
 }
 
 /**
-	@Function:		get_task_info_ptr
+	@Function:		TskmgrGetTaskInfoPtr
 	@Access:		Public
 	@Description:
 		获取任务信息结构体的指针。
@@ -674,7 +677,7 @@ set_task_info(	IN int32 tid,
 			任务信息结构体的指针。	
 */
 struct Task *
-get_task_info_ptr(IN int32 tid)
+TskmgrGetTaskInfoPtr(IN int32 tid)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT
@@ -684,7 +687,7 @@ get_task_info_ptr(IN int32 tid)
 }
 
 /**
-	@Function:		get_task_info_ptr_unsafe
+	@Function:		TskmgrGetTaskInfoPtrUnsafely
 	@Access:		Public
 	@Description:
 		获取任务信息结构体的指针。非安全版本。
@@ -696,7 +699,7 @@ get_task_info_ptr(IN int32 tid)
 			任务信息结构体的指针。	
 */
 struct Task *
-get_task_info_ptr_unsafe(IN int32 tid)
+TskmgrGetTaskInfoPtrUnsafely(IN int32 tid)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT)
@@ -705,7 +708,7 @@ get_task_info_ptr_unsafe(IN int32 tid)
 }
 
 /**
-	@Function:		task_ready
+	@Function:		TskmgrSetTaskToReady
 	@Access:		Public
 	@Description:
 		使任务就绪。
@@ -717,9 +720,9 @@ get_task_info_ptr_unsafe(IN int32 tid)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-task_ready(IN int32 tid)
+TskmgrSetTaskToReady(IN int32 tid)
 {
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL)
 		return FALSE;
 	task->ready = TRUE;
@@ -727,7 +730,7 @@ task_ready(IN int32 tid)
 }
 
 /**
-	@Function:		_create_task_by_file
+	@Function:		_TskmgrCreateTaskByFile
 	@Access:		Private
 	@Description:
 		通过程序文件创建一个任务。
@@ -748,7 +751,7 @@ task_ready(IN int32 tid)
 */
 static
 int32
-_create_task_by_file(	IN int8 * filename,
+_TskmgrCreateTaskByFile(IN int8 * filename,
 						IN int8 * param,
 						IN int8 * working_dir,
 						IN TaskType task_type,
@@ -762,7 +765,7 @@ _create_task_by_file(	IN int8 * filename,
 	FileObject * fptr = Ifs1OpenFile(filename, FILE_MODE_READ);
 	if(fptr == NULL)
 		return -1;
-	app = (uint8 *)alloc_memory(flen(fptr));
+	app = (uint8 *)MemAlloc(flen(fptr));
 	if(app == NULL)
 	{
 		Ifs1CloseFile(fptr);
@@ -770,7 +773,7 @@ _create_task_by_file(	IN int8 * filename,
 	}
 	if(flen(fptr) <= 256 || !Ifs1ReadFile(fptr, app, flen(fptr)))
 	{
-		free_memory(app);
+		MemFree(app);
 		Ifs1CloseFile(fptr);
 		return -1;
 	}
@@ -781,7 +784,7 @@ _create_task_by_file(	IN int8 * filename,
 	{
 		if(strcmp(file_symbol, "MTA32") != 0)
 		{
-			free_memory(app);
+			MemFree(app);
 			Ifs1CloseFile(fptr);
 			return -1;
 		}
@@ -790,26 +793,27 @@ _create_task_by_file(	IN int8 * filename,
 	{
 		if(strcmp(file_symbol, "SYS32") != 0)
 		{
-			free_memory(app);
+			MemFree(app);
 			Ifs1CloseFile(fptr);
 			return -1;
 		}
 	}
 
-	int32 tid = _create_task(	filename,
-								param,
-								app + 256,
-								flen(fptr) - 256,
-								working_dir,
-								task_type,
-								task_attr);
-	free_memory(app);
+	int32 tid = _TskmgrCreateTask(
+		filename,
+		param,
+		app + 256,
+		flen(fptr) - 256,
+		working_dir,
+		task_type,
+		task_attr);
+	MemFree(app);
 	Ifs1CloseFile(fptr);
 	return tid;
 }
 
 /**
-	@Function:		create_task_by_file
+	@Function:		TskmgrCreateTaskByFile
 	@Access:		Private
 	@Description:
 		通过程序文件创建一个用户任务。
@@ -825,12 +829,12 @@ _create_task_by_file(	IN int8 * filename,
 			如果失败则返回-1, 否则返回任务的 ID。
 */
 int32
-create_task_by_file(	IN int8 * filename,
+TskmgrCreateTaskByFile(	IN int8 * filename,
 						IN int8 * param,
 						IN int8 * working_dir)
 {
 	lock();
-	int32 tid = _create_task_by_file(	filename,
+	int32 tid = _TskmgrCreateTaskByFile(filename,
 										param,
 										working_dir,
 										TASK_TYPE_USER,
@@ -840,7 +844,7 @@ create_task_by_file(	IN int8 * filename,
 }
 
 /**
-	@Function:		create_sys_task_by_file
+	@Function:		TskmgrCreateSystemTaskByFile
 	@Access:		Private
 	@Description:
 		通过程序文件创建一个系统任务。
@@ -856,12 +860,12 @@ create_task_by_file(	IN int8 * filename,
 			如果失败则返回-1, 否则返回任务的 ID。
 */
 int32
-create_sys_task_by_file(IN int8 * filename,
-						IN int8 * param,
-						IN int8 * working_dir)
+TskmgrCreateSystemTaskByFile(	IN int8 * filename,
+								IN int8 * param,
+								IN int8 * working_dir)
 {
 	lock();
-	int32 tid = _create_task_by_file(	filename,
+	int32 tid = _TskmgrCreateTaskByFile(filename,
 										param,
 										working_dir,
 										TASK_TYPE_SYSTEM,
@@ -871,7 +875,7 @@ create_sys_task_by_file(IN int8 * filename,
 }
 
 /**
-	@Function:		create_task_by_file_wait
+	@Function:		TskmgrCreateTaskByFileSync
 	@Access:		Public
 	@Description:
 		通过程序文件创建一个任务。并且等待该任务结束，
@@ -890,7 +894,7 @@ create_sys_task_by_file(IN int8 * filename,
 			如果失败则返回 FALSE，否则返回 TRUE。
 */
 BOOL
-create_task_by_file_wait(	IN int8 * filename,
+TskmgrCreateTaskByFileSync(	IN int8 * filename,
 							IN int8 * param,
 							IN int8 * working_dir,
 							OUT int32 * retvalue)
@@ -901,14 +905,14 @@ create_task_by_file_wait(	IN int8 * filename,
 		|| retvalue == NULL)
 		return FALSE;
 	lock();
-	int32 tid = create_task_by_file(filename, param, working_dir);
+	int32 tid = TskmgrCreateTaskByFile(filename, param, working_dir);
 	if(tid == -1)
 	{
 		unlock();
 		return FALSE;
 	}
 	tasks[tid].allocable = FALSE;
-	task_ready(tid);
+	TskmgrSetTaskToReady(tid);
 	unlock();
 	while(tasks[tid].used)
 		asm volatile ("pause");
@@ -918,7 +922,7 @@ create_task_by_file_wait(	IN int8 * filename,
 }
 
 /**
-	@Function:		get_next_task_id
+	@Function:		TskmgrGetNextTaskID
 	@Access:		Public
 	@Description:
 		获取下一个将要执行的任务的 ID。
@@ -928,7 +932,7 @@ create_task_by_file_wait(	IN int8 * filename,
 			下一个将要执行的任务的 ID。	
 */
 int32
-get_next_task_id(void)
+TskmgrGetNextTaskID(void)
 {
 	if(running_tid != -1)
 	{
@@ -990,7 +994,7 @@ get_next_task_id(void)
 }
 
 /**
-	@Function:		set_task_ran_state
+	@Function:		TaskmgrSetTaskRunningStatus
 	@Access:		Public
 	@Description:
 		设置指定任务的状态为已运行。
@@ -1000,13 +1004,13 @@ get_next_task_id(void)
 	@Return:	
 */
 void
-set_task_ran_state(IN int32 tid)
+TaskmgrSetTaskRunningStatus(IN int32 tid)
 {
 	tasks[running_tid].ran = 1;
 }
 
 /**
-	@Function:		get_running_tid
+	@Function:		TaskmgrGetRunningTaskID
 	@Access:		Public
 	@Description:
 		获取正在运行的任务的 ID。
@@ -1016,28 +1020,28 @@ set_task_ran_state(IN int32 tid)
 			正在运行的任务的 ID。
 */
 int32
-get_running_tid(void)
+TaskmgrGetRunningTaskID(void)
 {
 	return running_tid;
 }
 
 /**
-	@Function:		get_physical_address
+	@Function:		TaskmgrConvertLAddrToPAddr
 	@Access:		Public
 	@Description:
 		把线性地址转换为物理地址。
 	@Parameters:
 		tid, int32, IN
 			任务的 ID。
-		line_address, void *, IN
+		linear_address, void *, IN
 			线性地址。
 	@Return:
 		void *
 			物理地址。
 */
 void *
-get_physical_address(	IN int32 tid, 
-						IN void * line_address)
+TaskmgrConvertLAddrToPAddr(	IN int32 tid, 
+							IN void * linear_address)
 {
 	if(tid < 0 || tid >= MAX_TASK_COUNT || tasks[tid].used == 0)
 		return NULL;
@@ -1045,7 +1049,7 @@ get_physical_address(	IN int32 tid,
 	if(!task->used)
 		return NULL;
 	uint32 * dp_ptr = (uint32 *)task->real_pagedt_addr;
-	uint32 paddress = 0, laddress = (uint32)line_address;
+	uint32 paddress = 0, laddress = (uint32)linear_address;
 	uint32 laddress_dir_index = (laddress >> 22) & 0x3ff;
 	uint32 laddress_page_index = (laddress >> 12) & 0x3ff;
 	uint32 laddress_low_12bits = laddress & 0xfff;
@@ -1056,7 +1060,7 @@ get_physical_address(	IN int32 tid,
 }
 
 /**
-	@Function:		_tasks_redirect_io
+	@Function:		_TaskmgrRedirectIO
 	@Access:		Private
 	@Description:
 		重定向任务的IO。
@@ -1073,7 +1077,7 @@ get_physical_address(	IN int32 tid,
 */
 static
 BOOL
-_tasks_redirect_io(	IN OUT FileObject ** v,
+_TaskmgrRedirectIO(	IN OUT FileObject ** v,
 					IN int8 * path,
 					IN int32 mode)
 {
@@ -1089,7 +1093,7 @@ _tasks_redirect_io(	IN OUT FileObject ** v,
 }
 
 /**
-	@Function:		tasks_redirect_stdin
+	@Function:		TaskmgrRedirectStdin
 	@Access:		Public
 	@Description:
 		重定向任务的stdin。
@@ -1103,19 +1107,19 @@ _tasks_redirect_io(	IN OUT FileObject ** v,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-tasks_redirect_stdin(	IN int32 tid,
+TaskmgrRedirectStdin(	IN int32 tid,
 						IN int8 * path)
 {
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL)
 		return FALSE;
-	return _tasks_redirect_io(	&(task->stdin), 
+	return _TaskmgrRedirectIO(	&(task->stdin), 
 								path,
 								FILE_MODE_READ);
 }
 
 /**
-	@Function:		tasks_redirect_stdout
+	@Function:		TaskmgrRedirectStdout
 	@Access:		Public
 	@Description:
 		重定向任务的stdout。
@@ -1129,19 +1133,19 @@ tasks_redirect_stdin(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-tasks_redirect_stdout(	IN int32 tid,
+TaskmgrRedirectStdout(	IN int32 tid,
 						IN int8 * path)
 {
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL)
 		return FALSE;
-	return _tasks_redirect_io(	&(task->stdout), 
+	return _TaskmgrRedirectIO(	&(task->stdout), 
 								path,
 								FILE_MODE_APPEND);
 }
 
 /**
-	@Function:		tasks_redirect_stderr
+	@Function:		TaskmgrRedirectStderr
 	@Access:		Public
 	@Description:
 		重定向任务的stderr。
@@ -1155,19 +1159,19 @@ tasks_redirect_stdout(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-tasks_redirect_stderr(	IN int32 tid,
+TaskmgrRedirectStderr(	IN int32 tid,
 						IN int8 * path)
 {
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL)
 		return FALSE;
-	return _tasks_redirect_io(	&(task->stderr), 
+	return _TaskmgrRedirectIO(	&(task->stderr), 
 								path,
 								FILE_MODE_APPEND);
 }
 
 /**
-	@Function:		tasks_get_count
+	@Function:		TaskmgrGetTaskCount
 	@Access:		Public
 	@Description:
 		获取当前任务数量。
@@ -1177,13 +1181,13 @@ tasks_redirect_stderr(	IN int32 tid,
 			当前任务数量。
 */
 int32
-tasks_get_count(void)
+TaskmgrGetTaskCount(void)
 {
 	return task_count;
 }
 
 /**
-	@Function:		tasks_alloc_memory
+	@Function:		TaskmgrAllocMemory
 	@Access:		Public
 	@Description:
 		分配一段指定任务可以访问的内存。
@@ -1199,11 +1203,11 @@ tasks_get_count(void)
 			任务可以访问的内存的指针。
 */
 void *
-tasks_alloc_memory(	IN int32 tid,
+TaskmgrAllocMemory(	IN int32 tid,
 					IN uint32 size,
 					OUT void ** phyaddr)
 {
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL || phyaddr == NULL)
 		return NULL;
 	uint32 start;
@@ -1212,19 +1216,20 @@ tasks_alloc_memory(	IN int32 tid,
 		ui < MAX_TASK_MEMORY_BLOCK_COUNT && task->memory_block_ptrs[ui] != NULL;
 		ui++);
 	if(	ui < MAX_TASK_MEMORY_BLOCK_COUNT
-		&& find_free_pages((uint32 *)task->real_pagedt_addr, size, &start))
+		&& PgFindFreePages((uint32 *)task->real_pagedt_addr, size, &start))
 	{
-		void * ptr = alloc_memory(size);
+		void * ptr = MemAlloc(size);
 		if(ptr != NULL)
 		{
 			*phyaddr = ptr;
-			map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
-									start,
-									size,
-									(uint32)ptr,
-									RW_RWE);
+			PgMapUserPageTableWithPermission(
+				(uint32 *)task->real_pagedt_addr,
+				start,
+				size,
+				(uint32)ptr,
+				RW_RWE);
 			task->memory_block_ptrs[ui] = ptr;
-			task->used_memory_size += align_4kb(size);
+			task->used_memory_size += MemAlign4KB(size);
 			return (void *)start;
 		}
 		else
@@ -1235,7 +1240,7 @@ tasks_alloc_memory(	IN int32 tid,
 }
 
 /**
-	@Function:		tasks_free_memory
+	@Function:		TaskmgrFreeMemory
 	@Access:		Public
 	@Description:
 		释放任务申请的内存。
@@ -1247,18 +1252,18 @@ tasks_alloc_memory(	IN int32 tid,
 	@Return:
 */
 void
-tasks_free_memory(	IN int32 tid,
+TaskmgrFreeMemory(	IN int32 tid,
 					IN void * ptr)
 {
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL)
 		return;
-	void * phyptr = get_physical_address(tid, ptr);
+	void * phyptr = TaskmgrConvertLAddrToPAddr(tid, ptr);
 	if(phyptr != NULL)
 	{
-		free_pages(	(uint32 *)task->real_pagedt_addr,
+		PgFreePages((uint32 *)task->real_pagedt_addr,
 					(uint32)ptr,
-					get_memory_block_size(phyptr));
+					MemGetBlockSise(phyptr));
 		uint32 ui;
 		for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT; ui++)
 			if(task->memory_block_ptrs[ui] == phyptr)
@@ -1268,7 +1273,7 @@ tasks_free_memory(	IN int32 tid,
 }
 
 /**
-	@Function:		tasks_load_elf
+	@Function:		TaskmgrLoadElfExecutableFile
 	@Access:		Public
 	@Description:
 		加载ELF进任务的内存空间。
@@ -1282,13 +1287,13 @@ tasks_free_memory(	IN int32 tid,
 			ELF入口函数地址（相对于任务的内存空间）。
 */
 uint32
-tasks_load_elf(	IN int32 tid,
-				IN CASCTEXT path)
+TaskmgrLoadElfExecutableFile(	IN int32 tid,
+								IN CASCTEXT path)
 {
 	BOOL ctx_inited = FALSE;
 	if(path == NULL)
 		goto err;
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL)
 		goto err;
 	if(task->elf != NULL)
@@ -1315,15 +1320,16 @@ tasks_load_elf(	IN int32 tid,
 		}
 	}
 	uint32 msize = max_vaddr - vbase + max_msize;
-	task->elf = alloc_memory(msize);
+	task->elf = MemAlloc(msize);
 	memset(task->elf, 0, msize);
 	if(task->elf == NULL)
 		goto err;
-	if(!map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
-								vbase,
-								msize,
-								(uint32)task->elf,
-								RW_RWE))
+	if(!PgMapUserPageTableWithPermission(
+			(uint32 *)task->real_pagedt_addr,
+			vbase,
+			msize,
+			(uint32)task->elf,
+			RW_RWE))
 		goto err;
 	ElfResetPHDR(&ctx);
 	while((phdr = ElfNextPHDR(&ctx)) != NULL)
@@ -1336,7 +1342,7 @@ tasks_load_elf(	IN int32 tid,
 err:
 	if(task->elf != NULL)
 	{
-		free_memory(task->elf);
+		MemFree(task->elf);
 		task->elf = NULL;
 	}
 	if(ctx_inited)
@@ -1345,7 +1351,7 @@ err:
 }
 
 /**
-	@Function:		tasks_load_elf_so
+	@Function:		TaskmgrLoadElfSharedObjectFile
 	@Access:		Public
 	@Description:
 		把ELF Shared Object文件加载进任务内存空间。
@@ -1361,8 +1367,8 @@ err:
 			当加载失败时返回0xffffffff。
 */
 uint32
-tasks_load_elf_so(	IN int32 tid,
-					IN CASCTEXT path)
+TaskmgrLoadElfSharedObjectFile(	IN int32 tid,
+								IN CASCTEXT path)
 {
 	uint8 * elf_knl = NULL;
 	uint8 * elf_usr = NULL;
@@ -1372,7 +1378,7 @@ tasks_load_elf_so(	IN int32 tid,
 		goto err;
 
 	// 获取任务信息。
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL)
 		goto err;
 
@@ -1410,7 +1416,7 @@ tasks_load_elf_so(	IN int32 tid,
 		}
 	}
 	uint32 msize = max_vaddr - vbase + max_msize;
-	elf_usr = tasks_alloc_memory(tid, msize, &elf_knl);
+	elf_usr = TaskmgrAllocMemory(tid, msize, &elf_knl);
 	if(elf_knl == NULL)
 		goto err;
 	memset(elf_knl, 0, msize);
@@ -1454,7 +1460,7 @@ tasks_load_elf_so(	IN int32 tid,
 	return ctx_idx;
 err:
 	if(elf_usr != NULL)
-		tasks_free_memory(tid, elf_usr);
+		TaskmgrFreeMemory(tid, elf_usr);
 	if(ctx != NULL)
 	{
 		if(ctx_idx < MAX_TASK_ELF_SO_COUNT)
@@ -1466,7 +1472,7 @@ err:
 }
 
 /**
-	@Function:		tasks_get_elf_so_symbol
+	@Function:		TaskmgrGetElfSharedObjectSymbol
 	@Access:		Public
 	@Description:
 		获取任务加载的ELF Shared Object的符号的地址。
@@ -1484,16 +1490,16 @@ err:
 			该地址相对于用户内存空间。
 */
 void *
-tasks_get_elf_so_symbol(IN int32 tid,
-						IN uint32 ctx_idx,
-						IN CASCTEXT name)
+TaskmgrGetElfSharedObjectSymbol(IN int32 tid,
+								IN uint32 ctx_idx,
+								IN CASCTEXT name)
 {
 	ELFContextPtr ctx = NULL;
 	if(name == NULL || ctx_idx >= MAX_TASK_ELF_SO_COUNT)
 		goto err;
 
 	// 获取任务信息和ELF上下文。
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL || task->elf_so_ctx[ctx_idx] == NULL)
 		goto err;
 	ctx = task->elf_so_ctx[ctx_idx];
@@ -1513,7 +1519,7 @@ err:
 }
 
 /**
-	@Function:		tasks_unload_elf_so
+	@Function:		TaskmgrUnloadElfSharedObjectFile
 	@Access:		Public
 	@Description:
 		释放任务加载的ELF Shared Object上下文。
@@ -1530,22 +1536,22 @@ err:
 			该地址相对于用户内存空间。
 */
 BOOL
-tasks_unload_elf_so(IN int32 tid,
-					IN uint32 ctx_idx)
+TaskmgrUnloadElfSharedObjectFile(	IN int32 tid,
+									IN uint32 ctx_idx)
 {
 	ELFContextPtr ctx = NULL;
 	if(ctx_idx >= MAX_TASK_ELF_SO_COUNT)
 		goto err;
 
 	// 获取任务信息和ELF SO上下文。
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task == NULL || task->elf_so_ctx[ctx_idx] == NULL)
 		goto err;
 	ctx = task->elf_so_ctx[ctx_idx];
 
 	// 释放ELF SO上下文。
 	task->elf_so_ctx[ctx_idx] = NULL;
-	tasks_free_memory(tid, ctx->elf_usr);
+	TaskmgrFreeMemory(tid, ctx->elf_usr);
 	ctx->elf_usr = NULL;
 	ctx->elf_knl = NULL;
 	ElfFree(ctx);

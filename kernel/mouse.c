@@ -28,7 +28,7 @@
 
 static
 void
-mouse_wait(uint8 a_type)
+_MouseWait(uint8 a_type)
 {
 	uint32 timeout = 100000;
 	if(!a_type)
@@ -36,7 +36,7 @@ mouse_wait(uint8 a_type)
 		while(--timeout)
 			if((KnlInByte(MOUSE_STATUS) & MOUSE_BBIT) == 1)
 				return;
-		print_str("<mouse timeout>\n");
+		ScrPrintString("<mouse timeout>\n");
 		asm volatile ("hlt;");
 		return;
 	}
@@ -45,7 +45,7 @@ mouse_wait(uint8 a_type)
 		while(--timeout)
 			if(!((KnlInByte(MOUSE_STATUS) & MOUSE_ABIT)))
 				return;
-		print_str("<mouse timeout>\n");
+		ScrPrintString("<mouse timeout>\n");
 		asm volatile ("hlt;");
 		return;
 	}
@@ -53,25 +53,25 @@ mouse_wait(uint8 a_type)
 
 static
 void
-mouse_write(uint8 write)
+_MouseWrite(uint8 write)
 {
-	mouse_wait(1);
+	_MouseWait(1);
 	KnlOutByte(MOUSE_STATUS, MOUSE_WRITE);
-	mouse_wait(1);
+	_MouseWait(1);
 	KnlOutByte(MOUSE_PORT, write);
 }
 
 static
 uint8
-mouse_read(void)
+_MouseRead(void)
 {
-	mouse_wait(0);
+	_MouseWait(0);
 	int8 t = KnlInByte(MOUSE_PORT);
 	return t;
 }
 
 BOOL
-mouse_init(void)
+MouseInit(void)
 {
 	/*
 	//允许鼠标接口
@@ -87,23 +87,23 @@ mouse_init(void)
 	*/
 
 	uint8 status, result;
-	mouse_wait(1);
+	_MouseWait(1);
 	KnlOutByte(MOUSE_STATUS, 0xA8);
-	mouse_wait(1);
+	_MouseWait(1);
 	KnlOutByte(MOUSE_STATUS, 0x20);
-	mouse_wait(0);
+	_MouseWait(0);
 	status = KnlInByte(0x60) | 2;
-	mouse_wait(1);
+	_MouseWait(1);
 	KnlOutByte(MOUSE_STATUS, 0x60);
-	mouse_wait(1);
+	_MouseWait(1);
 	KnlOutByte(MOUSE_PORT, status);
-	mouse_write(0xF6);
-	mouse_read();
-	mouse_write(0xF4);
-	mouse_read();
-	mouse_write(0xF2);
-	mouse_read();
-	result = mouse_read();
+	_MouseWrite(0xF6);
+	_MouseRead();
+	_MouseWrite(0xF4);
+	_MouseRead();
+	_MouseWrite(0xF2);
+	_MouseRead();
+	result = _MouseRead();
 
 
 

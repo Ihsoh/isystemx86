@@ -78,7 +78,7 @@ void
 _WinExplEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
 		BUTTON(btn1, &window->workspace, params, top);
@@ -93,7 +93,7 @@ _WinExplEvent(	IN struct Window * window,
 BOOL
 WinExplInit(void)
 {
-	_window = create_window(_WIDTH,
+	_window = ScrCreateWindow(_WIDTH,
 							_HEIGHT,
 							0xffffffff,
 							WINDOW_STYLE_MINIMIZE,

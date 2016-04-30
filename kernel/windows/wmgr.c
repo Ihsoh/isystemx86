@@ -57,7 +57,7 @@ WindowPtr *
 _WinWmgrGetWindows(OUT uint32 * count)
 {
 	uint32 window_count = 0;
-	WindowPtr * windows = get_windows(&window_count);
+	WindowPtr * windows = ScrGetWindows(&window_count);
 	*count = 0;
 	uint32 ui;
 	for(ui = 0; ui < window_count; ui++)
@@ -121,7 +121,7 @@ _WinWmgrControlEvent(	IN uint32 id,
 						{
 							WinWmgrHide();
 							windows[windex]->state = WINDOW_STATE_SHOW;
-							set_top_window(windows[windex]);
+							ScrSetTopWindow(windows[windex]);
 						}
 					}
 					break;
@@ -147,7 +147,7 @@ void
 _WinWmgrEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
 		LIST(_lst_wmgr, &window->workspace, params, TRUE);
@@ -169,21 +169,23 @@ _WinWmgrEvent(	IN struct Window * window,
 BOOL
 WinWmgrInit(void)
 {
-	_window = create_window(_WIDTH, _HEIGHT,
-							0xff222222,
-							WINDOW_STYLE_NO_TITLE
-								| WINDOW_STYLE_NO_WMGR
-								| WINDOW_STYLE_NO_BORDER,
-							"Window Manager",
-							_WinWmgrEvent);
+	_window = ScrCreateWindow(
+		_WIDTH, _HEIGHT,
+		0xff222222,
+		WINDOW_STYLE_NO_TITLE
+			| WINDOW_STYLE_NO_WMGR
+			| WINDOW_STYLE_NO_BORDER,
+		"Window Manager",
+		_WinWmgrEvent);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
 	_lst_wmgr = NEW(List);
-	CtrlListInit(	_lst_wmgr, 0,
-				_ITEM_COUNT,
-				0, 0,
-				"",
-				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_WinWmgrControlEvent);
+	CtrlListInit(
+		_lst_wmgr, 0,
+		_ITEM_COUNT,
+		0, 0,
+		"",
+		0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
+		_WinWmgrControlEvent);
 	SET_LIST_TEXT(_lst_wmgr, _ITEM_ID_UP, 		"Up                            ");
 	SET_LIST_TEXT(_lst_wmgr, _ITEM_ID_DOWN, 	"Down                          ");
 	SET_LIST_TEXT(_lst_wmgr, _ITEM_ID_CLOSE,	"Close                         ");
@@ -215,7 +217,7 @@ WinWmgrShow(IN int32 x,
 	_window->x = x;
 	_window->y = taskbar_y - _HEIGHT;
 	_window->state = WINDOW_STATE_SHOW;
-	set_top_window(_window);
+	ScrSetTopWindow(_window);
 	WinWmgrUpdate(0);
 	return TRUE;
 }

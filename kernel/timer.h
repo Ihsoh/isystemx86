@@ -25,53 +25,53 @@ typedef struct
 
 extern
 BOOL
-timer_init(void);
+TmrInit(void);
 
 extern
 void
-timer_dispatch_tick(void);
+TmrDispatchTick(void);
 
 extern
 void
-timer_inc_ticks(void);
+TmrIncTicks(void);
 
 extern
 uint32
-timer_get_ticks(void);
+TmrGetTicks(void);
 
 extern
 TimerPtr
-timer_new(	IN uint32 interval,
-			IN TimerEvent event);
+TmrNew(	IN uint32 interval,
+		IN TimerEvent event);
 
 extern
 BOOL
-timer_delete(IN TimerPtr timer);
+TmrDelete(IN TimerPtr timer);
 
 extern
 BOOL
-timer_set_interval(	OUT TimerPtr timer,
-					IN uint32 interval);
+TmrSetInterval(	OUT TimerPtr timer,
+				IN uint32 interval);
 
 extern
 BOOL
-timer_start(OUT TimerPtr timer);
+TmrStart(OUT TimerPtr timer);
 
 extern
 BOOL
-timer_stop(OUT TimerPtr timer);
+TmrStop(OUT TimerPtr timer);
 
 extern
 uint32
-timer_count(void);
+TmrGetCount(void);
 
 extern
 void
-timer_clear(void);
+TmrClear(void);
 
 extern
 BOOL
-timer_set_event(OUT TimerPtr timer,
-				IN TimerEvent event);
+TmrSetEvent(OUT TimerPtr timer,
+			IN TimerEvent event);
 
 #endif

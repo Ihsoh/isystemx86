@@ -54,7 +54,7 @@ _PciScanDevices(void)
 			PCIDeviceInfoPtr dev = &_devices[_devcount++];
 			dev->bus = bus;
 			dev->slot = slot;
-			dev->header = (PCIHeaderPtr)alloc_memory(sizeof(PCIHeader));
+			dev->header = (PCIHeaderPtr)MemAlloc(sizeof(PCIHeader));
 			if(dev->header == NULL)
 				goto err;
 			uint32 ui;
@@ -86,7 +86,7 @@ err:
 BOOL
 PciInitDevices(void)
 {
-	_devices = (PCIDeviceInfoPtr)alloc_memory(PCI_MAX_DEVICE_COUNT * sizeof(PCIDeviceInfo));
+	_devices = (PCIDeviceInfoPtr)MemAlloc(PCI_MAX_DEVICE_COUNT * sizeof(PCIDeviceInfo));
 	if(_devices == NULL)
 		return FALSE;
 	return _PciScanDevices();
@@ -109,10 +109,10 @@ PciFreeDevices(void)
 	for(ui = 0; ui < _devcount; ui++)
 		if(_devices[ui].header != NULL)
 		{
-			free_memory(_devices[ui].header);
+			MemFree(_devices[ui].header);
 			_devices[ui].header = NULL;
 		}
-	free_memory(_devices);
+	MemFree(_devices);
 	_devices = NULL;
 }
 

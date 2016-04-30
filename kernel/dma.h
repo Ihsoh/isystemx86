@@ -13,6 +13,6 @@
 
 extern
 BOOL
-dma_init(void);
+DmaInit(void);
 
 #endif

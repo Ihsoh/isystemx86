@@ -28,7 +28,7 @@ CmosGetDateTime(OUT struct CMOSDateTime * dt)
 {
 	if(dt == NULL)
 		return FALSE;
-	common_lock();
+	COMMON_LOCK();
 	uint8 temp;
 	//秒。
 	KnlOutByte(0x70, 0x00);
@@ -62,7 +62,7 @@ CmosGetDateTime(OUT struct CMOSDateTime * dt)
 	KnlOutByte(0x70, 0x32);
 	temp = KnlInByte(0x71);
 	dt->year += ((temp >> 4) * 10 + (temp & 0x0f)) * 100;
-	common_unlock();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 
@@ -111,7 +111,7 @@ CmosSetDateTime(IN struct CMOSDateTime * dt)
 		|| dt->second >= 60)
 		return FALSE;
 	dt->day_of_week = get_day_of_week(dt->year, dt->month, dt->day);
-	common_lock();
+	COMMON_LOCK();
 	uint8 temp;
 	//秒。
 	KnlOutByte(0x70, 0x00);
@@ -137,7 +137,7 @@ CmosSetDateTime(IN struct CMOSDateTime * dt)
 	//世纪。
 	KnlOutByte(0x70, 0x32);
 	KnlOutByte(0x71, _CmosToBcd8(dt->year / 100));
-	common_unlock();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 
@@ -166,7 +166,7 @@ CmosSetDate(IN uint16 year,
 		|| day > days)
 		return FALSE;
 	uint8 day_of_week = get_day_of_week(year, month, day);
-	common_lock();
+	COMMON_LOCK();
 	//日。
 	KnlOutByte(0x70, 0x07);
 	KnlOutByte(0x71, _CmosToBcd8(day));
@@ -179,7 +179,7 @@ CmosSetDate(IN uint16 year,
 	//世纪。
 	KnlOutByte(0x70, 0x32);
 	KnlOutByte(0x71, _CmosToBcd8(year / 100));
-	common_unlock();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 
@@ -206,7 +206,7 @@ CmosSetTime(IN uint8 hour,
 		|| minute >= 60
 		|| second >= 60)
 		return FALSE;
-	common_lock();
+	COMMON_LOCK();
 	//秒。
 	KnlOutByte(0x70, 0x00);
 	KnlOutByte(0x71, _CmosToBcd8(second));
@@ -216,7 +216,7 @@ CmosSetTime(IN uint8 hour,
 	//时。
 	KnlOutByte(0x70, 0x04);
 	KnlOutByte(0x71, _CmosToBcd8(hour));
-	common_unlock();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 
@@ -249,13 +249,13 @@ CmosEnableRtc(void)
 {
 	if(!rtc_state)
 	{
-		common_lock();
+		COMMON_LOCK();
 		KnlOutByte(0x70, 0x0b);
 		uint8 prev = KnlInByte(0x71);
 		KnlOutByte(0x70, 0x0b);
 		KnlOutByte(0x71, prev | 0x40);
 		rtc_state = TRUE;
-		common_unlock();
+		COMMON_UNLOCK();
 	}
 	return TRUE;
 }
@@ -274,13 +274,13 @@ CmosDisableRtc(void)
 {
 	if(rtc_state)
 	{
-		common_lock();
+		COMMON_LOCK();
 		KnlOutByte(0x70, 0x0b);
 		uint8 prev = KnlInByte(0x71);
 		KnlOutByte(0x70, 0x0b);
 		KnlOutByte(0x71, prev & ~0x40);
 		rtc_state = FALSE;
-		common_unlock();
+		COMMON_UNLOCK();
 	}
 	return TRUE;
 }
@@ -299,12 +299,12 @@ CmosSetRtcRate(uint8 rate)
 {
 	if(rate <= 2 || rate > 15)
 		return FALSE;
-	common_lock();
+	COMMON_LOCK();
 	KnlOutByte(0x70, 0x0a);
 	uint8 prev = KnlInByte(0x71);
 	KnlOutByte(0x70, 0x0a);
 	KnlOutByte(0x71, (prev & 0xf0) | rate);
-	common_unlock();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 
@@ -321,10 +321,10 @@ CmosEndOfRtc(void)
 {
 	if(rtc_state)
 	{
-		common_lock();
+		COMMON_LOCK();
 		KnlOutByte(0x70, 0x0c);
 		KnlInByte(0x71);
-		common_unlock();
+		COMMON_UNLOCK();
 	}
 }
 

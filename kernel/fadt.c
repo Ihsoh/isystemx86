@@ -15,7 +15,7 @@ static struct FADT fadt;
 static BOOL is_inited = FALSE;
 
 /**
-	@Function:		fadt_init
+	@Function:		FadtInit
 	@Access:		Public
 	@Description:
 		初始化 FADT。
@@ -25,19 +25,19 @@ static BOOL is_inited = FALSE;
 			初始化成功则返回 TRUE，否则返回 FALSE。
 */
 BOOL
-fadt_init(void)
+FadtInit(void)
 {
 	if(is_inited)
 		return TRUE;
-	if(!rsdt_init())
+	if(!RsdtInit())
 		return FALSE;
-	memcpy(&fadt, rsdt_find_sdt("FACP"), sizeof(struct FADT));
+	memcpy(&fadt, RsdtFindSDT("FACP"), sizeof(struct FADT));
 	is_inited = TRUE;
 	return TRUE;
 }
 
 /**
-	@Function:		fadt_get_table
+	@Function:		FadtGetTable
 	@Access:		Public
 	@Description:
 		获取 FADT。
@@ -47,7 +47,7 @@ fadt_init(void)
 			成功返回 FADT，否则返回 NULL。		
 */
 struct FADT *
-fadt_get_table(void)
+FadtGetTable(void)
 {
 	if(!is_inited)
 		return NULL;

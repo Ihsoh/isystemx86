@@ -48,7 +48,7 @@ _ScSysProcess(	IN uint32 func,
 		{
 			int32 tid = INT32_SPARAM(sparams->param0);
 
-			kill_sys_task(tid);
+			TskmgrKillSystemTask(tid);
 
 			if(tid == ConGetCurrentApplicationTid())
 				ConSetCurrentApplicationTid(-1);
@@ -63,7 +63,7 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_ALLOC_M:
 		{
 			int32 tid = sparams->tid;
-			struct Task * task = get_task_info_ptr(tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(tid);
 			uint32 len = UINT32_SPARAM(sparams->param0);
 			uint32 start;
 			uint32 ui;
@@ -71,18 +71,19 @@ _ScSysProcess(	IN uint32 func,
 				ui < MAX_TASK_MEMORY_BLOCK_COUNT && task->memory_block_ptrs[ui] != NULL;
 				ui++);
 			if(	ui < MAX_TASK_MEMORY_BLOCK_COUNT
-				&& find_free_pages((uint32 *)task->real_pagedt_addr, len, &start))
+				&& PgFindFreePages((uint32 *)task->real_pagedt_addr, len, &start))
 			{
-				void * ptr = alloc_memory(len);
+				void * ptr = MemAlloc(len);
 				if(ptr != NULL)
 				{
-					map_user_pagedt_with_rw((uint32 *)task->real_pagedt_addr,
-											start,
-											len,
-											(uint32)ptr,
-											RW_RWE);
+					PgMapUserPageTableWithPermission(
+						(uint32 *)task->real_pagedt_addr,
+						start,
+						len,
+						(uint32)ptr,
+						RW_RWE);
 					task->memory_block_ptrs[ui] = ptr;
-					task->used_memory_size += align_4kb(len);
+					task->used_memory_size += MemAlign4KB(len);
 					sparams->param0 = SPARAM(start);
 				}
 				else
@@ -107,7 +108,7 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_FREE_M:
 		{
 			int32 tid = sparams->tid;
-			struct Task * task = get_task_info_ptr(tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(tid);
 			void * ptr = (void *)(sparams->param0);	//线性地址
 			if(ptr == NULL)
 			{
@@ -115,7 +116,7 @@ _ScSysProcess(	IN uint32 func,
 				sparams->param0 = SPARAM(r);
 				break;
 			}			
-			void * physical_address = (void *)get_physical_address(tid, ptr);	//物理地址
+			void * physical_address = (void *)TaskmgrConvertLAddrToPAddr(tid, ptr);	//物理地址
 			if(physical_address == NULL)
 			{
 				BOOL r = FALSE;
@@ -123,17 +124,19 @@ _ScSysProcess(	IN uint32 func,
 				break;
 			}	
 			uint32 ui;
-			for(ui = 0; ui < MAX_TASK_MEMORY_BLOCK_COUNT && task->memory_block_ptrs[ui] != physical_address; ui++);
+			for(ui = 0;
+					ui < MAX_TASK_MEMORY_BLOCK_COUNT && task->memory_block_ptrs[ui] != physical_address;
+					ui++);
 			if(ui < MAX_TASK_MEMORY_BLOCK_COUNT)
 			{
-				uint32 length = get_memory_block_size(physical_address);
+				uint32 length = MemGetBlockSise(physical_address);
 				if(length == 0)
 				{
 					BOOL r = FALSE;
 					sparams->param0 = SPARAM(r);
 				}
 				else
-					if(!free_pages((uint32 *)task->real_pagedt_addr, (uint32)ptr, length))
+					if(!PgFreePages((uint32 *)task->real_pagedt_addr, (uint32)ptr, length))
 					{
 						BOOL r = FALSE;
 						sparams->param0 = SPARAM(r);
@@ -141,8 +144,8 @@ _ScSysProcess(	IN uint32 func,
 					else
 					{
 						task->memory_block_ptrs[ui] = NULL;
-						task->used_memory_size -= align_4kb(length);
-						BOOL r = free_memory(physical_address);
+						task->used_memory_size -= MemAlign4KB(length);
+						BOOL r = MemFree(physical_address);
 						sparams->param0 = SPARAM(r);
 					}	
 			}	
@@ -159,9 +162,11 @@ _ScSysProcess(	IN uint32 func,
 		//	Param0=参数缓冲区地址(相对于调用程序空间的偏移地址)
 		case SCALL_GET_PARAM:
 		{
-			void * buffer = (void *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			void * buffer = (void *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			struct Task task;
-			get_task_info(sparams->tid, &task);
+			TskmgrGetTaskInfo(sparams->tid, &task);
 			memcpy(buffer, task.param, 1024);
 			break;
 		}
@@ -171,7 +176,9 @@ _ScSysProcess(	IN uint32 func,
 		//	Param0=CMOSDateTime结构体地址(相对于调用程序空间的偏移地址)
 		case SCALL_GET_DATETIME:
 		{
-			struct CMOSDateTime * dt = (struct CMOSDateTime *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			struct CMOSDateTime * dt = (struct CMOSDateTime *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			CmosGetDateTime(dt);
 			break;
 		}
@@ -193,13 +200,15 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_MQUEUE_S_CREATE:
 		{
 			int32 tid = sparams->tid;
-			struct Task * task = get_task_info_ptr(tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(tid);
 			uint32 ui;
 			for(ui = 0; ui < MAX_TASK_MQUEUE_COUNT && task->mqueue_ids[ui] != 0; ui++);
 			if(ui < MAX_TASK_MQUEUE_COUNT)
 			{
-				int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-				MQueuePtr mqueue = mqueue_new(name);
+				int8 * name = (int8 *)TaskmgrConvertLAddrToPAddr(
+					sparams->tid,
+					VOID_PTR_SPARAM(sparams->param0));
+				MQueuePtr mqueue = MqNew(name);
 				task->mqueue_ids[ui] = (uint32)mqueue;
 				sparams->param0 = SPARAM(mqueue);
 			}
@@ -219,7 +228,7 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_MQUEUE_S_DELETE:
 		{
 			MQueuePtr mqueue = VOID_PTR_SPARAM(sparams->param0);
-			BOOL r = mqueue_free(mqueue);
+			BOOL r = MqFree(mqueue);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -233,8 +242,10 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_MQUEUE_S_PUSH:
 		{
 			MQueuePtr mqueue = VOID_PTR_SPARAM(sparams->param0);
-			MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			BOOL r = mqueue_add_message(mqueue, MQUEUE_IN, message);
+			MQueueMessagePtr message = (MQueueMessagePtr)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
+			BOOL r = MqAddMessage(mqueue, MQUEUE_IN, message);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -248,15 +259,17 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_MQUEUE_S_POP:
 		{
 			MQueuePtr mqueue = VOID_PTR_SPARAM(sparams->param0);
-			MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-			MQueueMessagePtr poped_message = mqueue_pop_message(mqueue, MQUEUE_OUT);
+			MQueueMessagePtr message = (MQueueMessagePtr)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
+			MQueueMessagePtr poped_message = MqPopMessage(mqueue, MQUEUE_OUT);
 			BOOL r = FALSE;
 			if(poped_message == NULL)
 				r = FALSE;
 			else
 			{
 				memcpy(message, poped_message, sizeof(MQueueMessage));
-				free_memory(poped_message);
+				MemFree(poped_message);
 				r = TRUE;
 			}
 			sparams->param0 = SPARAM(r);
@@ -271,13 +284,17 @@ _ScSysProcess(	IN uint32 func,
 		//	Param0=返回 TRUE 则成功，否则失败。
 		case SCALL_MQUEUE_C_PUSH:
 		{
-			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			MQueuePtr mqueue = mqueue_get_ptr_by_name(name);
+			int8 * name = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
+			MQueuePtr mqueue = MqGetPtrByName(name);
 			BOOL r = FALSE;
 			if(mqueue != NULL)
 			{
-				MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-				r = mqueue_add_message(mqueue, MQUEUE_OUT, message);
+				MQueueMessagePtr message = (MQueueMessagePtr)TaskmgrConvertLAddrToPAddr(
+					sparams->tid,
+					VOID_PTR_SPARAM(sparams->param1));
+				r = MqAddMessage(mqueue, MQUEUE_OUT, message);
 			}
 			else
 				r = FALSE;
@@ -293,19 +310,25 @@ _ScSysProcess(	IN uint32 func,
 		//	Param0=返回 TRUE 则成功，否则失败。
 		case SCALL_MQUEUE_C_POP:
 		{
-			int8 * name = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			MQueuePtr mqueue = mqueue_get_ptr_by_name(name);
+			int8 * name = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
+			MQueuePtr mqueue = MqGetPtrByName(name);
 			BOOL r = FALSE;
 			if(mqueue != NULL)
 			{
-				MQueueMessagePtr message = (MQueueMessagePtr)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
-				MQueueMessagePtr poped_message = mqueue_pop_message_with_tid(mqueue, MQUEUE_IN, sparams->tid);
+				MQueueMessagePtr message = (MQueueMessagePtr)TaskmgrConvertLAddrToPAddr(
+					sparams->tid,
+					VOID_PTR_SPARAM(sparams->param1));
+				MQueueMessagePtr poped_message = MqPopMessageWithTaskID(
+					mqueue,
+					MQUEUE_IN, sparams->tid);
 				if(poped_message == NULL)
 					r = FALSE;
 				else
 				{
 					memcpy(message, poped_message, sizeof(MQueueMessage));
-					free_memory(poped_message);
+					MemFree(poped_message);
 					r = TRUE;
 				}
 			}
@@ -337,7 +360,7 @@ _ScSysProcess(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			int32 retvalue = INT32_SPARAM(sparams->param0);
-			get_task_info_ptr(tid)->retvalue = retvalue;
+			TskmgrGetTaskInfoPtr(tid)->retvalue = retvalue;
 			break;
 		}
 		//执行一个程序。
@@ -350,8 +373,12 @@ _ScSysProcess(	IN uint32 func,
 		//	Param0=返回新建的任务的TID。
 		case SCALL_EXEC:
 		{
-			int8 * path = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			int8 * param = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param1));
+			int8 * path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
+			int8 * param = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
 			int8 buffer[1024];
 			if(strlen(path) < sizeof(buffer))
 				UtlCopyString(buffer, sizeof(buffer), path);
@@ -369,12 +396,12 @@ _ScSysProcess(	IN uint32 func,
 				}
 			int8 cpath[1024];
 			ConGetCurrentDir(cpath);
-			int32 new_task_tid = create_task_by_file(path, buffer, cpath);
+			int32 new_task_tid = TskmgrCreateTaskByFile(path, buffer, cpath);
 			if(new_task_tid != -1)
 			{
-				struct Task * new_task = get_task_info_ptr(new_task_tid);
+				struct Task * new_task = TskmgrGetTaskInfoPtr(new_task_tid);
 				new_task->allocable = FALSE;
-				task_ready(new_task_tid);
+				TskmgrSetTaskToReady(new_task_tid);
 			}
 			sparams->param0 = SPARAM(new_task_tid);
 			break;
@@ -390,7 +417,7 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_WAIT:
 		{
 			int32 tid = INT32_SPARAM(sparams->param0);
-			struct Task * task = get_task_info_ptr_unsafe(tid);
+			struct Task * task = TskmgrGetTaskInfoPtrUnsafely(tid);
 			BOOL r = TRUE;
 			int32 retvalue = -1;
 			if(task != NULL && !task->used)
@@ -413,11 +440,11 @@ _ScSysProcess(	IN uint32 func,
 		case SCALL_MEMORY_BLOCK_SIZE:
 		{
 			int32 tid = sparams->tid;
-			void * ptr = get_physical_address(tid,
+			void * ptr = TaskmgrConvertLAddrToPAddr(tid,
 								VOID_PTR_SPARAM(sparams->param0));
 			uint32 r = 0;
 			if(ptr != NULL)
-				r = get_memory_block_size(ptr);
+				r = MemGetBlockSise(ptr);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -425,7 +452,7 @@ _ScSysProcess(	IN uint32 func,
 		//
 		case SCALL_DISPATCH_TICK:
 		{
-			timer_dispatch_tick();
+			TmrDispatchTick();
 			break;
 		}
 		//装载ELF文件。
@@ -434,8 +461,8 @@ _ScSysProcess(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			void * vptr = VOID_PTR_SPARAM(sparams->param0);
-			CASCTEXT path = (CASCTEXT)get_physical_address(tid, vptr);
-			uint32 entry = tasks_load_elf(tid, path);
+			CASCTEXT path = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			uint32 entry = TaskmgrLoadElfExecutableFile(tid, path);
 			sparams->param0 = SPARAM(entry);
 			break;
 		}
@@ -445,8 +472,8 @@ _ScSysProcess(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			void * vptr = VOID_PTR_SPARAM(sparams->param0);
-			CASCTEXT path = (CASCTEXT)get_physical_address(tid, vptr);
-			uint32 ctx_idx = tasks_load_elf_so(tid, path);
+			CASCTEXT path = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			uint32 ctx_idx = TaskmgrLoadElfSharedObjectFile(tid, path);
 			sparams->param0 = SPARAM(ctx_idx);
 			break;
 		}
@@ -457,8 +484,8 @@ _ScSysProcess(	IN uint32 func,
 			int32 tid = sparams->tid;
 			uint32 ctx_idx = UINT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			CASCTEXT name = (CASCTEXT)get_physical_address(tid, vptr);
-			void * symaddr = tasks_get_elf_so_symbol(tid, ctx_idx, name);
+			CASCTEXT name = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			void * symaddr = TaskmgrGetElfSharedObjectSymbol(tid, ctx_idx, name);
 			sparams->param0 = SPARAM(symaddr);
 			break;
 		}
@@ -468,7 +495,7 @@ _ScSysProcess(	IN uint32 func,
 		{
 			int32 tid = sparams->tid;
 			uint32 ctx_idx = UINT32_SPARAM(sparams->param0);
-			BOOL r = tasks_unload_elf_so(tid, ctx_idx);
+			BOOL r = TaskmgrUnloadElfSharedObjectFile(tid, ctx_idx);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

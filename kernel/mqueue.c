@@ -15,17 +15,17 @@
 DSLLinkedListPtr mqueues = NULL;
 
 /**
-	@Function:		mqueue_init
+	@Function:		MqInit
 	@Access:		Public
 	@Description:
 		初始化消息队列功能。
 	@Parameters:
 	@Return:
 		BOOL
-			返回 TRUE 则表示初始化成功，否则失败。		
+			返回 TRUE 则表示初始化成功，否则失败。
 */
 BOOL
-mqueue_init(void)
+MqInit(void)
 {
 	mqueues = dsl_lnklst_new();
 	if(mqueues == NULL)
@@ -34,7 +34,7 @@ mqueue_init(void)
 }
 
 /**
-	@Function:		mqueue_validate_name
+	@Function:		_MqIsValidName
 	@Access:		Public
 	@Description:
 		检查是否是一个合法的消息队列名称。
@@ -48,7 +48,7 @@ mqueue_init(void)
 */
 static
 BOOL
-mqueue_validate_name(IN int8 * name)
+_MqIsValidName(IN int8 * name)
 {
 	uint32 len = strlen(name);
 	if(len > MAX_MQUEUE_NAME_LEN)
@@ -68,7 +68,7 @@ mqueue_validate_name(IN int8 * name)
 }
 
 /**
-	@Function:		mqueue_new
+	@Function:		MqNew
 	@Access:		Public
 	@Description:
 		新建一个消息队列。
@@ -80,26 +80,26 @@ mqueue_validate_name(IN int8 * name)
 			如果新建失败，则返回 NULL。否则，返回新建的消息队列的指针。		
 */
 MQueuePtr
-mqueue_new(IN int8 * name)
+MqNew(IN int8 * name)
 {
 	if(	mqueues == NULL 
-		|| !mqueue_validate_name(name) 
-		|| mqueue_get_ptr_by_name(name) != NULL)
+		|| !_MqIsValidName(name) 
+		|| MqGetPtrByName(name) != NULL)
 		return NULL;
-	MQueuePtr queue = (MQueuePtr)alloc_memory(sizeof(MQueue));
+	MQueuePtr queue = (MQueuePtr)MemAlloc(sizeof(MQueue));
 	if(queue == NULL)
 		return NULL;
 	queue->in = dsl_lnklst_new();
 	if(queue->in == NULL)
 	{
-		free_memory(queue);
+		MemFree(queue);
 		return NULL;
 	}
 	queue->out = dsl_lnklst_new();
 	if(queue->out == NULL)
 	{
 		dsl_lnklst_free(queue->in);
-		free_memory(queue);
+		MemFree(queue);
 		return NULL;
 	}
 	DSLLinkedListNodePtr node = dsl_lnklst_new_object_node(queue);
@@ -107,15 +107,15 @@ mqueue_new(IN int8 * name)
 	{
 		dsl_lnklst_free(queue->in);
 		dsl_lnklst_free(queue->out);
-		free_memory(queue);
+		MemFree(queue);
 		return NULL;
 	}
 	if(!dsl_lnklst_add_node(mqueues, node))
 	{
-		free_memory(node);
+		MemFree(node);
 		dsl_lnklst_free(queue->in);
 		dsl_lnklst_free(queue->out);
-		free_memory(queue);
+		MemFree(queue);
 		return NULL;
 	}
 	UtlCopyString(queue->name, sizeof(queue->name), name);
@@ -123,7 +123,7 @@ mqueue_new(IN int8 * name)
 }
 
 /**
-	@Function:		mqueue_free
+	@Function:		MqFree
 	@Access:		Public
 	@Description:
 		删除一个消息队列。
@@ -135,7 +135,7 @@ mqueue_new(IN int8 * name)
 			返回 TRUE 则成功，否则失败。	
 */
 BOOL
-mqueue_free(IN MQueuePtr mqueue)
+MqFree(IN MQueuePtr mqueue)
 {
 	if(mqueues == NULL || mqueue == NULL)
 		return FALSE;
@@ -157,7 +157,7 @@ mqueue_free(IN MQueuePtr mqueue)
 }
 
 /**
-	@Function:		_mqueue_add_message
+	@Function:		_MqAddMessage
 	@Access:		Private
 	@Description:
 		向一个消息队列的通道(In/Out)添加一条消息。
@@ -172,14 +172,14 @@ mqueue_free(IN MQueuePtr mqueue)
 */
 static
 BOOL
-_mqueue_add_message(IN OUT DSLLinkedListPtr list,
-					IN MQueueMessagePtr message)
+_MqAddMessage(	IN OUT DSLLinkedListPtr list,
+				IN MQueueMessagePtr message)
 {
 	if(	list == NULL 
 		|| message == NULL 
 		|| dsl_lnklst_count(list) == MAX_MESSAGE_COUNT)
 		return FALSE;
-	MQueueMessagePtr new_message = (MQueueMessagePtr)alloc_memory(sizeof(MQueueMessage));
+	MQueueMessagePtr new_message = (MQueueMessagePtr)MemAlloc(sizeof(MQueueMessage));
 	if(new_message == NULL)
 		return FALSE;
 	memcpy(new_message, message, sizeof(MQueueMessage));
@@ -188,14 +188,14 @@ _mqueue_add_message(IN OUT DSLLinkedListPtr list,
 		return FALSE;
 	if(!dsl_lnklst_add_node(list, node))
 	{
-		free_memory(node);
+		MemFree(node);
 		return FALSE;
 	}
 	return TRUE;
 }
 
 /**
-	@Function:		mqueue_add_message
+	@Function:		MqAddMessage
 	@Access:		Public
 	@Description:
 		向一个消息队列的通道(In/Out)添加一条消息。
@@ -211,9 +211,9 @@ _mqueue_add_message(IN OUT DSLLinkedListPtr list,
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-mqueue_add_message(	IN OUT MQueuePtr mqueue,
-					IN int32 in_out,
-					IN MQueueMessagePtr message)
+MqAddMessage(	IN OUT MQueuePtr mqueue,
+				IN int32 in_out,
+				IN MQueueMessagePtr message)
 {
 	if(mqueue == NULL || message == NULL)
 		return FALSE;
@@ -229,11 +229,11 @@ mqueue_add_message(	IN OUT MQueuePtr mqueue,
 		default:
 			return FALSE;
 	}
-	return _mqueue_add_message(list, message);
+	return _MqAddMessage(list, message);
 }
 
 /**
-	@Function:		_mqueue_pop_message_with_tid
+	@Function:		_MqPopMessageWithTaskID
 	@Access:		Private
 	@Description:
 		从一个消息队列的通道(In/Out)获取一条消息。
@@ -250,8 +250,8 @@ mqueue_add_message(	IN OUT MQueuePtr mqueue,
 */
 static
 MQueueMessagePtr
-_mqueue_pop_message_with_tid(	IN OUT DSLLinkedListPtr list,
-								IN int32 tid)
+_MqPopMessageWithTaskID(IN OUT DSLLinkedListPtr list,
+						IN int32 tid)
 {
 	if(list == NULL || dsl_lnklst_count(list) == 0)
 		return NULL;
@@ -271,7 +271,7 @@ _mqueue_pop_message_with_tid(	IN OUT DSLLinkedListPtr list,
 }
 
 /**
-	@Function:		mqueue_pop_message_with_tid
+	@Function:		MqPopMessageWithTaskID
 	@Access:		Public
 	@Description:
 		从一个消息队列的通道(In/Out)获取一条消息。
@@ -289,9 +289,9 @@ _mqueue_pop_message_with_tid(	IN OUT DSLLinkedListPtr list,
 			使用完毕需要自行释放。
 */
 MQueueMessagePtr
-mqueue_pop_message_with_tid(IN OUT MQueuePtr mqueue,
-							IN int32 in_out,
-							IN int32 tid)
+MqPopMessageWithTaskID(	IN OUT MQueuePtr mqueue,
+						IN int32 in_out,
+						IN int32 tid)
 {
 	if(mqueue == NULL)
 		return NULL;
@@ -307,11 +307,11 @@ mqueue_pop_message_with_tid(IN OUT MQueuePtr mqueue,
 		default:
 			return NULL;
 	}
-	return _mqueue_pop_message_with_tid(list, tid);
+	return _MqPopMessageWithTaskID(list, tid);
 }
 
 /**
-	@Function:		_mqueue_pop_message
+	@Function:		_MqPopMessage
 	@Access:		Private
 	@Description:
 		从一个消息队列的通道(In/Out)获取一条消息。
@@ -325,7 +325,7 @@ mqueue_pop_message_with_tid(IN OUT MQueuePtr mqueue,
 */
 static
 MQueueMessagePtr
-_mqueue_pop_message(IN OUT DSLLinkedListPtr list)
+_MqPopMessage(IN OUT DSLLinkedListPtr list)
 {
 	if(list == NULL || dsl_lnklst_count(list) == 0)
 		return NULL;
@@ -338,7 +338,7 @@ _mqueue_pop_message(IN OUT DSLLinkedListPtr list)
 }
 
 /**
-	@Function:		mqueue_pop_message
+	@Function:		MqPopMessage
 	@Access:		Public
 	@Description:
 		从一个消息队列的通道(In/Out)获取一条消息。
@@ -353,8 +353,8 @@ _mqueue_pop_message(IN OUT DSLLinkedListPtr list)
 			使用完毕需要自行释放。
 */
 MQueueMessagePtr
-mqueue_pop_message(	IN OUT MQueuePtr mqueue,
-					IN int32 in_out)
+MqPopMessage(	IN OUT MQueuePtr mqueue,
+				IN int32 in_out)
 {
 	if(mqueue == NULL)
 		return NULL;
@@ -370,11 +370,11 @@ mqueue_pop_message(	IN OUT MQueuePtr mqueue,
 		default:
 			return NULL;
 	}
-	return _mqueue_pop_message(list);
+	return _MqPopMessage(list);
 }
 
 /**
-	@Function:		mqueue_get_ptr_by_name
+	@Function:		MqGetPtrByName
 	@Access:		Public
 	@Description:
 		通过一个名称获取指向消息队列的指针。
@@ -386,7 +386,7 @@ mqueue_pop_message(	IN OUT MQueuePtr mqueue,
 			指向消息队列的指针
 */
 MQueuePtr
-mqueue_get_ptr_by_name(IN int8 * name)
+MqGetPtrByName(IN int8 * name)
 {
 	if(mqueues == NULL || name == NULL)
 		return NULL;

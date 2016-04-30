@@ -54,38 +54,38 @@ struct MADT
 
 extern
 BOOL
-madt_init(void);
+MadtInit(void);
 
 extern
 uint32
-madt_get_type0_count(void);
+MadtGetType0Count(void);
 
 extern
 uint32
-madt_get_type1_count(void);
+MadtGetType1Count(void);
 
 extern
 uint32
-madt_get_type2_count(void);
+MadtGetType2Count(void);
 
 extern
 struct MADTEntryType0 *
-madt_get_type0_entry(IN uint32 index);
+MadtGetType0Entry(IN uint32 index);
 
 extern
 struct MADTEntryType1 *
-madt_get_type1_entry(IN uint32 index);
+MadtGetType1Entry(IN uint32 index);
 
 extern
 struct MADTEntryType2 *
-madt_get_type2_entry(IN uint32 index);
+MadtGetType2Entry(IN uint32 index);
 
 extern
 struct MADT *
-madt_get(void);
+MadtGet(void);
 
 extern
 BOOL
-madt_write_to_file(IN const int8 * path);
+MadtWriteToFile(IN const int8 * path);
 
 #endif

@@ -21,9 +21,9 @@ static int8 * log_buffer 	= NULL;
 static BOOL write_in_rt		= FALSE;
 
 void
-init_log(void)
+LogInit(void)
 {
-	log_buffer = alloc_memory(LOG_BUFFER_SIZE);
+	log_buffer = MemAlloc(LOG_BUFFER_SIZE);
 	if(log_buffer == NULL)
 		return;
 	if(!Ifs1FileExists(SYSTEM_PATH"data/log/", "system.log"))
@@ -33,16 +33,16 @@ init_log(void)
 }
 
 void
-free_log(void)
+LogFree(void)
 {
 	if(log_buffer == NULL)
 		return;
-	write_log_to_disk();
-	free_memory(log_buffer);
+	LogWriteToDisk();
+	MemFree(log_buffer);
 }
 
 void
-write_log_to_disk(void)
+LogWriteToDisk(void)
 {
 	if(log_buffer == NULL)
 		return;
@@ -54,13 +54,13 @@ write_log_to_disk(void)
 }
 
 void
-clear_log(void)
+LogClear(void)
 {
 	log_buffer[0] = '\0';
 }
 
 void
-log(IN const int8 * type,
+Log(IN const int8 * type,
 	IN const int8 * text)
 {
 	if(log_buffer == NULL)
@@ -77,8 +77,8 @@ log(IN const int8 * type,
 				text);
 	if(strlen(log_buffer) + strlen(buffer) + 1 > LOG_BUFFER_SIZE)
 	{
-		write_log_to_disk();
-		clear_log();
+		LogWriteToDisk();
+		LogClear();
 		UtlCopyString(log_buffer, LOG_BUFFER_SIZE, buffer);
 	}
 	else
@@ -86,14 +86,14 @@ log(IN const int8 * type,
 		UtlConcatString(log_buffer, LOG_BUFFER_SIZE, buffer);
 		if(write_in_rt)
 		{
-			write_log_to_disk();
-			clear_log();
+			LogWriteToDisk();
+			LogClear();
 		}
 	}
 }
 
 int8 *
-get_log(void)
+LogGetBuffer(void)
 {
 	return log_buffer;
 }

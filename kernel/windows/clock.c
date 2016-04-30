@@ -81,7 +81,7 @@ _WinClockEvent(	IN struct Window * window,
 		text_common_image(	screen,
 							10,
 							0,
-							get_enfont_ptr(),
+							EnfntGetFontDataPtr(),
 							buffer,
 							strlen(buffer),
 							0xff000000);
@@ -102,7 +102,7 @@ _WinClockEvent(	IN struct Window * window,
 BOOL
 WinClockInit(void)
 {
-	clock_window = create_window(	WINDOW_WIDTH, 
+	clock_window = ScrCreateWindow(	WINDOW_WIDTH, 
 									WINDOW_HEIGHT, 
 									0xffffffff,
 									WINDOW_STYLE_MINIMIZE, 
@@ -112,7 +112,7 @@ WinClockInit(void)
 		return FALSE;
 
 	//使窗体初始化在屏幕右上角
-	uint32 screen_width = vesa_get_width();
+	uint32 screen_width = VesaGetWidth();
 	clock_window->x = screen_width - WINDOW_WIDTH;
 	clock_window->y = 0;
 

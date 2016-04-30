@@ -72,7 +72,7 @@ _Ifs1GetMaxBlockCount(IN const int8 * symbol)
 {
 	if(symbol == NULL)
 		return 0;
-	return (get_disk_size(symbol) * 2) / (BLOCK_SECTORS);
+	return (DskGetSize(symbol) * 2) / (BLOCK_SECTORS);
 }
 
 /**
@@ -233,7 +233,7 @@ Ifs1GetBlock(	IN const int8 * symbol,
 		|| id < START_BLOCK_ID 
 		|| id >= _Ifs1GetMaxBlockCount(symbol))
 		return FALSE;
-	return read_sectors(symbol, id * BLOCK_SECTORS, BLOCK_SECTORS, (uint8 *)block);
+	return DskReadSectors(symbol, id * BLOCK_SECTORS, BLOCK_SECTORS, (uint8 *)block);
 }
 
 /**
@@ -262,7 +262,7 @@ Ifs1SetBlock(	IN const int8 * symbol,
 		|| id < START_BLOCK_ID 
 		|| id >= _Ifs1GetMaxBlockCount(symbol))
 		return FALSE;
-	return write_sectors(symbol, id * BLOCK_SECTORS, BLOCK_SECTORS, (uint8 *)block);
+	return DskWriteSectors(symbol, id * BLOCK_SECTORS, BLOCK_SECTORS, (uint8 *)block);
 }
 
 /**

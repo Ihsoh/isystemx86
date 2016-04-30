@@ -51,7 +51,9 @@ void _ScKbdProcess(	IN uint32 func,
 		//	Param0=真正读入的字符数
 		case SCALL_GET_STR_N:
 		{
-			int8 * buffer = (int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			int8 * buffer = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			uint32 count = get_strn_utask(buffer, UINT32_SPARAM(sparams->param1));
 			sparams->param0 = SPARAM(count);
 			break;

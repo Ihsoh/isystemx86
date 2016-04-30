@@ -174,9 +174,9 @@ _ConParseCommand(	IN int8 * cmd,
 		word[ui] = '\0';
 		if(process_var && len >= 2)
 			if(word[0] == '$')
-				get_var_value(local_vars_s, word + 1, word);
+				KnlGetVarValue(local_vars_s, word + 1, word);
 			else if(word[0] == '@')
-				get_var_value(global_vars_s, word + 1, word);
+				KnlGetVarValue(global_vars_s, word + 1, word);
 	}
 	return len - pos;
 }
@@ -209,7 +209,7 @@ _ConCmdVer(void)
 				platform,
 				version,
 				group);
-	print_str(info);
+	ScrPrintString(info);
 }
 
 /**
@@ -226,7 +226,7 @@ static
 void
 _ConCmdPrint(IN int8 * text)
 {
-	print_str(text);
+	ScrPrintString(text);
 }
 
 /**
@@ -243,8 +243,8 @@ static
 void
 _ConCmdError(IN int8 * text)
 {
-	print_err_str_p(text, CC_RED);
-	print_err_str("\n");
+	ScrPrintStringToStderrWithProperty(text, CC_RED);
+	ScrPrintStringToStderr("\n");
 }
 
 /**
@@ -261,40 +261,41 @@ static
 int32
 _ConCmdShowDiskInfo(void)
 {
-	uint32 disk_count = get_disk_count();
+	uint32 disk_count = DskGetCount();
 	uint32 ui;
-	print_str_p("Name    System  Read                Write               Size                \n", 
-				CC_YELLOW | CBGC_GRAYWHITE);
+	ScrPrintStringWithProperty(
+		"Name    System  Read                Write               Size                \n", 
+		CC_YELLOW | CBGC_GRAYWHITE);
 	for(ui = 0; ui < disk_count; ui++)
 	{
 		int8 symbol[3];
-		get_disk_symbol(ui, symbol);
-		print_str(symbol);
-		print_str("\t\t");
-		if(is_system_disk(symbol))
-			print_str("Yes\t\t");
+		DskGetBySymbol(ui, symbol);
+		ScrPrintString(symbol);
+		ScrPrintString("\t\t");
+		if(DskHasSystem(symbol))
+			ScrPrintString("Yes\t\t");
 		else
-			print_str("No\t\t");
+			ScrPrintString("No\t\t");
 
 		// 输出磁盘读出字节数。
-		uint64 rbytes = disk_rbytes(symbol);
-		print_str("0x");
+		uint64 rbytes = DskGetRBytes(symbol);
+		ScrPrintString("0x");
 		printuihex((uint32)(rbytes >> 32));
 		printuihex((uint32)rbytes);
-		print_str("\t");
+		ScrPrintString("\t");
 
 		// 输出磁盘写入字节数。
-		uint64 wbytes = disk_wbytes(symbol);
-		print_str("0x");
+		uint64 wbytes = DskGetWBytes(symbol);
+		ScrPrintString("0x");
 		printuihex((uint32)(wbytes >> 32));
 		printuihex((uint32)wbytes);
-		print_str("\t");
+		ScrPrintString("\t");
 
-		uint32 disk_size = get_disk_size(symbol);
+		uint32 disk_size = DskGetSize(symbol);
 		printun(disk_size);
-		print_str("KB, ");
+		ScrPrintString("KB, ");
 		printun(disk_size / 1024);
-		print_str("MB\n");
+		ScrPrintString("MB\n");
 	}
 	return 1;
 }
@@ -315,31 +316,31 @@ _ConCmdShowMemoryInfo(void)
 {
 	uint64 max_memory_byte = get_memory_size();
 	uint32 max_memory_mbyte = (uint32)max_memory_byte == 0 ? 4096 : (uint32)max_memory_byte / 1024 / 1024;
-	print_str("Max Memory:  ");
+	ScrPrintString("Max Memory:  ");
 	printun(max_memory_mbyte);
-	print_str("MB\n");
-	uint64 used_memory_byte = get_used_memory_length();
+	ScrPrintString("MB\n");
+	uint64 used_memory_byte = MemGetUsedLength();
 	uint32 used_memory_mbyte = (uint32)used_memory_byte == 0 ? 4096 : (uint32)used_memory_byte / 1024 / 1024;
-	print_str("Used Memory: ");
+	ScrPrintString("Used Memory: ");
 	printun(used_memory_mbyte);
-	print_str("MB\n");
+	ScrPrintString("MB\n");
 	uint32 t, c, m;
-	print_str("MBDT:        ");
-	get_mbdt_info(&t, &c, &m);
+	ScrPrintString("MBDT:        ");
+	MemGetMBDTableInfo(&t, &c, &m);
 	printn(c);
-	print_str("/");
+	ScrPrintString("/");
 	printn(t);
-	print_str(", ");
+	ScrPrintString(", ");
 	printn(m / 1024 / 1024);
-	print_str("MB\n");
-	print_str("UMBDT:       ");
-	get_umbdt_info(&t, &c, &m);
+	ScrPrintString("MB\n");
+	ScrPrintString("UMBDT:       ");
+	MemGetUsedMBDTableInfo(&t, &c, &m);
 	printn(c);
-	print_str("/");
+	ScrPrintString("/");
 	printn(t);
-	print_str(", ");
+	ScrPrintString(", ");
 	printn(m / 1024 / 1024);
-	print_str("MB\n");
+	ScrPrintString("MB\n");
 	return 1;
 }
 
@@ -361,12 +362,12 @@ _ConCmdShowDate(void)
 	struct CMOSDateTime dt;
 	CmosGetDateTime(&dt);
 	printn(dt.year);
-	print_str("-");
+	ScrPrintString("-");
 	printn(dt.month);
-	print_str("-");
+	ScrPrintString("-");
 	printn(dt.day);
-	print_str(" ");
-	print_str(weeks[dt.day_of_week]);
+	ScrPrintString(" ");
+	ScrPrintString(weeks[dt.day_of_week]);
 	return 1;
 }
 
@@ -389,11 +390,11 @@ _ConCmdShowTime(IN int32 display_second)
 	struct CMOSDateTime dt;
 	CmosGetDateTime(&dt);
 	printn(dt.hour);
-	print_str(":");
+	ScrPrintString(":");
 	printn(dt.minute);
 	if(display_second)
 	{
-		print_str(":");
+		ScrPrintString(":");
 		printn(dt.second);
 	}
 	return 1;
@@ -414,7 +415,7 @@ int32
 _ConCmdShowDateTime(void)
 {
 	_ConCmdShowDate();
-	print_str("\n");
+	ScrPrintString("\n");
 	_ConCmdShowTime(1);
 	return 1;
 }
@@ -630,7 +631,7 @@ _ConCmdFormatDisk(IN int8 * param)
 	}
 	if(Ifs1Format(param))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -661,9 +662,9 @@ _ConCmdCheckDisk(IN int8 * param)
 		_ConCmdError(FORMAT("cdisk {DA|DB|VA|VB|...}"));
 		return 0;
 	}
-	print_str(param);
+	ScrPrintString(param);
 	if(Ifs1Check(param))
-		print_str(" is IFS1!");
+		ScrPrintString(" is IFS1!");
 	else
 		_ConCmdError(" is not IFS1!");
 	return 1;
@@ -706,7 +707,7 @@ _ConCmdCreateDir(	IN int8 * path,
 	}
 	if(Ifs1CreateDir(temp, name))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -753,7 +754,7 @@ _ConCmdCreateFile(	IN int8 * path,
 	}
 	if(Ifs1CreateFile(temp, name))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -792,7 +793,7 @@ _ConCmdDeleteDir(IN int8 * path)
 	}
 	if(!Ifs1IsChildPath(temp, current_path) && Ifs1DeleteDir(temp))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -831,7 +832,7 @@ _ConCmdDeleteDirRecursively(IN int8 * path)
 	}
 	if(!Ifs1IsChildPath(temp, current_path) && Ifs1DeleteDirRecursively(temp))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -870,7 +871,7 @@ _ConCmdDeleteFile(IN int8 * path)
 	}
 	if(Ifs1DeleteFile(temp))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -912,7 +913,7 @@ _ConCmdRenameDir(	IN int8 * path,
 	}
 	if(!Ifs1IsChildPath(temp, current_path) && Ifs1RenameDir(temp, new_name))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -954,7 +955,7 @@ _ConCmdRenameFile(	IN int8 * path,
 	}
 	if(Ifs1RenameFile(temp, new_name))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -1007,7 +1008,7 @@ _ConCmdShowFileInfo(IN int8 * path,
 	{
 		if(part && ui != 0 && ui % 20 == 0)
 		{
-			print_str("Press any key to continue!\n");
+			ScrPrintString("Press any key to continue!\n");
 			if(get_char() == KEY_EXT)
 				get_char();
 		}
@@ -1017,21 +1018,21 @@ _ConCmdShowFileInfo(IN int8 * path,
 			if(block->type == BLOCK_TYPE_FILE)
 			{
 				struct FileBlock * file = (struct FileBlock *)block;
-				print_str_p(file->filename, CC_YELLOW);
+				ScrPrintStringWithProperty(file->filename, CC_YELLOW);
 			}
 			else if(block->type == BLOCK_TYPE_DIR)
 			{
 				struct DirBlock * dir = (struct DirBlock *)block;
-				print_str_p(dir->dirname, CC_GREEN);
+				ScrPrintStringWithProperty(dir->dirname, CC_GREEN);
 			}
 			else if(block->type == BLOCK_TYPE_SLINK)
 			{
 				struct SLinkBlock * slink = (struct SLinkBlock *)block;
-				print_str_p(slink->filename, CC_BLUE);
+				ScrPrintStringWithProperty(slink->filename, CC_BLUE);
 			}
 			else
-				print_str_p("????", CC_RED);
-			print_str(" ");
+				ScrPrintStringWithProperty("????", CC_RED);
+			ScrPrintString(" ");
 		}
 		else
 		{
@@ -1052,12 +1053,12 @@ _ConCmdShowFileInfo(IN int8 * path,
 				}
 				else
 					memcpy(name, file->filename, strlen(file->filename));
-				print_str_p(name, CC_YELLOW);
-				print_str("       ");
-				print_datetime(&(file->change));
-				print_str(" ");
+				ScrPrintStringWithProperty(name, CC_YELLOW);
+				ScrPrintString("       ");
+				ScrPrintDateTime(&(file->change));
+				ScrPrintString(" ");
 				printn(file->length);
-				print_str("Bytes");
+				ScrPrintString("Bytes");
 			}
 			else if(block->type == BLOCK_TYPE_DIR)
 			{
@@ -1071,9 +1072,9 @@ _ConCmdShowFileInfo(IN int8 * path,
 				}
 				else		
 					memcpy(name, dir->dirname, strlen(dir->dirname));
-				print_str_p(name, CC_GREEN);
-				print_str(" <DIR> ");
-				print_datetime(&(dir->change));
+				ScrPrintStringWithProperty(name, CC_GREEN);
+				ScrPrintString(" <DIR> ");
+				ScrPrintDateTime(&(dir->change));
 			}
 			else if(block->type == BLOCK_TYPE_SLINK)
 			{
@@ -1087,16 +1088,16 @@ _ConCmdShowFileInfo(IN int8 * path,
 				}
 				else		
 					memcpy(name, slink->filename, strlen(slink->filename));
-				print_str_p(name, CC_BLUE);
-				print_str(" <LNK> ");
+				ScrPrintStringWithProperty(name, CC_BLUE);
+				ScrPrintString(" <LNK> ");
 			}
 			else
-				print_str_p("????", CC_RED);
-			print_str("\n");
+				ScrPrintStringWithProperty("????", CC_RED);
+			ScrPrintString("\n");
 		}
 	}
 	dsl_lnklst_delete_all_object_node(list);
-	free_memory(list);
+	MemFree(list);
 	return 1;
 }
 
@@ -1174,7 +1175,7 @@ _ConCmdCopyFile(IN int8 * src_path,
 	}
 	if(Ifs1CopyFile(temp, temp1, name))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -1211,9 +1212,9 @@ _ConCmdKillTask(IN int8 * tid_s)
 		return 0;
 	}
 	int32 tid = (int32)stol(tid_s);
-	if(kill_task(tid))
+	if(TskmgrKillTask(tid))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return 1;
 	}
 	else
@@ -1245,22 +1246,22 @@ _ConCmdShowTaskInfo(IN int32 part)
 	{
 		if(part && i != 0 && i % 20 == 0)
 		{
-			print_str("Press any key to continue!\n");
+			ScrPrintString("Press any key to continue!\n");
 			if(get_char() == KEY_EXT)
 				get_char();
 		}
 		struct Task task;
-		if(get_task_info(i, &task))
+		if(TskmgrGetTaskInfo(i, &task))
 		{
 			int8 tid_s[30];
 			ltos(tid_s, i);
-			print_str_p(tid_s, CC_YELLOW);
+			ScrPrintStringWithProperty(tid_s, CC_YELLOW);
 			for(ui = 0; ui < 6 - strlen(tid_s); ui++)
-				print_str(" ");
+				ScrPrintString(" ");
 			printn(task.used_memory_size / 1024 / 1024);
-			print_str("MB, ");
-			print_str(task.name);
-			print_str("\n");
+			ScrPrintString("MB, ");
+			ScrPrintString(task.name);
+			ScrPrintString("\n");
 		}
 	}
 	return 1;
@@ -1297,10 +1298,10 @@ _ConCmdExecuteApplication(	IN int8 * path,
 		_ConCmdError("Invalid path!");
 		return -1;
 	}
-	if((r = create_task_by_file(temp, cmd, current_path)) == -1)
+	if((r = TskmgrCreateTaskByFile(temp, cmd, current_path)) == -1)
 		_ConCmdError("Failed to run application!");
 	else
-		task_ready(r);
+		TskmgrSetTaskToReady(r);
 	return r;
 }
 
@@ -1344,21 +1345,21 @@ run_wait(	IN int8 * path,
 	//并且新的任务在被切换之前调用了 app_exit，新的任务将不能正常的
 	//退出。因为 wait_app_tid 此时等于-1。
 	lock();
-	if((r = create_task_by_file(temp, cmd, current_path)) == -1)
+	if((r = TskmgrCreateTaskByFile(temp, cmd, current_path)) == -1)
 	{
 		unlock();
 		_ConCmdError("Failed to run application!");
 		return -1;
 	}
 	if(strcmp(stdin, "%") != 0)
-		tasks_redirect_stdin(r, stdin);
+		TaskmgrRedirectStdin(r, stdin);
 	if(strcmp(stdout, "%") != 0)
-		tasks_redirect_stdout(r, stdout);
+		TaskmgrRedirectStdout(r, stdout);
 	if(strcmp(stderr, "%") != 0)
-		tasks_redirect_stderr(r, stderr);
+		TaskmgrRedirectStderr(r, stderr);
 	wait_app_tid = r;
 	unlock();
-	task_ready(r);
+	TskmgrSetTaskToReady(r);
 	return r;
 }
 
@@ -1382,7 +1383,7 @@ _ConCmdShowHelpInfo(void)
 		_ConCmdError("Cannot open file '"SYSTEM_HELP_FILE"'!");
 		return 0;
 	}
-	int8 * text = (char *)alloc_memory(flen(fptr) + 1);
+	int8 * text = (char *)MemAlloc(flen(fptr) + 1);
 	if(text == NULL)
 	{
 		_ConCmdError("No enough memory!");
@@ -1405,7 +1406,7 @@ _ConCmdShowHelpInfo(void)
 		{
 			while(1)
 			{
-				print_str("Press Enter to continue, Q to quit!\n");
+				ScrPrintString("Press Enter to continue, Q to quit!\n");
 				int8 input_char = get_char();
 				if(input_char == '\n')
 					break;
@@ -1419,7 +1420,7 @@ _ConCmdShowHelpInfo(void)
 			}
 			line = 0;
 		}
-		print_char(chr);
+		ScrPrintChar(chr);
 		if(chr == '\n')
 			line++;
 	}
@@ -1439,13 +1440,13 @@ static
 void
 _ConCmdReboot(void)
 {
-	print_str("Killing all tasks...\n");
+	ScrPrintString("Killing all tasks...\n");
 	//
 	// !!!如果该函数在除了内核任务的其他任务的情况下被调用将会导致调用该函数的任务被杀死，这会引发问题!!!
 	//
-	// kill_all_tasks();
-	print_str("OK!");
-	reboot_system();
+	// TskmgrKillAllTasks();
+	ScrPrintString("OK!");
+	KnlRebootSystem();
 }
 
 /**
@@ -1460,13 +1461,13 @@ static
 void
 _ConCmdShutdown(void)
 {
-	print_str("Killing all tasks...\n");
+	ScrPrintString("Killing all tasks...\n");
 	//
 	// !!!如果该函数在除了内核任务的其他任务的情况下被调用将会导致调用该函数的任务被杀死，这会引发问题!!!
 	//
-	// kill_all_tasks();
-	print_str("OK!");
-	shutdown_system();
+	// TskmgrKillAllTasks();
+	ScrPrintString("OK!");
+	KnlShutdownSystem();
 }
 
 /**
@@ -1525,7 +1526,7 @@ _ConCmdChangeVideoMode(IN int8 * mode)
 		_ConCmdError("Failed to change video mode!");
 		return 0;
 	}
-	uint8 * buffer = alloc_memory((flen(fptr) / 512 + 1) * 512);
+	uint8 * buffer = MemAlloc((flen(fptr) / 512 + 1) * 512);
 	uint r;
 	if(buffer == NULL || !(r = Ifs1ReadFile(fptr, buffer, flen(fptr))) )
 	{
@@ -1534,16 +1535,16 @@ _ConCmdChangeVideoMode(IN int8 * mode)
 		return 0;
 	}
 	Ifs1CloseFile(fptr);
-	if(!write_sectors(SYSTEM_DISK, 1, flen(fptr) / 512 + 1, buffer))
+	if(!DskWriteSectors(SYSTEM_DISK, 1, flen(fptr) / 512 + 1, buffer))
 	{
 		_ConCmdError("Failed to change video mode!");
-		free_memory(buffer);
+		MemFree(buffer);
 		return 0;
 	}
 	else
 	{
-		print_str("OK!");
-		free_memory(buffer);
+		ScrPrintString("OK!");
+		MemFree(buffer);
 		return 1;
 	}
 }
@@ -1564,109 +1565,109 @@ _ConCmdShowCpuInfo(void)
 {
 	int8 vendor_id_string[13];
 	int8 brand_string[49];
-	get_vendor_id_string(vendor_id_string);
-	print_str_p("Vendor ID String: ", CC_YELLOW);
-	print_str(vendor_id_string);
-	print_str("\n");
-	get_brand_string(brand_string);	
+	CpuGetVendorIdString(vendor_id_string);
+	ScrPrintStringWithProperty("Vendor ID String: ", CC_YELLOW);
+	ScrPrintString(vendor_id_string);
+	ScrPrintString("\n");
+	CpuGetBrandString(brand_string);	
 	trim(brand_string);
-	print_str_p("Brand String: ", CC_YELLOW);
-	print_str(brand_string);
-	print_str("\n");
+	ScrPrintStringWithProperty("Brand String: ", CC_YELLOW);
+	ScrPrintString(brand_string);
+	ScrPrintString("\n");
 	struct CacheInfo L1;
-	if(get_cpu_L1(&L1))
+	if(CpuGetL1(&L1))
 	{
-		print_str_p("L1: ", CC_YELLOW);
+		ScrPrintStringWithProperty("L1: ", CC_YELLOW);
 		printn(L1.size);
-		print_str(", ");
+		ScrPrintString(", ");
 		printn(L1.way);
-		print_str(", ");
+		ScrPrintString(", ");
 		printn(L1.linesize);
-		print_str("\n");
+		ScrPrintString("\n");
 	}
 	struct CacheInfo L2;
-	if(get_cpu_L2(&L2))
+	if(CpuGetL2(&L2))
 	{
-		print_str_p("L2: ", CC_YELLOW);
+		ScrPrintStringWithProperty("L2: ", CC_YELLOW);
 		printn(L2.size);
-		print_str(", ");
+		ScrPrintString(", ");
 		printn(L2.way);
-		print_str(", ");
+		ScrPrintString(", ");
 		printn(L2.linesize);
-		print_str("\n");
+		ScrPrintString("\n");
 	}
 	struct CacheInfo L3;
-	if(get_cpu_L3(&L3))
+	if(CpuGetL3(&L3))
 	{
-		print_str_p("L3: ", CC_YELLOW);
+		ScrPrintStringWithProperty("L3: ", CC_YELLOW);
 		printn(L3.size);
-		print_str(", ");
+		ScrPrintString(", ");
 		printn(L3.way);
-		print_str(", ");
+		ScrPrintString(", ");
 		printn(L3.linesize);
-		print_str("\n");
+		ScrPrintString("\n");
 	}
-	print_str_p("Features: ", CC_YELLOW);
+	ScrPrintStringWithProperty("Features: ", CC_YELLOW);
 
-	print_str_p("SSE3, ", cpu_feature_sse3() ? CC_GREEN : CC_RED);
-	print_str_p("PCLMUL, ", cpu_feature_pclmul() ? CC_GREEN : CC_RED);
-	print_str_p("DTES64, ", cpu_feature_dtes64() ? CC_GREEN : CC_RED);
-	print_str_p("MONITOR, ", cpu_feature_monitor() ? CC_GREEN : CC_RED);
-	print_str_p("DS-CPL, ", cpu_feature_ds_cpl() ? CC_GREEN : CC_RED);
-	print_str_p("VMX, ", cpu_feature_vmx() ? CC_GREEN : CC_RED);
-	print_str_p("SMX, ", cpu_feature_smx() ? CC_GREEN : CC_RED);
-	print_str_p("EST, ", cpu_feature_est() ? CC_GREEN : CC_RED);
-	print_str_p("TM2, ", cpu_feature_tm2() ? CC_GREEN : CC_RED);
-	print_str_p("SSSE3, ", cpu_feature_ssse3() ? CC_GREEN : CC_RED);
-	print_str_p("CID, ", cpu_feature_cid() ? CC_GREEN : CC_RED);
-	print_str_p("FMA, ", cpu_feature_fma() ? CC_GREEN : CC_RED);
-	print_str_p("CX16, ", cpu_feature_cx16() ? CC_GREEN : CC_RED);
-	print_str_p("ETPRD, ", cpu_feature_etprd() ? CC_GREEN : CC_RED);
-	print_str_p("PDCM, ", cpu_feature_pdcm() ? CC_GREEN : CC_RED);
-	print_str_p("PCID, ", cpu_feature_pcid() ? CC_GREEN : CC_RED);
-	print_str_p("DCA, ", cpu_feature_dca() ? CC_GREEN : CC_RED);
-	print_str_p("SSE4.1, ", cpu_feature_sse4_1() ? CC_GREEN : CC_RED);
-	print_str_p("SSE4.2, ", cpu_feature_sse4_2() ? CC_GREEN : CC_RED);
-	print_str_p("X2APIC, ", cpu_feature_x2apic() ? CC_GREEN : CC_RED);
-	print_str_p("MOVBE, ", cpu_feature_movbe() ? CC_GREEN : CC_RED);
-	print_str_p("POPCNT, ", cpu_feature_popcnt() ? CC_GREEN : CC_RED);
-	print_str_p("TSC-Deadline, ", cpu_feature_tsc_deadline() ? CC_GREEN : CC_RED);
-	print_str_p("AES, ", cpu_feature_aes() ? CC_GREEN : CC_RED);
-	print_str_p("XSAVE, ", cpu_feature_xsave() ? CC_GREEN : CC_RED);
-	print_str_p("OSXSAVE, ", cpu_feature_osxsave() ? CC_GREEN : CC_RED);
-	print_str_p("AVX, ", cpu_feature_avx() ? CC_GREEN : CC_RED);
-	print_str_p("F16C, ", cpu_feature_f16c() ? CC_GREEN : CC_RED);
-	print_str_p("RDRAND, ", cpu_feature_rdrand() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SSE3 ", CPU_FEATURE_SSE3() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PCLMUL ", CPU_FEATURE_PCLMUL() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("DTES64 ", CPU_FEATURE_DTES64() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("MONITOR ", CPU_FEATURE_MONITOR() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("DS-CPL ", CPU_FEATURE_DS_CPL() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("VMX ", CPU_FEATURE_VMX() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SMX ", CPU_FEATURE_SMX() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("EST ", CPU_FEATURE_EST() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("TM2 ", CPU_FEATURE_TM2() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SSSE3 ", CPU_FEATURE_SSSE3() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("CID ", CPU_FEATURE_CID() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("FMA ", CPU_FEATURE_FMA() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("CX16 ", CPU_FEATURE_CX16() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("ETPRD ", CPU_FEATURE_ETPRD() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PDCM ", CPU_FEATURE_PDCM() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PCID ", CPU_FEATURE_PCID() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("DCA ", CPU_FEATURE_DCA() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SSE4.1 ", CPU_FEATURE_SSE4_1() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SSE4.2 ", CPU_FEATURE_SSE4_2() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("X2APIC ", CPU_FEATURE_X2APIC() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("MOVBE ", CPU_FEATURE_MOVBE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("POPCNT ", CPU_FEATURE_POPCNT() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("TSC-Deadline ", CPU_FEATURE_TSC_DEADLINE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("AES ", CPU_FEATURE_AES() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("XSAVE ", CPU_FEATURE_XSAVE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("OSXSAVE ", CPU_FEATURE_OSXSAVE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("AVX ", CPU_FEATURE_AVX() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("F16C ", CPU_FEATURE_F16C() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("RDRAND ", CPU_FEATURE_RDRAND() ? CC_GREEN : CC_RED);
 
-	print_str_p("FPU, ", cpu_feature_fpu() ? CC_GREEN : CC_RED);
-	print_str_p("VME, ", cpu_feature_vme() ? CC_GREEN : CC_RED);
-	print_str_p("DE, ", cpu_feature_de() ? CC_GREEN : CC_RED);
-	print_str_p("PSE, ", cpu_feature_pse() ? CC_GREEN : CC_RED);
-	print_str_p("TSC, ", cpu_feature_tsc() ? CC_GREEN : CC_RED);
-	print_str_p("MSR, ", cpu_feature_msr() ? CC_GREEN : CC_RED);
-	print_str_p("PAE, ", cpu_feature_pae() ? CC_GREEN : CC_RED);
-	print_str_p("MCE, ", cpu_feature_mce() ? CC_GREEN : CC_RED);
-	print_str_p("CXB, ", cpu_feature_cxb() ? CC_GREEN : CC_RED);
-	print_str_p("APIC, ", cpu_feature_apic() ? CC_GREEN : CC_RED);
-	print_str_p("SEP, ", cpu_feature_sep() ? CC_GREEN : CC_RED);
-	print_str_p("MTRR, ", cpu_feature_mtrr() ? CC_GREEN : CC_RED);
-	print_str_p("PGE, ", cpu_feature_pge() ? CC_GREEN : CC_RED);
-	print_str_p("MCA, ", cpu_feature_mca() ? CC_GREEN : CC_RED);
-	print_str_p("CMOV, ", cpu_feature_cmov() ? CC_GREEN : CC_RED);
-	print_str_p("PAT, ", cpu_feature_pat() ? CC_GREEN : CC_RED);
-	print_str_p("PSE-36, ", cpu_feature_pse36() ? CC_GREEN : CC_RED);
-	print_str_p("PN, ", cpu_feature_pn() ? CC_GREEN : CC_RED);
-	print_str_p("CLF, ", cpu_feature_clf() ? CC_GREEN : CC_RED);
-	print_str_p("DTES, ", cpu_feature_dtes() ? CC_GREEN : CC_RED);
-	print_str_p("ACPI, ", cpu_feature_acpi() ? CC_GREEN : CC_RED);
-	print_str_p("MMX, ", cpu_feature_mmx() ? CC_GREEN : CC_RED);
-	print_str_p("FXSR, ", cpu_feature_fxsr() ? CC_GREEN : CC_RED);
-	print_str_p("SSE, ", cpu_feature_sse() ? CC_GREEN : CC_RED);
-	print_str_p("SSE2, ", cpu_feature_sse2() ? CC_GREEN : CC_RED);
-	print_str_p("SS, ", cpu_feature_ss() ? CC_GREEN : CC_RED);
-	print_str_p("HTT, ", cpu_feature_htt() ? CC_GREEN : CC_RED);
-	print_str_p("TM1, ", cpu_feature_tm1() ? CC_GREEN : CC_RED);
-	print_str_p("PBE.", cpu_feature_pbe() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("FPU ", CPU_FEATURE_FPU() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("VME ", CPU_FEATURE_VME() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("DE ", CPU_FEATURE_DE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PSE ", CPU_FEATURE_PSE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("TSC ", CPU_FEATURE_TSC() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("MSR ", CPU_FEATURE_MSR() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PAE ", CPU_FEATURE_PAE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("MCE ", CPU_FEATURE_MCE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("CXB ", CPU_FEATURE_CXB() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("APIC ", CPU_FEATURE_APIC() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SEP ", CPU_FEATURE_SEP() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("MTRR ", CPU_FEATURE_MTRR() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PGE ", CPU_FEATURE_PGE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("MCA ", CPU_FEATURE_MCA() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("CMOV ", CPU_FEATURE_CMOV() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PAT ", CPU_FEATURE_PAT() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PSE-36 ", CPU_FEATURE_PSE36() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PN ", CPU_FEATURE_PN() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("CLF ", CPU_FEATURE_CLF() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("DTES ", CPU_FEATURE_DTES() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("ACPI ", CPU_FEATURE_ACPI() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("MMX ", CPU_FEATURE_MMX() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("FXSR ", CPU_FEATURE_FXSR() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SSE ", CPU_FEATURE_SSE() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SSE2 ", CPU_FEATURE_SSE2() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("SS ", CPU_FEATURE_SS() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("HTT ", CPU_FEATURE_HTT() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("TM1 ", CPU_FEATURE_TM1() ? CC_GREEN : CC_RED);
+	ScrPrintStringWithProperty("PBE", CPU_FEATURE_PBE() ? CC_GREEN : CC_RED);
 	return 1;
 }
 
@@ -1690,15 +1691,15 @@ _ConCmdSetProperty(	IN int8 * property,
 					IN int8 * value)
 {
 	if(strcmp(property, "cursor_color") == 0)
-		set_cursor_color((uchar)stoi(value));
+		ScrSetConsoleCursorColor((uchar)stoi(value));
 	else if(strcmp(property, "char_color") == 0)
-		set_char_color((uchar)stoi(value));
+		ScrSetConsoleCharColor((uchar)stoi(value));
 	else
 	{
 		_ConCmdError("Failed to set property!");
 		return 0;
 	}
-	print_str("OK!");
+	ScrPrintString("OK!");
 	return 1;
 }
 
@@ -1737,7 +1738,7 @@ _ConCmdCreateSLink(	IN int8 * path,
 	}
 	if(Ifs1CreateSLink(temp, name, link))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return TRUE;
 	}
 	else
@@ -1776,7 +1777,7 @@ _ConCmdDeleteSLink(IN int8 * path)
 	}
 	if(Ifs1DeleteSLink(temp))
 	{
-		print_str("OK!");
+		ScrPrintString("OK!");
 		return TRUE;
 	}
 	else
@@ -1817,7 +1818,7 @@ _ConCmdShowSLinkTarget(IN int8 * path)
 	link[1023] = '\0';
 	if(Ifs1GetSLinkTarget(temp, 1023, link))
 	{
-		print_str(link);
+		ScrPrintString(link);
 		return TRUE;
 	}
 	else
@@ -1856,32 +1857,32 @@ __ConExecuteBatchScript(IN int8 * path)
 		return 0;
 	}
 	struct Vars * local_vars_s;
-	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
+	local_vars_s = KnlAllocVarList(BATCH_MAX_VARS_COUNT);
 	if(local_vars_s == NULL)
 		return 0;
 	FileObject * fptr = Ifs1OpenFile(temp, FILE_MODE_READ);
 	if(fptr == NULL)
 	{
-		free_vars(local_vars_s);
+		KnlFreeVarList(local_vars_s);
 		return 0;
 	}
 	uint32 file_len = flen(fptr);
-	int8 * cmds = (int8 *)alloc_memory(file_len);
+	int8 * cmds = (int8 *)MemAlloc(file_len);
 	if(cmds == NULL)
 	{
 		Ifs1CloseFile(fptr);
-		free_vars(local_vars_s);
+		KnlFreeVarList(local_vars_s);
 		return 0;
 	}
 	Ifs1ReadFile(fptr, cmds, file_len);
 	Ifs1CloseFile(fptr);
 	uint32 ui;
 	int8 cmd[BATCH_MAX_CMD_LEN];
-	int8 * lines = alloc_memory(BATCH_MAX_CMD_LINES * BATCH_MAX_CMD_LEN);
+	int8 * lines = MemAlloc(BATCH_MAX_CMD_LINES * BATCH_MAX_CMD_LEN);
 	if(lines == NULL)
 	{
-		free_memory(cmds);
-		free_vars(local_vars_s);
+		MemFree(cmds);
+		KnlFreeVarList(local_vars_s);
 		return 0;
 	}
 	uint32 line = 0;
@@ -1918,12 +1919,12 @@ __ConExecuteBatchScript(IN int8 * path)
 		int8 * current_cmd = lines + pointer * BATCH_MAX_CMD_LEN;
 		if(!_ConExecuteCommand(current_cmd, lines, &pointer, line, local_vars_s))
 		{
-			print_str_p("\nBatch have error. Command:\n\t", CC_RED);
-			print_str_p(current_cmd, CC_RED);
-			print_str("\n");
-			free_memory(cmds);
-			free_memory(lines);
-			free_vars(local_vars_s);
+			ScrPrintStringWithProperty("\nBatch have error. Command:\n\t", CC_RED);
+			ScrPrintStringWithProperty(current_cmd, CC_RED);
+			ScrPrintString("\n");
+			MemFree(cmds);
+			MemFree(lines);
+			KnlFreeVarList(local_vars_s);
 			return 0;
 		}
 
@@ -1934,9 +1935,9 @@ __ConExecuteBatchScript(IN int8 * path)
 			break;
 		}
 	}
-	free_memory(cmds);
-	free_memory(lines);
-	free_vars(local_vars_s);
+	MemFree(cmds);
+	MemFree(lines);
+	KnlFreeVarList(local_vars_s);
 	return 1;
 }
 
@@ -2004,7 +2005,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			{
 				_ConCmdPrint(word);
 				r = 1;
-				print_str("\n");
+				ScrPrintString("\n");
 			}
 			else
 			{
@@ -2020,59 +2021,59 @@ _ConExecuteCommand(	IN int8 * cmd,
 		else if(strcmp(name, "disks") == 0)
 		{
 			r = _ConCmdShowDiskInfo();
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "mm") == 0)
 		{
 			r = _ConCmdShowMemoryInfo();
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "date") == 0)
 		{
 			r = _ConCmdShowDate();
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "time") == 0)
 		{
 			r = _ConCmdShowTime(1);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "dt") == 0)
 		{
 			r = _ConCmdShowDateTime();
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "setdate") == 0)
 		{
 			_PARSE_COMMAND(NULL, word, 1023);
 			r = _ConCmdSetDate(word);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "settime") == 0)
 		{
 			_PARSE_COMMAND(NULL, word, 1023);
 			r = _ConCmdSetTime(word);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "clock") == 0)
 		{
 			_PARSE_COMMAND(NULL, word, 1023);
 			r = _ConCmdSetClock(word);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "format") == 0)
 		{
 			_PARSE_COMMAND(NULL, word, 1023);
 			trim(word);
 			r = _ConCmdFormatDisk(word);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "cdisk") == 0)
 		{
 			_PARSE_COMMAND(NULL, word, 1023);
 			trim(word);
 			r = _ConCmdCheckDisk(word);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "mkdir") == 0)
 		{
@@ -2083,7 +2084,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			trim(path);
 			trim(name);
 			r = _ConCmdCreateDir(path, name);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "mkfile") == 0)
 		{
@@ -2094,7 +2095,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			trim(path);
 			trim(name);
 			r = _ConCmdCreateFile(path, name);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "deldir") == 0)
 		{
@@ -2102,7 +2103,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
 			r = _ConCmdDeleteDir(path);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "deldirs") == 0)
 		{
@@ -2110,7 +2111,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
 			r = _ConCmdDeleteDirRecursively(path);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "delfile") == 0)
 		{
@@ -2118,7 +2119,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
 			r = _ConCmdDeleteFile(path);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "rndir") == 0)
 		{
@@ -2129,7 +2130,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			trim(path);
 			trim(new_name);
 			r = _ConCmdRenameDir(path, new_name);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "rnfile") == 0)
 		{
@@ -2140,7 +2141,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			trim(path);
 			trim(new_name);
 			r = _ConCmdRenameFile(path, new_name);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "files") == 0)
 		{
@@ -2173,7 +2174,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			}
 			if(!err)
 				r = _ConCmdShowFileInfo(path, simple, part);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "cd") == 0)
 		{
@@ -2181,7 +2182,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			_PARSE_COMMAND(NULL, path, MAX_PATH_LEN);
 			trim(path);
 			r = _ConCmdChangeDir(path);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "cpfile") == 0)
 		{
@@ -2192,14 +2193,14 @@ _ConExecuteCommand(	IN int8 * cmd,
 			_PARSE_COMMAND(NULL, dst_path, MAX_PATH_LEN);
 			_PARSE_COMMAND(NULL, dst_name, MAX_FILENAME_LEN);
 			r = _ConCmdCopyFile(src_path, dst_path, dst_name);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "kill") == 0)
 		{
 			int8 tid_s[30];
 			_PARSE_COMMAND(NULL, tid_s, 29);
 			r = _ConCmdKillTask(tid_s);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "tasks") == 0)
 		{
@@ -2221,7 +2222,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			}
 			if(!err)
 				r = _ConCmdShowTaskInfo(part);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "run") == 0)
 		{
@@ -2230,7 +2231,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];
 			int8 path[1024];
-			get_var_value_with_size(global_vars_s,
+			KnlGetVarValueWithSize(global_vars_s,
 									"__path__",
 									buffer,
 									10 * 1024);
@@ -2249,14 +2250,14 @@ _ConExecuteCommand(	IN int8 * cmd,
 		}
 		else if(strcmp(name, "clear") == 0)
 		{
-			clear_screen();
+			ScrClearScreen();
 			r = 1;
 		}
 		else if(strcmp(name, "help") == 0 || strcmp(name, "?") == 0)
 		{
 			_ConCmdShowHelpInfo();
 			r = 1;
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "reboot") == 0)
 			_ConCmdReboot();
@@ -2266,12 +2267,12 @@ _ConExecuteCommand(	IN int8 * cmd,
 		{
 			_PARSE_COMMAND(NULL, word, 1023);
 			r = _ConCmdChangeVideoMode(word);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "cpuid") == 0)
 		{
 			r = _ConCmdShowCpuInfo();
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "set") == 0)
 		{
@@ -2280,14 +2281,14 @@ _ConExecuteCommand(	IN int8 * cmd,
 			_PARSE_COMMAND(NULL, property, 1023);
 			_PARSE_COMMAND(NULL, value, 1023);
 			r = _ConCmdSetProperty(property, value);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "flushlog") == 0)
 		{
-			write_log_to_disk();
-			clear_log();
+			LogWriteToDisk();
+			LogClear();
 			r = 1;
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "mkslink") == 0)
 		{
@@ -2298,21 +2299,21 @@ _ConExecuteCommand(	IN int8 * cmd,
 			_PARSE_COMMAND(NULL, name, 1023);
 			_PARSE_COMMAND(NULL, link, 1023);
 			r = _ConCmdCreateSLink(path, name, link);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "delslink") == 0)
 		{
 			int8 path[1024];
 			_PARSE_COMMAND(NULL, path, 1023);
 			r = _ConCmdDeleteSLink(path);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "slink") == 0)
 		{
 			int8 path[1024];
 			_PARSE_COMMAND(NULL, path, 1023);
 			r = _ConCmdShowSLinkTarget(path);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 
 		else if(strcmp(name, "hash") == 0)
@@ -2325,7 +2326,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			int8 text[1024];
 			_PARSE_COMMAND(NULL, text, 1023);
 
-			print_str_p("MD5:    ", CC_GREEN);
+			ScrPrintStringWithProperty("MD5:    ", CC_GREEN);
 			Md5Context md5_context;
 			MD5_HASH md5_hash;
 			Md5Initialise(&md5_context);
@@ -2334,9 +2335,9 @@ _ConExecuteCommand(	IN int8 * cmd,
 			uint32 ui;
 			for(ui = 0; ui < MD5_HASH_SIZE; ui++)
 				printuchex(md5_hash.bytes[ui]);
-			print_str("\n");
+			ScrPrintString("\n");
 
-			print_str_p("SHA1:   ", CC_GREEN);
+			ScrPrintStringWithProperty("SHA1:   ", CC_GREEN);
 			Sha1Context sha1_context;
 			SHA1_HASH sha1_hash;
 			Sha1Initialise(&sha1_context);
@@ -2344,9 +2345,9 @@ _ConExecuteCommand(	IN int8 * cmd,
 			Sha1Finalise(&sha1_context, &sha1_hash);
 			for(ui = 0; ui < SHA1_HASH_SIZE; ui++)
 				printuchex(sha1_hash.bytes[ui]);
-			print_str("\n");
+			ScrPrintString("\n");
 
-			print_str_p("SHA256: ", CC_GREEN);
+			ScrPrintStringWithProperty("SHA256: ", CC_GREEN);
 			Sha256Context sha256_context;
 			SHA256_HASH sha256_hash;
 			Sha256Initialise(&sha256_context);
@@ -2354,9 +2355,9 @@ _ConExecuteCommand(	IN int8 * cmd,
 			Sha256Finalise(&sha256_context, &sha256_hash);
 			for(ui = 0; ui < SHA256_HASH_SIZE; ui++)
 				printuchex(sha256_hash.bytes[ui]);
-			print_str("\n");
+			ScrPrintString("\n");
 
-			print_str_p("SHA512: ", CC_GREEN);
+			ScrPrintStringWithProperty("SHA512: ", CC_GREEN);
 			Sha512Context sha512_context;
 			SHA512_HASH sha512_hash;
 			Sha512Initialise(&sha512_context);
@@ -2364,7 +2365,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			Sha512Finalise(&sha512_context, &sha512_hash);
 			for(ui = 0; ui < SHA512_HASH_SIZE; ui++)
 				printuchex(sha512_hash.bytes[ui]);
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 
 		else if(strcmp(name, "serial") == 0)
@@ -2372,17 +2373,17 @@ _ConExecuteCommand(	IN int8 * cmd,
 			#include "serial.h"
 			
 			int8 * text = "ISystem II x86\0";
-			serial_write_buffer(PORT_COM1, text, strlen(text) + 1);
+			SrlWriteBuffer(PORT_COM1, text, strlen(text) + 1);
 			
 			while(TRUE)
-				if(serial_has_data(PORT_COM1))
+				if(SrlHasData(PORT_COM1))
 				{
 					int8 c;
-					serial_read(PORT_COM1, &c);
-					print_char(c);
+					SrlRead(PORT_COM1, &c);
+					ScrPrintChar(c);
 				}
 
-			print_str("\n");
+			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "message") == 0)
 		{
@@ -2449,10 +2450,10 @@ _ConExecuteCommand(	IN int8 * cmd,
 					vars_s = local_vars_s;
 				else if(var_name[0] == '@')
 					vars_s = global_vars_s;
-				if(new_var(vars_s, var_name + 1))
+				if(KnlNewVar(vars_s, var_name + 1))
 				{
 					_PARSE_COMMAND_WITHOUT_VAR(NULL, var_value, MAX_VAR_VALUE_LEN);
-					if(set_var_value(vars_s, var_name + 1, var_value))
+					if(KnlSetVarValue(vars_s, var_name + 1, var_value))
 						r = 1;
 					else
 						r = 0;
@@ -2570,9 +2571,9 @@ _ConExecuteCommand(	IN int8 * cmd,
 				return 0;
 			struct Vars * vars_s = NULL;
 			if(result[0] == '$')
-				set_var_value(local_vars_s, result + 1, stack[stack_top--]);
+				KnlSetVarValue(local_vars_s, result + 1, stack[stack_top--]);
 			else if(result[0] == '@')
-				set_var_value(global_vars_s, result + 1, stack[stack_top--]);
+				KnlSetVarValue(global_vars_s, result + 1, stack[stack_top--]);
 			else if(result[0] == ':' && n_r != 0.0)
 			{
 				uint32 ui;
@@ -2609,7 +2610,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];
 			int8 path[1024];
-			get_var_value_with_size(global_vars_s,
+			KnlGetVarValueWithSize(global_vars_s,
 									"__path__",
 									buffer,
 									10 * 1024);
@@ -2631,7 +2632,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];
 			int8 path[1024];
-			get_var_value_with_size(global_vars_s,
+			KnlGetVarValueWithSize(global_vars_s,
 									"__path__",
 									buffer,
 									10 * 1024);
@@ -2654,7 +2655,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 			BOOL ran = FALSE;
 			int8 buffer[10 * 1024];
 			int8 path[1024];
-			get_var_value_with_size(global_vars_s,
+			KnlGetVarValueWithSize(global_vars_s,
 									"__path__",
 									buffer,
 									10 * 1024);
@@ -2678,7 +2679,7 @@ _ConExecuteCommand(	IN int8 * cmd,
 	{
 		// 这里加锁是因为检测任务是否还可用时不被打断，否则总是会出奇怪的问题。
 		lock();
-		struct Task * task = get_task_info_ptr(wait_app_tid);
+		struct Task * task = TskmgrGetTaskInfoPtr(wait_app_tid);
 		if(task == NULL)
 			wait_app_tid = -1;
 		unlock();
@@ -2704,30 +2705,30 @@ _ConExecuteInitBatchScript(void)
 {
 	int8 buffer[100];
 	//__video_mode__
-	new_var(global_vars_s, "__video_mode__");
-	if(!vesa_is_valid())
-		set_var_value(global_vars_s, "__video_mode__", "text");
+	KnlNewVar(global_vars_s, "__video_mode__");
+	if(!VesaIsEnabled())
+		KnlSetVarValue(global_vars_s, "__video_mode__", "text");
 	else	
 	{
-		uint32 width = vesa_get_width();
-		uint32 height = vesa_get_height();
+		uint32 width = VesaGetWidth();
+		uint32 height = VesaGetHeight();
 		if(width == 640 && height == 480)
-			set_var_value(global_vars_s, "__video_mode__", "vesa640_480");
+			KnlSetVarValue(global_vars_s, "__video_mode__", "vesa640_480");
 		else if(width == 800 && height == 600)
-			set_var_value(global_vars_s, "__video_mode__", "vesa800_600");
+			KnlSetVarValue(global_vars_s, "__video_mode__", "vesa800_600");
 		else if(width == 1024 && height == 768)
-			set_var_value(global_vars_s, "__video_mode__", "vesa1024_768");
+			KnlSetVarValue(global_vars_s, "__video_mode__", "vesa1024_768");
 		else if(width == 1280 && height == 1024)
-			set_var_value(global_vars_s, "__video_mode__", "vesa1280_1024");
+			KnlSetVarValue(global_vars_s, "__video_mode__", "vesa1280_1024");
 	}
 
 	//__master_ver__
-	new_var(global_vars_s, "__master_ver__");
-	set_var_value(global_vars_s, "__master_ver__", MASTER_VER);
+	KnlNewVar(global_vars_s, "__master_ver__");
+	KnlSetVarValue(global_vars_s, "__master_ver__", MASTER_VER);
 
 	//__slave_ver__
-	new_var(global_vars_s, "__slave_ver__");
-	set_var_value(global_vars_s, "__slave_ver__", SLAVE_VER);
+	KnlNewVar(global_vars_s, "__slave_ver__");
+	KnlSetVarValue(global_vars_s, "__slave_ver__", SLAVE_VER);
 
 	_ConExecuteBatchScript(SYSTEM_INIT_BAT);
 }
@@ -2744,9 +2745,9 @@ void
 ConEnterConsole(void)
 {	
 	int8 command[1024];
-	global_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
+	global_vars_s = KnlAllocVarList(BATCH_MAX_VARS_COUNT);
 	struct Vars * local_vars_s;
-	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
+	local_vars_s = KnlAllocVarList(BATCH_MAX_VARS_COUNT);
 	_ConExecuteInitBatchScript();
 	BOOL bvalue = FALSE;
 	if(config_system_console_get_bool("ShowVerInfoWhenBoot", &bvalue) && bvalue)
@@ -2754,19 +2755,19 @@ ConEnterConsole(void)
 	if(config_system_console_get_bool("ShowDiskInfoWhenBoot", &bvalue) && bvalue)
 	{
 		_ConCmdShowDiskInfo();
-		print_str("\n");
+		ScrPrintString("\n");
 	}
 	if(config_system_console_get_bool("ShowMemoryInfoWhenBoot", &bvalue) && bvalue)
 	{
 		_ConCmdShowMemoryInfo();
-		print_str("\n");
+		ScrPrintString("\n");
 	}
 	if(config_system_console_get_bool("ShowCPUInfoWhenBoot", &bvalue) && bvalue)
 	{
 		_ConCmdShowCpuInfo();
-		print_str("\n");
+		ScrPrintString("\n");
 	}
-	print_str("\n");
+	ScrPrintString("\n");
 
 	while(1)
 	{
@@ -2774,12 +2775,12 @@ ConEnterConsole(void)
 		if(strcmp(current_path, "") == 0)
 		{
 			UtlCopyString(prompt, sizeof(prompt), promptns);
-			print_str_p(prompt, promptns_color);
+			ScrPrintStringWithProperty(prompt, promptns_color);
 		}
 		else
 		{
 			sprintf_s(prompt, sizeof(prompt), prompts, current_path);
-			print_str_p(prompt, prompts_color);
+			ScrPrintStringWithProperty(prompt, prompts_color);
 		}
 		get_strn(command, 1023);
 		_ConExecuteCommand(command, NULL, 0, 0, local_vars_s);
@@ -2800,21 +2801,21 @@ ConUpdateClock(void)
 	if(enable_clock)
 	{
 		//YYYY-MM-DD WWWWWWWWW HH:NN
-		lock_cursor();
+		ScrLockConsoleCursor();
 		uint32 ui;
 		uint16 max_chars = 26;
 		uint16 startx = COLUMN - max_chars;	
 		uint16 x, y;
-		get_cursor(&x, &y);
-		set_cursor_pos(startx, 0);
+		ScrGetConsoleCursor(&x, &y);
+		ScrSetConsoleCursorPosition(startx, 0);
 		for(ui = 0; ui < max_chars; ui++)
-			print_str(" ");
-		set_cursor_pos(startx, 0);
+			ScrPrintString(" ");
+		ScrSetConsoleCursorPosition(startx, 0);
 		_ConCmdShowDate();
-		print_str(" ");
+		ScrPrintString(" ");
 		_ConCmdShowTime(0);
-		set_cursor_pos(x, y);
-		unlock_cursor();
+		ScrSetConsoleCursorPosition(x, y);
+		ScrUnlockConsoleCursor();
 	}
 }
 
@@ -2939,11 +2940,11 @@ int32
 ConExecuteCommand(IN CASCTEXT cmd)
 {
 	struct Vars * local_vars_s = NULL;
-	local_vars_s = alloc_vars(BATCH_MAX_VARS_COUNT);
+	local_vars_s = KnlAllocVarList(BATCH_MAX_VARS_COUNT);
 	if(local_vars_s == NULL)
 		goto err;
 	int32 r = _ConExecuteCommand(cmd, NULL, 0, 0, local_vars_s);
-	free_vars(local_vars_s);
+	KnlFreeVarList(local_vars_s);
 	return r;
 err:
 	return 0;

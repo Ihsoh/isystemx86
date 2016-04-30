@@ -62,7 +62,7 @@ _WinTskmgrGetTasks(OUT uint32 * count)
 		return NULL;
 	int32 i;
 	for(i = 0; i < MAX_TASK_COUNT; i++)
-		if(get_task_info_ptr(i) != NULL)
+		if(TskmgrGetTaskInfoPtr(i) != NULL)
 			tasks[(*count)++] = i;
 	return tasks;
 }
@@ -143,7 +143,7 @@ void
 _WinTskmgrEvent(IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	switch(params->event_type)
 	{
 		case WINDOW_EVENT_PAINT:
@@ -210,21 +210,23 @@ _WinTskmgrRPadString(IN OUT ASCTEXT text)
 void
 WinTskmgrInit(void)
 {
-	_window = create_window(_WIDTH, _HEIGHT,
-							0xff222222,
-							WINDOW_STYLE_CLOSE
-								| WINDOW_STYLE_MINIMIZE
-								| WINDOW_STYLE_NO_WMGR,
-							_TITLE,
-							_WinTskmgrEvent);
+	_window = ScrCreateWindow(
+		_WIDTH, _HEIGHT,
+		0xff222222,
+		WINDOW_STYLE_CLOSE
+			| WINDOW_STYLE_MINIMIZE
+			| WINDOW_STYLE_NO_WMGR,
+		_TITLE,
+		_WinTskmgrEvent);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xffffffff);
 	_lst_taskmgr = NEW(List);
-	CtrlListInit(	_lst_taskmgr, 0,
-				_ITEM_COUNT,
-				0, 0,
-				"",
-				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_WinTskmgrControlEvent);
+	CtrlListInit(
+		_lst_taskmgr, 0,
+		_ITEM_COUNT,
+		0, 0,
+		"",
+		0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
+		_WinTskmgrControlEvent);
 	ASCCHAR text[MAX_BUTTON_TEXT_LEN + 1];
 	UtlCopyString(text, sizeof(text), "Up");
 	_WinTskmgrRPadString(text);
@@ -257,7 +259,7 @@ WinTskmgrShow(void)
 	if(_window == NULL)
 		return;
 	_window->state = WINDOW_STATE_SHOW;
-	set_top_window(_window);
+	ScrSetTopWindow(_window);
 	WinWmgrUpdate(0);
 }
 
@@ -302,7 +304,7 @@ WinTskmgrUpdate(IN uint32 offset)
 			int32 tid = tasks[tindex];
 			itos(title, tid);
 			UtlConcatString(title, sizeof(title), "# ");
-			struct Task * task = get_task_info_ptr(tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(tid);
 			if(task != NULL)
 			{
 				UtlConcatString(title, sizeof(title), task->name);

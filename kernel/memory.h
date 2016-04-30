@@ -32,65 +32,61 @@ struct MemoryBlockDescriptor
 
 extern
 void
-copy_memory(IN uint8 * src,
-			OUT uint8 * dst,
-			IN uint32 length);
+MemCopy(IN uint8 * src,
+		OUT uint8 * dst,
+		IN uint32 length);
 
 extern
 void
-clear_memory(	OUT uint8 * dst,
-				IN uint8 data,
-				IN uint32 len);
+MemClear(	OUT uint8 * dst,
+			IN uint8 data,
+			IN uint32 len);
 
 extern
 void
-init_memory(void);
+MemInit(void);
 
 extern
 void
-get_mbdt_info(	OUT uint32 * total_mbd_count,
-				OUT uint32 * used_mbd_count,
-				OUT uint32 * m_size);
+MemGetMBDTableInfo(	OUT uint32 * total_mbd_count,
+					OUT uint32 * used_mbd_count,
+					OUT uint32 * m_size);
 
 extern
 void
-get_umbdt_info(	OUT uint32 * total_umbd_count,
-				OUT uint32 * used_umbd_count,
-				OUT uint32 * m_size);
+MemGetUsedMBDTableInfo(	OUT uint32 * total_umbd_count,
+						OUT uint32 * used_umbd_count,
+						OUT uint32 * m_size);
 
 extern
 uint32
-align_4kb(IN uint32 n);
+MemAlign4KB(IN uint32 n);
 
 extern
 uint64
-get_used_memory_length(void);
+MemGetUsedLength(void);
 
 extern
 void *
-alloc_memory_with_start(IN uint32 m_start,
-						IN uint32 length);
+MemAllocWithStart(	IN uint32 m_start,
+					IN uint32 length);
 
 extern
 void *
-alloc_memory(IN uint32 length);
+MemAlloc(IN uint32 length);
 
-#define NEW(_t) 		((_t *)alloc_memory(sizeof(_t)))
-#define NEWC(_t, _c)	((_t *)alloc_memory(sizeof(_t) * (_c)))
-
-extern
-void *
-alloc_memory_unsafe(IN uint length);
+#define NEW(_t) 		((_t *)MemAlloc(sizeof(_t)))
+#define NEWC(_t, _c)	((_t *)MemAlloc(sizeof(_t) * (_c)))
 
 extern
 BOOL
-free_memory(IN void * address);
+MemFree(IN void * address);
 
-#define DELETE(_p)		(free_memory((_p)))
+#define DELETE(_p)		(MemFree((_p)))
 
 extern
 uint32
-get_memory_block_size(IN void * ptr);
+MemGetBlockSise(IN void * ptr);
 
 DEFINE_LOCK_EXTERN(memory)
 

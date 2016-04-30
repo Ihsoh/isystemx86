@@ -29,9 +29,9 @@ struct RSDPDescriptor2_0
 } __attribute__((packed));
 
 BOOL
-rsdp_init(void);
+RsdpInit(void);
 
 struct RSDPDescriptor2_0 *
-rsdp_get_desc(void);
+RsdpGetDesc(void);
 
 #endif

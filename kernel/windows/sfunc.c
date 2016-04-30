@@ -52,7 +52,7 @@ _WinSfuncEvent(struct Window * window, struct WindowEventParams * params)
 								strlen("Clock") * ENFONT_WIDTH, 
 								ENFONT_HEIGHT, 
 								0xffbbbbbb);
-			if(is_mouse_left_button_down())
+			if(KnlIsMouseLeftButtonDown())
 				WinClockShow();
 		}		
 		else
@@ -65,7 +65,7 @@ _WinSfuncEvent(struct Window * window, struct WindowEventParams * params)
 		text_common_image(	screen, 
 							20, 
 							20, 
-							get_enfont_ptr(), 
+							EnfntGetFontDataPtr(), 
 							"Clock", 
 							strlen("Clock"), 
 							0xff000000);
@@ -83,7 +83,7 @@ _WinSfuncEvent(struct Window * window, struct WindowEventParams * params)
 								strlen("Console") * ENFONT_WIDTH, 
 								ENFONT_HEIGHT, 
 								0xffbbbbbb);
-			if(is_mouse_left_button_down())
+			if(KnlIsMouseLeftButtonDown())
 				WinConsoleShow();
 		}		
 		else
@@ -96,7 +96,7 @@ _WinSfuncEvent(struct Window * window, struct WindowEventParams * params)
 		text_common_image(	screen, 
 							20, 
 							40, 
-							get_enfont_ptr(), 
+							EnfntGetFontDataPtr(), 
 							"Console", 
 							strlen("Console"), 
 							0xff000000);
@@ -116,7 +116,7 @@ _WinSfuncEvent(struct Window * window, struct WindowEventParams * params)
 BOOL
 WinSfuncInit(void)
 {
-	sfunc_window = create_window(	320, 
+	sfunc_window = ScrCreateWindow(	320, 
 									200, 
 									0xffffffff, 
 									WINDOW_STYLE_MINIMIZE, 

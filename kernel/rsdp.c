@@ -15,7 +15,7 @@ static struct RSDPDescriptor2_0 rsdp;
 static BOOL is_inited = FALSE;
 
 /**
-	@Function:		rsdp_init
+	@Function:		RsdpInit
 	@Access:		Public
 	@Description:
 		初始化 RSDP。
@@ -25,7 +25,7 @@ static BOOL is_inited = FALSE;
 			初始化成功则返回 TRUE，否则返回 FALSE。
 */
 BOOL
-rsdp_init(void)
+RsdpInit(void)
 {
 	if(is_inited)
 		return TRUE;
@@ -45,7 +45,7 @@ rsdp_init(void)
 }
 
 /**
-	@Function:		rsdp_get_desc
+	@Function:		RsdpGetDesc
 	@Access:		Public
 	@Description:
 		获取 RSDP。
@@ -55,7 +55,7 @@ rsdp_init(void)
 			成功返回 RSDP，否则返回 NULL。		
 */
 struct RSDPDescriptor2_0 *
-rsdp_get_desc(void)
+RsdpGetDesc(void)
 {
 	if(is_inited)
 		return &rsdp;

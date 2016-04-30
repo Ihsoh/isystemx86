@@ -101,14 +101,14 @@ _CtrlEditInit(	OUT EditPtr edit,
 
 	// 创建内容缓冲区。
 	uint32 ui;
-	edit->content_buffer = (ASCCHAR *)alloc_memory(MAX_ROW * MAX_COLUMN);
+	edit->content_buffer = (ASCCHAR *)MemAlloc(MAX_ROW * MAX_COLUMN);
 	if(edit->content_buffer == NULL)
 		return FALSE;
 	for(ui = 0; ui < MAX_ROW * MAX_COLUMN; ui++)
 		edit->content_buffer[ui] = '\0';
 
 	// 创建显示缓冲区。
-	edit->screen_buffer = (uint8 *)alloc_memory(edit->scr_row * edit->scr_column * 2);
+	edit->screen_buffer = (uint8 *)MemAlloc(edit->scr_row * edit->scr_column * 2);
 	if(edit->screen_buffer == NULL)
 		return FALSE;
 	for(ui = 0; ui < edit->scr_row * edit->scr_column * 2; ui++)
@@ -134,9 +134,9 @@ _CtrlEditUninit(IN EditPtr edit)
 	if(edit == NULL)
 		return;
 	if(edit->content_buffer != NULL)
-		free_memory(edit->content_buffer);
+		MemFree(edit->content_buffer);
 	if(edit->screen_buffer != NULL)
-		free_memory(edit->screen_buffer);
+		MemFree(edit->screen_buffer);
 }
 
 /**
@@ -397,7 +397,7 @@ _CtrlEditRender(IN EditPtr edit,
 				IN OUT ImagePtr image)
 {
 	_CtrlEditFlush(edit);
-	render_text_buffer_ex(	image,
+	ScrRenderTextBufferEx(	image,
 							edit->x,
 							edit->y,
 							edit->screen_buffer,
@@ -518,21 +518,21 @@ CtrlEditUpdate(	IN OUT EditPtr edit,
 						width, height)
 		&& edit->enabled)
 	{
-		if(is_mouse_left_button_down())
+		if(KnlIsMouseLeftButtonDown())
 		{
-			window_clear_key(window);
-			window_focus_ctrl(window, edit->id);
+			WinmgrClearKeyBuffer(window);
+			WinmgrFocusControl(window, edit->id);
 		}
 	}
 	BOOL changed = FALSE;
 	if(window->focused_ctrl == edit->id)
-		while(window_has_key(window))
+		while(WINMGR_HAS_KEY(window))
 		{
-			uint8 chr = window_get_key(window);
+			uint8 chr = WinmgrGetKey(window);
 			if(chr == KEY_EXT)
 			{
-				while(!window_has_key(window));
-				uint8 chr1 = window_get_key(window);
+				while(!WINMGR_HAS_KEY(window));
+				uint8 chr1 = WinmgrGetKey(window);
 				_CtrlEditUpdate(edit, chr, chr1);
 			}
 			else

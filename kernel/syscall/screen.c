@@ -42,7 +42,7 @@ _ScScrProcess(	IN uint32 func,
 		//	Param0=字符
 		case SCALL_PRINT_CHAR:
 		{
-			print_char(INT8_SPARAM(sparams->param0));
+			ScrPrintChar(INT8_SPARAM(sparams->param0));
 			break;
 		}
 		//打印一个字符. 并指定属性
@@ -52,7 +52,7 @@ _ScScrProcess(	IN uint32 func,
 		//	Param1=属性
 		case SCALL_PRINT_CHAR_P:
 		{		
-			print_char_p(INT8_SPARAM(sparams->param0), UINT8_SPARAM(sparams->param1));
+			ScrPrintCharWithProperty(INT8_SPARAM(sparams->param0), UINT8_SPARAM(sparams->param1));
 			break;
 		}		
 		//打印字符串
@@ -61,8 +61,10 @@ _ScScrProcess(	IN uint32 func,
 		//	Param0=缓冲区地址(相对于调用程序空间的偏移地址)
 		case SCALL_PRINT_STR:
 		{
-			const int8 * str = (const int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			print_str(str);
+			const int8 * str = (const int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
+			ScrPrintString(str);
 			break;
 		}		
 		//打印字符串. 并指定属性
@@ -72,15 +74,17 @@ _ScScrProcess(	IN uint32 func,
 		//	Param1=属性
 		case SCALL_PRINT_STR_P:
 		{
-			const int8 * str = (const int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			print_str_p(str, UINT8_SPARAM(sparams->param1));
+			const int8 * str = (const int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
+			ScrPrintStringWithProperty(str, UINT8_SPARAM(sparams->param1));
 			break;
 		}
 		//清屏
 		//
 		case SCALL_CLEAR_SCREEN:
 		{
-			clear_screen();
+			ScrClearScreen();
 			break;
 		}		
 		//设置光标位置
@@ -90,7 +94,7 @@ _ScScrProcess(	IN uint32 func,
 		//	Param1=Y
 		case SCALL_SET_CURSOR:
 		{		
-			set_cursor(UINT16_SPARAM(sparams->param0), UINT16_SPARAM(sparams->param1));
+			ScrSetConsoleCursor(UINT16_SPARAM(sparams->param0), UINT16_SPARAM(sparams->param1));
 			break;
 		}
 		//读取光标位置
@@ -101,7 +105,7 @@ _ScScrProcess(	IN uint32 func,
 		case SCALL_GET_CURSOR:
 		{
 			uint16 x, y;
-			get_cursor(&x, &y);
+			ScrGetConsoleCursor(&x, &y);
 			sparams->param0 = SPARAM(x);
 			sparams->param1 = SPARAM(y);
 			break;
@@ -112,7 +116,7 @@ _ScScrProcess(	IN uint32 func,
 		//	Param0=1为可用, 否则不可用
 		case SCALL_VESA_IS_VALID:
 		{
-			BOOL r = vesa_is_valid();
+			BOOL r = VesaIsEnabled();
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -123,8 +127,8 @@ _ScScrProcess(	IN uint32 func,
 		//	Param1=高度
 		case SCALL_GET_SCREEN_SIZE:
 		{
-			uint32 width = vesa_get_width();
-			uint32 height = vesa_get_height();
+			uint32 width = VesaGetWidth();
+			uint32 height = VesaGetHeight();
 			sparams->param0 = SPARAM(width);
 			sparams->param1 = SPARAM(height);
 			break;
@@ -139,7 +143,7 @@ _ScScrProcess(	IN uint32 func,
 			uint32 x = UINT32_SPARAM(sparams->param0);
 			uint32 y = UINT32_SPARAM(sparams->param1);
 			uint32 color = UINT32_SPARAM(sparams->param2);
-			vesa_set_pixel(x, y, color);
+			VesaSetPixel(x, y, color);
 			break;
 		}
 		//获取屏幕像素
@@ -153,7 +157,7 @@ _ScScrProcess(	IN uint32 func,
 		{
 			uint32 x = UINT32_SPARAM(sparams->param0);
 			uint32 y = UINT32_SPARAM(sparams->param1);
-			uint32 pixel = vesa_get_pixel(x, y);
+			uint32 pixel = VesaGetPixel(x, y);
 			sparams->param0 = SPARAM(pixel);
 			break;
 		}
@@ -171,8 +175,10 @@ _ScScrProcess(	IN uint32 func,
 			uint32 y = UINT32_SPARAM(sparams->param1);
 			uint32 width = UINT32_SPARAM(sparams->param2);
 			uint32 height = UINT32_SPARAM(sparams->param3);
-			uint32 * image = UINT32_PTR_SPARAM(get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param4)));
-			vesa_draw_image(x, y, width, height, image);
+			uint32 * image = UINT32_PTR_SPARAM(TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param4)));
+			VesaDrawImage(x, y, width, height, image);
 			break;
 		}
 		//获取文本屏幕的列数和行数
@@ -192,33 +198,35 @@ _ScScrProcess(	IN uint32 func,
 		//
 		case SCALL_LOCK_CURSOR:
 		{
-			lock_cursor();
+			ScrLockConsoleCursor();
 			break;
 		}
 		//解锁光标
 		//
 		case SCALL_UNLOCK_CURSOR:
 		{
-			unlock_cursor();
+			ScrUnlockConsoleCursor();
 			break;
 		}
 		case SCALL_SET_TARGET_SCREEN:
 		{
 			if(target_screen != NULL)
-				free_memory(target_screen);
-			struct CommonImage * ts = get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+				MemFree(target_screen);
+			struct CommonImage * ts = TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			if(ts == NULL)
 			{
 				target_screen = NULL;				
-				clear_screen();			
+				ScrClearScreen();			
 			}			
 			else
 			{				
-				struct CommonImage * new = alloc_memory(sizeof(struct CommonImage));
+				struct CommonImage * new = MemAlloc(sizeof(struct CommonImage));
 				memcpy(new, ts, sizeof(struct CommonImage));
-				new->data = get_physical_address(sparams->tid, new->data);
+				new->data = TaskmgrConvertLAddrToPAddr(sparams->tid, new->data);
 				target_screen = new;
-				clear_screen();
+				ScrClearScreen();
 			}	
 			break;
 		}
@@ -228,11 +236,11 @@ _ScScrProcess(	IN uint32 func,
 			uint32 height = UINT32_SPARAM(sparams->param1);
 			uint32 bgcolor = UINT32_SPARAM(sparams->param2);
 			uint32 style = UINT32_SPARAM(sparams->param3);
-			int8 * title = get_physical_address(sparams->tid, 
+			int8 * title = TaskmgrConvertLAddrToPAddr(sparams->tid, 
 												INT8_PTR_SPARAM(sparams->param4));
 			WindowEvent * event = NULL;
 			struct Window * window;
-			window = create_window(width, height, bgcolor, style, title, event);
+			window = ScrCreateWindow(width, height, bgcolor, style, title, event);
 			if(window == NULL)
 			{
 				uint32 id = 0;
@@ -245,7 +253,7 @@ _ScScrProcess(	IN uint32 func,
 		case SCALL_DESTROY_WINDOW:
 		{
 			uint32 id = UINT32_SPARAM(sparams->param0);
-			destroy_window((struct Window *)id);
+			ScrDestroyWindow((struct Window *)id);
 			break;
 		}
 		case SCALL_SHOW_WINDOW:
@@ -266,7 +274,7 @@ _ScScrProcess(	IN uint32 func,
 		{
 			uint32 id = UINT32_SPARAM(sparams->param0);
 			struct Window * window = (struct Window *)id;
-			uint8 key = window_get_key(window);
+			uint8 key = WinmgrGetKey(window);
 			sparams->param0 = SPARAM(key);
 			break;
 		}
@@ -275,11 +283,11 @@ _ScScrProcess(	IN uint32 func,
 			uint32 id = UINT32_SPARAM(sparams->param0);
 			struct Window * window = (struct Window *)id;
 			struct CommonImage * image;
-			image = get_physical_address(	sparams->tid, 
+			image = TaskmgrConvertLAddrToPAddr(	sparams->tid, 
 											VOID_PTR_SPARAM(sparams->param1));
 			struct CommonImage new;
 			memcpy(&new, image, sizeof(struct CommonImage));
-			new.data = get_physical_address(	sparams->tid, 
+			new.data = TaskmgrConvertLAddrToPAddr(	sparams->tid, 
 												VOID_PTR_SPARAM(new.data));
 			BOOL r = draw_common_image(&window->workspace, &new, 0, 0, new.width, new.height);
 			sparams->param0 = SPARAM(r);
@@ -291,7 +299,7 @@ _ScScrProcess(	IN uint32 func,
 		//	Param0=字符。
 		case SCALL_PRINT_ERR_CHAR:
 		{
-			print_err_char(INT8_SPARAM(sparams->param0));
+			ScrPrintCharToStderr(INT8_SPARAM(sparams->param0));
 			break;
 		}
 		//打印一个字符到标准错误。并指定属性。
@@ -301,7 +309,7 @@ _ScScrProcess(	IN uint32 func,
 		//	Param1=属性。
 		case SCALL_PRINT_ERR_CHAR_P:
 		{		
-			print_err_char_p(INT8_SPARAM(sparams->param0), UINT8_SPARAM(sparams->param1));
+			ScrPrintCharToStderrWithProperty(INT8_SPARAM(sparams->param0), UINT8_SPARAM(sparams->param1));
 			break;
 		}		
 		//打印字符串到标准错误。
@@ -310,8 +318,10 @@ _ScScrProcess(	IN uint32 func,
 		//	Param0=缓冲区地址(相对于调用程序空间的偏移地址)。
 		case SCALL_PRINT_ERR_STR:
 		{
-			const int8 * str = (const int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			print_err_str(str);
+			const int8 * str = (const int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
+			ScrPrintStringToStderr(str);
 			break;
 		}		
 		//打印字符串到标准错误。并指定属性。
@@ -321,24 +331,28 @@ _ScScrProcess(	IN uint32 func,
 		//	Param1=属性。
 		case SCALL_PRINT_ERR_STR_P:
 		{
-			const int8 * str = (const int8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
-			print_err_str_p(str, UINT8_SPARAM(sparams->param1));
+			const int8 * str = (const int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
+			ScrPrintStringToStderrWithProperty(str, UINT8_SPARAM(sparams->param1));
 			break;
 		}
 		//刷新屏幕。
 		//
 		case SCALL_FLUSH_SCREEN:
 		{
-			flush_screen();
+			ScrFlushScreen();
 			break;
 		}
 		//写控制台字符缓冲区。
 		//
 		case SCALL_WRITE_CONSOLE_BUFFER:
 		{
-			const uint8 * buffer = (const uint8 *)get_physical_address(sparams->tid, VOID_PTR_SPARAM(sparams->param0));
+			const uint8 * buffer = (const uint8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			uint32 size = UINT32_SPARAM(sparams->param1);
-			BOOL r = screen_write_console_buffer(buffer, size);
+			BOOL r = ScrWriteConsoleBuffer(buffer, size);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -346,17 +360,17 @@ _ScScrProcess(	IN uint32 func,
 		{
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param0);
-			vptr = get_physical_address(sparams->tid, vptr);
+			vptr = TaskmgrConvertLAddrToPAddr(sparams->tid, vptr);
 			Image image;
 			memcpy(&image, vptr, sizeof(Image));
-			image.data = (uint8 *)get_physical_address(sparams->tid, image.data);
+			image.data = (uint8 *)TaskmgrConvertLAddrToPAddr(sparams->tid, image.data);
 			vptr = VOID_PTR_SPARAM(sparams->param1);
-			uint8 * txtbuf = (uint8 *)get_physical_address(sparams->tid, vptr);
+			uint8 * txtbuf = (uint8 *)TaskmgrConvertLAddrToPAddr(sparams->tid, vptr);
 			uint32 row = UINT32_SPARAM(sparams->param2);
 			uint32 column = UINT32_SPARAM(sparams->param3);
 			uint32 curx = UINT32_SPARAM(sparams->param4);
 			uint32 cury = UINT32_SPARAM(sparams->param5);
-			BOOL r = render_text_buffer(&image, txtbuf, row, column, curx, cury);
+			BOOL r = ScrRenderTextBuffer(&image, txtbuf, row, column, curx, cury);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

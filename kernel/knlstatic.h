@@ -14,253 +14,253 @@
 
 static
 void
-reset_all_exceptions(void);
+_KnlResetAllExceptions(void);
 
 static
 void
-disk_va_init(void);
+_KnlInitDiskVA(void);
 
 static
 void *
-knl_lib_malloc(IN uint32 num_bytes);
+_KnlLibMalloc(IN uint32 num_bytes);
 
 static
 void *
-knl_lib_calloc(	IN uint32 n, 
+_KnlLibCalloc(	IN uint32 n, 
 				IN uint32 size);
 
 static
 void
-knl_lib_free(IN void * ptr);
+_KnlLibFree(IN void * ptr);
 
 static
 BOOL
-init_dsl(void);
+_KnlLibInitDSL(void);
 
 static
 BOOL
-init_jsonl(void);
+_KnlLibInitJson(void);
 
 static
 BOOL
-init_pathl(void);
+_KnlLibInitPath(void);
 
 static
 BOOL
-init_mempooll(void);
+_KnlLibInitMemPool(void);
 
 static
 void
-irq_ack(IN uint32 no);
+_KnlIrqAck(IN uint32 no);
 
 static
 void
-init_interrupt(void);
+_KnlInitInterrupt(void);
 
 static
 void
-fpu_error_int(void);
+_KnlFpuErrorInterrupt(void);
 
 static
 void
-fill_tss(	OUT struct TSS * tss, 
+_KnlFillTSS(OUT struct TSS * tss, 
 			IN uint32 eip,
 			IN uint32 esp);
 
 static
 void
-init_timer(void);
+_KnlInitTimer(void);
 
 static
 void
-init_mouse(void);
+_KnlInitMouse(void);
 
 static
 void
-init_keyboard(void);
+_KnlInitKeyboard(void);
 
 static
 void
-init_ide(void);
+_KnlInitIde(void);
 
 static
 void
-init_ide1(void);
+_KnlInitIde1(void);
 
 static
 void
-init_fpu(void);
+_KnlInitFpu(void);
 
 static
 void
-free_system_call_tss(void);
+_KnlFreeSystemCallTSS(void);
 
 static
 void
-free_task_tss(void);
+_KnlFreeTaskTSS(void);
 
 static
 void
-timer_int(void);
+_KnlTimerInterrupt(void);
 
 static
 void
-mouse_int(void);
+_KnlMouseInterrupt(void);
 
 static
 void
-keyboard_int(void);
+_KnlKeyboardInterrupt(void);
 
 static
 void
-ide_int(void);
+_KnlIdeInterrupt(void);
 
 static
 void
-ide1_int(void);
+_KnlIde1Interrupt(void);
 
 static
 void
-fpu_int(void);
+_KnlFpuInterrupt(void);
 
 static
 void
-init_system_call(void);
+_KnlInitSystemCall(void);
 
 static
 void
-system_call(void);
+_KnlProcessSystemCall(void);
 
 static
 void
-system_call_int(void);
+_KnlSystemCallInterrupt(void);
 
 static
 void
-kill_task_and_jump_to_kernel(IN uint32 tid);
+_KnlKillTaskAndJumpToKernel(IN uint32 tid);
 
 static
 void
-init_dividing_by_zero(void);
+_KnlInitDividingByZeroException(void);
 
 static
 void
-dividing_by_zero_int(void);
+_KnlDividingByZeroExceptionInterrupt(void);
 
 static
 void
-init_bound_check(void);
+_KnlInitBoundCheckException(void);
 
 static
 void
-bound_check_int(void);
+_KnlBoundCheckExceptionInterrupt(void);
 
 static
 void
-init_invalid_opcode(void);
+_KnlInitInvalidOpcodeException(void);
 
 static
 void
-invalid_opcode_int(void);
+_KnlInvalidOpcodeExceptionInterrupt(void);
 
 static
 void
-init_double_fault(void);
+_KnlInitDoubleFaultException(void);
 
 static
 void
-double_fault_int(void);
+_KnlDoubleFaultExceptionInterrupt(void);
 
 static
 void
-init_invalid_tss(void);
+_KnlInitInvalidTSSException(void);
 
 static
 void
-invalid_tss_int(void);
+_KnlInvalidTSSExceptionInterrupt(void);
 
 static
 void
-init_invalid_seg(void);
+_KnlInitInvalidSegmentException(void);
 
 static
 void
-invalid_seg_int(void);
+_KnlInvalidSegmentExceptionInterrupt(void);
 
 static
 void
-init_invalid_stack(void);
+_KnlInitInvalidStackException(void);
 
 static
 void
-invalid_stack_int(void);
+_KnlInvalidStackExceptionInterrupt(void);
 
 static
 void
-init_gp(void);
+_KnlInitGlobalProtectionException(void);
 
 static
 void
-gp_int(void);
+_KnlGlobalProtectionExceptionInterrupt(void);
 
 static
 void
-init_pf(void);
+_KnlInitPageFaultException(void);
 
 static
 void
-pf_int(void);
+_KnlPageFaultExceptionInterrupt(void);
 
 static
 void
-init_mf(void);
+_KnlInitMathFaultException(void);
 
 static
 void
-mf_int(void);
+_KnlMathFaultExceptionInterrupt(void);
 
 static
 void
-init_ac(void);
+_KnlInitAlignCheckException(void);
 
 static
 void
-ac_int(void);
+_KnlAlignCheckExceptionInterrupt(void);
 
 static
 void
-init_mc(void);
+_KnlInitMachineCheckException(void);
 
 static
 void
-mc_int(void);
+_KnlMachineCheckExceptionInterrupt(void);
 
 static
 void
-init_xf(void);
+_KnlInitSIMDFloatPointException(void);
 
 static
 void
-xf_int(void);
+_KnlSIMDFloatPointExceptionInterrupt(void);
 
 static
 void
-init_noimpl(void);
+_KnlInitUnimplementedInterruptException(void);
 
 static
 void
-set_noimpl(IN uint32 int_num);
+_KnlSetUnimplementedInterrupt(IN uint32 int_num);
 
 static
 void
-noimpl_int(void);
+_KnlUnimplementedInterrupt(void);
 
 static
 void
-enter_system(void);
+_KnlEnterSystem(void);
 
 static
 void
-leave_system(void);
+_KnlLeaveSystem(void);
 
 #endif

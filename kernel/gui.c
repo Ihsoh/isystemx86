@@ -44,7 +44,7 @@ typedef struct
 static DSLListPtr		_winstances = NULL;
 
 /**
-	@Function:		gui_init
+	@Function:		GuiInit
 	@Access:		Public
 	@Description:
 		初始化用户GUI模块。
@@ -54,7 +54,7 @@ static DSLListPtr		_winstances = NULL;
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_init(void)
+GuiInit(void)
 {
 	_winstances = dsl_lst_new();
 	if(_winstances == NULL)
@@ -63,7 +63,7 @@ gui_init(void)
 }
 
 /**
-	@Function:		gui_is_valid
+	@Function:		GuiIsEnabled
 	@Access:		Public
 	@Description:
 		检测用户GUI是否可用。
@@ -73,16 +73,16 @@ gui_init(void)
 			返回TRUE则可用，否则不可用。
 */
 BOOL
-gui_is_valid(void)
+GuiIsEnabled(void)
 {
-	if(vesa_is_valid())
+	if(VesaIsEnabled())
 		return TRUE;
 	else
 		return FALSE;
 }
 
 /**
-	@Function:		_window_event
+	@Function:		_GuiWindowEvent
 	@Access:		Private
 	@Description:
 		用户GUI的窗体的事件函数。
@@ -95,10 +95,10 @@ gui_is_valid(void)
 */
 static
 void
-_window_event(	IN struct Window * window,
+_GuiWindowEvent(IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	switch(params->event_type)
 	{
 		case WINDOW_EVENT_PAINT:
@@ -148,8 +148,8 @@ _window_event(	IN struct Window * window,
 			WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
 			if(winstance == NULL)
 				return;
-			gui_clear_messages(winstance->tid, window->uwid);
-			gui_push_message(	winstance->tid,
+			GuiClearMessages(winstance->tid, window->uwid);
+			GuiPushMessage(	winstance->tid,
 								window->uwid,
 								-1,
 								WINDOW_WILL_CLOSE,
@@ -161,7 +161,7 @@ _window_event(	IN struct Window * window,
 }
 
 /**
-	@Function:		gui_create_window
+	@Function:		GuiCreateWindow
 	@Access:		Public
 	@Description:
 		创建用户GUI的窗体。
@@ -183,24 +183,24 @@ _window_event(	IN struct Window * window,
 			用户GUI的窗体的ID。
 */
 int32
-gui_create_window(	IN int32		tid,
-					IN uint32		width,
-					IN uint32		height,
-					IN uint32		bgcolor,
-					IN uint32		style,
-					IN CASCTEXT		title)
+GuiCreateWindow(IN int32		tid,
+				IN uint32		width,
+				IN uint32		height,
+				IN uint32		bgcolor,
+				IN uint32		style,
+				IN CASCTEXT		title)
 {
 	lock();
 	WindowPtr window = NULL;
 	DSLLinkedListPtr messages = NULL;
 	DSLListPtr controls = NULL;
 	WindowInstancePtr winstance = NULL;
-	window = create_window(	width,
+	window = ScrCreateWindow(	width,
 							height,
 							bgcolor,
 							style,
 							title,
-							_window_event);
+							_GuiWindowEvent);
 	if(window == NULL)
 		goto err;
 	messages = dsl_lnklst_new();
@@ -209,7 +209,7 @@ gui_create_window(	IN int32		tid,
 	controls = dsl_lst_new();
 	if(controls == NULL)
 		goto err;
-	winstance = (WindowInstancePtr)alloc_memory(sizeof(WindowInstance));
+	winstance = (WindowInstancePtr)MemAlloc(sizeof(WindowInstance));
 	if(winstance == NULL)
 		goto err;
 	winstance->tid = tid;
@@ -233,13 +233,13 @@ gui_create_window(	IN int32		tid,
 	return wid;
 err:
 	if(window != NULL)
-		free_memory(window);
+		MemFree(window);
 	if(messages != NULL)
 		dsl_lnklst_free(messages);
 	if(controls != NULL)
 		dsl_lst_free(controls);
 	if(winstance != NULL)
-		free_memory(winstance);
+		MemFree(winstance);
 	unlock();
 	return -1;
 }
@@ -257,7 +257,7 @@ err:
 	ControlPtr control = (ControlPtr)DSL_OBJECTVAL(__v);
 
 /**
-	@Function:		gui_clear_messages
+	@Function:		GuiClearMessages
 	@Access:		Public
 	@Description:
 		清除指定窗体的消息队列。
@@ -271,21 +271,21 @@ err:
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_clear_messages(	IN int32 tid,
+GuiClearMessages(	IN int32 tid,
 					IN int32 wid)
 {
 	_WINSTANCE_FALSE
 	lock();
 	void * phyaddr_data = NULL;
-	while(gui_pop_message(tid, wid, NULL, NULL, NULL, &phyaddr_data))
+	while(GuiPopMessage(tid, wid, NULL, NULL, NULL, &phyaddr_data))
 		if(phyaddr_data != NULL)
-			free_memory(phyaddr_data);
+			MemFree(phyaddr_data);
 	unlock();
 	return TRUE;
 }
 
 /**
-	@Function:		gui_close_window
+	@Function:		GuiCloseWindow
 	@Access:		Public
 	@Description:
 		关闭指定窗体。
@@ -299,25 +299,25 @@ gui_clear_messages(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_close_window(	IN int32 tid,
-					IN int32 wid)
+GuiCloseWindow(	IN int32 tid,
+				IN int32 wid)
 {
 	_WINSTANCE_FALSE
 	lock();
-	destroy_window(winstance->window);
-	gui_clear_messages(tid, wid);
+	ScrDestroyWindow(winstance->window);
+	GuiClearMessages(tid, wid);
 	dsl_lnklst_free(winstance->messages);
 	dsl_lst_delete_all_object_value(winstance->controls);
 	dsl_lst_free(winstance->controls);
 	dsl_lst_set(_winstances, wid, NULL);
-	free_memory(winstance);
-	free_memory(__v);
+	MemFree(winstance);
+	MemFree(__v);
 	unlock();
 	return TRUE;
 }
 
 /**
-	@Function:		gui_close_windows
+	@Function:		GuiCloseWindows
 	@Access:		Public
 	@Description:
 		关闭指定任务的所有窗体。
@@ -327,7 +327,7 @@ gui_close_window(	IN int32 tid,
 	@Return:
 */
 void
-gui_close_windows(IN int32 tid)
+GuiCloseWindows(IN int32 tid)
 {
 	lock();
 	uint32 wid = 0;
@@ -339,14 +339,14 @@ gui_close_windows(IN int32 tid)
 		{
 			WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
 			if(winstance->tid == tid)
-				gui_close_window(tid, wid);
+				GuiCloseWindow(tid, wid);
 		}
 	}
 	unlock();
 }
 
 /**
-	@Function:		gui_set_window_state
+	@Function:		GuiSetWindowStatus
 	@Access:		Public
 	@Description:
 		设置窗体的状态。
@@ -362,9 +362,9 @@ gui_close_windows(IN int32 tid)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_set_window_state(	IN int32 tid,
-						IN int32 wid,
-						IN uint32 state)
+GuiSetWindowStatus(	IN int32 tid,
+					IN int32 wid,
+					IN uint32 state)
 {
 	_WINSTANCE_FALSE
 	winstance->window->state = state;
@@ -372,7 +372,7 @@ gui_set_window_state(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_window_state
+	@Function:		GuiGetWindowStatus
 	@Access:		Public
 	@Description:
 		获取窗体的状态。
@@ -388,9 +388,9 @@ gui_set_window_state(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_window_state(	IN int32 tid,
-						IN int32 wid,
-						OUT uint32 * state)
+GuiGetWindowStatus(	IN int32 tid,
+					IN int32 wid,
+					OUT uint32 * state)
 {
 	_WINSTANCE_FALSE
 	if(state == NULL)
@@ -400,7 +400,7 @@ gui_get_window_state(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_set_window_position
+	@Function:		GuiSetWindowPosition
 	@Access:		Public
 	@Description:
 		设置窗体的位置。
@@ -418,7 +418,7 @@ gui_get_window_state(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_set_window_position(IN int32 tid,
+GuiSetWindowPosition(	IN int32 tid,
 						IN int32 wid,
 						IN int32 x,
 						IN int32 y)
@@ -430,7 +430,7 @@ gui_set_window_position(IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_window_position
+	@Function:		GuiGetWindowPosition
 	@Access:		Public
 	@Description:
 		获取窗体的位置。
@@ -448,7 +448,7 @@ gui_set_window_position(IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_window_position(IN int32 tid,
+GuiGetWindowPosition(	IN int32 tid,
 						IN int32 wid,
 						OUT int32 * x,
 						OUT int32 * y)
@@ -462,7 +462,7 @@ gui_get_window_position(IN int32 tid,
 }
 
 /**
-	@Function:		gui_set_window_size
+	@Function:		GuiSetWindowSize
 	@Access:		Public
 	@Description:
 		设置窗体的大小。
@@ -480,7 +480,7 @@ gui_get_window_position(IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_set_window_size(IN int32 tid,
+GuiSetWindowSize(	IN int32 tid,
 					IN int32 wid,
 					IN uint32 width,
 					IN uint32 height)
@@ -494,7 +494,7 @@ gui_set_window_size(IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_window_size
+	@Function:		GuiGetWindowSize
 	@Access:		Public
 	@Description:
 		获取窗体的大小。
@@ -512,7 +512,7 @@ gui_set_window_size(IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_window_size(IN int32 tid,
+GuiGetWindowSize(	IN int32 tid,
 					IN int32 wid,
 					OUT uint32 * width,
 					OUT uint32 * height)
@@ -526,7 +526,7 @@ gui_get_window_size(IN int32 tid,
 }
 
 /**
-	@Function:		gui_set_window_title
+	@Function:		GuiSetWindowTitle
 	@Access:		Public
 	@Description:
 		设置窗体标题。
@@ -542,9 +542,9 @@ gui_get_window_size(IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_set_window_title(	IN int32 tid,
-						IN int32 wid,
-						IN CASCTEXT title)
+GuiSetWindowTitle(	IN int32 tid,
+					IN int32 wid,
+					IN CASCTEXT title)
 {
 	_WINSTANCE_FALSE
 	if(strlen(title) >= sizeof(winstance->window->title))
@@ -556,7 +556,7 @@ gui_set_window_title(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_window_title
+	@Function:		GuiGetWindowTitle
 	@Access:		Public
 	@Description:
 		获取窗体标题。
@@ -573,9 +573,9 @@ gui_set_window_title(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_window_title(	IN int32 tid,
-						IN int32 wid,
-						OUT ASCTEXT title)
+GuiGetWindowTitle(	IN int32 tid,
+					IN int32 wid,
+					OUT ASCTEXT title)
 {
 	_WINSTANCE_FALSE
 	if(title == NULL)
@@ -585,7 +585,7 @@ gui_get_window_title(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_has_key
+	@Function:		GuiHasKey
 	@Access:		Public
 	@Description:
 		检测窗体按键队列里是否包含按键。
@@ -602,16 +602,16 @@ gui_get_window_title(	IN int32 tid,
 			返回TRUE则代表按键队列有按键。
 */
 BOOL
-gui_has_key(IN int32 tid,
+GuiHasKey(	IN int32 tid,
 			IN int32 wid,
 			OUT uint32 * key)
 {
 	_WINSTANCE_FALSE
-	int32 count = window_has_key(winstance->window);
+	int32 count = WINMGR_HAS_KEY(winstance->window);
 	if(count > 0)
 	{
 		if(key != NULL)
-			*key = window_peek_key(winstance->window);
+			*key = WinmgrPeekKey(winstance->window);
 		return TRUE;
 	}
 	else
@@ -619,7 +619,7 @@ gui_has_key(IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_key
+	@Function:		GuiGetKey
 	@Access:		Public
 	@Description:
 		获取窗体按键队列里的按键。
@@ -636,17 +636,17 @@ gui_has_key(IN int32 tid,
 			返回TRUE则代表按键队列有按键。
 */
 BOOL
-gui_get_key(IN int32 tid,
+GuiGetKey(	IN int32 tid,
 			IN int32 wid,
 			OUT uint32 * key)
 {
 	_WINSTANCE_FALSE
 	if(key == NULL)
 		return FALSE;
-	int32 count = window_has_key(winstance->window);
+	int32 count = WINMGR_HAS_KEY(winstance->window);
 	if(count > 0)
 	{
-		*key = window_get_key(winstance->window);
+		*key = WinmgrGetKey(winstance->window);
 		return TRUE;
 	}
 	else
@@ -654,7 +654,7 @@ gui_get_key(IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_mouse
+	@Function:		GuiGetMouse
 	@Access:		Public
 	@Description:
 		获取鼠标信息。
@@ -674,7 +674,7 @@ gui_get_key(IN int32 tid,
 			返回TRUE则代表按键队列有按键。
 */
 BOOL
-gui_get_mouse(	IN int32 tid,
+GuiGetMouse(	IN int32 tid,
 				IN int32 wid,
 				OUT int32 * x,
 				OUT int32 * y,
@@ -686,22 +686,22 @@ gui_get_mouse(	IN int32 tid,
 	WindowPtr window = winstance->window;
 	uint32 wstyle = window->style;
 	BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
-	get_mouse_position(x, y);
+	KnlGetMousePosition(x, y);
 	*x = *x - window->x;
 	if(has_title_bar)
 		*y = *y - window->y - TITLE_BAR_HEIGHT;
 	else
 		*y = *y - window->y;
 	*button = MOUSE_BUTTON_NONE;
-	if(is_mouse_left_button_down())
+	if(KnlIsMouseLeftButtonDown())
 		*button |= MOUSE_BUTTON_LEFT;
-	if(is_mouse_right_button_down())
+	if(KnlIsMouseRightButtonDown())
 		*button |= MOUSE_BUTTON_RIGHT;
 	return TRUE;
 }
 
 /**
-	@Function:		gui_focused
+	@Function:		GuiIsFocused
 	@Access:		Public
 	@Description:
 		检测窗体是否获得了焦点。
@@ -715,18 +715,18 @@ gui_get_mouse(	IN int32 tid,
 			返回TRUE则获得了焦点。
 */
 BOOL
-gui_focused(IN int32 tid,
-			IN int32 wid)
+GuiIsFocused(	IN int32 tid,
+				IN int32 wid)
 {
 	_WINSTANCE_FALSE
-	if(get_top_window() == winstance->window)
+	if(ScrGetTopWindow() == winstance->window)
 		return TRUE;
 	else
 		return FALSE;
 }
 
 /**
-	@Function:		gui_focus
+	@Function:		GuiFocus
 	@Access:		Public
 	@Description:
 		使窗体获得焦点。
@@ -740,15 +740,15 @@ gui_focused(IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_focus(	IN int32 tid,
+GuiFocus(	IN int32 tid,
 			IN int32 wid)
 {
 	_WINSTANCE_FALSE
-	return set_top_window(winstance->window);
+	return ScrSetTopWindow(winstance->window);
 }
 
 /**
-	@Function:		gui_set_pixel
+	@Function:		GuiSetPixel
 	@Access:		Public
 	@Description:
 		使设置窗体工作区的像素。
@@ -768,11 +768,11 @@ gui_focus(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_set_pixel(	IN int32 tid,
-				IN int32 wid,
-				IN int32 x,
-				IN int32 y,
-				IN uint32 pixel)
+GuiSetPixel(IN int32 tid,
+			IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN uint32 pixel)
 {
 	_WINSTANCE_FALSE
 	return set_pixel_common_image(	&winstance->window->workspace,
@@ -782,7 +782,7 @@ gui_set_pixel(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_pixel
+	@Function:		GuiGetPixel
 	@Access:		Public
 	@Description:
 		获取窗体工作区的像素。
@@ -802,11 +802,11 @@ gui_set_pixel(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_pixel(	IN int32 tid,
-				IN int32 wid,
-				IN int32 x,
-				IN int32 y,
-				OUT uint32 * pixel)
+GuiGetPixel(IN int32 tid,
+			IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			OUT uint32 * pixel)
 {
 	_WINSTANCE_FALSE
 	if(pixel == NULL)
@@ -818,7 +818,7 @@ gui_get_pixel(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_draw_rect
+	@Function:		GuiDrawRect
 	@Access:		Public
 	@Description:
 		在工作区内绘制矩形。
@@ -842,13 +842,13 @@ gui_get_pixel(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_draw_rect(	IN int32 tid,
-				IN int32 wid,
-				IN int32 x,
-				IN int32 y,
-				IN int32 width,
-				IN int32 height,
-				IN uint32 pixel)
+GuiDrawRect(IN int32 tid,
+			IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN int32 width,
+			IN int32 height,
+			IN uint32 pixel)
 {
 	_WINSTANCE_FALSE
 	return rect_common_image(	&winstance->window->workspace,
@@ -860,7 +860,7 @@ gui_draw_rect(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_draw_image
+	@Function:		GuiDrawImage
 	@Access:		Public
 	@Description:
 		在工作区内绘制图片。
@@ -884,7 +884,7 @@ gui_draw_rect(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_draw_image(	IN int32 tid,
+GuiDrawImage(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,
 				IN int32 y,
@@ -904,7 +904,7 @@ gui_draw_image(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_draw_text
+	@Function:		GuiDrawText
 	@Access:		Public
 	@Description:
 		在工作区内绘制文本。
@@ -926,12 +926,12 @@ gui_draw_image(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_draw_text(	IN int32 tid,
-				IN int32 wid,
-				IN int32 x,
-				IN int32 y,
-				IN CASCTEXT text,
-				IN uint32 color)
+GuiDrawText(IN int32 tid,
+			IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN CASCTEXT text,
+			IN uint32 color)
 {
 	_WINSTANCE_FALSE
 	if(text == NULL)
@@ -939,14 +939,14 @@ gui_draw_text(	IN int32 tid,
 	return text_common_image_ml(&winstance->window->workspace,
 								x,
 								y,
-								get_enfont_ptr(),
+								EnfntGetFontDataPtr(),
 								text,
 								strlen(text),
 								color);
 }
 
 /**
-	@Function:		gui_draw_line
+	@Function:		GuiDrawLine
 	@Access:		Public
 	@Description:
 		在工作区内绘制一条线。
@@ -970,13 +970,13 @@ gui_draw_text(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_draw_line(	IN int32 tid,
-				IN int32 wid,
-				IN int32 startx,
-				IN int32 starty,
-				IN int32 endx,
-				IN int32 endy,
-				IN uint32 color)
+GuiDrawLine(IN int32 tid,
+			IN int32 wid,
+			IN int32 startx,
+			IN int32 starty,
+			IN int32 endx,
+			IN int32 endy,
+			IN uint32 color)
 {
 	_WINSTANCE_FALSE
 	return line_common_image(	&winstance->window->workspace,
@@ -988,7 +988,7 @@ gui_draw_line(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_push_message
+	@Function:		GuiPushMessage
 	@Access:		Public
 	@Description:
 		往指定窗口的消息队列里压入一条消息。
@@ -1010,12 +1010,12 @@ gui_draw_line(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_push_message(	IN int32 tid,
-					IN int32 wid,
-					IN int32 cid,
-					IN uint32 type,
-					IN void * data,
-					IN void * phyaddr_data)
+GuiPushMessage(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				IN uint32 type,
+				IN void * data,
+				IN void * phyaddr_data)
 {
 	_WINSTANCE_FALSE
 	if(winstance->messages->count >= GUI_MAX_MESSAGE_COUNT)
@@ -1047,7 +1047,7 @@ err:
 }
 
 /**
-	@Function:		gui_pop_message
+	@Function:		GuiPopMessage
 	@Access:		Public
 	@Description:
 		从指定窗口的消息队列里弹出一条消息。
@@ -1069,7 +1069,7 @@ err:
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_pop_message(IN int32 tid,
+GuiPopMessage(	IN int32 tid,
 				IN int32 wid,
 				OUT int32 * cid,
 				OUT uint32 * type,
@@ -1097,7 +1097,7 @@ gui_pop_message(IN int32 tid,
 }
 
 /**
-	@Function:		gui_set_text
+	@Function:		GuiSetText
 	@Access:		Public
 	@Description:
 		设置控件的文本。
@@ -1118,10 +1118,10 @@ gui_pop_message(IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_set_text(	IN int32 tid,
-				IN int32 wid,
-				IN int32 cid,
-				IN CASCTEXT text)
+GuiSetText(	IN int32 tid,
+			IN int32 wid,
+			IN int32 cid,
+			IN CASCTEXT text)
 {
 	_WINSTANCE_FALSE
 	if(text == NULL)
@@ -1158,7 +1158,7 @@ gui_set_text(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_text
+	@Function:		GuiGetText
 	@Access:		Public
 	@Description:
 		获取控件的文本。
@@ -1181,11 +1181,11 @@ gui_set_text(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_text(	IN int32 tid,
-				IN int32 wid,
-				IN int32 cid,
-				OUT ASCTEXT text,
-				IN uint32 bufsz)
+GuiGetText(	IN int32 tid,
+			IN int32 wid,
+			IN int32 cid,
+			OUT ASCTEXT text,
+			IN uint32 bufsz)
 {
 	_WINSTANCE_FALSE
 	if(text == NULL)
@@ -1228,7 +1228,7 @@ gui_get_text(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_update
+	@Function:		GuiUpdate
 	@Access:		Public
 	@Description:
 		向窗体发送绘制事件。
@@ -1242,16 +1242,16 @@ gui_get_text(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_update(	IN int32 tid,
+GuiUpdate(	IN int32 tid,
 			IN int32 wid)
 {
 	_WINSTANCE_FALSE
-	window_dispatch_event(winstance->window, WINDOW_EVENT_PAINT, NULL);
+	WinmgrDispatchEvent(winstance->window, WINDOW_EVENT_PAINT, NULL);
 	return TRUE;
 }
 
 /**
-	@Function:		gui_render_text_buffer
+	@Function:		GuiRenderTextBuffer
 	@Access:		Public
 	@Description:
 		渲染文本缓冲区。
@@ -1276,13 +1276,13 @@ gui_update(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_render_text_buffer(	IN int32 tid,
-						IN int32 wid,
-						IN uint8 * txtbuf,
-						IN uint32 row,
-						IN uint32 column,
-						IN uint32 curx,
-						IN uint32 cury)
+GuiRenderTextBuffer(IN int32 tid,
+					IN int32 wid,
+					IN uint8 * txtbuf,
+					IN uint32 row,
+					IN uint32 column,
+					IN uint32 curx,
+					IN uint32 cury)
 {
 	_WINSTANCE_FALSE
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1293,7 +1293,7 @@ gui_render_text_buffer(	IN int32 tid,
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	lock();
 	winstance->window->locked = TRUE;
-	render_text_buffer(	&winstance->window->workspace,
+	ScrRenderTextBuffer(	&winstance->window->workspace,
 						txtbuf,
 						row,
 						column,
@@ -1305,7 +1305,7 @@ gui_render_text_buffer(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_free_msgdata
+	@Function:		GuiFreeMessageData
 	@Access:		Public
 	@Description:
 		释放事件附加数据。
@@ -1319,19 +1319,19 @@ gui_render_text_buffer(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 void
-gui_free_msgdata(	IN int32 tid,
+GuiFreeMessageData(	IN int32 tid,
 					IN void * data)
 {
 	if(data == NULL)
 		return;
-	void * phyaddr_data = get_physical_address(tid, data);
+	void * phyaddr_data = TaskmgrConvertLAddrToPAddr(tid, data);
 	if(phyaddr_data == NULL)
 		return;
-	free_memory(phyaddr_data);
+	MemFree(phyaddr_data);
 }
 
 /**
-	@Function:		gui_enable_control
+	@Function:		GuiEnableControl
 	@Access:		Public
 	@Description:
 		启用控件。
@@ -1347,7 +1347,7 @@ gui_free_msgdata(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_enable_control(	IN int32 tid,
+GuiEnableControl(	IN int32 tid,
 					IN int32 wid,
 					IN int32 cid)
 {
@@ -1371,7 +1371,7 @@ gui_enable_control(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_disable_control
+	@Function:		GuiDisableControl
 	@Access:		Public
 	@Description:
 		禁用控件。
@@ -1387,7 +1387,7 @@ gui_enable_control(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_disable_control(IN int32 tid,
+GuiDisableControl(	IN int32 tid,
 					IN int32 wid,
 					IN int32 cid)
 {
@@ -1411,7 +1411,7 @@ gui_disable_control(IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_width
+	@Function:		GuiGetWidth
 	@Access:		Public
 	@Description:
 		获取控件宽度。
@@ -1429,10 +1429,10 @@ gui_disable_control(IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_width(	IN int32 tid,
-				IN int32 wid,
-				IN int32 cid,
-				OUT uint32 * width)
+GuiGetWidth(IN int32 tid,
+			IN int32 wid,
+			IN int32 cid,
+			OUT uint32 * width)
 {
 	if(width == NULL)
 		return FALSE;
@@ -1444,7 +1444,7 @@ gui_get_width(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_get_height
+	@Function:		GuiGetHeight
 	@Access:		Public
 	@Description:
 		获取控件高度。
@@ -1462,7 +1462,7 @@ gui_get_width(	IN int32 tid,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-gui_get_height(	IN int32 tid,
+GuiGetHeight(	IN int32 tid,
 				IN int32 wid,
 				IN int32 cid,
 				OUT uint32 * height)
@@ -1477,7 +1477,7 @@ gui_get_height(	IN int32 tid,
 }
 
 /**
-	@Function:		_no_data_event
+	@Function:		_GuiNoDataEvent
 	@Access:		Public
 	@Description:
 		无附加数据的控件事件。
@@ -1496,7 +1496,7 @@ gui_get_height(	IN int32 tid,
 */
 static
 void
-_no_data_event(	IN uint32 id,
+_GuiNoDataEvent(IN uint32 id,
 				IN uint32 type,
 				IN void * param)
 {
@@ -1509,11 +1509,11 @@ _no_data_event(	IN uint32 id,
 	DSLValuePtr v = dsl_lst_get(_winstances, wid);
 	WindowInstancePtr winstance = (WindowInstancePtr)DSL_OBJECTVAL(v);
 	int32 tid = winstance->tid;
-	gui_push_message(tid, wid, cid, type, NULL, NULL);
+	GuiPushMessage(tid, wid, cid, type, NULL, NULL);
 }
 
 /**
-	@Function:		_has_data_event
+	@Function:		_GuiHasDataEvent
 	@Access:		Public
 	@Description:
 		有附加数据的控件事件。
@@ -1530,9 +1530,9 @@ _no_data_event(	IN uint32 id,
 */
 static
 void
-_has_data_event(IN uint32 id,
-				IN uint32 type,
-				IN void * param)
+_GuiHasDataEvent(	IN uint32 id,
+					IN uint32 type,
+					IN void * param)
 {
 	ControlPtr ctrl = (ControlPtr)id;
 	if(ctrl->type != CONTROL_LIST)
@@ -1549,18 +1549,18 @@ _has_data_event(IN uint32 id,
 		case CONTROL_LIST:
 		{
 			uint32 index = *(uint32 *)param;
-			data = tasks_alloc_memory(tid, sizeof(index), &phyaddr_data);
+			data = TaskmgrAllocMemory(tid, sizeof(index), &phyaddr_data);
 			memcpy(phyaddr_data, &index, sizeof(index));
 			break;
 		}
 		default:
 			return;
 	}
-	gui_push_message(tid, wid, cid, type, data, phyaddr_data);
+	GuiPushMessage(tid, wid, cid, type, data, phyaddr_data);
 }
 
 /**
-	@Function:		gui_new_button
+	@Function:		GuiNewButton
 	@Access:		Public
 	@Description:
 		新建一个BUTTON。
@@ -1581,7 +1581,7 @@ _has_data_event(IN uint32 id,
 		返回TRUE则成功，否则失败。
 */
 BOOL
-gui_new_button(	IN int32 tid,
+GuiNewButton(	IN int32 tid,
 				IN int32 wid,
 				IN int32 x,
 				IN int32 y,
@@ -1597,7 +1597,7 @@ gui_new_button(	IN int32 tid,
 	btn = NEW(Button);
 	if(btn == NULL)
 		goto err;
-	INIT_BUTTON(btn, x, y, text, _no_data_event);
+	INIT_BUTTON(btn, x, y, text, _GuiNoDataEvent);
 	btn->uwid = wid;
 	val = dsl_val_object(btn);
 	if(val == NULL)
@@ -1625,7 +1625,7 @@ err:
 }
 
 /**
-	@Function:		gui_new_label
+	@Function:		GuiNewLabel
 	@Access:		Public
 	@Description:
 		新建一个LABEL。
@@ -1646,12 +1646,12 @@ err:
 		返回TRUE则成功，否则失败。
 */
 BOOL
-gui_new_label(	IN int32 tid,
-				IN int32 wid,
-				IN int32 x,
-				IN int32 y,
-				IN CASCTEXT text,
-				OUT int32 * cid)
+GuiNewLabel(IN int32 tid,
+			IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN CASCTEXT text,
+			OUT int32 * cid)
 {
 	_WINSTANCE_FALSE
 	lock();
@@ -1662,7 +1662,7 @@ gui_new_label(	IN int32 tid,
 	lbl = NEW(Label);
 	if(lbl == NULL)
 		goto err;
-	INIT_LABEL(lbl, x, y, text, _no_data_event);
+	INIT_LABEL(lbl, x, y, text, _GuiNoDataEvent);
 	lbl->uwid = wid;
 	val = dsl_val_object(lbl);
 	if(val == NULL)
@@ -1690,7 +1690,7 @@ err:
 }
 
 /**
-	@Function:		gui_new_list
+	@Function:		GuiNewList
 	@Access:		Public
 	@Description:
 		新建一个LIST。
@@ -1713,13 +1713,13 @@ err:
 		返回TRUE则成功，否则失败。
 */
 BOOL
-gui_new_list(	IN int32 tid,
-				IN int32 wid,
-				IN uint32 count,
-				IN int32 x,
-				IN int32 y,
-				IN CASCTEXT text,
-				OUT int32 * cid)
+GuiNewList(	IN int32 tid,
+			IN int32 wid,
+			IN uint32 count,
+			IN int32 x,
+			IN int32 y,
+			IN CASCTEXT text,
+			OUT int32 * cid)
 {
 	_WINSTANCE_FALSE
 	lock();
@@ -1730,7 +1730,7 @@ gui_new_list(	IN int32 tid,
 	lst = NEW(List);
 	if(lst == NULL)
 		goto err;
-	INIT_LIST(lst, count, x, y, text, _has_data_event);
+	INIT_LIST(lst, count, x, y, text, _GuiHasDataEvent);
 	lst->uwid = wid;
 	val = dsl_val_object(lst);
 	if(val == NULL)
@@ -1758,7 +1758,7 @@ err:
 }
 
 /**
-	@Function:		gui_set_list_text
+	@Function:		GuiSetListText
 	@Access:		Public
 	@Description:
 		设置LIST的列表项的文本。
@@ -1777,11 +1777,11 @@ err:
 		返回TRUE则成功，否则失败。
 */
 BOOL
-gui_set_list_text(	IN int32 tid,
-					IN int32 wid,
-					IN int32 cid,
-					IN uint32 index,
-					IN CASCTEXT text)
+GuiSetListText(	IN int32 tid,
+				IN int32 wid,
+				IN int32 cid,
+				IN uint32 index,
+				IN CASCTEXT text)
 {
 	_WINSTANCE_FALSE
 	if(text == NULL)
@@ -1794,7 +1794,7 @@ gui_set_list_text(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_enable_list_item
+	@Function:		GuiEnableListItem
 	@Access:		Public
 	@Description:
 		启用列表项。
@@ -1811,10 +1811,10 @@ gui_set_list_text(	IN int32 tid,
 		返回TRUE则成功，否则失败。
 */
 BOOL
-gui_enable_list_item(	IN int32 tid,
-						IN int32 wid,
-						IN int32 cid,
-						IN uint32 index)
+GuiEnableListItem(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid,
+					IN uint32 index)
 {
 	_WINSTANCE_FALSE
 	_CONTROL_FALSE
@@ -1822,7 +1822,7 @@ gui_enable_list_item(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_disable_list_item
+	@Function:		GuiDisableListItem
 	@Access:		Public
 	@Description:
 		禁用列表项。
@@ -1839,10 +1839,10 @@ gui_enable_list_item(	IN int32 tid,
 		返回TRUE则成功，否则失败。
 */
 BOOL
-gui_disable_list_item(	IN int32 tid,
-						IN int32 wid,
-						IN int32 cid,
-						IN uint32 index)
+GuiDisableListItem(	IN int32 tid,
+					IN int32 wid,
+					IN int32 cid,
+					IN uint32 index)
 {
 	_WINSTANCE_FALSE
 	_CONTROL_FALSE
@@ -1850,7 +1850,7 @@ gui_disable_list_item(	IN int32 tid,
 }
 
 /**
-	@Function:		gui_new_edit
+	@Function:		GuiNewEdit
 	@Access:		Public
 	@Description:
 		新建一个EDIT。
@@ -1877,15 +1877,15 @@ gui_disable_list_item(	IN int32 tid,
 		返回TRUE则成功，否则失败。
 */
 BOOL
-gui_new_edit(	IN int32 tid,
-				IN int32 wid,
-				IN int32 x,
-				IN int32 y,
-				IN uint32 row,
-				IN uint32 column,
-				IN CASCTEXT text,
-				IN uint32 style,
-				OUT int32 * cid)
+GuiNewEdit(	IN int32 tid,
+			IN int32 wid,
+			IN int32 x,
+			IN int32 y,
+			IN uint32 row,
+			IN uint32 column,
+			IN CASCTEXT text,
+			IN uint32 style,
+			OUT int32 * cid)
 {
 	_WINSTANCE_FALSE
 	lock();
@@ -1896,7 +1896,7 @@ gui_new_edit(	IN int32 tid,
 	edit = NEW(Edit);
 	if(edit == NULL)
 		goto err;
-	INIT_EDIT(edit, x, y, row, column, style, _no_data_event);
+	INIT_EDIT(edit, x, y, row, column, style, _GuiNoDataEvent);
 	SET_EDIT_TEXT(edit, text);
 	edit->uwid = wid;
 	val = dsl_val_object(edit);

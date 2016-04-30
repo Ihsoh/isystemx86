@@ -31,15 +31,15 @@ struct RSDT
 } __attribute__((packed));
 
 BOOL
-rsdt_init(void);
+RsdtInit(void);
 
 void
-rsdt_free(void);
+RsdtFree(void);
 
 struct RSDT *
-rsdt_get_table(void);
+RsdtGetTable(void);
 
 struct ACPISDTHeader *
-rsdt_find_sdt(int8 * sign);
+RsdtFindSDT(int8 * sign);
 
 #endif

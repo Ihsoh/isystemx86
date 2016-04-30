@@ -48,36 +48,36 @@
 
 extern
 BOOL
-screen_write_console_buffer(IN const uint8 * buffer,
+ScrWriteConsoleBuffer(IN const uint8 * buffer,
 							IN uint32 size);
 
 extern
 void
-flush_char_buffer(void);
+ScrEnableFlushConsoleBuffer(void);
 
 extern
 void
-no_flush_char_buffer(void);
+ScrDisableFlushConsoleBuffer(void);
 
 extern
 void
-set_char_color(IN uint8 cc);
+ScrSetConsoleCharColor(IN uint8 cc);
 
 extern
 uint8
-get_char_color(void);
+ScrGetConsoleCharColor(void);
 
 extern
 void
-set_cursor_color(IN uint8 cc);
+ScrSetConsoleCursorColor(IN uint8 cc);
 
 extern
 uint8
-get_cursor_color(void);
+ScrGetConsoleCursorColor(void);
 
 extern
 BOOL
-render_text_buffer_ex(	IN OUT ImagePtr image,
+ScrRenderTextBufferEx(	IN OUT ImagePtr image,
 						IN uint32 start_x,
 						IN uint32 start_y,
 						IN uint8 * txtbuf,
@@ -88,7 +88,7 @@ render_text_buffer_ex(	IN OUT ImagePtr image,
 
 extern
 BOOL
-render_text_buffer(	IN OUT ImagePtr image,
+ScrRenderTextBuffer(IN OUT ImagePtr image,
 					IN uint8 * txtbuf,
 					IN uint32 row,
 					IN uint32 column,
@@ -97,129 +97,129 @@ render_text_buffer(	IN OUT ImagePtr image,
 
 extern
 void
-flush_screen(void);
+ScrFlushScreen(void);
 
 extern
 void
-lock_cursor(void);
+ScrLockConsoleCursor(void);
 
 extern
 void
-unlock_cursor(void);
+ScrUnlockConsoleCursor(void);
 
 extern
 void
-set_cursor(	IN uint16 x,
-			IN uint16 y);
+ScrSetConsoleCursor(IN uint16 x,
+					IN uint16 y);
 
 extern
 void
-set_cursor_pos(	IN uint16 x,
-				IN uint16 y);
+ScrSetConsoleCursorPosition(IN uint16 x,
+							IN uint16 y);
 
 extern
 void
-get_cursor(	OUT uint16 * x,
-			OUT uint16 * y);
+ScrGetConsoleCursor(OUT uint16 * x,
+					OUT uint16 * y);
 
 extern
 void
-screen_up(void);
+ScrScreenUp(void);
 
 extern
 void
-print_char_p(	IN int8 chr,
-				IN uint8 p);
+ScrPrintCharWithProperty(	IN int8 chr,
+							IN uint8 p);
 
 extern
 void
-print_char(IN int8 chr);
+ScrPrintChar(IN int8 chr);
 
 extern
 void
-print_str(IN const int8 * str);
+ScrPrintString(IN const int8 * str);
 
 extern
 void
-print_str_p(IN const int8 * str,
-			IN uint8 p);
+ScrPrintStringWithProperty(	IN const int8 * str,
+							IN uint8 p);
 
 extern 
 void
-print_err_char_p(	IN int8 chr,
-					IN uint8 p);
+ScrPrintCharToStderrWithProperty(	IN int8 chr,
+									IN uint8 p);
 
 extern
 void
-print_err_char(IN int8 chr);
+ScrPrintCharToStderr(IN int8 chr);
 
 extern
 void
-print_err_str(IN const int8 * str);
+ScrPrintStringToStderr(IN const int8 * str);
 
 extern
 void
-print_err_str_p(IN const int8 * str,
-				IN uint8 p);
+ScrPrintStringToStderrWithProperty(	IN const int8 * str,
+									IN uint8 p);
 
 extern
 void
-clear_screen(void);
+ScrClearScreen(void);
 
 extern
 void
-set_char_color(IN uint8 cc);
+ScrSetConsoleCharColor(IN uint8 cc);
 
 extern
 void
-init_screen(void);
+ScrInit(void);
 
 extern
 void
-print_date(IN struct CMOSDateTime * date);
+ScrPrintDate(IN struct CMOSDateTime * date);
 
 extern
 void
-print_time(IN struct CMOSDateTime * time);
+ScrPrintTime(IN struct CMOSDateTime * time);
 
 extern
 void
-print_datetime(IN struct CMOSDateTime * dt);
+ScrPrintDateTime(IN struct CMOSDateTime * dt);
 
 extern
 void
-set_target_screen(IN struct CommonImage * ts);
+ScrSetTargetScreen(IN struct CommonImage * ts);
 
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\
 						int8 __buffer__[BUFFER_SIZE];\
-						print_str(ultos(__buffer__, (n)));\
+						ScrPrintString(ultos(__buffer__, (n)));\
 					}
 #define	printn(n) 	{\
 						int8 __buffer__[BUFFER_SIZE];\
-						print_str(ltos(__buffer__, (n)));\
+						ScrPrintString(ltos(__buffer__, (n)));\
 					}
 
 #define	printd(n) 	{\
 						int8 __buffer__[BUFFER_SIZE];\
-						print_str(dtos(__buffer__, (n)));\
+						ScrPrintString(dtos(__buffer__, (n)));\
 					}
 
 #define	printuchex(n)	{\
 							int8 __buffer__[BUFFER_SIZE];\
-							print_str(uctohexs(__buffer__, (n)));\
+							ScrPrintString(uctohexs(__buffer__, (n)));\
 						}
 #define	printushex(n)	{\
 							int8 __buffer__[BUFFER_SIZE];\
-							print_str(ustohexs(__buffer__, (n)));\
+							ScrPrintString(ustohexs(__buffer__, (n)));\
 						}
 #define	printuihex(n)	{\
 							int8 __buffer__[BUFFER_SIZE];\
-							print_str(uitohexs(__buffer__, (n)));\
+							ScrPrintString(uitohexs(__buffer__, (n)));\
 						}
 #define	printulhex(n)	{\
 							int8 __buffer__[BUFFER_SIZE];\
-							print_str(ultohexs(__buffer__, (n)));\
+							ScrPrintString(ultohexs(__buffer__, (n)));\
 						}
 			
 extern struct CommonImage * target_screen;
@@ -234,15 +234,15 @@ extern struct CommonImage console_screen_buffer;
 
 extern
 void
-switch_window(void);
+ScrSwitchWindow(void);
 
 extern
 BOOL
-set_top_window(IN WindowPtr window);
+ScrSetTopWindow(IN WindowPtr window);
 
 extern
 struct Window *
-create_window(	IN uint32		width,
+ScrCreateWindow(	IN uint32		width,
 				IN uint32		height,
 				IN uint32		bgcolor,
 				IN uint32		style,
@@ -251,14 +251,14 @@ create_window(	IN uint32		width,
 
 extern
 BOOL
-destroy_window(IN struct Window * window);
+ScrDestroyWindow(IN struct Window * window);
 
 extern
 struct Window *
-get_top_window(void);
+ScrGetTopWindow(void);
 
 extern
 WindowPtr *
-get_windows(OUT uint32 * count);
+ScrGetWindows(OUT uint32 * count);
 
 #endif

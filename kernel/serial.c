@@ -10,7 +10,7 @@
 #include "types.h"
 
 /**
-	@Function:		serial_enable
+	@Function:		_SrlEnable
 	@Access:		Private
 	@Description:
 		启用指定COM口。
@@ -22,7 +22,7 @@
 */
 static
 void
-serial_enable(IN uint16 port)
+_SrlEnable(IN uint16 port)
 {
 	KnlOutByte(port + 1, 0x00);    // Disable all interrupts
 	KnlOutByte(port + 3, 0x80);    // Enable DLAB (set baud rate divisor)
@@ -34,7 +34,7 @@ serial_enable(IN uint16 port)
 }
 
 /**
-	@Function:		serial_write
+	@Function:		SrlWrite
 	@Access:		Public
 	@Description:
 		向指定COM口写一个字符。
@@ -49,18 +49,18 @@ serial_enable(IN uint16 port)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-serial_write(	IN uint16 port,
-				IN int8 c)
+SrlWrite(	IN uint16 port,
+			IN int8 c)
 {
 	while(!(KnlInByte(port + 5) & 0x20));
 	KnlOutByte(port, c);
 	if(c == '\n')
-		serial_write(port, '\r');
+		SrlWrite(port, '\r');
 	return TRUE;
 }
 
 /**
-	@Function:		serial_write_buffer
+	@Function:		SrlWriteBuffer
 	@Access:		Public
 	@Description:
 		向指定COM口写一个字符序列。
@@ -77,21 +77,21 @@ serial_write(	IN uint16 port,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-serial_write_buffer(IN uint16 port,
-					IN int8 * buffer,
-					IN uint32 count)
+SrlWriteBuffer(	IN uint16 port,
+				IN int8 * buffer,
+				IN uint32 count)
 {
 	if(buffer == NULL)
 		return FALSE;
 	uint32 ui;
 	for(ui = 0; ui < count; ui++)
-		if(!serial_write(port, buffer[ui]))
+		if(!SrlWrite(port, buffer[ui]))
 			return FALSE;
 	return TRUE;
 }
 
 /**
-	@Function:		serial_has_data
+	@Function:		SrlHasData
 	@Access:		Public
 	@Description:
 		确认指定COM口是否有数据。
@@ -104,13 +104,13 @@ serial_write_buffer(IN uint16 port,
 			返回TRUE则有，否则没有。
 */
 BOOL
-serial_has_data(IN uint16 port)
+SrlHasData(IN uint16 port)
 {
 	return (KnlInByte(port + 5) & 1) != 0;
 }
 
 /**
-	@Function:		serial_read
+	@Function:		SrlRead
 	@Access:		Public
 	@Description:
 		尝试从COM口读取一个字符。
@@ -127,10 +127,10 @@ serial_has_data(IN uint16 port)
 			返回TRUE则有，否则没有。
 */
 BOOL
-serial_read(IN uint16 port,
-			OUT int8 * c)
+SrlRead(IN uint16 port,
+		OUT int8 * c)
 {
-	if(serial_has_data(port))
+	if(SrlHasData(port))
 	{
 		*c = KnlInByte(port);
 		return TRUE;
@@ -140,7 +140,7 @@ serial_read(IN uint16 port,
 }
 
 /**
-	@Function:		serial_init
+	@Function:		SrlInit
 	@Access:		Public
 	@Description:
 		初始化所有COM口。
@@ -150,11 +150,11 @@ serial_read(IN uint16 port,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-serial_init(void)
+SrlInit(void)
 {
-	serial_enable(PORT_COM1);
-	serial_enable(PORT_COM2);
-	serial_enable(PORT_COM3);
-	serial_enable(PORT_COM4);
+	_SrlEnable(PORT_COM1);
+	_SrlEnable(PORT_COM2);
+	_SrlEnable(PORT_COM3);
+	_SrlEnable(PORT_COM4);
 	return TRUE;
 }

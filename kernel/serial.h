@@ -17,30 +17,30 @@
 
 extern
 BOOL
-serial_init(void);
+SrlInit(void);
 
 extern
 BOOL
-serial_write(	IN uint16 port,
-				IN int8 c);
+SrlWrite(	IN uint16 port,
+			IN int8 c);
 
 extern
 BOOL
-serial_write_buffer(IN uint16 port,
+SrlWriteBuffer(IN uint16 port,
 					IN int8 * buffer,
 					IN uint32 count);
 
 extern
 BOOL
-serial_has_data(IN uint16 port);
+SrlHasData(IN uint16 port);
 
 extern
 BOOL
-serial_read(IN uint16 port,
+SrlRead(IN uint16 port,
 			OUT int8 * c);
 
 extern
 BOOL
-serial_init(void);
+SrlInit(void);
 
 #endif

@@ -24,7 +24,7 @@
 */
 void
 KnlOutByte(	IN uint16 port,
-		IN uint8 data)
+			IN uint8 data)
 {
 	asm volatile (
 		"outb	%%al, %%dx\n\t"
@@ -72,7 +72,7 @@ KnlInByte(IN uint16 port)
 */
 void 
 KnlOutWord(	IN uint16 port,
-		IN uint16 data)
+			IN uint16 data)
 {
 	asm volatile (
 		"outw	%%ax, %%dx\n\t"

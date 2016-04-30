@@ -47,35 +47,35 @@ typedef struct
 
 extern
 BOOL
-mqueue_init(void);
+MqInit(void);
 
 extern
 MQueuePtr
-mqueue_new(IN int8 * name);
+MqNew(IN int8 * name);
 
 extern
 BOOL
-mqueue_free(IN MQueuePtr mqueue);
+MqFree(IN MQueuePtr mqueue);
 
 extern
 BOOL
-mqueue_add_message(	IN OUT MQueuePtr mqueue,
-					IN int32 in_out,
-					IN MQueueMessagePtr message);
+MqAddMessage(	IN OUT MQueuePtr mqueue,
+				IN int32 in_out,
+				IN MQueueMessagePtr message);
 
 extern
 MQueueMessagePtr
-mqueue_pop_message_with_tid(IN OUT MQueuePtr mqueue,
+MqPopMessageWithTaskID(IN OUT MQueuePtr mqueue,
 							IN int32 in_out,
 							IN int32 tid);
 
 extern
 MQueueMessagePtr
-mqueue_pop_message(	IN OUT MQueuePtr mqueue,
-					IN int32 in_out);
+MqPopMessage(	IN OUT MQueuePtr mqueue,
+				IN int32 in_out);
 
 extern
 MQueuePtr
-mqueue_get_ptr_by_name(IN int8 * name);
+MqGetPtrByName(IN int8 * name);
 
 #endif

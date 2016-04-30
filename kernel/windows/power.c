@@ -58,10 +58,10 @@ _WinPwrControlEvent(IN uint32 id,
 			switch(*(uint32 *)param)
 			{
 				case _ITEM_ID_SHUTDOWN:
-					shutdown_system();
+					KnlShutdownSystem();
 					break;
 				case _ITEM_ID_REBOOT:
-					reboot_system();
+					KnlRebootSystem();
 					break;
 				case _ITEM_ID_CANCEL:
 					WinPwrHide();
@@ -87,7 +87,7 @@ void
 _WinPwrEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
 		LIST(_lst_power, &window->workspace, params, TRUE);
@@ -107,20 +107,22 @@ _WinPwrEvent(	IN struct Window * window,
 BOOL
 WinPwrInit(void)
 {
-	_window = create_window(_WIDTH, _HEIGHT,
-							0xff222222,
-							WINDOW_STYLE_NO_TITLE
-								| WINDOW_STYLE_NO_WMGR,
-							"Power",
-							_WinPwrEvent);
+	_window = ScrCreateWindow(
+		_WIDTH, _HEIGHT,
+		0xff222222,
+		WINDOW_STYLE_NO_TITLE
+			| WINDOW_STYLE_NO_WMGR,
+		"Power",
+		_WinPwrEvent);
 	rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xff222222);
 	_lst_power = NEW(List);
-	CtrlListInit(	_lst_power, 0,
-				_ITEM_COUNT,
-				0, 0,
-				"",
-				0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
-				_WinPwrControlEvent);
+	CtrlListInit(
+		_lst_power, 0,
+		_ITEM_COUNT,
+		0, 0,
+		"",
+		0xffffffff, 0xff222222, 0xffffffff, 0xff444444,
+		_WinPwrControlEvent);
 	SET_LIST_TEXT(_lst_power, _ITEM_ID_SHUTDOWN,	"      Shutdown      ");
 	SET_LIST_TEXT(_lst_power, _ITEM_ID_REBOOT,		"      Reboot        ");
 	SET_LIST_TEXT(_lst_power, _ITEM_ID_CANCEL,		"      Cancel        ");
@@ -143,12 +145,12 @@ WinPwrInit(void)
 BOOL
 WinPwrShow(void)
 {
-	uint32 w = vesa_get_width();
-	uint32 h = vesa_get_height();
+	uint32 w = VesaGetWidth();
+	uint32 h = VesaGetHeight();
 	_window->x = w / 2 - _WIDTH / 2;
 	_window->y = h / 2 - _HEIGHT / 2;
 	_window->state = WINDOW_STATE_SHOW;
-	set_top_window(_window);
+	ScrSetTopWindow(_window);
 	return TRUE;
 }
 

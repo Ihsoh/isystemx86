@@ -23,7 +23,7 @@ DEFINE_LOCK_IMPL(paging)
 	((((address) << 12) & 0xfffff000) | (d << 6) | (a << 5) | (us << 2) | (rw << 1) | (p))
 
 /**
-	@Function:		_create_empty_user_pagedt
+	@Function:		_PgCreateEmptyUserPageTable
 	@Access:		Private
 	@Description:
 		创建空的用户页目录表。
@@ -36,9 +36,9 @@ DEFINE_LOCK_IMPL(paging)
 */
 static
 uint32 *
-_create_empty_user_pagedt(OUT uint32 * cr3)
+_PgCreateEmptyUserPageTable(OUT uint32 * cr3)
 {
-	uint32 * pagedt_ptr = alloc_memory(KB(4) + 1 * KB(4) + 1024 * KB(4) + KB(4));
+	uint32 * pagedt_ptr = MemAlloc(KB(4) + 1 * KB(4) + 1024 * KB(4) + KB(4));
 	if(pagedt_ptr == NULL)
 		return NULL;
 	uint32 * real_pagedt_ptr = (uint32 *)((uint32)pagedt_ptr + (KB(4) - (uint32)pagedt_ptr % KB(4)));
@@ -60,7 +60,7 @@ _create_empty_user_pagedt(OUT uint32 * cr3)
 }
 
 /**
-	@Function:		create_empty_user_pagedt
+	@Function:		PgCreateEmptyUserPageTable
 	@Access:		Public
 	@Description:
 		创建空的用户页目录表。
@@ -72,16 +72,16 @@ _create_empty_user_pagedt(OUT uint32 * cr3)
 			页目录表真正的起始地址。	
 */
 uint32 *
-create_empty_user_pagedt(OUT uint32 * cr3)
+PgCreateEmptyUserPageTable(OUT uint32 * cr3)
 {
 	lock();
-	uint32 * r = _create_empty_user_pagedt(cr3);
+	uint32 * r = _PgCreateEmptyUserPageTable(cr3);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_map_user_pagedt_with_rw
+	@Function:		_PgMapUserPageTableWithPermission
 	@Access:		Private
 	@Description:
 		修改页目录表的映射关系。
@@ -102,11 +102,11 @@ create_empty_user_pagedt(OUT uint32 * cr3)
 */
 static
 BOOL
-_map_user_pagedt_with_rw(	OUT uint32 * cr3,
-							IN uint32 start,
-							IN uint32 length,
-							IN uint32 real_address,
-							IN uint32 rw)
+_PgMapUserPageTableWithPermission(	OUT uint32 * cr3,
+									IN uint32 start,
+									IN uint32 length,
+									IN uint32 real_address,
+									IN uint32 rw)
 {
 	uint32 ui;
 	uint32 dir_index = (start >> 22) & 0x3ff;
@@ -143,7 +143,7 @@ _map_user_pagedt_with_rw(	OUT uint32 * cr3,
 }
 
 /**
-	@Function:		map_user_pagedt_with_rw
+	@Function:		PgMapUserPageTableWithPermission
 	@Access:		Public
 	@Description:
 		修改页目录表的映射关系。
@@ -163,20 +163,20 @@ _map_user_pagedt_with_rw(	OUT uint32 * cr3,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-map_user_pagedt_with_rw(OUT uint32 * cr3,
-						IN uint32 start,
-						IN uint32 length,
-						IN uint32 real_address,
-						IN uint32 rw)
+PgMapUserPageTableWithPermission(	OUT uint32 * cr3,
+									IN uint32 start,
+									IN uint32 length,
+									IN uint32 real_address,
+									IN uint32 rw)
 {
 	lock();
-	BOOL r = _map_user_pagedt_with_rw(cr3, start, length, real_address, rw);
+	BOOL r = _PgMapUserPageTableWithPermission(cr3, start, length, real_address, rw);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_find_free_pages
+	@Function:		_PgFindFreePages
 	@Access:		Private
 	@Description:
 		寻找空闲的页。
@@ -193,7 +193,7 @@ map_user_pagedt_with_rw(OUT uint32 * cr3,
 */
 static
 BOOL
-_find_free_pages(	IN uint32 * cr3,
+_PgFindFreePages(	IN uint32 * cr3,
 					IN uint32 length,
 					OUT uint32 * start)
 {
@@ -243,7 +243,7 @@ _find_free_pages(	IN uint32 * cr3,
 }
 
 /**
-	@Function:		find_free_pages
+	@Function:		PgFindFreePages
 	@Access:		Public
 	@Description:
 		寻找空闲的页。
@@ -259,18 +259,18 @@ _find_free_pages(	IN uint32 * cr3,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-find_free_pages(IN uint32 * cr3,
+PgFindFreePages(IN uint32 * cr3,
 				IN uint32 length,
 				IN uint32 * start)
 {
 	lock();
-	BOOL r = _find_free_pages(cr3, length, start);
+	BOOL r = _PgFindFreePages(cr3, length, start);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_free_pages
+	@Function:		_PgFreePages
 	@Access:		Private
 	@Description:
 		释放页。
@@ -287,9 +287,9 @@ find_free_pages(IN uint32 * cr3,
 */
 static
 BOOL
-_free_pages(OUT uint32 * cr3,
-			IN uint32 start,
-			IN uint32 length)
+_PgFreePages(	OUT uint32 * cr3,
+				IN uint32 start,
+				IN uint32 length)
 {
 	uint32 free_page_count = 0;
 	uint32 dir_index = (start >> 22) & 0x3ff;
@@ -322,7 +322,7 @@ _free_pages(OUT uint32 * cr3,
 }
 
 /**
-	@Function:		free_pages
+	@Function:		PgFreePages
 	@Access:		Public
 	@Description:
 		释放页。
@@ -338,18 +338,18 @@ _free_pages(OUT uint32 * cr3,
 			返回值说明		
 */
 BOOL
-free_pages(	OUT uint32 * cr3,
+PgFreePages(OUT uint32 * cr3,
 			IN uint32 start,
 			IN uint32 length)
 {
 	lock();
-	BOOL r = _free_pages(cr3, start, length);
+	BOOL r = _PgFreePages(cr3, start, length);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		create_kernel_pagedt
+	@Function:		_PgCreateKernelPageTable
 	@Access:		Private
 	@Description:
 		创建内核的页目录表。
@@ -358,9 +358,9 @@ free_pages(	OUT uint32 * cr3,
 */
 static
 void
-create_kernel_pagedt(void)
+_PgCreateKernelPageTable(void)
 {
-	kernel_pagedt = alloc_memory(KB(4) + 1 * KB(4) + 1024 * KB(4) + KB(4));
+	kernel_pagedt = MemAlloc(KB(4) + 1 * KB(4) + 1024 * KB(4) + KB(4));
 	uint32 kpagedt = (uint32)kernel_pagedt;
 	kernel_cr3 = kpagedt + (KB(4) - kpagedt % KB(4)); 
 	uint32 * kernel_cr3_ptr = (uint32 *)kernel_cr3;
@@ -380,7 +380,7 @@ create_kernel_pagedt(void)
 }
 
 /**
-	@Function:		init_paging
+	@Function:		PgInit
 	@Access:		Public
 	@Description:
 		初始化分页功能。
@@ -388,9 +388,9 @@ create_kernel_pagedt(void)
 	@Return:		
 */
 void
-init_paging(void)
+PgInit(void)
 {
-	create_kernel_pagedt();
+	_PgCreateKernelPageTable();
 	asm volatile (
 		"pushal\n\t"
 		"movl	%0, %%eax\n\t"
@@ -403,7 +403,7 @@ init_paging(void)
 }
 
 /**
-	@Function:		get_kernel_cr3
+	@Function:		PgGetKernelCR3
 	@Access:		Public/Private
 	@Description:
 		获取内核的页目录表的地址。	
@@ -413,13 +413,13 @@ init_paging(void)
 			内核的页目录表的地址。	
 */
 uint32
-get_kernel_cr3(void)
+PgGetKernelCR3(void)
 {
 	return kernel_cr3;
 }
 
 /**
-	@Function:		enable_paging
+	@Function:		PgEnablePaging
 	@Access:		Public
 	@Description:
 		开启分页功能。
@@ -427,7 +427,7 @@ get_kernel_cr3(void)
 	@Return:	
 */
 void
-enable_paging(void)
+PgEnablePaging(void)
 {
 	asm volatile (
 		"pushal\n\t"

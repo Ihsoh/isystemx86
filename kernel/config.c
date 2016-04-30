@@ -257,7 +257,7 @@ config_##xxx##_get_string(	IN int8 * name,	\
 		UtlCopyString(buffer, sizeof(buffer), fullname" configuration object doesn't contain key '");	\
 		UtlConcatString(buffer, sizeof(buffer), name);	\
 		UtlConcatString(buffer, sizeof(buffer), "'(STRING) or other some unknow errors.");	\
-		log(LOG_ERROR, buffer);	\
+		Log(LOG_ERROR, buffer);	\
 	}	\
 	return r;	\
 }	\
@@ -272,7 +272,7 @@ config_##xxx##_get_bool(IN int8 * name,	\
 		UtlCopyString(buffer, sizeof(buffer), fullname" configuration object doesn't contain key '");	\
 		UtlConcatString(buffer, sizeof(buffer), name);	\
 		UtlConcatString(buffer, sizeof(buffer), "'(BOOL) or other some unknow errors.");	\
-		log(LOG_ERROR, buffer);	\
+		Log(LOG_ERROR, buffer);	\
 	}	\
 	return r;	\
 }	\
@@ -287,7 +287,7 @@ config_##xxx##_get_number(	IN int8 * name,	\
 		UtlCopyString(buffer, sizeof(buffer), fullname" configuration object doesn't contain key '");	\
 		UtlConcatString(buffer, sizeof(buffer), name);	\
 		UtlConcatString(buffer, sizeof(buffer), "'(NUMBER) or other some unknow errors.");	\
-		log(LOG_ERROR, buffer);	\
+		Log(LOG_ERROR, buffer);	\
 	}	\
 	return r;	\
 }	\
@@ -302,7 +302,7 @@ config_##xxx##_get_uint(IN int8 * name,	\
 		UtlCopyString(buffer, sizeof(buffer), fullname" configuration object doesn't contain key '");	\
 		UtlConcatString(buffer, sizeof(buffer), name);	\
 		UtlConcatString(buffer, sizeof(buffer), "'(NUMBER) or other some unknow errors.");	\
-		log(LOG_ERROR, buffer);	\
+		Log(LOG_ERROR, buffer);	\
 	}	\
 	return r;	\
 }

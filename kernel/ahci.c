@@ -145,10 +145,10 @@ _AhciLock(void)
 	if(_lock)
 		return FALSE;
 
-	common_lock();
+	COMMON_LOCK();
 	_lock = TRUE;
-	_lock_tid = get_running_tid();
-	common_unlock();
+	_lock_tid = TaskmgrGetRunningTaskID();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 
@@ -959,7 +959,7 @@ AhciWrite(	IN uint32 portno,
 BOOL
 AhciInit(void)
 {
-	_ahci_base = alloc_memory(MB(1));
+	_ahci_base = MemAlloc(MB(1));
 	if(_ahci_base == NULL)
 		return NULL;
 	_AhciCheckAllDevices();

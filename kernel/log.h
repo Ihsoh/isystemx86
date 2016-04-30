@@ -18,27 +18,27 @@
 
 extern
 void
-init_log(void);
+LogInit(void);
 
 extern
 void
-free_log(void);
+LogFree(void);
 
 extern
 void
-write_log_to_disk(void);
+LogWriteToDisk(void);
 
 extern
 void
-clear_log(void);
+LogClear(void);
 
 extern
 void
-log(IN const int8 * type,
+Log(IN const int8 * type,
 	IN const int8 * text);
 
 extern
 int8 *
-get_log(void);
+LogGetBuffer(void);
 
 #endif

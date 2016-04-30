@@ -32,12 +32,13 @@ _WinDetailEvent(	IN struct Window * window,
 BOOL
 WinDetailInit(void)
 {
-	_window = create_window(_WIDTH,
-							_HEIGHT,
-							0xffffffff,
-							WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_NO_WMGR,
-							"Detail",
-							_WinDetailEvent);
+	_window = ScrCreateWindow(
+		_WIDTH,
+		_HEIGHT,
+		0xffffffff,
+		WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_NO_WMGR,
+		"Detail",
+		_WinDetailEvent);
 	if(_window == NULL)
 		return FALSE;
 	return TRUE;
@@ -51,18 +52,18 @@ WinDetailShow(IN CASCTEXT path)
 	if(!Ifs1Exists(path))
 	{
 		WinMsgShow(	"The path does not exists!",
-								"The path does not exists!",
-								MESSAGE_WINDOW_STYLE_CENTER
-								| MESSAGE_WINDOW_STYLE_TOP,
-								0,
-								0,
-								0xff000000,
-								0xffffffff);
+					"The path does not exists!",
+					MESSAGE_WINDOW_STYLE_CENTER
+					| MESSAGE_WINDOW_STYLE_TOP,
+					0,
+					0,
+					0xff000000,
+					0xffffffff);
 		return FALSE;
 	}
 	struct CommonImage * workspace = &_window->workspace;
 	rect_common_image(workspace, 0, 0, _WIDTH, _HEIGHT, 0xffffffff);
-	uint8 * enfont = get_enfont_ptr();
+	uint8 * enfont = EnfntGetFontDataPtr();
 	uint32 len = strlen(path);
 	if(path[len - 1] == '/')
 	{

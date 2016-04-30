@@ -11,9 +11,9 @@
 #include "types.h"
 
 BOOL
-interrupts_init(void);
+KnlInitInterrupts(void);
 
 int32
-get_unimpl_intn(void);
+KnlGetUnimplementedInterruptNo(void);
 
 #endif

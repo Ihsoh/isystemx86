@@ -38,7 +38,7 @@ _ScGuiProcess(	IN uint32 func,
 	{
 		case SCALL_GUI_IS_VALID:
 		{
-			BOOL r = gui_is_valid();
+			BOOL r = GuiIsEnabled();
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -49,15 +49,15 @@ _ScGuiProcess(	IN uint32 func,
 			uint32 bgcolor = UINT32_SPARAM(sparams->param2);
 			uint32 style = UINT32_SPARAM(sparams->param3);
 			void * vptr = VOID_PTR_SPARAM(sparams->param4);
-			CASCTEXT title = (CASCTEXT)get_physical_address(tid, vptr);
-			int32 wid = gui_create_window(tid, width, height, bgcolor, style, title);
+			CASCTEXT title = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			int32 wid = GuiCreateWindow(tid, width, height, bgcolor, style, title);
 			sparams->param0 = SPARAM(wid);
 			break;
 		}
 		case SCALL_GUI_CLOSE_WINDOW:
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
-			BOOL r = gui_close_window(tid, wid);
+			BOOL r = GuiCloseWindow(tid, wid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -65,7 +65,7 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			uint32 state = UINT32_SPARAM(sparams->param1);
-			BOOL r = gui_set_window_state(tid, wid, state);
+			BOOL r = GuiSetWindowStatus(tid, wid, state);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -73,8 +73,8 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			uint32 * state = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_window_state(tid, wid, state);
+			uint32 * state = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetWindowStatus(tid, wid, state);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -83,7 +83,7 @@ _ScGuiProcess(	IN uint32 func,
 			int32 wid = INT32_SPARAM(sparams->param0);
 			int32 x = INT32_SPARAM(sparams->param1);
 			int32 y = INT32_SPARAM(sparams->param2);
-			BOOL r = gui_set_window_position(tid, wid, x, y);
+			BOOL r = GuiSetWindowPosition(tid, wid, x, y);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -91,10 +91,10 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			int32 * x = (int32 *)get_physical_address(tid, vptr);
+			int32 * x = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			int32 * y = (int32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_window_position(tid, wid, x, y);
+			int32 * y = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetWindowPosition(tid, wid, x, y);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -103,7 +103,7 @@ _ScGuiProcess(	IN uint32 func,
 			int32 wid = INT32_SPARAM(sparams->param0);
 			uint32 width = UINT32_SPARAM(sparams->param1);
 			uint32 height = UINT32_SPARAM(sparams->param2);
-			BOOL r = gui_set_window_size(tid, wid, width, height);
+			BOOL r = GuiSetWindowSize(tid, wid, width, height);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -111,10 +111,10 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			uint32 * width = (uint32 *)get_physical_address(tid, vptr);
+			uint32 * width = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			uint32 * height = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_window_size(tid, wid, width, height);
+			uint32 * height = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetWindowSize(tid, wid, width, height);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -122,8 +122,8 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			CASCTEXT title = (CASCTEXT)get_physical_address(tid, vptr);
-			BOOL r = gui_set_window_title(tid, wid, title);
+			CASCTEXT title = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiSetWindowTitle(tid, wid, title);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -131,8 +131,8 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			ASCTEXT title = (ASCTEXT)get_physical_address(tid, vptr);
-			BOOL r = gui_get_window_title(tid, wid, title);
+			ASCTEXT title = (ASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetWindowTitle(tid, wid, title);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -140,8 +140,8 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			uint32 * key = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_has_key(tid, wid, key);
+			uint32 * key = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiHasKey(tid, wid, key);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -149,8 +149,8 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = VOID_PTR_SPARAM(sparams->param1);
-			uint32 * key = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_key(tid, wid, key);
+			uint32 * key = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetKey(tid, wid, key);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -159,26 +159,26 @@ _ScGuiProcess(	IN uint32 func,
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param1);
-			int32 * x = (int32 *)get_physical_address(tid, vptr);
+			int32 * x = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			int32 * y = (int32 *)get_physical_address(tid, vptr);
+			int32 * y = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param3);
-			uint32 * button = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_mouse(tid, wid, x, y, button);
+			uint32 * button = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetMouse(tid, wid, x, y, button);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
 		case SCALL_GUI_FOCUSED:
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
-			BOOL r = gui_focused(tid, wid);
+			BOOL r = GuiIsFocused(tid, wid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
 		case SCALL_GUI_FOCUS:
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
-			BOOL r = gui_focus(tid, wid);
+			BOOL r = GuiFocus(tid, wid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -188,7 +188,7 @@ _ScGuiProcess(	IN uint32 func,
 			int32 x = INT32_SPARAM(sparams->param1);
 			int32 y = INT32_SPARAM(sparams->param2);
 			uint32 pixel = UINT32_SPARAM(sparams->param3);
-			BOOL r = gui_set_pixel(tid, wid, x, y, pixel);
+			BOOL r = GuiSetPixel(tid, wid, x, y, pixel);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -199,8 +199,8 @@ _ScGuiProcess(	IN uint32 func,
 			int32 y = INT32_SPARAM(sparams->param2);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param3);
-			uint32 * pixel = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_pixel(tid, wid, x, y, pixel);
+			uint32 * pixel = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetPixel(tid, wid, x, y, pixel);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -212,7 +212,7 @@ _ScGuiProcess(	IN uint32 func,
 			int32 width = INT32_SPARAM(sparams->param3);
 			int32 height = INT32_SPARAM(sparams->param4);
 			uint32 pixel = UINT32_SPARAM(sparams->param5);
-			BOOL r = gui_draw_rect(tid, wid, x, y, width, height, pixel);
+			BOOL r = GuiDrawRect(tid, wid, x, y, width, height, pixel);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -225,11 +225,11 @@ _ScGuiProcess(	IN uint32 func,
 			int32 height = INT32_SPARAM(sparams->param4);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param5);
-			vptr = get_physical_address(tid, vptr);
+			vptr = TaskmgrConvertLAddrToPAddr(tid, vptr);
 			Image img;
 			memcpy(&img, vptr, sizeof(Image));
-			img.data = (uint8 *)get_physical_address(tid, img.data);
-			BOOL r = gui_draw_image(tid, wid, x, y, width, height, &img);
+			img.data = (uint8 *)TaskmgrConvertLAddrToPAddr(tid, img.data);
+			BOOL r = GuiDrawImage(tid, wid, x, y, width, height, &img);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -240,9 +240,9 @@ _ScGuiProcess(	IN uint32 func,
 			int32 y = INT32_SPARAM(sparams->param2);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param3);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			CASCTEXT text = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			uint32 color = UINT32_SPARAM(sparams->param4);
-			BOOL r = gui_draw_text(tid, wid, x, y, text, color);
+			BOOL r = GuiDrawText(tid, wid, x, y, text, color);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -254,7 +254,7 @@ _ScGuiProcess(	IN uint32 func,
 			int32 endx = INT32_SPARAM(sparams->param3);
 			int32 endy = INT32_SPARAM(sparams->param4);
 			uint32 color = UINT32_SPARAM(sparams->param5);
-			BOOL r = gui_draw_line(tid, wid, startx, starty, endx, endy, color);
+			BOOL r = GuiDrawLine(tid, wid, startx, starty, endx, endy, color);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -263,12 +263,12 @@ _ScGuiProcess(	IN uint32 func,
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param1);
-			int32 * cid = (int32 *)get_physical_address(tid, vptr);
+			int32 * cid = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			uint32 * type = (uint32 *)get_physical_address(tid, vptr);
+			uint32 * type = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param3);
-			void ** data = (void **)get_physical_address(tid, vptr);
-			BOOL r = gui_pop_message(tid, wid, cid, type, data, NULL);
+			void ** data = (void **)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiPopMessage(tid, wid, cid, type, data, NULL);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -278,8 +278,8 @@ _ScGuiProcess(	IN uint32 func,
 			int32 cid = INT32_SPARAM(sparams->param1);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
-			BOOL r = gui_set_text(tid, wid, cid, text);
+			CASCTEXT text = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiSetText(tid, wid, cid, text);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -289,16 +289,16 @@ _ScGuiProcess(	IN uint32 func,
 			int32 cid = INT32_SPARAM(sparams->param1);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			ASCTEXT text = (ASCTEXT)get_physical_address(tid, vptr);
+			ASCTEXT text = (ASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			uint32 bufsz = UINT32_SPARAM(sparams->param3);
-			BOOL r = gui_get_text(tid, wid, cid, text, bufsz);
+			BOOL r = GuiGetText(tid, wid, cid, text, bufsz);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
 		case SCALL_GUI_UPDATE:
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
-			BOOL r = gui_update(tid, wid);
+			BOOL r = GuiUpdate(tid, wid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -307,26 +307,26 @@ _ScGuiProcess(	IN uint32 func,
 			int32 wid = INT32_SPARAM(sparams->param0);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param1);
-			uint8 * txtbuf = (uint8 *)get_physical_address(tid, vptr);
+			uint8 * txtbuf = (uint8 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			uint32 row = UINT32_SPARAM(sparams->param2);
 			uint32 column = UINT32_SPARAM(sparams->param3);
 			uint32 curx = UINT32_SPARAM(sparams->param4);
 			uint32 cury = UINT32_SPARAM(sparams->param5);
-			BOOL r = gui_render_text_buffer(tid, wid, txtbuf, row, column, curx, cury);
+			BOOL r = GuiRenderTextBuffer(tid, wid, txtbuf, row, column, curx, cury);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
 		case SCALL_GUI_FREE_MSGDATA:
 		{
 			void * data = VOID_PTR_SPARAM(sparams->param0);
-			gui_free_msgdata(tid, data);
+			GuiFreeMessageData(tid, data);
 			break;
 		}
 		case SCALL_GUI_ENABLE_CONTROL:
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			int32 cid = INT32_SPARAM(sparams->param1);
-			BOOL r = gui_enable_control(tid, wid, cid);
+			BOOL r = GuiEnableControl(tid, wid, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -334,7 +334,7 @@ _ScGuiProcess(	IN uint32 func,
 		{
 			int32 wid = INT32_SPARAM(sparams->param0);
 			int32 cid = INT32_SPARAM(sparams->param1);
-			BOOL r = gui_disable_control(tid, wid, cid);
+			BOOL r = GuiDisableControl(tid, wid, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -344,8 +344,8 @@ _ScGuiProcess(	IN uint32 func,
 			int32 cid = INT32_SPARAM(sparams->param1);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			uint32 * width = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_width(tid, wid, cid, width);
+			uint32 * width = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetWidth(tid, wid, cid, width);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -355,8 +355,8 @@ _ScGuiProcess(	IN uint32 func,
 			int32 cid = INT32_SPARAM(sparams->param1);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param2);
-			uint32 * height = (uint32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_get_height(tid, wid, cid, height);
+			uint32 * height = (uint32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiGetHeight(tid, wid, cid, height);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -368,10 +368,10 @@ _ScGuiProcess(	IN uint32 func,
 			int32 y = INT32_SPARAM(sparams->param2);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param3);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			CASCTEXT text = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param4);
-			int32 * cid = (int32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_new_button(tid, wid, x, y, text, cid);
+			int32 * cid = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiNewButton(tid, wid, x, y, text, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -384,10 +384,10 @@ _ScGuiProcess(	IN uint32 func,
 			int32 y = INT32_SPARAM(sparams->param2);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param3);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			CASCTEXT text = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param4);
-			int32 * cid = (int32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_new_label(tid, wid, x, y, text, cid);
+			int32 * cid = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiNewLabel(tid, wid, x, y, text, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -401,10 +401,10 @@ _ScGuiProcess(	IN uint32 func,
 			int32 y = INT32_SPARAM(sparams->param3);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param4);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			CASCTEXT text = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			vptr = VOID_PTR_SPARAM(sparams->param5);
-			int32 * cid = (int32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_new_list(tid, wid, count, x, y, text, cid);
+			int32 * cid = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiNewList(tid, wid, count, x, y, text, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -415,8 +415,8 @@ _ScGuiProcess(	IN uint32 func,
 			uint32 index = UINT32_SPARAM(sparams->param2);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param3);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
-			BOOL r = gui_set_list_text(tid, wid, cid, index, text);
+			CASCTEXT text = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiSetListText(tid, wid, cid, index, text);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -425,7 +425,7 @@ _ScGuiProcess(	IN uint32 func,
 			int32 wid = INT32_SPARAM(sparams->param0);
 			int32 cid = INT32_SPARAM(sparams->param1);
 			uint32 index = UINT32_SPARAM(sparams->param2);
-			BOOL r = gui_enable_list_item(tid, wid, cid, index);
+			BOOL r = GuiEnableListItem(tid, wid, cid, index);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -434,7 +434,7 @@ _ScGuiProcess(	IN uint32 func,
 			int32 wid = INT32_SPARAM(sparams->param0);
 			int32 cid = INT32_SPARAM(sparams->param1);
 			uint32 index = UINT32_SPARAM(sparams->param2);
-			BOOL r = gui_disable_list_item(tid, wid, cid, index);
+			BOOL r = GuiDisableListItem(tid, wid, cid, index);
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -449,11 +449,11 @@ _ScGuiProcess(	IN uint32 func,
 			uint32 column = UINT32_SPARAM(sparams->param4);
 			void * vptr = NULL;
 			vptr = VOID_PTR_SPARAM(sparams->param5);
-			CASCTEXT text = (CASCTEXT)get_physical_address(tid, vptr);
+			CASCTEXT text = (CASCTEXT)TaskmgrConvertLAddrToPAddr(tid, vptr);
 			uint32 style = UINT32_SPARAM(sparams->param6);
 			vptr = VOID_PTR_SPARAM(sparams->param7);
-			int32 * cid = (int32 *)get_physical_address(tid, vptr);
-			BOOL r = gui_new_edit(tid, wid, x, y, row, column, text, style, cid);
+			int32 * cid = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+			BOOL r = GuiNewEdit(tid, wid, x, y, row, column, text, style, cid);
 			sparams->param0 = SPARAM(r);
 			break;
 		}

@@ -20,219 +20,219 @@ struct CacheInfo
 
 extern 
 void
-init_cpu(void);
+CpuInit(void);
 
 extern
 void
-get_vendor_id_string(OUT int8 * buffer);
+CpuGetVendorIdString(OUT int8 * buffer);
 
 extern
 void
-get_brand_string(OUT int8 * buffer);
+CpuGetBrandString(OUT int8 * buffer);
 
 extern
 BOOL
-get_cpu_L1(OUT struct CacheInfo * cache_info);
+CpuGetL1(OUT struct CacheInfo * cache_info);
 
 extern
 BOOL
-get_cpu_L2(OUT struct CacheInfo * cache_info);
+CpuGetL2(OUT struct CacheInfo * cache_info);
 
 extern
 BOOL
-get_cpu_L3(OUT struct CacheInfo * cache_info);
+CpuGetL3(OUT struct CacheInfo * cache_info);
 
 extern
 BOOL
-cpu_write_to_file(IN const int8 * path);
+CpuWriteInfoToFile(IN const int8 * path);
 
 
 extern uint32 cpu_feature_ecx, cpu_feature_edx;
 
 //==================== ECX ====================
-#define	cpu_feature_sse3()	\
+#define	CPU_FEATURE_SSE3()	\
 	((cpu_feature_ecx >> 0) & 0x00000001)
 
-#define	cpu_feature_pclmul()	\
+#define	CPU_FEATURE_PCLMUL()	\
 	((cpu_feature_ecx >> 1) & 0x00000001)
 
-#define	cpu_feature_dtes64()	\
+#define	CPU_FEATURE_DTES64()	\
 	((cpu_feature_ecx >> 2) & 0x00000001)
 
-#define	cpu_feature_monitor()	\
+#define	CPU_FEATURE_MONITOR()	\
 	((cpu_feature_ecx >> 3) & 0x00000001)
 
-#define	cpu_feature_ds_cpl()	\
+#define	CPU_FEATURE_DS_CPL()	\
 	((cpu_feature_ecx >> 4) & 0x00000001)
 
-#define	cpu_feature_vmx()	\
+#define	CPU_FEATURE_VMX()	\
 	((cpu_feature_ecx >> 5) & 0x00000001)
 
-#define	cpu_feature_smx()	\
+#define	CPU_FEATURE_SMX()	\
 	((cpu_feature_ecx >> 6) & 0x00000001)
 
-#define	cpu_feature_est()	\
+#define	CPU_FEATURE_EST()	\
 	((cpu_feature_ecx >> 7) & 0x00000001)
 
-#define	cpu_feature_tm2()	\
+#define	CPU_FEATURE_TM2()	\
 	((cpu_feature_ecx >> 8) & 0x00000001)
 
-#define	cpu_feature_ssse3()	\
+#define	CPU_FEATURE_SSSE3()	\
 	((cpu_feature_ecx >> 9) & 0x00000001)
 
-#define	cpu_feature_cid()	\
+#define	CPU_FEATURE_CID()	\
 	((cpu_feature_ecx >> 10) & 0x00000001)
 
-#define	cpu_feature_fma()	\
+#define	CPU_FEATURE_FMA()	\
 	((cpu_feature_ecx >> 12) & 0x00000001)
 
-#define	cpu_feature_cx16()	\
+#define	CPU_FEATURE_CX16()	\
 	((cpu_feature_ecx >> 13) & 0x00000001)
 
-#define	cpu_feature_etprd()	\
+#define	CPU_FEATURE_ETPRD()	\
 	((cpu_feature_ecx >> 14) & 0x00000001)
 
-#define	cpu_feature_pdcm()	\
+#define	CPU_FEATURE_PDCM()	\
 	((cpu_feature_ecx >> 15) & 0x00000001)
 
 //ECX的位16为保留位。
 
-#define	cpu_feature_pcid()	\
+#define	CPU_FEATURE_PCID()	\
 	((cpu_feature_ecx >> 17) & 0x00000001)
 
-#define	cpu_feature_dca()	\
+#define	CPU_FEATURE_DCA()	\
 	((cpu_feature_ecx >> 18) & 0x00000001)
 
-#define	cpu_feature_sse4_1()	\
+#define	CPU_FEATURE_SSE4_1()	\
 	((cpu_feature_ecx >> 19) & 0x00000001)
 
-#define	cpu_feature_sse4_2()	\
+#define	CPU_FEATURE_SSE4_2()	\
 	((cpu_feature_ecx >> 20) & 0x00000001)
 
-#define	cpu_feature_x2apic()	\
+#define	CPU_FEATURE_X2APIC()	\
 	((cpu_feature_ecx >> 21) & 0x00000001)
 
-#define	cpu_feature_movbe()	\
+#define	CPU_FEATURE_MOVBE()	\
 	((cpu_feature_ecx >> 22) & 0x00000001)
 
-#define	cpu_feature_popcnt()	\
+#define	CPU_FEATURE_POPCNT()	\
 	((cpu_feature_ecx >> 23) & 0x00000001)
 
-#define	cpu_feature_tsc_deadline()	\
+#define	CPU_FEATURE_TSC_DEADLINE()	\
 	((cpu_feature_ecx >> 24) & 0x00000001)
 
-#define	cpu_feature_aes()	\
+#define	CPU_FEATURE_AES()	\
 	((cpu_feature_ecx >> 25) & 0x00000001)
 
-#define	cpu_feature_xsave()	\
+#define	CPU_FEATURE_XSAVE()	\
 	((cpu_feature_ecx >> 26) & 0x00000001)
 
-#define	cpu_feature_osxsave()	\
+#define	CPU_FEATURE_OSXSAVE()	\
 	((cpu_feature_ecx >> 27) & 0x00000001)
 
-#define	cpu_feature_avx()	\
+#define	CPU_FEATURE_AVX()	\
 	((cpu_feature_ecx >> 28) & 0x00000001)
 
-#define	cpu_feature_f16c()	\
+#define	CPU_FEATURE_F16C()	\
 	((cpu_feature_ecx >> 29) & 0x00000001)
 
-#define	cpu_feature_rdrand()	\
+#define	CPU_FEATURE_RDRAND()	\
 	((cpu_feature_ecx >> 30) & 0x00000001)
 
 //ECX的位31为未被使用。
 
 //==================== EDX ====================
-#define	cpu_feature_fpu()	\
+#define	CPU_FEATURE_FPU()	\
 	((cpu_feature_edx >> 0) & 0x00000001)
 
-#define	cpu_feature_vme()	\
+#define	CPU_FEATURE_VME()	\
 	((cpu_feature_edx >> 1) & 0x00000001)
 
-#define	cpu_feature_de()	\
+#define	CPU_FEATURE_DE()	\
 	((cpu_feature_edx >> 2) & 0x00000001)
 
-#define	cpu_feature_pse()	\
+#define	CPU_FEATURE_PSE()	\
 	((cpu_feature_edx >> 3) & 0x00000001)
 
-#define	cpu_feature_tsc()	\
+#define	CPU_FEATURE_TSC()	\
 	((cpu_feature_edx >> 4) & 0x00000001)
 
-#define	cpu_feature_msr()	\
+#define	CPU_FEATURE_MSR()	\
 	((cpu_feature_edx >> 5) & 0x00000001)
 
-#define	cpu_feature_pae()	\
+#define	CPU_FEATURE_PAE()	\
 	((cpu_feature_edx >> 6) & 0x00000001)
 
-#define	cpu_feature_mce()	\
+#define	CPU_FEATURE_MCE()	\
 	((cpu_feature_edx >> 7) & 0x00000001)
 
-#define	cpu_feature_cxb()	\
+#define	CPU_FEATURE_CXB()	\
 	((cpu_feature_edx >> 8) & 0x00000001)
 
-#define	cpu_feature_apic()	\
+#define	CPU_FEATURE_APIC()	\
 	((cpu_feature_edx >> 9) & 0x00000001)
 
 //EDX的位10为保留位。
 
-#define	cpu_feature_sep()	\
+#define	CPU_FEATURE_SEP()	\
 	((cpu_feature_edx >> 11) & 0x00000001)
 
-#define	cpu_feature_mtrr()	\
+#define	CPU_FEATURE_MTRR()	\
 	((cpu_feature_edx >> 12) & 0x00000001)
 
-#define	cpu_feature_pge()	\
+#define	CPU_FEATURE_PGE()	\
 	((cpu_feature_edx >> 13) & 0x00000001)
 
-#define	cpu_feature_mca()	\
+#define	CPU_FEATURE_MCA()	\
 	((cpu_feature_edx >> 14) & 0x00000001)
 
-#define	cpu_feature_cmov()	\
+#define	CPU_FEATURE_CMOV()	\
 	((cpu_feature_edx >> 15) & 0x00000001)
 
-#define	cpu_feature_pat()	\
+#define	CPU_FEATURE_PAT()	\
 	((cpu_feature_edx >> 16) & 0x00000001)
 
-#define	cpu_feature_pse36()	\
+#define	CPU_FEATURE_PSE36()	\
 	((cpu_feature_edx >> 17) & 0x00000001)
 
-#define	cpu_feature_pn()	\
+#define	CPU_FEATURE_PN()	\
 	((cpu_feature_edx >> 18) & 0x00000001)
 
-#define	cpu_feature_clf()	\
+#define	CPU_FEATURE_CLF()	\
 	((cpu_feature_edx >> 19) & 0x00000001)
 
 //EDX的位20为保留位。
 
-#define	cpu_feature_dtes()	\
+#define	CPU_FEATURE_DTES()	\
 	((cpu_feature_edx >> 21) & 0x00000001)
 
-#define	cpu_feature_acpi()	\
+#define	CPU_FEATURE_ACPI()	\
 	((cpu_feature_edx >> 22) & 0x00000001)
 
-#define	cpu_feature_mmx()	\
+#define	CPU_FEATURE_MMX()	\
 	((cpu_feature_edx >> 23) & 0x00000001)
 
-#define	cpu_feature_fxsr()	\
+#define	CPU_FEATURE_FXSR()	\
 	((cpu_feature_edx >> 24) & 0x00000001)
 
-#define	cpu_feature_sse()	\
+#define	CPU_FEATURE_SSE()	\
 	((cpu_feature_edx >> 25) & 0x00000001)
 
-#define	cpu_feature_sse2()	\
+#define	CPU_FEATURE_SSE2()	\
 	((cpu_feature_edx >> 26) & 0x00000001)
 
-#define	cpu_feature_ss()	\
+#define	CPU_FEATURE_SS()	\
 	((cpu_feature_edx >> 27) & 0x00000001)
 
-#define	cpu_feature_htt()	\
+#define	CPU_FEATURE_HTT()	\
 	((cpu_feature_edx >> 28) & 0x00000001)
 
-#define	cpu_feature_tm1()	\
+#define	CPU_FEATURE_TM1()	\
 	((cpu_feature_edx >> 29) & 0x00000001)
 
 //EDX的位30为保留位。
 
-#define	cpu_feature_pbe()	\
+#define	CPU_FEATURE_PBE()	\
 	((cpu_feature_edx >> 31) & 0x00000001)
 
 #endif

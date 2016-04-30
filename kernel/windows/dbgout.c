@@ -41,7 +41,7 @@ void
 WinDbgoutEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	switch(params->event_type)
 	{
 		case WINDOW_EVENT_WILL_CLOSE:
@@ -81,20 +81,21 @@ WinDbgoutInit(void)
 	_edt_dbgout->y = 0;
 	uint32 w = GET_EDIT_WIDTH(_edt_dbgout);
 	uint32 h = GET_EDIT_HEIGHT(_edt_dbgout);
-	_window = create_window(w, h,
-							0xffffffff,
-							WINDOW_STYLE_CLOSE
-								| WINDOW_STYLE_MINIMIZE
-								| WINDOW_STYLE_NO_WMGR,
-							_TITLE,
-							WinDbgoutEvent);
+	_window = ScrCreateWindow(
+		w, h,
+		0xffffffff,
+		WINDOW_STYLE_CLOSE
+			| WINDOW_STYLE_MINIMIZE
+			| WINDOW_STYLE_NO_WMGR,
+		_TITLE,
+		WinDbgoutEvent);
 	if(_window == NULL)
 		goto err;
 	return;
 err:
 	if(_window != NULL)
 	{
-		destroy_window(_window);
+		ScrDestroyWindow(_window);
 		_window = NULL;
 	}
 	if(_edt_dbgout != NULL)

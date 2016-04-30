@@ -85,9 +85,9 @@ struct FADT
 };
 
 BOOL
-fadt_init(void);
+FadtInit(void);
 
 struct FADT *
-fadt_get_table(void);
+FadtGetTable(void);
 
 #endif

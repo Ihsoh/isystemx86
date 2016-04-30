@@ -16,7 +16,7 @@
 static struct RSDT * rsdt = NULL;
 
 /**
-	@Function:		rsdt_init
+	@Function:		RsdtInit
 	@Access:		Public
 	@Description:
 		初始化 RSDT。
@@ -26,25 +26,25 @@ static struct RSDT * rsdt = NULL;
 			初始化成功则返回 TRUE，否则返回 FALSE。
 */
 BOOL
-rsdt_init(void)
+RsdtInit(void)
 {
 	if(rsdt != NULL)
 		return TRUE;
-	if(!rsdp_init())
+	if(!RsdpInit())
 		return FALSE;
-	struct RSDPDescriptor2_0 * desc = rsdp_get_desc();
+	struct RSDPDescriptor2_0 * desc = RsdpGetDesc();
 	if(desc == NULL)
 		return FALSE;
 	struct ACPISDTHeader * header = (struct ACPISDTHeader *)desc->part1_0.rsdt_addr;
 	if(header == NULL)
 		return FALSE;
-	rsdt = alloc_memory(header->length);
+	rsdt = MemAlloc(header->length);
 	memcpy(rsdt, header, header->length);
 	return TRUE;
 }
 
 /**
-	@Function:		rsdt_free
+	@Function:		RsdtFree
 	@Access:		Public
 	@Description:
 		释放 RSDT。
@@ -52,14 +52,14 @@ rsdt_init(void)
 	@Return:
 */
 void
-rsdt_free(void)
+RsdtFree(void)
 {
 	if(rsdt != NULL)
-		free_memory(rsdt);
+		MemFree(rsdt);
 }
 
 /**
-	@Function:		rsdt_get_table
+	@Function:		RsdtGetTable
 	@Access:		Public
 	@Description:
 		获取 RSDT。
@@ -69,13 +69,13 @@ rsdt_free(void)
 			成功返回 RSDT，否则返回 NULL。		
 */
 struct RSDT *
-rsdt_get_table(void)
+RsdtGetTable(void)
 {
 	return rsdt;
 }
 
 /**
-	@Function:		rsdt_find_sdt
+	@Function:		RsdtFindSDT
 	@Access:		Public
 	@Description:
 		查找一个指定的 SDT。
@@ -85,7 +85,7 @@ rsdt_get_table(void)
 			成功返回指定的 SDT，否则返回 NULL。		
 */
 struct ACPISDTHeader *
-rsdt_find_sdt(IN int8 * sign)
+RsdtFindSDT(IN int8 * sign)
 {
 	if(sign == NULL || rsdt == NULL)
 		return NULL;

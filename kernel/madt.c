@@ -25,7 +25,7 @@ static struct MADTEntryType1 type1_entries[MAX_MADT_ENTRY_COUNT];
 static struct MADTEntryType2 type2_entries[MAX_MADT_ENTRY_COUNT];
 
 /**
-	@Function:		release_resource
+	@Function:		_MadtReleaseResource
 	@Access:		Private
 	@Description:
 		释放该代码文件模块所占用资源。
@@ -34,11 +34,11 @@ static struct MADTEntryType2 type2_entries[MAX_MADT_ENTRY_COUNT];
 */
 static
 void
-release_resource(void)
+_MadtReleaseResource(void)
 {
 	if(madt != NULL)
 	{
-		free_memory(madt);
+		MemFree(madt);
 		madt = NULL;
 	}
 	type0_count = 0;
@@ -47,7 +47,7 @@ release_resource(void)
 }
 
 /**
-	@Function:		madt_init
+	@Function:		MadtInit
 	@Access:		Public
 	@Description:
 		初始化 MADT 模块。该模块会读取 MADT(名称为"APIC")。
@@ -61,14 +61,14 @@ release_resource(void)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-madt_init(void)
+MadtInit(void)
 {
-	if(!rsdt_init())
+	if(!RsdtInit())
 		return FALSE;
-	struct ACPISDTHeader * madt_header = rsdt_find_sdt("APIC");
+	struct ACPISDTHeader * madt_header = RsdtFindSDT("APIC");
 	if(madt_header == NULL)
 		return FALSE;
-	madt = (struct MADT *)alloc_memory(madt_header->length);
+	madt = (struct MADT *)MemAlloc(madt_header->length);
 	if(madt == NULL)
 		return FALSE;
 	memcpy(madt, madt_header, madt_header->length);
@@ -81,7 +81,7 @@ madt_init(void)
 			case 0:
 				if(type0_count == MAX_MADT_ENTRY_COUNT)
 				{
-					release_resource();
+					_MadtReleaseResource();
 					return FALSE;
 				}
 				memcpy(	type0_entries + type0_count, 
@@ -92,7 +92,7 @@ madt_init(void)
 			case 1:
 				if(type1_count == MAX_MADT_ENTRY_COUNT)
 				{
-					release_resource();
+					_MadtReleaseResource();
 					return FALSE;
 				}
 				memcpy(	type1_entries + type1_count, 
@@ -103,7 +103,7 @@ madt_init(void)
 			case 2:
 				if(type2_count == MAX_MADT_ENTRY_COUNT)
 				{
-					release_resource();
+					_MadtReleaseResource();
 					return FALSE;
 				}
 				memcpy(	type2_entries + type2_count, 
@@ -112,7 +112,7 @@ madt_init(void)
 				type2_count++;
 				break;
 			default:
-				release_resource();
+				_MadtReleaseResource();
 				return FALSE;
 		}
 		len -= eh->length;
@@ -120,14 +120,14 @@ madt_init(void)
 	}
 	if(len < 0)
 	{
-		release_resource();
+		_MadtReleaseResource();
 		return FALSE;
 	}
 	return TRUE;
 }
 
 /**
-	@Function:		madt_get_type0_count
+	@Function:		MadtGetType0Count
 	@Access:		Public
 	@Description:
 		获取 Processor Local APIC 的 Entry 的数量。
@@ -137,7 +137,7 @@ madt_init(void)
 			Processor Local APIC 的 Entry 的数量。
 */
 uint32
-madt_get_type0_count(void)
+MadtGetType0Count(void)
 {
 	if(madt == NULL)
 		return 0;
@@ -145,7 +145,7 @@ madt_get_type0_count(void)
 }
 
 /**
-	@Function:		madt_get_type1_count
+	@Function:		MadtGetType1Count
 	@Access:		Public
 	@Description:
 		获取 I/O APIC 的 Entry 的数量。
@@ -155,7 +155,7 @@ madt_get_type0_count(void)
 			I/O APIC 的 Entry 的数量。
 */
 uint32
-madt_get_type1_count(void)
+MadtGetType1Count(void)
 {
 	if(madt == NULL)
 		return 0;
@@ -163,7 +163,7 @@ madt_get_type1_count(void)
 }
 
 /**
-	@Function:		madt_get_type2_count
+	@Function:		MadtGetType2Count
 	@Access:		Public
 	@Description:
 		获取 Interrupt Source Override 的 Entry 的数量。
@@ -173,7 +173,7 @@ madt_get_type1_count(void)
 			Interrupt Source Override 的 Entry 的数量。
 */
 uint32
-madt_get_type2_count(void)
+MadtGetType2Count(void)
 {
 	if(madt == NULL)
 		return 0;
@@ -181,7 +181,7 @@ madt_get_type2_count(void)
 }
 
 /**
-	@Function:		madt_get_type0_entry
+	@Function:		MadtGetType0Entry
 	@Access:		Public
 	@Description:
 		通过索引获取指定的 Processor Local APIC 的 Entry。
@@ -193,7 +193,7 @@ madt_get_type2_count(void)
 			Processor Local APIC 的 Entry。
 */
 struct MADTEntryType0 *
-madt_get_type0_entry(IN uint32 index)
+MadtGetType0Entry(IN uint32 index)
 {
 	if(madt == NULL || index >= type0_count)
 		return NULL;
@@ -201,7 +201,7 @@ madt_get_type0_entry(IN uint32 index)
 }
 
 /**
-	@Function:		madt_get_type1_entry
+	@Function:		MadtGetType1Entry
 	@Access:		Public
 	@Description:
 		通过索引获取指定的 I/O APIC 的 Entry。
@@ -213,7 +213,7 @@ madt_get_type0_entry(IN uint32 index)
 			I/O APIC 的 Entry。
 */
 struct MADTEntryType1 *
-madt_get_type1_entry(IN uint32 index)
+MadtGetType1Entry(IN uint32 index)
 {
 	if(madt == NULL || index >= type1_count)
 		return NULL;
@@ -221,7 +221,7 @@ madt_get_type1_entry(IN uint32 index)
 }
 
 /**
-	@Function:		madt_get_type2_entry
+	@Function:		MadtGetType2Entry
 	@Access:		Public
 	@Description:
 		通过索引获取指定的 Interrupt Source Override 的 Entry。
@@ -233,7 +233,7 @@ madt_get_type1_entry(IN uint32 index)
 			Interrupt Source Override 的 Entry。
 */
 struct MADTEntryType2 *
-madt_get_type2_entry(IN uint32 index)
+MadtGetType2Entry(IN uint32 index)
 {
 	if(madt == NULL || index >= type2_count)
 		return NULL;
@@ -241,7 +241,7 @@ madt_get_type2_entry(IN uint32 index)
 }
 
 /**
-	@Function:		madt_get
+	@Function:		MadtGet
 	@Access:		Public
 	@Description:
 		获取 MADT。
@@ -251,13 +251,13 @@ madt_get_type2_entry(IN uint32 index)
 			MADT。
 */
 struct MADT *
-madt_get(void)
+MadtGet(void)
 {
 	return madt;
 }
 
 /**
-	@Function:		madt_write_to_file
+	@Function:		MadtWriteToFile
 	@Access:		Public
 	@Description:
 		把 MADT 保存到指定文件。
@@ -269,7 +269,7 @@ madt_get(void)
 			返回 TRUE 则成功，否则失败。
 */
 BOOL
-madt_write_to_file(IN const int8 * path)
+MadtWriteToFile(IN const int8 * path)
 {
 	if(madt == NULL)
 		return FALSE;
@@ -279,10 +279,10 @@ madt_write_to_file(IN const int8 * path)
 	Ifs1WriteFile(fptr, "", 0);
 	int8 buffer[1024];
 	uint32 ui;
-	uint32 count = madt_get_type0_count();
+	uint32 count = MadtGetType0Count();
 	for(ui = 0; ui < count; ui++)
 	{
-		struct MADTEntryType0 * e = madt_get_type0_entry(ui);
+		struct MADTEntryType0 * e = MadtGetType0Entry(ui);
 		sprintf_s(	buffer, 
 					sizeof(buffer), 
 					"Type0Entry: %d, %d, %d\n",
@@ -291,10 +291,10 @@ madt_write_to_file(IN const int8 * path)
 					e->flags);
 		Ifs1AppendFile(fptr, buffer, strlen(buffer));
 	}
-	count = madt_get_type1_count();
+	count = MadtGetType1Count();
 	for(ui = 0; ui < count; ui++)
 	{
-		struct MADTEntryType1 * e = madt_get_type1_entry(ui);
+		struct MADTEntryType1 * e = MadtGetType1Entry(ui);
 		sprintf_s(	buffer, 
 					sizeof(buffer), 
 					"Type1Entry: %d, %X, %X\n",
@@ -303,10 +303,10 @@ madt_write_to_file(IN const int8 * path)
 					e->global_sys_int_base);
 		Ifs1AppendFile(fptr, buffer, strlen(buffer));
 	}
-	count = madt_get_type2_count();
+	count = MadtGetType2Count();
 	for(ui = 0; ui < count; ui++)
 	{
-		struct MADTEntryType2 * e = madt_get_type2_entry(ui);
+		struct MADTEntryType2 * e = MadtGetType2Entry(ui);
 		sprintf_s(	buffer, 
 					sizeof(buffer), 
 					"Type2Entry: %d, %d, %X, %X\n",

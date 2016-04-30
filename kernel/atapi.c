@@ -13,7 +13,7 @@
 #include "kernel.h"
 #include "cmlock.h"
 
-#define	MAX_RETRY	0x100
+#define	MAX_RETRY		0x100
 #define	MAX_LOCK_RETRY	0x00100000
 
 #define	_LOCK_TID_NONE		-2	// 没有任何任务获取到锁。
@@ -70,10 +70,10 @@ _AtapiLock(void)
 	if(_lock)
 		return FALSE;
 
-	common_lock();
+	COMMON_LOCK();
 	_lock = TRUE;
-	_lock_tid = get_running_tid();
-	common_unlock();
+	_lock_tid = TaskmgrGetRunningTaskID();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 

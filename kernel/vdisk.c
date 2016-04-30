@@ -17,7 +17,7 @@ static uint8 * vdiska = NULL;
 static uint8 * vdiskb = NULL;
 
 /**
-	@Function:		init_vdisk
+	@Function:		VdskInit
 	@Access:		Public
 	@Description:
 		初始化虚拟硬盘。
@@ -27,19 +27,19 @@ static uint8 * vdiskb = NULL;
 	@Return:
 */
 void
-init_vdisk(IN int8 * symbol)
+VdskInit(IN int8 * symbol)
 {
 	uint32 ui;
 	if(strcmp(symbol, "VA") == 0)
 	{
-		vdiska = (uint8 *)alloc_memory(VDISK_BUFFER_SIZE);
+		vdiska = (uint8 *)MemAlloc(VDISK_BUFFER_SIZE);
 		if(vdiska != NULL)
 			for(ui = 0; ui < VDISK_BUFFER_SIZE; ui++)
 				vdiska[ui] = 0;	
 	}
 	else if(strcmp(symbol, "VB") == 0)
 	{
-		vdiskb = (uint8 *)alloc_memory(VDISK_BUFFER_SIZE);
+		vdiskb = (uint8 *)MemAlloc(VDISK_BUFFER_SIZE);
 		if(vdiskb != NULL)
 			for(ui = 0; ui < VDISK_BUFFER_SIZE; ui++)
 				vdiskb[ui] = 0;	
@@ -47,7 +47,7 @@ init_vdisk(IN int8 * symbol)
 }
 
 /**
-	@Function:		destroy_vdisk
+	@Function:		VdskDestroy
 	@Access:		Public
 	@Description:
 		销毁指定虚拟硬盘资源。
@@ -57,20 +57,20 @@ init_vdisk(IN int8 * symbol)
 	@Return:	
 */
 void
-destroy_vdisk(IN int8 * symbol)
+VdskDestroy(IN int8 * symbol)
 {
 	if(strcmp(symbol, "VA") == 0)
 	{
 		if(vdiskb != NULL)
-			free_memory(vdiska);
+			MemFree(vdiska);
 	}	
 	else if(strcmp(symbol, "VB") == 0)
 		if(vdiskb != NULL)
-			free_memory(vdiskb);
+			MemFree(vdiskb);
 }
 
 /**
-	@Function:		sector_count_v
+	@Function:		VdskGetSectorCount
 	@Access:		Public
 	@Description:
 		获取虚拟硬盘的扇区数量。
@@ -80,13 +80,13 @@ destroy_vdisk(IN int8 * symbol)
 			扇区数量。		
 */
 uint32
-sector_count_v(void)
+VdskGetSectorCount(void)
 {
 	return VDISK_SECTORS;
 }
 
 /**
-	@Function:		get_vdisk_size
+	@Function:		VdskGetSize
 	@Access:		Public
 	@Description:
 		获取指定虚拟硬盘容量，单位为KB。
@@ -98,7 +98,7 @@ sector_count_v(void)
 			指定虚拟硬盘容量。		
 */
 uint32
-get_vdisk_size(IN int8 * symbol)
+VdskGetSize(IN int8 * symbol)
 {
 	if(strcmp(symbol, "VA") == 0)
 		if(vdiska == NULL)
@@ -115,7 +115,7 @@ get_vdisk_size(IN int8 * symbol)
 }
 
 /**
-	@Function:		read_sector_v
+	@Function:		VdskReadSector
 	@Access:		Public
 	@Description:
 		读取一个扇区的数据。
@@ -131,7 +131,7 @@ get_vdisk_size(IN int8 * symbol)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-read_sector_v(	IN int8 * symbol, 
+VdskReadSector(	IN int8 * symbol, 
 				IN uint32 pos, 
 				OUT uint8 * buffer)
 {
@@ -151,7 +151,7 @@ read_sector_v(	IN int8 * symbol,
 }
 
 /**
-	@Function:		write_sector_v
+	@Function:		VdskWriteSector
 	@Access:		Public
 	@Description:
 		写入数据到一个扇区。
@@ -167,7 +167,7 @@ read_sector_v(	IN int8 * symbol,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-write_sector_v(	IN int8 * symbol,
+VdskWriteSector(IN int8 * symbol,
 				IN uint32 pos,
 				IN uint8 * buffer)
 {
@@ -187,7 +187,7 @@ write_sector_v(	IN int8 * symbol,
 }
 
 /**
-	@Function:		read_sectors_v
+	@Function:		VdskReadSectors
 	@Access:		Public
 	@Description:
 		读取一个或多个扇区的数据。最多一次可以读取256个扇区的数据。
@@ -205,7 +205,7 @@ write_sector_v(	IN int8 * symbol,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-read_sectors_v(	IN int8 * symbol,
+VdskReadSectors(IN int8 * symbol,
 				IN uint32 pos,
 				IN uint8 count,
 				OUT uint8 * buffer)
@@ -218,7 +218,7 @@ read_sectors_v(	IN int8 * symbol,
 		c = count;
 	while(c > 0)
 	{
-		if(!read_sector_v(symbol, pos, buffer))
+		if(!VdskReadSector(symbol, pos, buffer))
 		{
 			r = FALSE;
 			break;		
@@ -231,7 +231,7 @@ read_sectors_v(	IN int8 * symbol,
 }
 
 /**
-	@Function:		write_sectors_v
+	@Function:		VdskWriteSectors
 	@Access:		Public
 	@Description:
 		写入数据到一个或多个扇区。最多一次可以写入256个扇区的数据。
@@ -249,10 +249,10 @@ read_sectors_v(	IN int8 * symbol,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-write_sectors_v(IN int8 * symbol,
-				IN uint32 pos,
-				IN uint8 count,
-				IN uint8 * buffer)
+VdskWriteSectors(	IN int8 * symbol,
+					IN uint32 pos,
+					IN uint8 count,
+					IN uint8 * buffer)
 {
 	BOOL r = TRUE;
 	int32 c;
@@ -262,7 +262,7 @@ write_sectors_v(IN int8 * symbol,
 		c = count;
 	while(c > 0)
 	{
-		if(!write_sector_v(symbol, pos, buffer))
+		if(!VdskWriteSector(symbol, pos, buffer))
 		{
 			r = FALSE;
 			break;

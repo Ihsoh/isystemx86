@@ -115,7 +115,7 @@ ElfParse(	IN CASCTEXT path,
 	if(foptr == NULL)
 		goto err;
 	ctx->file_size = flen(foptr);
-	ctx->file_content = (unsigned char *)alloc_memory(ctx->file_size);
+	ctx->file_content = (unsigned char *)MemAlloc(ctx->file_size);
 	if(Ifs1ReadFile(foptr, ctx->file_content, ctx->file_size) != ctx->file_size)
 		goto err;
 	Ifs1CloseFile(foptr);
@@ -127,7 +127,7 @@ err:
 	if(foptr != NULL)
 		Ifs1CloseFile(foptr);
 	if(ctx->file_content != NULL)
-		free_memory(ctx->file_content);
+		MemFree(ctx->file_content);
 	return 0;
 }
 
@@ -137,7 +137,7 @@ ElfFree(IN ELFContextPtr ctx)
 	if(ctx == NULL)
 		return;
 	if(ctx->file_content != NULL)
-		free_memory(ctx->file_content);
+		MemFree(ctx->file_content);
 }
 
 void

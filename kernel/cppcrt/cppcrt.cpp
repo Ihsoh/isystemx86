@@ -30,22 +30,22 @@ namespace std
 
 inline void * operator new(uint32 n)
 {
-	return alloc_memory(n);
+	return MemAlloc(n);
 }
 
 inline void * operator new [](uint32 n)
 {
-	return alloc_memory(n);
+	return MemAlloc(n);
 }
 
 inline void operator delete(void * p)
 {
-	free_memory(p);
+	MemFree(p);
 }
 
 inline void operator delete [](void * p)
 {
-	free_memory(p);
+	MemFree(p);
 }
 
 inline void * operator new(uint32, void * p)

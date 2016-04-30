@@ -97,11 +97,11 @@ struct Task
 
 extern
 BOOL
-init_tasks(void);
+TskmgrInit(void);
 
 extern
 int32
-create_task(IN int8 * name,
+TskmgrCreateTask(IN int8 * name,
 			IN int8 * param,
 			IN uint8 * app,
 			IN uint32 app_len,
@@ -109,7 +109,7 @@ create_task(IN int8 * name,
 
 extern
 int32
-create_sys_task(IN int8 * name,
+TskmgrCreateSystemTask(IN int8 * name,
 				IN int8 * param,
 				IN uint8 * app,
 				IN uint32 app_len,
@@ -117,124 +117,124 @@ create_sys_task(IN int8 * name,
 
 extern
 BOOL
-kill_task(IN int32 tid);
+TskmgrKillTask(IN int32 tid);
 
 extern
 BOOL
-kill_sys_task(IN int32 tid);
+TskmgrKillSystemTask(IN int32 tid);
 
 extern
 void
-kill_all_tasks(void);
+TskmgrKillAllTasks(void);
 
 extern
 BOOL
-get_task_info(	IN int32 tid,
+TskmgrGetTaskInfo(	IN int32 tid,
 				OUT struct Task * task);
 
 extern
 BOOL
-set_task_info(	IN int32 tid,
+TskmgrSetTaskInfo(	IN int32 tid,
 				IN struct Task * task);
 
 extern
 struct Task *
-get_task_info_ptr(IN int32 tid);
+TskmgrGetTaskInfoPtr(IN int32 tid);
 
 extern
 struct Task *
-get_task_info_ptr_unsafe(IN int32 tid);
+TskmgrGetTaskInfoPtrUnsafely(IN int32 tid);
 
 extern
 BOOL
-task_ready(IN int32 tid);
+TskmgrSetTaskToReady(IN int32 tid);
 
 extern
 int32
-create_task_by_file(IN int8 * filename,
+TskmgrCreateTaskByFile(IN int8 * filename,
 					IN int8 * param,
 					IN int8 * working_dir);
 
 extern
 int32
-create_sys_task_by_file(IN int8 * filename,
+TskmgrCreateSystemTaskByFile(IN int8 * filename,
 						IN int8 * param,
 						IN int8 * working_dir);
 
 extern
 BOOL
-create_task_by_file_wait(	IN int8 * filename,
+TskmgrCreateTaskByFileSync(	IN int8 * filename,
 							IN int8 * param,
 							IN int8 * working_dir,
 							OUT int32 * retvalue);
 
 extern
 int32
-get_next_task_id(void);
+TskmgrGetNextTaskID(void);
 
 extern
 void
-set_task_ran_state(IN int32 tid);
+TaskmgrSetTaskRunningStatus(IN int32 tid);
 
 extern
 int32
-get_running_tid(void);
+TaskmgrGetRunningTaskID(void);
 
 extern
 void *
-get_physical_address(	IN int32 tid, 
-						IN void * line_address);
+TaskmgrConvertLAddrToPAddr(	IN int32 tid, 
+						IN void * linear_address);
 
 extern
 BOOL
-tasks_redirect_stdin(	IN int32 tid,
+TaskmgrRedirectStdin(	IN int32 tid,
 						IN int8 * path);
 
 extern
 BOOL
-tasks_redirect_stdout(	IN int32 tid,
+TaskmgrRedirectStdout(	IN int32 tid,
 						IN int8 * path);
 
 extern
 BOOL
-tasks_redirect_stderr(	IN int32 tid,
+TaskmgrRedirectStderr(	IN int32 tid,
 						IN int8 * path);
 
 extern
 int32
-tasks_get_count(void);
+TaskmgrGetTaskCount(void);
 
 extern
 void *
-tasks_alloc_memory(	IN int32 tid,
+TaskmgrAllocMemory(	IN int32 tid,
 					IN uint32 size,
 					OUT void ** phyaddr);
 
 extern
 void
-tasks_free_memory(	IN int32 tid,
+TaskmgrFreeMemory(	IN int32 tid,
 					IN void * ptr);
 
 extern
 uint32
-tasks_load_elf(	IN int32 tid,
-				IN CASCTEXT path);
+TaskmgrLoadElfExecutableFile(	IN int32 tid,
+								IN CASCTEXT path);
 
 extern
 uint32
-tasks_load_elf_so(	IN int32 tid,
-					IN CASCTEXT path);
+TaskmgrLoadElfSharedObjectFile(	IN int32 tid,
+								IN CASCTEXT path);
 
 extern
 void *
-tasks_get_elf_so_symbol(IN int32 tid,
-						IN uint32 ctx_idx,
-						IN CASCTEXT name);
+TaskmgrGetElfSharedObjectSymbol(IN int32 tid,
+								IN uint32 ctx_idx,
+								IN CASCTEXT name);
 
 extern
 BOOL
-tasks_unload_elf_so(IN int32 tid,
-					IN uint32 ctx_idx);
+TaskmgrUnloadElfSharedObjectFile(	IN int32 tid,
+									IN uint32 ctx_idx);
 
 #define	LOCK_TASK() cli()
 #define	UNLOCK_TASK() sti()

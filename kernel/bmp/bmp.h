@@ -10,16 +10,16 @@
 
 typedef	struct
 {
-	FileObject *		imgfile_ptr;
-	uint8 *		data_ptr;
-	uint8 *		pixel_array_ptr;
-	int32		width, height, color_depth, compression, palette_size;
-	int32		red_mask, green_mask, blue_mask;
-	int32		red_shift, green_shift, blue_shift;
-	DSLListPtr	palette_r;
-	DSLListPtr	palette_g;
-	DSLListPtr	palette_b;
-	int32		row_size;
+	FileObject *	imgfile_ptr;
+	uint8 *			data_ptr;
+	uint8 *			pixel_array_ptr;
+	int32			width, height, color_depth, compression, palette_size;
+	int32			red_mask, green_mask, blue_mask;
+	int32			red_shift, green_shift, blue_shift;
+	DSLListPtr		palette_r;
+	DSLListPtr		palette_g;
+	DSLListPtr		palette_b;
+	int32			row_size;
 } IMGLBMP, * IMGLBMPPtr;
 
 IMGLBMPPtr

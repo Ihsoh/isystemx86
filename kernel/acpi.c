@@ -32,10 +32,10 @@ static struct FADT * fadt = NULL;
 BOOL
 AcpiInit(void)
 {
-	if(fadt_init())
+	if(FadtInit())
 	{
 		uint32 ui;
-		fadt = fadt_get_table();
+		fadt = FadtGetTable();
 
 		//获取DSDT
 		uint8 * dsdt = (uint8 *)(fadt->dsdt);

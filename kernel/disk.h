@@ -22,63 +22,63 @@
 
 extern
 void
-get_disk_symbol(	IN uint32 index, 
-					OUT int8 * symbol);
+DskGetBySymbol(	IN uint32 index, 
+				OUT int8 * symbol);
 
 extern
 uint32
-get_disk_count(void);
+DskGetCount(void);
 
 extern
 uint32
-get_disk_size(IN int8 * symbol);
+DskGetSize(IN int8 * symbol);
 
 extern
 BOOL
-is_system_disk(IN int8 * symbol);
+DskHasSystem(IN int8 * symbol);
 
 extern
 void
-init_disk(IN int8 * symbol);
+DskInit(IN int8 * symbol);
 
 extern
 void
-destroy_disk(IN int8 * symbol);
+DskDestroy(IN int8 * symbol);
 
 extern
 uint32
-sector_count(IN int8 * symbol);
+DskGetSectorCount(IN int8 * symbol);
 
 extern
 uint64
-disk_wbytes(IN CASCTEXT symbol);
+DskGetWBytes(IN CASCTEXT symbol);
 
 extern
 uint64
-disk_rbytes(IN CASCTEXT symbol);
+DskGetRBytes(IN CASCTEXT symbol);
 
 extern
 BOOL
-read_sector(IN int8 * symbol, 
-			IN uint32 pos, 
-			OUT uint8 * buffer);
+DskReadSector(	IN int8 * symbol, 
+				IN uint32 pos, 
+				OUT uint8 * buffer);
 
 extern
 BOOL
-write_sector(	IN int8 * symbol, 
+DskWriteSector(	IN int8 * symbol, 
 				IN uint32 pos, 
 				IN uint8 * buffer);
 
 extern
 BOOL
-read_sectors(	IN int8 * symbol, 
+DskReadSectors(	IN int8 * symbol, 
 				IN uint32 pos, 
 				IN uint8 count, 
 				OUT uint8 * buffer);
 
 extern
 BOOL
-write_sectors(	IN int8 * symbol, 
+DskWriteSectors(IN int8 * symbol, 
 				IN uint32 pos, 
 				IN uint8 count, 
 				IN uint8 * buffer);

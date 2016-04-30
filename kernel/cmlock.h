@@ -11,28 +11,28 @@
 
 extern
 void
-enable_common_lock(void);
+KnlEnableCommonLock(void);
 
 extern
 void
-disable_common_lock(void);
+KnlDisableCommonLock(void);
 
 extern
 void
-_common_lock(void);
+_KnlCommonLock(void);
 
 extern
 void
-_common_unlock(	IN const int8 * file,
-				IN uint32 line);
+_KnlCommonUnlock(	IN const int8 * file,
+					IN uint32 line);
 
 extern
 void
-_common_unlock_without_sti(	IN const int8 * file,
+_KnlCommonUnlockWithoutSti(	IN const int8 * file,
 							IN uint32 line);
 
-#define common_lock()				_common_lock();
-#define common_unlock()				_common_unlock(__FILE__, __LINE__);
-#define common_unlock_without_sti()	_common_unlock_without_sti(__FILE__, __LINE__);
+#define COMMON_LOCK()				_KnlCommonLock();
+#define COMMON_UNLOCK()				_KnlCommonUnlock(__FILE__, __LINE__);
+#define COMMON_UNLOCK_WITHOUT_STI()	_KnlCommonUnlockWithoutSti(__FILE__, __LINE__);
 
 #endif

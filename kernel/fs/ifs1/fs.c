@@ -621,7 +621,7 @@ _Ifs1GetItemList(	IN int8 * symbol,
 			&& Ifs1GetBlock(symbol, sub_blockid, &raw_block)
 			&& raw_block.used)
 		{
-			struct RawBlock * new_raw_block = alloc_memory(sizeof(struct RawBlock));
+			struct RawBlock * new_raw_block = MemAlloc(sizeof(struct RawBlock));
 			if(new_raw_block == NULL)
 				return -1;
 			memcpy(new_raw_block, &raw_block, sizeof(struct RawBlock));
@@ -1236,7 +1236,7 @@ Ifs1DeleteDirRecursively(IN int8 * path)
 	uint32 count = Ifs1GetItemCount(path);
 	if(count != 0)
 	{
-		struct RawBlock * subs = (struct RawBlock *)alloc_memory(count * sizeof(struct RawBlock));
+		struct RawBlock * subs = (struct RawBlock *)MemAlloc(count * sizeof(struct RawBlock));
 		if(subs == NULL)
 			return FALSE;
 		Ifs1GetItems(path, subs, count);
@@ -1266,7 +1266,7 @@ Ifs1DeleteDirRecursively(IN int8 * path)
 			else
 				return FALSE;
 		}
-		free_memory(subs);
+		MemFree(subs);
 	}	
 	return Ifs1DeleteDir(path);
 }
@@ -1799,7 +1799,7 @@ FileObject *
 _Ifs1OpenFileUnsafely(	IN int8 * path, 
 						IN int32 mode)
 {
-	FileObject * fptr = (FileObject *)alloc_memory(sizeof(FileObject));
+	FileObject * fptr = (FileObject *)MemAlloc(sizeof(FileObject));
 	if(fptr == NULL)
 		return NULL;
 	int32 type;
@@ -1807,7 +1807,7 @@ _Ifs1OpenFileUnsafely(	IN int8 * path,
 	uint32 id = Ifs1ParsePath(path, symbol, &type);
 	if(type != BLOCK_TYPE_FILE || id == INVALID_BLOCK_ID)
 	{
-		free_memory(fptr);
+		MemFree(fptr);
 		return NULL;
 	}
 	fptr->mode = mode;
@@ -1816,23 +1816,23 @@ _Ifs1OpenFileUnsafely(	IN int8 * path,
 	fptr->next_block_index = 0;
 	fptr->next_block_pos = 0;
 	struct FileBlock * file_block = NULL;
-	file_block = (struct FileBlock *)alloc_memory(sizeof(struct FileBlock));	
+	file_block = (struct FileBlock *)MemAlloc(sizeof(struct FileBlock));	
 	if(file_block == NULL)
 	{
-		free_memory(fptr);
+		MemFree(fptr);
 		return NULL;
 	}
 	if(!Ifs1GetBlock(symbol, id, (struct RawBlock *)file_block) || file_block->lock)
 	{
-		free_memory(fptr->file_block);
-		free_memory(fptr);
+		MemFree(fptr->file_block);
+		MemFree(fptr);
 		return NULL;
 	}
 	file_block->lock = 1;
 	if(!Ifs1SetBlock(symbol, id, (struct RawBlock *)file_block))
 	{
-		free_memory(fptr->file_block);
-		free_memory(fptr);
+		MemFree(fptr->file_block);
+		MemFree(fptr);
 		return NULL;
 	}
 	fptr->file_block = file_block;
@@ -1908,8 +1908,8 @@ _Ifs1CloseFileUnsafely(IN FileObject * fptr)
 
 	if(!Ifs1SetBlock(fptr->symbol, fptr->file_block_id, (struct RawBlock *)(fptr->file_block)))
 		r = FALSE;
-	free_memory(fptr->file_block);
-	free_memory(fptr);
+	MemFree(fptr->file_block);
+	MemFree(fptr);
 	return r;
 }
 
@@ -2564,15 +2564,15 @@ _Ifs1RepairFiles(	IN int8 * symbol,
 						UtlConcatString(temp_path, sizeof(temp_path), file_block->filename);
 						if(Ifs1SetBlock(symbol, id, &raw_block))
 						{
-							print_str_p("Unlocked ", CC_GREEN);
-							print_str(temp_path);
-							print_str("\n");
+							ScrPrintStringWithProperty("Unlocked ", CC_GREEN);
+							ScrPrintString(temp_path);
+							ScrPrintString("\n");
 						}
 						else
 						{
-							print_str_p("Failed to unlock ", CC_RED);
-							print_str(temp_path);
-							print_str("\n");
+							ScrPrintStringWithProperty("Failed to unlock ", CC_RED);
+							ScrPrintString(temp_path);
+							ScrPrintString("\n");
 						}
 					}
 					break;

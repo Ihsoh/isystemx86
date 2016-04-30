@@ -93,50 +93,50 @@ typedef struct Window
 																	// 如果该函数返回FALSE，则表示不要把按键添加到key_buffer中。
 	BOOL					locked;									// 如果该值为TRUE，则锁住窗体，不把工作区的内容更新到显存。
 	int32					old_state;								// 旧的状态。
-	BOOL					is_top;									// 指示窗体是否为最顶，该值由render_window函数更新。
+	BOOL					is_top;									// 指示窗体是否为最顶，该值由WinmgrRenderWindow函数更新。
 	uint32					focused_ctrl;							// 当前获得焦点的控件的ID。如果该ID为CONTROL_INVALID_ID，则窗体没有获得焦点的控件。
 } * WindowPtr;
 
 extern
 BOOL
-init_window_resources(void);
+WinmgrInit(void);
 
 extern
 void
-destroy_window_resources(void);
+WinmgrUninit(void);
 
 extern
 BOOL
-render_window(	IN struct Window * window,
+WinmgrRenderWindow(	IN struct Window * window,
 				IN BOOL top);
 
 extern
 uint8
-window_get_key(IN struct Window * window);
+WinmgrGetKey(IN struct Window * window);
 
 extern
 uint8
-window_peek_key(IN struct Window * window);
+WinmgrPeekKey(IN struct Window * window);
 
-#define	window_has_key(window)	((window) == NULL ? 0 : (window)->key_count)
-
-extern
-void
-window_clear_key(IN WindowPtr window);
+#define	WINMGR_HAS_KEY(window)	((window) == NULL ? 0 : (window)->key_count)
 
 extern
 void
-window_dispatch_event(	IN WindowPtr window,
-						IN int32 type,
-						IN void * data);
+WinmgrClearKeyBuffer(IN WindowPtr window);
 
 extern
 void
-window_focus_ctrl(	IN WindowPtr window,
+WinmgrDispatchEvent(IN WindowPtr window,
+					IN int32 type,
+					IN void * data);
+
+extern
+void
+WinmgrFocusControl(	IN WindowPtr window,
 					IN uint32 cid);
 
 extern
 void
-window_unfocus_ctrl(IN WindowPtr window);
+WinmgrUnfocusControl(IN WindowPtr window);
 
 #endif

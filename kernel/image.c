@@ -14,8 +14,8 @@
 	#include "memory.h"
 	#include "fs/ifs1/fs.h"
 	#include <ilib/string.h>
-	#define	ALLOCM(n)	(alloc_memory((n)))
-	#define	FREEM(ptr)	(free_memory((ptr)))
+	#define	ALLOCM(n)	(MemAlloc((n)))
+	#define	FREEM(ptr)	(MemFree((ptr)))
 #else
 	#include <ilib/ilib.h>
 	#define	ALLOCM(n)	(allocm((n)))
@@ -881,7 +881,7 @@ text_common_image_normal(	IN OUT struct CommonImage * common_image,
 	uint32 char_count = strlen(text);
 	uint32 ui;
 	#ifdef	_KERNEL_MODULE_
-	BOOL enfx_enabled = enfontx_enabled();
+	BOOL enfx_enabled = EnfntIsEnabled();
 	uint8 * enfont_content = enfont + 6;
 	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
 	#endif
@@ -986,7 +986,7 @@ text_common_image_sse(	IN OUT struct CommonImage * common_image,
 	uint32 char_count = strlen(text);
 	uint32 ui;
 	#ifdef	_KERNEL_MODULE_
-	BOOL enfx_enabled = enfontx_enabled();
+	BOOL enfx_enabled = EnfntIsEnabled();
 	uint8 * enfont_content = enfont + 6;
 	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
 	#endif
@@ -1077,7 +1077,7 @@ text_common_image_sse_ex(	IN OUT struct CommonImage * common_image,
 	uint32 char_count = strlen(text);
 	uint32 ui;
 	#ifdef	_KERNEL_MODULE_
-	BOOL enfx_enabled = enfontx_enabled();
+	BOOL enfx_enabled = EnfntIsEnabled();
 	uint8 * enfont_content = enfont + 6;
 	uint32 enfont_size = ENFONT_WIDTH * ENFONT_HEIGHT;
 	uint32 half_enfont_width = ENFONT_WIDTH / 2;

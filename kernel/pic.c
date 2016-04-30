@@ -27,7 +27,7 @@
 #define PIT_SET		0x36
 
 /**
-	@Function:		pic_set_phase
+	@Function:		_PicSetPhase
 	@Access:		Public
 	@Description:
 		设置PIT周期。
@@ -38,7 +38,7 @@
 */
 static
 void
-pic_set_phase(IN int32 hz)
+_PicSetPhase(IN int32 hz)
 {
 	int32 divisor = PIT_SCALE / hz;
 	KnlOutByte(PIT_CONTROL, PIT_SET);
@@ -47,7 +47,7 @@ pic_set_phase(IN int32 hz)
 }
 
 /**
-	@Function:		pic_init
+	@Function:		PicInit
 	@Access:		Public
 	@Description:
 		初始化PIC。
@@ -57,14 +57,14 @@ pic_set_phase(IN int32 hz)
 			返回 TRUE 则成功，否则失败。	
 */
 BOOL
-pic_init(void)
+PicInit(void)
 {
-	pic_set_phase(1000);
+	_PicSetPhase(1000);
 	return TRUE;
 }
 
 /**
-	@Function:		pic_mask
+	@Function:		PicMask
 	@Access:		Public
 	@Description:
 		屏蔽指定的外部中断。
@@ -76,7 +76,7 @@ pic_init(void)
 			返回 TRUE 则成功，否则失败。	
 */
 BOOL
-pic_mask(IN uint8 irq)
+PicMask(IN uint8 irq)
 {
 	if(irq >= PIC_IRQ_COUNT)
 		return FALSE;
@@ -88,7 +88,7 @@ pic_mask(IN uint8 irq)
 }
 
 /**
-	@Function:		pic_unmask
+	@Function:		PicUnmask
 	@Access:		Public
 	@Description:
 		启用指定的外部中断。
@@ -100,7 +100,7 @@ pic_mask(IN uint8 irq)
 			返回 TRUE 则成功，否则失败。	
 */
 BOOL
-pic_unmask(IN uint8 irq)
+PicUnmask(IN uint8 irq)
 {
 	if(irq >= PIC_IRQ_COUNT)
 		return FALSE;
@@ -112,7 +112,7 @@ pic_unmask(IN uint8 irq)
 }
 
 /**
-	@Function:		pic_mask_all
+	@Function:		PicMaskAll
 	@Access:		Public
 	@Description:
 		屏蔽所有的外部中断。
@@ -122,17 +122,17 @@ pic_unmask(IN uint8 irq)
 			返回 TRUE 则成功，否则失败。	
 */
 BOOL
-pic_mask_all(void)
+PicMaskAll(void)
 {
 	uint8 irq;
 	for(irq = 0; irq < PIC_IRQ_COUNT; irq++)
-		if(!pic_mask(irq))
+		if(!PicMask(irq))
 			return FALSE;
 	return TRUE;
 }
 
 /**
-	@Function:		pic_unmask_all
+	@Function:		PicUnmaskAll
 	@Access:		Public
 	@Description:
 		启用所有的外部中断。
@@ -142,11 +142,11 @@ pic_mask_all(void)
 			返回 TRUE 则成功，否则失败。	
 */
 BOOL
-pic_unmask_all(void)
+PicUnmaskAll(void)
 {
 	uint8 irq;
 	for(irq = 0; irq < PIC_IRQ_COUNT; irq++)
-		if(!pic_unmask(irq))
+		if(!PicUnmask(irq))
 			return FALSE;
 	return TRUE;
 }

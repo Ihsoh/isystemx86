@@ -30,51 +30,51 @@ struct Vars
 
 extern
 struct Vars *
-alloc_vars(IN uint32 n);
+KnlAllocVarList(IN uint32 n);
 
 extern
 BOOL
-free_vars(IN struct Vars * vars);
+KnlFreeVarList(IN struct Vars * vars);
 
 extern
 BOOL
-new_var(IN struct Vars * vars_s,
-		IN int8 * name);
+KnlNewVar(	IN struct Vars * vars_s,
+			IN int8 * name);
 
 extern
 BOOL
-set_var_value(	IN OUT struct Vars * vars_s,
+KnlSetVarValue(	IN OUT struct Vars * vars_s,
 				IN int8 * name,
 				IN int8 * value);
 
 extern
 BOOL
-get_var_value(	IN struct Vars * vars_s,
+KnlGetVarValue(	IN struct Vars * vars_s,
 				IN int8 * name,
 				OUT int8 * value);
 
 extern
 BOOL
-get_var_value_with_size(IN struct Vars * vars_s,
+KnlGetVarValueWithSize(	IN struct Vars * vars_s,
 						IN int8 * name,
 						OUT int8 * value,
 						IN uint32 size);
 
 extern
 BOOL
-get_var_int_value(	IN struct Vars * vars_s,
+KnlGetVarIntValue(	IN struct Vars * vars_s,
 					IN int8 * name,
 					OUT int32 * value);
 
 extern
 BOOL
-get_var_double_value(	IN struct Vars * vars_s,
+KnlGetVarDoubleValue(	IN struct Vars * vars_s,
 						IN int8 * name,
 						OUT double * value);
 
 extern
 BOOL
-del_var(IN OUT struct Vars * vars_s,
-		IN int8 * name);
+KnlDeleteVar(	IN OUT struct Vars * vars_s,
+				IN int8 * name);
 
 #endif

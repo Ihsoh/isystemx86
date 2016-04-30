@@ -542,14 +542,14 @@ set_all_unimpl_int(void)
 }
 
 BOOL
-interrupts_init(void)
+KnlInitInterrupts(void)
 {
 	set_all_unimpl_int();
 	return TRUE;
 }
 
 int32
-get_unimpl_intn(void)
+KnlGetUnimplementedInterruptNo(void)
 {
 	return unimpl_intn;
 }

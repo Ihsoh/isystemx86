@@ -32,22 +32,22 @@ die(IN struct die_info * info)
 	asm volatile ("cli");
 	lock_level = 0x7fffffff;
 	ApicStopTimer();
-	pic_mask_all();
-	write_log_to_disk();
+	PicMaskAll();
+	LogWriteToDisk();
 	uint16 us;
-	set_cursor(0, 0);
-	set_char_color(CC_YELLOW | CBGC_RED);
+	ScrSetConsoleCursor(0, 0);
+	ScrSetConsoleCharColor(CC_YELLOW | CBGC_RED);
 	for(us = 0; us < ROW * COLUMN; us++)
-		print_char(' ');
-	set_cursor(0, 0);
-	print_str(	"ISystem X86 Fault Error\n"
+		ScrPrintChar(' ');
+	ScrSetConsoleCursor(0, 0);
+	ScrPrintString(	"ISystem X86 Fault Error\n"
 				"=======================\n\n");
-	print_str("Code: ");
+	ScrPrintString("Code: ");
 	printuihex(info->code);
-	print_str(	"\n\n"
+	ScrPrintString(	"\n\n"
 				"Infomation:\n    ");
-	print_str(info->info);
-	if(vesa_is_valid())
-		flush_screen();
+	ScrPrintString(info->info);
+	if(VesaIsEnabled())
+		ScrFlushScreen();
 	asm volatile ("hlt");
 }

@@ -23,7 +23,7 @@ static struct MemoryBlockDescriptor * umbdt_foot = NULL;
 DEFINE_LOCK_IMPL(memory)
 
 /**
-	@Function:		copy_memory
+	@Function:		MemCopy
 	@Access:		Public
 	@Description:
 		复制内存中的数据。
@@ -37,9 +37,9 @@ DEFINE_LOCK_IMPL(memory)
 	@Return:		
 */
 void 
-copy_memory(IN uint8 * src,
-			OUT uint8 * dst,
-			IN uint32 length)
+MemCopy(IN uint8 * src,
+		OUT uint8 * dst,
+		IN uint32 length)
 {
 	uint32 ui;	
 	for(ui = 0; ui < length; ui++)
@@ -47,7 +47,7 @@ copy_memory(IN uint8 * src,
 }
 
 /**
-	@Function:		clear_memory
+	@Function:		MemClear
 	@Access:		Public
 	@Description:
 		清空内存中的数据。
@@ -61,9 +61,9 @@ copy_memory(IN uint8 * src,
 	@Return:	
 */
 void 
-clear_memory(	OUT uint8 * dst,
-				IN uint8 data,
-				IN uint32 len)
+MemClear(	OUT uint8 * dst,
+			IN uint8 data,
+			IN uint32 len)
 {
 	uint32 ui;
 	for(ui = 0; ui < len; ui++)
@@ -71,7 +71,7 @@ clear_memory(	OUT uint8 * dst,
 }
 
 /**
-	@Function:		get_used_memory_length
+	@Function:		MemGetUsedLength
 	@Access:		Public
 	@Description:
 		获取已使用内存的长度，单位为Byte。
@@ -81,13 +81,13 @@ clear_memory(	OUT uint8 * dst,
 			已使用的内存的长度。
 */
 uint64 
-get_used_memory_length(void)
+MemGetUsedLength(void)
 {
 	return used;
 }
 
 /**
-	@Function:		get_unused_mbd
+	@Function:		_MemGetUnusedMBD
 	@Access:		Private
 	@Description:
 		获取一个未被使用的内存块描述符。
@@ -102,8 +102,8 @@ get_used_memory_length(void)
 */
 static 
 struct MemoryBlockDescriptor * 
-get_unused_mbd(	IN struct MemoryBlockDescriptor * mbdt, 
-				IN uint32 mbd_count)
+_MemGetUnusedMBD(	IN struct MemoryBlockDescriptor * mbdt, 
+					IN uint32 mbd_count)
 {
 	uint32 ui;
 	for(ui = 0; ui < mbd_count; ui++)
@@ -113,7 +113,7 @@ get_unused_mbd(	IN struct MemoryBlockDescriptor * mbdt,
 }
 
 /**
-	@Function:		append_mbd
+	@Function:		_MemAppendMBD
 	@Access:		Private
 	@Description:
 		向内存块描述符表结尾添加一个内存块描述符。
@@ -126,13 +126,13 @@ get_unused_mbd(	IN struct MemoryBlockDescriptor * mbdt,
 			内存块描述符。
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。		
+			返回TRUE则成功，否则失败。
 */
 static
 BOOL
-append_mbd(	IN OUT struct MemoryBlockDescriptor ** head, 
-			IN OUT struct MemoryBlockDescriptor ** foot,
-			IN OUT struct MemoryBlockDescriptor * mbd)
+_MemAppendMBD(	IN OUT struct MemoryBlockDescriptor ** head, 
+				IN OUT struct MemoryBlockDescriptor ** foot,
+				IN OUT struct MemoryBlockDescriptor * mbd)
 {
 	if(*head == NULL && *foot == NULL)
 	{
@@ -155,7 +155,7 @@ append_mbd(	IN OUT struct MemoryBlockDescriptor ** head,
 }
 
 /**
-	@Function:		remove_mbd
+	@Function:		_MemRemoveMBD
 	@Access:		Private
 	@Description:
 		移除内存块描述符表里的一个内存块描述符。
@@ -168,13 +168,13 @@ append_mbd(	IN OUT struct MemoryBlockDescriptor ** head,
 			内存块描述符。
 	@Return:
 		BOOL
-			返回TRUE则成功，否则失败。		
+			返回TRUE则成功，否则失败。
 */
-static 
+static
 BOOL
-remove_mbd(	IN OUT struct MemoryBlockDescriptor ** head, 
-			IN OUT struct MemoryBlockDescriptor ** foot,
-			IN OUT struct MemoryBlockDescriptor * mbd)
+_MemRemoveMBD(	IN OUT struct MemoryBlockDescriptor ** head, 
+				IN OUT struct MemoryBlockDescriptor ** foot,
+				IN OUT struct MemoryBlockDescriptor * mbd)
 {
 	if(*head == mbd && *foot == mbd)
 	{
@@ -205,7 +205,7 @@ remove_mbd(	IN OUT struct MemoryBlockDescriptor ** head,
 }
 
 /**
-	@Function:		init_memory
+	@Function:		MemInit
 	@Access:		Public
 	@Description:
 		初始化内存。
@@ -213,22 +213,22 @@ remove_mbd(	IN OUT struct MemoryBlockDescriptor ** head,
 	@Return:	
 */
 void 
-init_memory(void)
+MemInit(void)
 {
 	uint32 ui;
 	uint64 size = get_memory_size();
 	memory_limit = (uint32)(size - 1);
-	clear_memory((uchar *)MBDT_ADDRESS, 0, MBDT_LENGTH);
-	clear_memory((uchar *)UMBDT_ADDRESS, 0, UMBDT_LENGTH);
-	struct MemoryBlockDescriptor * mbd = get_unused_mbd(MBDT_ADDRESS, MBD_COUNT);
+	MemClear((uchar *)MBDT_ADDRESS, 0, MBDT_LENGTH);
+	MemClear((uchar *)UMBDT_ADDRESS, 0, UMBDT_LENGTH);
+	struct MemoryBlockDescriptor * mbd = _MemGetUnusedMBD(MBDT_ADDRESS, MBD_COUNT);
 	mbd->used = 1;
 	mbd->start = ALLOC_START_ADDRESS;
 	mbd->length = memory_limit - ALLOC_START_ADDRESS + 1;
-	append_mbd(&mbdt_head, &mbdt_foot, mbd);
+	_MemAppendMBD(&mbdt_head, &mbdt_foot, mbd);
 }
 
 /**
-	@Function:		get_mbdt_info
+	@Function:		MemGetMBDTableInfo
 	@Access:		Public
 	@Description:
 		获取未被使用的内存块描述符表的信息。
@@ -242,9 +242,9 @@ init_memory(void)
 	@Return:
 */
 void
-get_mbdt_info(	OUT uint32 * total_mbd_count,
-				OUT uint32 * used_mbd_count,
-				OUT uint32 * m_size)
+MemGetMBDTableInfo(	OUT uint32 * total_mbd_count,
+					OUT uint32 * used_mbd_count,
+					OUT uint32 * m_size)
 {
 	*total_mbd_count = MBD_COUNT;
 	*used_mbd_count = 0;
@@ -259,7 +259,7 @@ get_mbdt_info(	OUT uint32 * total_mbd_count,
 }
 
 /**
-	@Function:		get_umbdt_info
+	@Function:		MemGetUsedMBDTableInfo
 	@Access:		Public
 	@Description:
 		获取正在被使用的内存块描述符表的信息。
@@ -273,9 +273,9 @@ get_mbdt_info(	OUT uint32 * total_mbd_count,
 	@Return:
 */
 void
-get_umbdt_info(	OUT uint32 * total_umbd_count,
-				OUT uint32 * used_umbd_count,
-				OUT uint32 * m_size)
+MemGetUsedMBDTableInfo(	OUT uint32 * total_umbd_count,
+						OUT uint32 * used_umbd_count,
+						OUT uint32 * m_size)
 {
 	*total_umbd_count = UMBD_COUNT;
 	*used_umbd_count = 0;
@@ -290,7 +290,7 @@ get_umbdt_info(	OUT uint32 * total_umbd_count,
 }
 
 /**
-	@Function:		align_4kb
+	@Function:		MemAlign4KB
 	@Access:		Public
 	@Description:
 		使一个值 4KB 对齐。
@@ -302,7 +302,7 @@ get_umbdt_info(	OUT uint32 * total_umbd_count,
 			4KB 对齐之后的值。		
 */
 uint32
-align_4kb(IN uint32 n)
+MemAlign4KB(IN uint32 n)
 {
 	if(n % KB(4) == 0)
 		return n;
@@ -311,7 +311,7 @@ align_4kb(IN uint32 n)
 }
 
 /**
-	@Function:		_alloc_memory_with_start
+	@Function:		_MemAllocWithStart
 	@Access:		Private
 	@Description:
 		分配一段内存。该内存的起始地址必须大于一个指定的地址
@@ -327,20 +327,20 @@ align_4kb(IN uint32 n)
 */
 static
 void *
-_alloc_memory_with_start(	IN uint32 m_start,
-							IN uint32 length)
+_MemAllocWithStart(	IN uint32 m_start,
+					IN uint32 length)
 {
 	//让需要分配的内存长度4KB对齐.
 	//因为一直分配的内存的长度都是4KB对齐
 	//并且第一个未分配内存块的起始地址也是4KB对齐的,
 	//所以分配得到的内存地址也是4KB对齐的.
-	length = align_4kb(length);
+	length = MemAlign4KB(length);
 
 	struct MemoryBlockDescriptor * mbd = mbdt_foot;
 	while(mbd != NULL)
 		if(mbd->start < m_start && m_start + length < mbd->start + mbd->length)
 		{
-			struct MemoryBlockDescriptor * umbd = get_unused_mbd(UMBDT_ADDRESS, UMBD_COUNT);
+			struct MemoryBlockDescriptor * umbd = _MemGetUnusedMBD(UMBDT_ADDRESS, UMBD_COUNT);
 			if(umbd == NULL)
 				return NULL;
 			uint32 address = mbd->start + mbd->length - length;
@@ -348,7 +348,7 @@ _alloc_memory_with_start(	IN uint32 m_start,
 			umbd->start = address;
 			umbd->length = length;
 			mbd->length -= length;
-			if(!append_mbd(&umbdt_head, &umbdt_foot, umbd))
+			if(!_MemAppendMBD(&umbdt_head, &umbdt_foot, umbd))
 				return NULL;
 			else
 			{
@@ -359,7 +359,7 @@ _alloc_memory_with_start(	IN uint32 m_start,
 		else if(m_start <= mbd->start && length <= mbd->length)
 		{
 			uint32 address;
-			struct MemoryBlockDescriptor * umbd = get_unused_mbd(UMBDT_ADDRESS, MBD_COUNT);
+			struct MemoryBlockDescriptor * umbd = _MemGetUnusedMBD(UMBDT_ADDRESS, MBD_COUNT);
 			if(umbd == NULL)
 				return NULL;
 			address = (uint)(mbd->start);
@@ -371,10 +371,10 @@ _alloc_memory_with_start(	IN uint32 m_start,
 			if(mbd->length == 0)
 			{
 				mbd->used = 0;
-				if(!remove_mbd(&mbdt_head, &mbdt_foot, mbd))
+				if(!_MemRemoveMBD(&mbdt_head, &mbdt_foot, mbd))
 					return NULL;
 			}			
-			if(!append_mbd(&umbdt_head, &umbdt_foot, umbd))
+			if(!_MemAppendMBD(&umbdt_head, &umbdt_foot, umbd))
 				return NULL;
 			else
 			{
@@ -388,7 +388,7 @@ _alloc_memory_with_start(	IN uint32 m_start,
 }
 
 /**
-	@Function:		alloc_memory_with_start
+	@Function:		MemAllocWithStart
 	@Access:		Public
 	@Description:
 		分配一段内存。该内存的起始地址必须大于一个指定的地址
@@ -403,17 +403,17 @@ _alloc_memory_with_start(	IN uint32 m_start,
 			分配的内存的地址。返回 NULL 则失败。
 */
 void *
-alloc_memory_with_start(IN uint32 m_start,
-						IN uint32 length)
+MemAllocWithStart(	IN uint32 m_start,
+					IN uint32 length)
 {
 	lock();
-	void * r = _alloc_memory_with_start(m_start, length);
+	void * r = _MemAllocWithStart(m_start, length);
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_alloc_memory
+	@Function:		_MemAlloc
 	@Access:		Private
 	@Description:
 		分配一段内存。
@@ -426,13 +426,13 @@ alloc_memory_with_start(IN uint32 m_start,
 */
 static
 void * 
-_alloc_memory(uint length)
+_MemAlloc(uint32 length)
 {
-	return _alloc_memory_with_start(ALLOC_START_ADDRESS, length);
+	return _MemAllocWithStart(ALLOC_START_ADDRESS, length);
 }
 
 /**
-	@Function:		alloc_memory
+	@Function:		MemAlloc
 	@Access:		Public
 	@Description:
 		分配一段内存。
@@ -444,10 +444,10 @@ _alloc_memory(uint length)
 			分配的内存的地址。返回 NULL 则失败。	
 */
 void * 
-alloc_memory(uint length)
+MemAlloc(uint32 length)
 {
 	lock();
-	void * r = _alloc_memory(length);
+	void * r = _MemAlloc(length);
 	if(r == NULL)
 	{
 		int8 buffer[1024];
@@ -455,14 +455,14 @@ alloc_memory(uint length)
 					1024, 
 					"Memory manager cannot allocate %d byte(s) of memory.", 
 					length);
-		log(LOG_ERROR, buffer);
+		Log(LOG_ERROR, buffer);
 	}
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_free_memory
+	@Function:		_MemFree
 	@Access:		Private
 	@Description:
 		释放内存。
@@ -475,19 +475,19 @@ alloc_memory(uint length)
 */
 static
 BOOL
-_free_memory(void * ptr)
+_MemFree(void * ptr)
 {
 	uint32 address = (uint32)ptr;
 	struct MemoryBlockDescriptor * umbd = umbdt_head;
 	while(umbd != NULL)
 		if(umbd->start == ptr)
 		{
-			struct MemoryBlockDescriptor * new_mbd = get_unused_mbd(MBDT_ADDRESS, MBD_COUNT);
+			struct MemoryBlockDescriptor * new_mbd = _MemGetUnusedMBD(MBDT_ADDRESS, MBD_COUNT);
 			if(new_mbd == NULL)
 				return FALSE;
-			copy_memory(umbd, new_mbd, sizeof(struct MemoryBlockDescriptor));
+			MemCopy(umbd, new_mbd, sizeof(struct MemoryBlockDescriptor));
 			umbd->used = 0;
-			if(remove_mbd(&umbdt_head, &umbdt_foot, umbd))
+			if(_MemRemoveMBD(&umbdt_head, &umbdt_foot, umbd))
 			{
 				if(mbdt_head == NULL && mbdt_foot == NULL)
 				{
@@ -514,7 +514,7 @@ _free_memory(void * ptr)
 						else
 							mbd = mbd->next;
 					if(mbd == NULL)
-						if(!append_mbd(&mbdt_head, &mbdt_foot, new_mbd))
+						if(!_MemAppendMBD(&mbdt_head, &mbdt_foot, new_mbd))
 							return FALSE;
 				}
 				else
@@ -531,7 +531,7 @@ _free_memory(void * ptr)
 }
 
 /**
-	@Function:		free_memory
+	@Function:		MemFree
 	@Access:		Public
 	@Description:
 		释放内存。
@@ -543,10 +543,10 @@ _free_memory(void * ptr)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-free_memory(void * ptr)
+MemFree(void * ptr)
 {
 	lock();
-	BOOL r = _free_memory(ptr);
+	BOOL r = _MemFree(ptr);
 	if(!r)
 	{
 		uint32 address = (uint32)ptr;
@@ -555,14 +555,14 @@ free_memory(void * ptr)
 					1024, 
 					"Memory manager cannot release a block of memory, the memory address is %X.", 
 					address);
-		log(LOG_ERROR, buffer);
+		Log(LOG_ERROR, buffer);
 	}
 	unlock();
 	return r;
 }
 
 /**
-	@Function:		_get_memory_block_size
+	@Function:		_MemGetBlockSise
 	@Access:		Private
 	@Description:
 		获取内存块的大小。
@@ -575,7 +575,7 @@ free_memory(void * ptr)
 */
 static
 uint32
-_get_memory_block_size(void * ptr)
+_MemGetBlockSise(void * ptr)
 {
 	struct MemoryBlockDescriptor * umbdt = umbdt_head;
 	while(umbdt != NULL)
@@ -589,7 +589,7 @@ _get_memory_block_size(void * ptr)
 }
 
 /**
-	@Function:		get_memory_block_size
+	@Function:		MemGetBlockSise
 	@Access:		Public
 	@Description:
 		获取内存块的大小。
@@ -601,10 +601,10 @@ _get_memory_block_size(void * ptr)
 			内存块的大小。		
 */
 uint32
-get_memory_block_size(void * ptr)
+MemGetBlockSise(void * ptr)
 {
 	lock();
-	uint32 r = _get_memory_block_size(ptr);
+	uint32 r = _MemGetBlockSise(ptr);
 	unlock();
 	return r;
 }

@@ -21,39 +21,39 @@
 #define	P_INVALID	0
 
 extern
-void init_paging(void);
+void PgInit(void);
 
 extern
 uint32 *
-create_empty_user_pagedt(OUT uint32 * cr3);
+PgCreateEmptyUserPageTable(OUT uint32 * cr3);
 
 extern
 BOOL
-map_user_pagedt_with_rw(OUT uint32 * cr3,
-						IN uint32 start,
-						IN uint32 length,
-						IN uint32 real_address,
-						IN uint32 rw);
+PgMapUserPageTableWithPermission(	OUT uint32 * cr3,
+									IN uint32 start,
+									IN uint32 length,
+									IN uint32 real_address,
+									IN uint32 rw);
 
 extern
 BOOL
-find_free_pages(IN uint32 * cr3, 
+PgFindFreePages(IN uint32 * cr3, 
 				IN uint32 length,
 				IN uint32 * start);
 
 extern
 BOOL
-free_pages(	OUT uint32 * cr3,
+PgFreePages(OUT uint32 * cr3,
 			IN uint32 start,
 			IN uint32 length);
 
 extern
 uint32
-get_kernel_cr3(void);
+PgGetKernelCR3(void);
 
 extern
 void
-enable_paging(void);
+PgEnablePaging(void);
 
 DEFINE_LOCK_EXTERN(paging)
 

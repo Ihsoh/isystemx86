@@ -43,9 +43,9 @@ _WinConsoleEvent(	IN struct Window * window,
 							console_screen_buffer.width, 
 							console_screen_buffer.height);
 	else if(params->event_type == WINDOW_EVENT_HIDDEN)
-		no_flush_char_buffer();
+		ScrDisableFlushConsoleBuffer();
 	else if(params->event_type == WINDOW_EVENT_SHOW)
-		flush_char_buffer();
+		ScrEnableFlushConsoleBuffer();
 }
 
 /**
@@ -61,7 +61,7 @@ _WinConsoleEvent(	IN struct Window * window,
 BOOL
 WinConsoleInit(void)
 {
-	console_window = create_window(	WINDOW_WIDTH, 
+	console_window = ScrCreateWindow(	WINDOW_WIDTH, 
 									WINDOW_HEIGHT, 
 									0xffbbbbbb, 
 									WINDOW_STYLE_MINIMIZE, 
@@ -71,8 +71,8 @@ WinConsoleInit(void)
 		return FALSE;
 	
 	//使窗体初始化在屏幕中央
-	uint32 screen_width = vesa_get_width();
-	uint32 screen_height = vesa_get_height();
+	uint32 screen_width = VesaGetWidth();
+	uint32 screen_height = VesaGetHeight();
 	console_window->x = screen_width / 2 - WINDOW_WIDTH / 2;
 	console_window->y = screen_height / 2 - WINDOW_HEIGHT / 2;
 

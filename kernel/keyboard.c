@@ -81,9 +81,9 @@ static
 void
 add_key(IN uint8 key)
 {
-	if(vesa_is_valid())
+	if(VesaIsEnabled())
 	{
-		struct Window * top_window = get_top_window();
+		struct Window * top_window = ScrGetTopWindow();
 		if(top_window == console_window)
 		{
 			if(bpos + 1 < IBUFFER_SIZE)
@@ -432,7 +432,7 @@ tran_key(IN uint8 scan_code)
 				keyup(KEY_EQUAL);
 				break;
 			case KEY_TAB | KEY_KEYDOWN:
-				if(!vesa_is_valid())
+				if(!VesaIsEnabled())
 					add_key('\t');
 				else
 					// ALT + TAB是切换窗体的热键。
@@ -444,8 +444,8 @@ tran_key(IN uint8 scan_code)
 				break;
 			case KEY_TAB | KEY_KEYUP:
 				// ALT + TAB切换当前窗体。
-				if(vesa_is_valid() && alt)
-					switch_window();
+				if(VesaIsEnabled() && alt)
+					ScrSwitchWindow();
 				
 				keyup(KEY_TAB);
 				break;
@@ -528,7 +528,7 @@ tran_key(IN uint8 scan_code)
 				break;
 			case KEY_F2:
 			{
-				if(alt && vesa_is_valid())
+				if(alt && VesaIsEnabled())
 					WinRunShow();
 				break;
 			}
@@ -540,8 +540,8 @@ tran_key(IN uint8 scan_code)
 					if(tid != -1)
 					{
 						ConSetCurrentApplicationTid(-1);
-						kill_task(tid);
-						clear_screen();
+						TskmgrKillTask(tid);
+						ScrClearScreen();
 					}
 				}
 				else if(alt)
@@ -618,12 +618,12 @@ get_char(void)
 uint8
 get_char_utask(void)
 {
-	if(kernel_is_knltask())
+	if(KnlIsCurrentlyKernelTask())
 		return get_char();
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stdin == NULL)
 				return get_char();
@@ -659,13 +659,13 @@ move_cursor_left(void)
 {
 	LOCK_TASK();
 	uint16 x, y;
-	get_cursor(&x, &y);
+	ScrGetConsoleCursor(&x, &y);
 	if(x == 0 && y == 0)
 		return FALSE;
 	if(x > 0)
-		set_cursor(x - 1, y);
+		ScrSetConsoleCursor(x - 1, y);
 	else
-		set_cursor(COLUMN - 1, y - 1);
+		ScrSetConsoleCursor(COLUMN - 1, y - 1);
 	UNLOCK_TASK();
 	return TRUE;
 }
@@ -686,13 +686,13 @@ move_cursor_right(void)
 {
 	LOCK_TASK();
 	uint16 x, y;
-	get_cursor(&x, &y);
+	ScrGetConsoleCursor(&x, &y);
 	if(x == COLUMN - 1 && y == ROW - 1)
 		return FALSE;
 	if(x + 1 == COLUMN)
-		set_cursor(0, y + 1);
+		ScrSetConsoleCursor(0, y + 1);
 	else
-		set_cursor(x + 1, y);
+		ScrSetConsoleCursor(x + 1, y);
 	UNLOCK_TASK();
 	return TRUE;
 }
@@ -720,7 +720,7 @@ get_strn(	OUT int8 * input_buffer,
 	uint8 chr;
 	int32 pos = -1;
 	uint16 startx, starty;
-	get_cursor(&startx, &starty);
+	ScrGetConsoleCursor(&startx, &starty);
 	input_buffer[0] = '\0';
 	UNLOCK_TASK();
 	for(;;)
@@ -730,10 +730,10 @@ get_strn(	OUT int8 * input_buffer,
 		if(chr == '\n' || count >= n)
 		{
 			int32 i;
-			set_cursor(startx, starty);
+			ScrSetConsoleCursor(startx, starty);
 			for(i = 0; i < count; i++)
-				print_char(input_buffer[i]);
-			print_char('\n');
+				ScrPrintChar(input_buffer[i]);
+			ScrPrintChar('\n');
 			break;
 		}
 		switch(chr)
@@ -743,26 +743,26 @@ get_strn(	OUT int8 * input_buffer,
 				if(count > 0 && pos != -1)
 				{
 					uint16 x, y;
-					get_cursor(&x, &y);
+					ScrGetConsoleCursor(&x, &y);
 					if(x != 0 || y != 0)
 					{
 						int32 i;
-						lock_cursor();					
-						set_cursor(startx, starty);
+						ScrLockConsoleCursor();					
+						ScrSetConsoleCursor(startx, starty);
 						for(i = 0; i < count; i++)
-							print_char(' ');
+							ScrPrintChar(' ');
 						for(i = pos; i < count - 1; i++)
 							input_buffer[i] = input_buffer[i + 1];
-						set_cursor(startx, starty);
+						ScrSetConsoleCursor(startx, starty);
 						count--;
 						pos--;
 						for(i = 0; i < count; i++)
-							print_char(input_buffer[i]);
-						unlock_cursor();
+							ScrPrintChar(input_buffer[i]);
+						ScrUnlockConsoleCursor();
 						if(x == 0)
-							set_cursor(COLUMN - 1, y - 1);
+							ScrSetConsoleCursor(COLUMN - 1, y - 1);
 						else
-							set_cursor(x - 1, y);
+							ScrSetConsoleCursor(x - 1, y);
 					}				
 				}
 				break;
@@ -802,34 +802,34 @@ get_strn(	OUT int8 * input_buffer,
 				BOOL is_screen_up = FALSE;
 				BOOL is_screen_up1 = FALSE;
 				uint16 x, y;
-				get_cursor(&x, &y);
+				ScrGetConsoleCursor(&x, &y);
 				if(pos + 1 != count && (startx + count) % COLUMN == 0 && starty * COLUMN + startx + count == ROW * COLUMN)
 				{
 					starty--;
-					screen_up();
+					ScrScreenUp();
 					is_screen_up1 = TRUE;
 				}
 				else if(pos + 1 == count && x == COLUMN - 1 && y == ROW - 1)
 				{
 					starty--;
-					screen_up();
+					ScrScreenUp();
 					is_screen_up = TRUE;
 				}
-				lock_cursor();
-				set_cursor(startx, starty);
+				ScrLockConsoleCursor();
+				ScrSetConsoleCursor(startx, starty);
 				for(i = 0; i < count; i++)
-					print_char(input_buffer[i]);
-				unlock_cursor();
+					ScrPrintChar(input_buffer[i]);
+				ScrUnlockConsoleCursor();
 				if(x + 1 == COLUMN)
 					if(is_screen_up)
-						set_cursor(0, y);
+						ScrSetConsoleCursor(0, y);
 					else
-						set_cursor(0, y + 1);
+						ScrSetConsoleCursor(0, y + 1);
 				else
 					if(is_screen_up1)
-						set_cursor(x + 1, y - 1);
+						ScrSetConsoleCursor(x + 1, y - 1);
 					else
-						set_cursor(x + 1, y);
+						ScrSetConsoleCursor(x + 1, y);
 				break;
 			}		
 		}
@@ -859,12 +859,12 @@ uint32
 get_strn_utask(	OUT int8 * input_buffer,
 				IN uint32 n)
 {
-	if(kernel_is_knltask())
+	if(KnlIsCurrentlyKernelTask())
 		return get_strn(input_buffer, n);
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stdin == NULL)
 				return get_strn(input_buffer, n);

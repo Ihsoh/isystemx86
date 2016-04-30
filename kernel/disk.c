@@ -37,7 +37,7 @@ uint32 disk_hard_disk_type = DISK_TYPE_ATA;
 #define	_DISK_WBYTES(_idx)	(_disk_wbytes[(_idx)])
 
 /**
-	@Function:		_is_ahcisym
+	@Function:		_DskIsAhciSym
 	@Access:		Private
 	@Description:
 		检测盘符是否为AHCI符号。
@@ -51,7 +51,7 @@ uint32 disk_hard_disk_type = DISK_TYPE_ATA;
 */
 static
 BOOL
-_is_ahcisym(IN CASCTEXT symbol)
+_DskIsAhciSym(IN CASCTEXT symbol)
 {
 	return	symbol[0] == 'S'
 			&& (symbol[1] >= 'A' && symbol[1] <= 'Z')
@@ -59,7 +59,7 @@ _is_ahcisym(IN CASCTEXT symbol)
 }
 
 /**
-	@Function:		_ahcisym2portno
+	@Function:		_DskGetPortNoByAhciSym
 	@Access:		Private
 	@Description:
 		AHCI设备符号转换为端口号。
@@ -78,16 +78,16 @@ _is_ahcisym(IN CASCTEXT symbol)
 */
 static
 uint32
-_ahcisym2portno(IN CASCTEXT symbol)
+_DskGetPortNoByAhciSym(IN CASCTEXT symbol)
 {
-	if(_is_ahcisym(symbol))
+	if(_DskIsAhciSym(symbol))
 		return symbol[1] - 'A';
 	else
 		return 0xffffffff;
 }
 
 /**
-	@Function:		_is_atasym
+	@Function:		_DskIsAtaSym
 	@Access:		Private
 	@Description:
 		检测盘符是否为ATA符号。
@@ -101,7 +101,7 @@ _ahcisym2portno(IN CASCTEXT symbol)
 */
 static
 BOOL
-_is_atasym(IN CASCTEXT symbol)
+_DskIsAtaSym(IN CASCTEXT symbol)
 {
 	return 	strcmp(symbol, "DA") == 0
 			|| strcmp(symbol, "DB") == 0
@@ -110,7 +110,7 @@ _is_atasym(IN CASCTEXT symbol)
 }
 
 /**
-	@Function:		get_disk_symbol
+	@Function:		DskGetBySymbol
 	@Access:		Public
 	@Description:
 		获取盘符。
@@ -123,7 +123,7 @@ _is_atasym(IN CASCTEXT symbol)
 	@Return:	
 */
 void
-get_disk_symbol(IN uint32 index, 
+DskGetBySymbol(	IN uint32 index, 
 				OUT int8 * symbol)
 {
 	if(symbol == NULL)
@@ -135,7 +135,7 @@ get_disk_symbol(IN uint32 index,
 }
 
 /**
-	@Function:		get_disk_count
+	@Function:		DskGetCount
 	@Access:		Public
 	@Description:
 		获取磁盘数量。
@@ -145,13 +145,13 @@ get_disk_symbol(IN uint32 index,
 			磁盘数量。		
 */
 uint32
-get_disk_count(void)
+DskGetCount(void)
 {
 	return disk_count;
 }
 
 /**
-	@Function:		get_disk_size
+	@Function:		DskGetSize
 	@Access:		Public
 	@Description:
 		获取指定磁盘容量，单位为KB。
@@ -163,26 +163,26 @@ get_disk_count(void)
 			指定磁盘容量。		
 */
 uint32
-get_disk_size(IN int8 * symbol)
+DskGetSize(IN int8 * symbol)
 {
 	if(symbol == NULL)
 		return 0;
 	if(strcmp(symbol, "VA") == 0)
-		return get_vdisk_size("VA");
+		return VdskGetSize("VA");
 	else if(strcmp(symbol, "VB") == 0)
-		return get_vdisk_size("VB");
+		return VdskGetSize("VB");
 	else if(strcmp(symbol, "VS") == 0)
-		return get_disk_size(EXPLICIT_SYSTEM_DISK);
-	else if(_is_atasym(symbol))
+		return DskGetSize(EXPLICIT_SYSTEM_DISK);
+	else if(_DskIsAtaSym(symbol))
 		return AtaGetSectorCount(symbol);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return ATAPI_MAX_SIZE / 1024;
-	else if(_is_ahcisym(symbol))
+	else if(_DskIsAhciSym(symbol))
 	{
-		uint32 portno = _ahcisym2portno(symbol);
+		uint32 portno = _DskGetPortNoByAhciSym(symbol);
 		return (uint32)((uint64)AhciGetSectorCount(portno) * 512UL / 1024UL);
 	}
 	else
@@ -190,7 +190,7 @@ get_disk_size(IN int8 * symbol)
 }
 
 /**
-	@Function:		is_system_disk
+	@Function:		DskHasSystem
 	@Access:		Public
 	@Description:
 		检测指定磁盘是否为系统盘。
@@ -202,18 +202,18 @@ get_disk_size(IN int8 * symbol)
 			返回TRUE则为系统盘，否则不是。	
 */
 BOOL
-is_system_disk(IN int8 * symbol)
+DskHasSystem(IN int8 * symbol)
 {
 	CASCTEXT sign_str = SYSTEM_SIGNATURE_STRING;
 	if(symbol == NULL)
 		return FALSE;
 	if(strcmp(symbol, "VS") == 0)
-		return is_system_disk(EXPLICIT_SYSTEM_DISK);
-	uint32 disk_size = get_disk_size(symbol);
+		return DskHasSystem(EXPLICIT_SYSTEM_DISK);
+	uint32 disk_size = DskGetSize(symbol);
 	if(disk_size != 0)
 	{
 		uchar buffer[512];
-		if(!read_sector(symbol, 0, buffer))
+		if(!DskReadSector(symbol, 0, buffer))
 			return FALSE;
 		if(	// 验证MBR的合法性。
 			buffer[510] == 0x55
@@ -234,7 +234,7 @@ is_system_disk(IN int8 * symbol)
 }
 
 /**
-	@Function:		init_disk
+	@Function:		DskInit
 	@Access:		Public
 	@Description:
 		初始化磁盘。
@@ -244,18 +244,18 @@ is_system_disk(IN int8 * symbol)
 	@Return:	
 */
 void
-init_disk(IN int8 * symbol)
+DskInit(IN int8 * symbol)
 {
 	if(symbol == NULL)
 		return;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
 	{
-		init_vdisk(symbol);
+		VdskInit(symbol);
 		_INIT_DISK_RWBYTES(disk_count);
 		UtlCopyString(disk_list[disk_count++], DISK_SYMBOL_BUFFER_SIZE, symbol);
 	}
 	else if(strcmp(symbol, "VS") == 0)
-		init_disk(EXPLICIT_SYSTEM_DISK);
+		DskInit(EXPLICIT_SYSTEM_DISK);
 	else if(strcmp(symbol, "HD") == 0)
 	{
 		// ATA。
@@ -294,9 +294,9 @@ init_disk(IN int8 * symbol)
 		}
 
 		// 检查ATA与SATA的主盘是否为系统盘。
-		if(is_system_disk("SA"))
+		if(DskHasSystem("SA"))
 			disk_hard_disk_type = DISK_TYPE_SATA;
-		else if(is_system_disk("DA"))
+		else if(DskHasSystem("DA"))
 			disk_hard_disk_type = DISK_TYPE_ATA;
 		else
 			disk_hard_disk_type = DISK_TYPE_ATA;
@@ -304,7 +304,7 @@ init_disk(IN int8 * symbol)
 }
 
 /**
-	@Function:		destroy_disk
+	@Function:		DskDestroy
 	@Access:		Public
 	@Description:
 		销毁指定磁盘资源。
@@ -314,18 +314,18 @@ init_disk(IN int8 * symbol)
 	@Return:	
 */
 void
-destroy_disk(IN int8 * symbol)
+DskDestroy(IN int8 * symbol)
 {
 	if(symbol == NULL)
 		return;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		destroy_vdisk(symbol);
+		VdskDestroy(symbol);
 	else if(strcmp(symbol, "VS") == 0)
-		destroy_disk(EXPLICIT_SYSTEM_DISK);
+		DskDestroy(EXPLICIT_SYSTEM_DISK);
 }
 
 /**
-	@Function:		sector_count
+	@Function:		DskGetSectorCount
 	@Access:		Public
 	@Description:
 		获取指定磁盘的扇区数量。
@@ -337,24 +337,24 @@ destroy_disk(IN int8 * symbol)
 			扇区数量。		
 */
 uint32
-sector_count(IN int8 * symbol)
+DskGetSectorCount(IN int8 * symbol)
 {
 	if(symbol == NULL)
 		return 0;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		return sector_count_v();
+		return VdskGetSectorCount();
 	else if(strcmp(symbol, "VS") == 0)
-		return sector_count(EXPLICIT_SYSTEM_DISK);
-	else if(_is_atasym(symbol))
+		return DskGetSectorCount(EXPLICIT_SYSTEM_DISK);
+	else if(_DskIsAtaSym(symbol))
 		return AtaGetSectorCount(symbol);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return ATAPI_SECTOR512_COUNT;
-	else if(_is_ahcisym(symbol))
+	else if(_DskIsAhciSym(symbol))
 	{
-		uint32 portno = _ahcisym2portno(symbol);
+		uint32 portno = _DskGetPortNoByAhciSym(symbol);
 		return AhciGetSectorCount(portno);
 	}
 	else 
@@ -362,7 +362,7 @@ sector_count(IN int8 * symbol)
 }
 
 /**
-	@Function:		_disk_index
+	@Function:		_DskGetIndexBySymbol
 	@Access:		Public
 	@Description:
 		获取一个磁盘的索引。
@@ -375,7 +375,7 @@ sector_count(IN int8 * symbol)
 */
 static
 uint32
-_disk_index(IN CASCTEXT symbol)
+_DskGetIndexBySymbol(IN CASCTEXT symbol)
 {
 	if(symbol == NULL)
 		return 0xffffffff;
@@ -387,7 +387,7 @@ _disk_index(IN CASCTEXT symbol)
 }
 
 /**
-	@Function:		disk_wbytes
+	@Function:		DskGetWBytes
 	@Access:		Public
 	@Description:
 		获取一个磁盘的写入的字节数。
@@ -399,18 +399,18 @@ _disk_index(IN CASCTEXT symbol)
 			磁盘的写入的字节数。
 */
 uint64
-disk_wbytes(IN CASCTEXT symbol)
+DskGetWBytes(IN CASCTEXT symbol)
 {
 	if(symbol == NULL)
 		return 0;
 	if(strcmp(symbol, "VS") == 0)
-		return disk_wbytes(EXPLICIT_SYSTEM_DISK);
-	uint32 idx = _disk_index(symbol);
+		return DskGetWBytes(EXPLICIT_SYSTEM_DISK);
+	uint32 idx = _DskGetIndexBySymbol(symbol);
 	return _DISK_WBYTES(idx);
 }
 
 /**
-	@Function:		disk_rbytes
+	@Function:		DskGetRBytes
 	@Access:		Public
 	@Description:
 		获取一个磁盘的读出的字节数。
@@ -422,18 +422,18 @@ disk_wbytes(IN CASCTEXT symbol)
 			磁盘的读出的字节数。
 */
 uint64
-disk_rbytes(IN CASCTEXT symbol)
+DskGetRBytes(IN CASCTEXT symbol)
 {
 	if(symbol == NULL)
 		return 0;
 	if(strcmp(symbol, "VS") == 0)
-		return disk_rbytes(EXPLICIT_SYSTEM_DISK);
-	uint32 idx = _disk_index(symbol);
+		return DskGetRBytes(EXPLICIT_SYSTEM_DISK);
+	uint32 idx = _DskGetIndexBySymbol(symbol);
 	return _DISK_RBYTES(idx);
 }
 
 /**
-	@Function:		read_sector
+	@Function:		DskReadSector
 	@Access:		Public
 	@Description:
 		读取一个扇区的数据。
@@ -449,56 +449,56 @@ disk_rbytes(IN CASCTEXT symbol)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-read_sector(IN int8 * symbol, 
-			IN uint32 pos, 
-			OUT uint8 * buffer)
+DskReadSector(	IN int8 * symbol, 
+				IN uint32 pos, 
+				OUT uint8 * buffer)
 {
 	if(symbol == NULL || buffer == NULL)
 		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		r = read_sector_v(symbol, pos, buffer);
+		r = VdskReadSector(symbol, pos, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = read_sector(EXPLICIT_SYSTEM_DISK, pos, buffer);
-	else if(_is_atasym(symbol))
+		r = DskReadSector(EXPLICIT_SYSTEM_DISK, pos, buffer);
+	else if(_DskIsAtaSym(symbol))
 		r = AtaReadSector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0)
 		r = AtapiReadSector512(	ATA_BUS_PRIMARY,
-									ATA_DRIVE_MASTER,
-									pos,
-									buffer);
+								ATA_DRIVE_MASTER,
+								pos,
+								buffer);
 	else if(strcmp(symbol, "CB") == 0)
 		r = AtapiReadSector512(	ATA_BUS_PRIMARY,
-									ATA_DRIVE_SLAVE,
-									pos,
-									buffer);
+								ATA_DRIVE_SLAVE,
+								pos,
+								buffer);
 	else if(strcmp(symbol, "CC") == 0)
 		r = AtapiReadSector512(	ATA_BUS_SECONDARY,
-									ATA_DRIVE_MASTER,
-									pos,
-									buffer);
+								ATA_DRIVE_MASTER,
+								pos,
+								buffer);
 	else if(strcmp(symbol, "CD") == 0)
 		r = AtapiReadSector512(	ATA_BUS_SECONDARY,
-									ATA_DRIVE_SLAVE,
-									pos,
-									buffer);
-	else if(_is_ahcisym(symbol))
+								ATA_DRIVE_SLAVE,
+								pos,
+								buffer);
+	else if(_DskIsAhciSym(symbol))
 	{
-		uint32 portno = _ahcisym2portno(symbol);
+		uint32 portno = _DskGetPortNoByAhciSym(symbol);
 		r = AhciRead(portno, pos, 0, 1, (WORD *)buffer);
 	}
 	else
 		return FALSE;
 	if(r)
 	{
-		uint32 idx = _disk_index(symbol);
+		uint32 idx = _DskGetIndexBySymbol(symbol);
 		_INC_DISK_RBYTES(idx, DISK_BYTES_PER_SECTOR);
 	}
 	return r;
 }
 
 /**
-	@Function:		write_sector
+	@Function:		DskWriteSector
 	@Access:		Public
 	@Description:
 		写入数据到一个扇区。
@@ -514,7 +514,7 @@ read_sector(IN int8 * symbol,
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-write_sector(	IN int8 * symbol, 
+DskWriteSector(	IN int8 * symbol, 
 				IN uint32 pos, 
 				IN uint8 * buffer)
 {
@@ -522,33 +522,33 @@ write_sector(	IN int8 * symbol,
 		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		r = write_sector_v(symbol, pos, buffer);
+		r = VdskWriteSector(symbol, pos, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = write_sector(EXPLICIT_SYSTEM_DISK, pos, buffer);
-	else if(_is_atasym(symbol))
+		r = DskWriteSector(EXPLICIT_SYSTEM_DISK, pos, buffer);
+	else if(_DskIsAtaSym(symbol))
 		r = AtaWriteSector(symbol, pos, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return FALSE;
-	else if(_is_ahcisym(symbol))
+	else if(_DskIsAhciSym(symbol))
 	{
-		uint32 portno = _ahcisym2portno(symbol);
+		uint32 portno = _DskGetPortNoByAhciSym(symbol);
 		r = AhciWrite(portno, pos, 0, 1, (WORD *)buffer);
 	}
 	else
 		return FALSE;
 	if(r)
 	{
-		uint32 idx = _disk_index(symbol);
+		uint32 idx = _DskGetIndexBySymbol(symbol);
 		_INC_DISK_WBYTES(idx, DISK_BYTES_PER_SECTOR);
 	}
 	return r;
 }
 
 /**
-	@Function:		read_sectors
+	@Function:		DskReadSectors
 	@Access:		Public
 	@Description:
 		读取一个或多个扇区的数据。最多一次可以读取256个扇区的数据。
@@ -566,7 +566,7 @@ write_sector(	IN int8 * symbol,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-read_sectors(	IN int8 * symbol, 
+DskReadSectors(	IN int8 * symbol, 
 				IN uint32 pos, 
 				IN uint8 count, 
 				OUT uint8 * buffer)
@@ -575,52 +575,52 @@ read_sectors(	IN int8 * symbol,
 		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		r = read_sectors_v(symbol, pos, count, buffer);
+		r = VdskReadSectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = read_sectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
-	else if(_is_atasym(symbol))
+		r = DskReadSectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
+	else if(_DskIsAtaSym(symbol))
 		r = AtaReadSectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0)
-		r = AtapiReadSector512s(	ATA_BUS_PRIMARY,
-									ATA_DRIVE_MASTER,
-									pos,
-									count,
-									buffer);
+		r = AtapiReadSector512s(ATA_BUS_PRIMARY,
+								ATA_DRIVE_MASTER,
+								pos,
+								count,
+								buffer);
 	else if(strcmp(symbol, "CB") == 0)
-		r = AtapiReadSector512s(	ATA_BUS_PRIMARY,
-									ATA_DRIVE_SLAVE,
-									pos,
-									count,
-									buffer);
+		r = AtapiReadSector512s(ATA_BUS_PRIMARY,
+								ATA_DRIVE_SLAVE,
+								pos,
+								count,
+								buffer);
 	else if(strcmp(symbol, "CC") == 0)
-		r = AtapiReadSector512s(	ATA_BUS_SECONDARY,
-									ATA_DRIVE_MASTER,
-									pos,
-									count,
-									buffer);
+		r = AtapiReadSector512s(ATA_BUS_SECONDARY,
+								ATA_DRIVE_MASTER,
+								pos,
+								count,
+								buffer);
 	else if(strcmp(symbol, "CD") == 0)
-		r = AtapiReadSector512s(	ATA_BUS_SECONDARY,
-									ATA_DRIVE_SLAVE,
-									pos,
-									count,
-									buffer);
-	else if(_is_ahcisym(symbol))
+		r = AtapiReadSector512s(ATA_BUS_SECONDARY,
+								ATA_DRIVE_SLAVE,
+								pos,
+								count,
+								buffer);
+	else if(_DskIsAhciSym(symbol))
 	{
-		uint32 portno = _ahcisym2portno(symbol);
+		uint32 portno = _DskGetPortNoByAhciSym(symbol);
 		r = AhciRead(portno, pos, 0, count, (WORD *)buffer);
 	}
 	else 
 		return FALSE;
 	if(r)
 	{
-		uint32 idx = _disk_index(symbol);
+		uint32 idx = _DskGetIndexBySymbol(symbol);
 		_INC_DISK_RBYTES(idx, count * DISK_BYTES_PER_SECTOR);
 	}
 	return r;
 }
 
 /**
-	@Function:		write_sectors
+	@Function:		DskWriteSectors
 	@Access:		Public
 	@Description:
 		写入数据到一个或多个扇区。最多一次可以写入256个扇区的数据。
@@ -638,7 +638,7 @@ read_sectors(	IN int8 * symbol,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-write_sectors(	IN int8 * symbol, 
+DskWriteSectors(IN int8 * symbol, 
 				IN uint32 pos, 
 				IN uint8 count, 
 				IN uint8 * buffer)
@@ -647,26 +647,26 @@ write_sectors(	IN int8 * symbol,
 		return FALSE;
 	BOOL r = FALSE;
 	if(strcmp(symbol, "VA") == 0 || strcmp(symbol, "VB") == 0)
-		r = write_sectors_v(symbol, pos, count, buffer);
+		r = VdskWriteSectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "VS") == 0)
-		r = write_sectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
-	else if(_is_atasym(symbol))
+		r = DskWriteSectors(EXPLICIT_SYSTEM_DISK, pos, count, buffer);
+	else if(_DskIsAtaSym(symbol))
 		r = AtaWriteSectors(symbol, pos, count, buffer);
 	else if(strcmp(symbol, "CA") == 0
 			|| strcmp(symbol, "CB") == 0
 			|| strcmp(symbol, "CC") == 0
 			|| strcmp(symbol, "CD") == 0)
 		return FALSE;
-	else if(_is_ahcisym(symbol))
+	else if(_DskIsAhciSym(symbol))
 	{
-		uint32 portno = _ahcisym2portno(symbol);
+		uint32 portno = _DskGetPortNoByAhciSym(symbol);
 		r = AhciWrite(portno, pos, 0, count, (WORD *)buffer);
 	}
 	else
 		return FALSE;
 	if(r)
 	{
-		uint32 idx = _disk_index(symbol);
+		uint32 idx = _DskGetIndexBySymbol(symbol);
 		_INC_DISK_WBYTES(idx, count * DISK_BYTES_PER_SECTOR);
 	}
 	return r;

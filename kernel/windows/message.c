@@ -39,12 +39,12 @@ void
 _WinMsgEvent(	IN WindowPtr window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	switch(params->event_type)
 	{
 		case WINDOW_EVENT_WILL_CLOSE:
 		{
-			destroy_window(window);
+			ScrDestroyWindow(window);
 			break;
 		}
 	}
@@ -88,18 +88,19 @@ WinMsgShow(	IN CASCTEXT title,
 	if(title == NULL || text == NULL)
 		return NULL;
 	struct Window * window = NULL;
-	window = create_window(	_WIDTH,
-							_HEIGHT,
-							bgcolor,
-							WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_CLOSE,
-							title,
-							_WinMsgEvent);
+	window = ScrCreateWindow(
+		_WIDTH,
+		_HEIGHT,
+		bgcolor,
+		WINDOW_STYLE_MINIMIZE | WINDOW_STYLE_CLOSE,
+		title,
+		_WinMsgEvent);
 	if(window == NULL)
 		return NULL;
 	struct CommonImage * workspace = &(window->workspace);
 	if(!rect_common_image(workspace, 0, 0, _WIDTH, _HEIGHT, bgcolor))
 	{
-		destroy_window(window);
+		ScrDestroyWindow(window);
 		return FALSE;
 	}
 
@@ -108,7 +109,7 @@ WinMsgShow(	IN CASCTEXT title,
 		text_common_image(	workspace,
 							_LPADDING, 
 							_TPADDING, 
-							get_enfont_ptr(),
+							EnfntGetFontDataPtr(),
 							text,
 							len,
 							color);
@@ -118,7 +119,7 @@ WinMsgShow(	IN CASCTEXT title,
 		ASCCHAR line1[_MAX_CHAR];
 		UtlCopyMemory(line0, sizeof(line0), text, _MAX_CHAR);
 		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, len - _MAX_CHAR);
-		uint8 * enfont = get_enfont_ptr();
+		uint8 * enfont = EnfntGetFontDataPtr();
 		text_common_image(	workspace,
 							_LPADDING, 
 							_TPADDING, 
@@ -142,7 +143,7 @@ WinMsgShow(	IN CASCTEXT title,
 		UtlCopyMemory(line0, sizeof(line0), text, _MAX_CHAR);
 		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
 		UtlCopyMemory(line2, sizeof(line2), text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
-		uint8 * enfont = get_enfont_ptr();
+		uint8 * enfont = EnfntGetFontDataPtr();
 		text_common_image(	workspace,
 							_LPADDING, 
 							_TPADDING, 
@@ -175,7 +176,7 @@ WinMsgShow(	IN CASCTEXT title,
 		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
 		UtlCopyMemory(line2, sizeof(line2), text + _MAX_CHAR * 2, _MAX_CHAR);
 		UtlCopyMemory(line3, sizeof(line3), text + _MAX_CHAR * 3, len - _MAX_CHAR * 3);
-		uint8 * enfont = get_enfont_ptr();
+		uint8 * enfont = EnfntGetFontDataPtr();
 		text_common_image(	workspace,
 							_LPADDING, 
 							_TPADDING, 
@@ -214,7 +215,7 @@ WinMsgShow(	IN CASCTEXT title,
 		UtlCopyMemory(line0, sizeof(line0), text, _MAX_CHAR);
 		UtlCopyMemory(line1, sizeof(line1), text + _MAX_CHAR, _MAX_CHAR);
 		UtlCopyMemory(line2, sizeof(line2), text + _MAX_CHAR * 2, len - _MAX_CHAR * 2);
-		uint8 * enfont = get_enfont_ptr();
+		uint8 * enfont = EnfntGetFontDataPtr();
 		text_common_image(	workspace,
 							_LPADDING, 
 							_TPADDING, 
@@ -254,12 +255,12 @@ WinMsgShow(	IN CASCTEXT title,
 	window->state = WINDOW_STATE_SHOW;
 	if(style & MESSAGE_WINDOW_STYLE_CENTER)
 	{
-		x = vesa_get_width() / 2 - _WIDTH / 2;
-		y = vesa_get_height() / 2 - _HEIGHT / 2;
+		x = VesaGetWidth() / 2 - _WIDTH / 2;
+		y = VesaGetHeight() / 2 - _HEIGHT / 2;
 	}
 	window->x = x;
 	window->y = y;
 	if(style & MESSAGE_WINDOW_STYLE_TOP)
-		set_top_window(window);
+		ScrSetTopWindow(window);
 	return window;
 }

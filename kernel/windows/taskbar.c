@@ -100,7 +100,7 @@ void
 _WinTskbrEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	if(params->event_type == WINDOW_EVENT_PAINT)
 	{
 		BUTTON(_btn_start, &window->workspace, params, top);
@@ -158,15 +158,16 @@ _WinTskbrTimerEvent(void)
 BOOL
 WinTskbrInit(void)
 {
-	uint32 w = vesa_get_width();
-	uint32 h = vesa_get_height();
-	_window = create_window(w, _HEIGHT,
-							0xff000000,
-							WINDOW_STYLE_NO_TITLE 
-								| WINDOW_STYLE_NO_WMGR
-								| WINDOW_STYLE_NO_BORDER,
-							"Taskbar",
-							_WinTskbrEvent);
+	uint32 w = VesaGetWidth();
+	uint32 h = VesaGetHeight();
+	_window = ScrCreateWindow(
+		w, _HEIGHT,
+		0xff000000,
+		WINDOW_STYLE_NO_TITLE 
+			| WINDOW_STYLE_NO_WMGR
+			| WINDOW_STYLE_NO_BORDER,
+		"Taskbar",
+		_WinTskbrEvent);
 	rect_common_image(&_window->workspace, 0, 0, w, _HEIGHT, 0xff222222);
 	_window->y = h - _HEIGHT;
 
@@ -197,8 +198,8 @@ WinTskbrInit(void)
 				_BTN_TIME_WIDTH, 0);
 	_btn_time->style = BUTTON_STYLE_REFRESH;
 
-	_timer = timer_new(800, _WinTskbrTimerEvent);
-	timer_start(_timer);
+	_timer = TmrNew(500, _WinTskbrTimerEvent);
+	TmrStart(_timer);
 
 	_window->state = WINDOW_STATE_SHOW;
 	return TRUE;

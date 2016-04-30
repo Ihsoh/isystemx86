@@ -12,7 +12,7 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		alloc_vars
+	@Function:		KnlAllocVarList
 	@Access:		Public
 	@Description:
 		创建变量列表。
@@ -24,14 +24,14 @@
 			指向分配的变量列表的指针。		
 */
 struct Vars *
-alloc_vars(IN uint32 n)
+KnlAllocVarList(IN uint32 n)
 {
 	if(n == 0)
 		return NULL;
-	struct Vars * vars_s = (struct Vars *)alloc_memory(sizeof(struct Vars));
+	struct Vars * vars_s = (struct Vars *)MemAlloc(sizeof(struct Vars));
 	if(vars_s == NULL)
 		return NULL;
-	vars_s->vars = alloc_memory(n * sizeof(struct Var));
+	vars_s->vars = MemAlloc(n * sizeof(struct Var));
 	if(vars_s->vars == NULL)
 		return NULL;
 	uint32 ui;
@@ -42,7 +42,7 @@ alloc_vars(IN uint32 n)
 }
 
 /**
-	@Function:		free_vars
+	@Function:		KnlFreeVarList
 	@Access:		Public
 	@Description:
 		释放变量列表。
@@ -54,16 +54,16 @@ alloc_vars(IN uint32 n)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-free_vars(IN struct Vars * vars_s)
+KnlFreeVarList(IN struct Vars * vars_s)
 {
-	if(free_memory(vars_s->vars) && free_memory(vars_s))
+	if(MemFree(vars_s->vars) && MemFree(vars_s))
 		return TRUE;
 	else
 		return FALSE;
 }
 
 /**
-	@Function:		is_valid_var_name
+	@Function:		_KnlIsValidVarName
 	@Access:		Public
 	@Description:
 		检查变量名是否合法。
@@ -76,7 +76,7 @@ free_vars(IN struct Vars * vars_s)
 */
 static
 BOOL
-is_valid_var_name(IN int8 * name)
+_KnlIsValidVarName(IN int8 * name)
 {
 	if(name == NULL)
 		return FALSE;
@@ -87,14 +87,17 @@ is_valid_var_name(IN int8 * name)
 	for(ui = 0; ui < len; ui++)
 	{
 		int8 chr = name[ui];
-		if(!((chr >= 'A' && chr <= 'Z') || (chr >= 'a' && chr <= 'z') || (chr >= '0' && chr <= '9') || chr == '_'))
+		if(!(	(chr >= 'A' && chr <= 'Z')
+				|| (chr >= 'a' && chr <= 'z')
+				|| (chr >= '0' && chr <= '9')
+				|| chr == '_'))
 			return FALSE;
 	}
 	return TRUE;
 }
 
 /**
-	@Function:		get_var
+	@Function:		_KnlGetVar
 	@Access:		Public
 	@Description:
 		获取变量。
@@ -109,8 +112,8 @@ is_valid_var_name(IN int8 * name)
 */
 static
 struct Var *
-get_var(IN struct Vars * vars_s,
-		IN int8 * name)
+_KnlGetVar(	IN struct Vars * vars_s,
+			IN int8 * name)
 {
 	uint32 ui;
 	struct Var * vars = vars_s->vars;
@@ -121,7 +124,7 @@ get_var(IN struct Vars * vars_s,
 }
 
 /**
-	@Function:		var_is_exists
+	@Function:		_KnlHasVar
 	@Access:		Private
 	@Description:
 		获取变量。
@@ -136,17 +139,17 @@ get_var(IN struct Vars * vars_s,
 */
 static
 BOOL
-var_is_exists(	IN struct Vars * vars_s,
-				IN int8 * name)
+_KnlHasVar(	IN struct Vars * vars_s,
+			IN int8 * name)
 {
-	if(get_var(vars_s, name) != NULL)
+	if(_KnlGetVar(vars_s, name) != NULL)
 		return TRUE;
 	else
 		return FALSE;
 }
 
 /**
-	@Function:		new_var
+	@Function:		KnlNewVar
 	@Access:		Public
 	@Description:
 		新建变量。
@@ -160,12 +163,12 @@ var_is_exists(	IN struct Vars * vars_s,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-new_var(IN OUT struct Vars * vars_s,
-		IN int8 * name)
+KnlNewVar(	IN OUT struct Vars * vars_s,
+			IN int8 * name)
 {
 	if(	vars_s == NULL 
-		|| !is_valid_var_name(name) 
-		|| var_is_exists(vars_s, name))
+		|| !_KnlIsValidVarName(name) 
+		|| _KnlHasVar(vars_s, name))
 		return FALSE;
 	struct Var * vars = vars_s->vars;
 	uint32 index;
@@ -179,7 +182,7 @@ new_var(IN OUT struct Vars * vars_s,
 }
 
 /**
-	@Function:		set_var_value
+	@Function:		KnlSetVarValue
 	@Access:		Public
 	@Description:
 		设置变量的值。
@@ -195,17 +198,17 @@ new_var(IN OUT struct Vars * vars_s,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-set_var_value(	IN OUT struct Vars * vars_s,
+KnlSetVarValue(	IN OUT struct Vars * vars_s,
 				IN int8 * name,
 				IN int8 * value)
 {
 	if(	vars_s == NULL 
-		|| !is_valid_var_name(name)
+		|| !_KnlIsValidVarName(name)
 		|| value == NULL 
 		|| strlen(value) > MAX_VAR_VALUE_LEN
-		|| !var_is_exists(vars_s, name))
+		|| !_KnlHasVar(vars_s, name))
 		return FALSE;
-	struct Var * var = get_var(vars_s, name);
+	struct Var * var = _KnlGetVar(vars_s, name);
 	if(var == NULL)
 		return FALSE;
 	UtlCopyString(var->value, sizeof(var->value), value);
@@ -213,7 +216,7 @@ set_var_value(	IN OUT struct Vars * vars_s,
 }
 
 /**
-	@Function:		get_var_value
+	@Function:		KnlGetVarValue
 	@Access:		Public
 	@Description:
 		获取变量的值。
@@ -229,15 +232,15 @@ set_var_value(	IN OUT struct Vars * vars_s,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-get_var_value(	IN struct Vars * vars_s,
+KnlGetVarValue(	IN struct Vars * vars_s,
 				IN int8 * name,
 				OUT int8 * value)
 {
-	return get_var_value_with_size(vars_s, name, value, 0x7fffffff);
+	return KnlGetVarValueWithSize(vars_s, name, value, 0x7fffffff);
 }
 
 /**
-	@Function:		get_var_value_with_size
+	@Function:		KnlGetVarValueWithSize
 	@Access:		Public
 	@Description:
 		获取变量的值，并且可以指定储存值的缓冲区的大小。
@@ -255,17 +258,17 @@ get_var_value(	IN struct Vars * vars_s,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-get_var_value_with_size(IN struct Vars * vars_s,
+KnlGetVarValueWithSize(	IN struct Vars * vars_s,
 						IN int8 * name,
 						OUT int8 * value,
 						IN uint32 size)
 {
 	if(	vars_s == NULL 
 		|| size == 0
-		|| !is_valid_var_name(name)
-		|| !var_is_exists(vars_s, name))
+		|| !_KnlIsValidVarName(name)
+		|| !_KnlHasVar(vars_s, name))
 		return FALSE;
-	struct Var * var = get_var(vars_s, name);
+	struct Var * var = _KnlGetVar(vars_s, name);
 	if(var == NULL)
 		return FALSE;
 	char chr;
@@ -278,7 +281,7 @@ get_var_value_with_size(IN struct Vars * vars_s,
 }
 
 /**
-	@Function:		get_var_int_value
+	@Function:		KnlGetVarIntValue
 	@Access:		Public
 	@Description:
 		获取变量的值。
@@ -294,19 +297,19 @@ get_var_value_with_size(IN struct Vars * vars_s,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-get_var_int_value(	IN struct Vars * vars_s,
+KnlGetVarIntValue(	IN struct Vars * vars_s,
 					IN int8 * name,
 					OUT int32 * value)
 {
 	int8 buffer[MAX_VAR_VALUE_BUFFER_LEN];
-	if(!get_var_value(vars_s, name, buffer))
+	if(!KnlGetVarValue(vars_s, name, buffer))
 		return FALSE;
 	*value = (int32)stol(buffer);
 	return TRUE;
 }
 
 /**
-	@Function:		get_var_double_value
+	@Function:		KnlGetVarDoubleValue
 	@Access:		Public
 	@Description:
 		获取变量的值。
@@ -322,19 +325,19 @@ get_var_int_value(	IN struct Vars * vars_s,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-get_var_double_value(	IN struct Vars * vars_s,
+KnlGetVarDoubleValue(	IN struct Vars * vars_s,
 						IN int8 * name,
 						OUT double * value)
 {
 	int8 buffer[MAX_VAR_VALUE_BUFFER_LEN];
-	if(!get_var_value(vars_s, name, buffer))
+	if(!KnlGetVarValue(vars_s, name, buffer))
 		return FALSE;
 	*value = stod(buffer);
 	return TRUE;
 }
 
 /**
-	@Function:		del_var
+	@Function:		KnlDeleteVar
 	@Access:		Public
 	@Description:
 		删除变量。
@@ -348,14 +351,14 @@ get_var_double_value(	IN struct Vars * vars_s,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-del_var(IN OUT struct Vars * vars_s,
-		IN int8 * name)
+KnlDeleteVar(	IN OUT struct Vars * vars_s,
+				IN int8 * name)
 {
 	if(	vars_s == NULL 
-		|| !is_valid_var_name(name)
-		|| !var_is_exists(vars_s, name))
+		|| !_KnlIsValidVarName(name)
+		|| !_KnlHasVar(vars_s, name))
 		return FALSE;
-	struct Var * var = get_var(vars_s, name);
+	struct Var * var = _KnlGetVar(vars_s, name);
 	if(var == NULL)
 		return FALSE;
 	var->used = 0;

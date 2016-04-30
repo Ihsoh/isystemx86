@@ -40,7 +40,7 @@ _ScMouseProcess(IN uint32 func,
 		case SCALL_GET_MPOSITION:
 		{
 			int32 x, y;
-			get_mouse_position(&x, &y);
+			KnlGetMousePosition(&x, &y);
 			sparams->param0 = SPARAM(x);
 			sparams->param1 = SPARAM(y);
 			break;
@@ -51,7 +51,7 @@ _ScMouseProcess(IN uint32 func,
 		//	Param0=0:未按下, 1:按下
 		case SCALL_GET_MLBSTATE:
 		{
-			BOOL r = is_mouse_left_button_down();
+			BOOL r = KnlIsMouseLeftButtonDown();
 			sparams->param0 = SPARAM(r);
 			break;
 		}
@@ -61,7 +61,7 @@ _ScMouseProcess(IN uint32 func,
 		//	Param0=0:未按下, 1:按下
 		case SCALL_GET_MRBSTATE:
 		{
-			BOOL r = is_mouse_right_button_down();
+			BOOL r = KnlIsMouseRightButtonDown();
 			sparams->param0 = SPARAM(r);
 			break;
 		}

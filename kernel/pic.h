@@ -12,18 +12,18 @@
 #include "types.h"
 
 BOOL
-pic_init(void);
+PicInit(void);
 
 BOOL
-pic_mask(IN uint8 irq);
+PicMask(IN uint8 irq);
 
 BOOL
-pic_unmask(IN uint8 irq);
+PicUnmask(IN uint8 irq);
 
 BOOL
-pic_mask_all(void);
+PicMaskAll(void);
 
 BOOL
-pic_unmask_all(void);
+PicUnmaskAll(void);
 
 #endif

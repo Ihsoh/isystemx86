@@ -78,10 +78,10 @@ _AtaLock(void)
 	if(_lock)
 		return FALSE;
 
-	common_lock();
+	COMMON_LOCK();
 	_lock = TRUE;
-	_lock_tid = get_running_tid();
-	common_unlock();
+	_lock_tid = TaskmgrGetRunningTaskID();
+	COMMON_UNLOCK();
 	return TRUE;
 }
 

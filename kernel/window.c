@@ -34,7 +34,7 @@ uint32 __window_border_color			= 0xff000000;
 uint32 __window_border_color_nt			= 0xffffffff;
 
 /**
-	@Function:		load_image
+	@Function:		_WinmgrLoadImage
 	@Access:		Private
 	@Description:
 		加载图片。
@@ -49,28 +49,28 @@ uint32 __window_border_color_nt			= 0xffffffff;
 */
 static
 BOOL
-load_image(	OUT struct CommonImage * common_image,
-			IN int8 * path)
+_WinmgrLoadImage(	OUT struct CommonImage * common_image,
+					IN int8 * path)
 {
 	FileObject * fptr = Ifs1OpenFile(path, FILE_MODE_READ);
 	if(fptr == NULL)
 		return FALSE;
-	uchar * image_data = alloc_memory(flen(fptr));
+	uchar * image_data = MemAlloc(flen(fptr));
 	if(image_data == NULL)
 		return FALSE;
 	Ifs1ReadFile(fptr, image_data, flen(fptr));
 	Ifs1CloseFile(fptr);
 	if(!new_common_image(common_image, image_data))
 	{
-		free_memory(image_data);
+		MemFree(image_data);
 		return FALSE;
 	}
-	free_memory(image_data);
+	MemFree(image_data);
 	return TRUE;
 }
 
 /**
-	@Function:		init_window_resources
+	@Function:		WinmgrInit
 	@Access:		Public
 	@Description:
 		初始化窗体所需的资源。
@@ -80,7 +80,7 @@ load_image(	OUT struct CommonImage * common_image,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-init_window_resources(void)
+WinmgrInit(void)
 {
 	// 加载窗体的配置。
 	uint32 uiv = 0;
@@ -155,7 +155,7 @@ init_window_resources(void)
 }
 
 /**
-	@Function:		destroy_window_resources
+	@Function:		WinmgrUninit
 	@Access:		Public
 	@Description:
 		销毁窗体所需的资源。
@@ -163,7 +163,7 @@ init_window_resources(void)
 	@Return:
 */
 void
-destroy_window_resources(void)
+WinmgrUninit(void)
 {
 	destroy_common_image(&close_button);
 	destroy_common_image(&close_button_hover);
@@ -172,7 +172,7 @@ destroy_window_resources(void)
 }
 
 /**
-	@Function:		render_window
+	@Function:		WinmgrRenderWindow
 	@Access:		Public
 	@Description:
 		渲染窗体。
@@ -186,8 +186,8 @@ destroy_window_resources(void)
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-render_window(	IN struct Window * window,
-				IN BOOL top)
+WinmgrRenderWindow(	IN struct Window * window,
+					IN BOOL top)
 {
 	if(window == NULL)
 		return FALSE;
@@ -195,11 +195,11 @@ render_window(	IN struct Window * window,
 	// 从隐藏的状态过渡到显示的状态时引发WINDOW_EVENT_SHOW事件。
 	if(	window->old_state == WINDOW_STATE_HIDDEN
 		&& window->state == WINDOW_STATE_SHOW)
-		window_dispatch_event(window, WINDOW_EVENT_SHOW, NULL);
+		WinmgrDispatchEvent(window, WINDOW_EVENT_SHOW, NULL);
 	// 从显示的状态过渡到隐藏的状态时引发WINDOW_EVENT_HIDDEN事件。
 	else if(window->old_state == WINDOW_STATE_SHOW
 			&& window->state == WINDOW_STATE_HIDDEN)
-		window_dispatch_event(window, WINDOW_EVENT_HIDDEN, NULL);
+		WinmgrDispatchEvent(window, WINDOW_EVENT_HIDDEN, NULL);
 	// 更新旧状态。
 	window->old_state = window->state;
 	if(	window->state == WINDOW_STATE_CLOSED
@@ -210,7 +210,7 @@ render_window(	IN struct Window * window,
 	// 说明窗体从底层过渡到顶层，发送WINDOW_EVENT_FOCUS事件。
 	if(!window->is_top && top)
 	{
-		window_dispatch_event(	window,
+		WinmgrDispatchEvent(	window,
 								WINDOW_EVENT_FOCUS,
 								NULL);
 		window->is_top = TRUE;
@@ -219,7 +219,7 @@ render_window(	IN struct Window * window,
 	// 说明窗体从顶层过渡到底层，发送WINDOW_EVENT_UNFOCUS事件。
 	else if(window->is_top && !top)
 	{
-		window_dispatch_event(	window,
+		WinmgrDispatchEvent(	window,
 								WINDOW_EVENT_UNFOCUS,
 								NULL);
 		window->is_top = FALSE;
@@ -320,7 +320,7 @@ render_window(	IN struct Window * window,
 		text_common_image(	title_bar,
 							10,
 							TITLE_BAR_HEIGHT / 2 - ENFONT_HEIGHT / 2,
-							get_enfont_ptr(),
+							EnfntGetFontDataPtr(),
 							window->title,
 							(window->width - 10 - CLOSE_BUTTON_WIDTH - HIDDEN_BUTTON_WIDTH) / ENFONT_WIDTH,
 							0xff000000);
@@ -328,13 +328,13 @@ render_window(	IN struct Window * window,
 
 	// 如果窗体被锁定，则不发送WINDOW_EVENT_PAINT事件。
 	if(!window->locked)
-		window_dispatch_event(window, WINDOW_EVENT_PAINT, NULL);
+		WinmgrDispatchEvent(window, WINDOW_EVENT_PAINT, NULL);
 
 	return TRUE;	
 }
 
 /**
-	@Function:		window_get_key
+	@Function:		WinmgrGetKey
 	@Access:		Public
 	@Description:
 		获取指定窗体的按键缓冲区的按键。
@@ -346,9 +346,9 @@ render_window(	IN struct Window * window,
 			键值。		
 */
 uint8
-window_get_key(IN struct Window * window)
+WinmgrGetKey(IN struct Window * window)
 {
-	if(window == NULL || !window_has_key(window))
+	if(window == NULL || !WINMGR_HAS_KEY(window))
 		return 0;
 	uint8 key = window->key_buffer[0];
 	uint32 ui;
@@ -359,7 +359,7 @@ window_get_key(IN struct Window * window)
 }
 
 /**
-	@Function:		window_peek_key
+	@Function:		WinmgrPeekKey
 	@Access:		Public
 	@Description:
 		获取指定窗体的按键缓冲区的按键。
@@ -372,16 +372,16 @@ window_get_key(IN struct Window * window)
 			键值。		
 */
 uint8
-window_peek_key(IN struct Window * window)
+WinmgrPeekKey(IN struct Window * window)
 {
-	if(window == NULL || !window_has_key(window))
+	if(window == NULL || !WINMGR_HAS_KEY(window))
 		return 0;
 	uint8 key = window->key_buffer[0];
 	return key;
 }
 
 /**
-	@Function:		window_clear_key
+	@Function:		WinmgrClearKeyBuffer
 	@Access:		Public
 	@Description:
 		清除指定窗体的按键缓冲区内的按键。
@@ -391,7 +391,7 @@ window_peek_key(IN struct Window * window)
 	@Return:		
 */
 void
-window_clear_key(IN WindowPtr window)
+WinmgrClearKeyBuffer(IN WindowPtr window)
 {
 	if(window == NULL)
 		return;
@@ -399,7 +399,7 @@ window_clear_key(IN WindowPtr window)
 }
 
 /**
-	@Function:		window_dispatch_event
+	@Function:		WinmgrDispatchEvent
 	@Access:		Public
 	@Description:
 		分发窗体事件。
@@ -415,9 +415,9 @@ window_clear_key(IN WindowPtr window)
 			键值。		
 */
 void
-window_dispatch_event(	IN WindowPtr window,
-						IN int32 type,
-						IN void * data)
+WinmgrDispatchEvent(IN WindowPtr window,
+					IN int32 type,
+					IN void * data)
 {
 	if(	window == NULL
 		|| window->event == NULL)
@@ -425,16 +425,16 @@ window_dispatch_event(	IN WindowPtr window,
 	uint32 wstyle = window->style;
 	BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
 	int32 x, y;
-	get_mouse_position(&x, &y);
+	KnlGetMousePosition(&x, &y);
 	x = x - window->x;
 	if(has_title_bar)
 		y = y - window->y - TITLE_BAR_HEIGHT;
 	else
 		y = y - window->y;
 	uint32 mouse_button = MOUSE_BUTTON_NONE;
-	if(is_mouse_left_button_down())
+	if(KnlIsMouseLeftButtonDown())
 		mouse_button |= MOUSE_BUTTON_LEFT;
-	if(is_mouse_right_button_down())
+	if(KnlIsMouseRightButtonDown())
 		mouse_button |= MOUSE_BUTTON_RIGHT;
 	struct WindowEventParams params;
 	params.wid = window->id;
@@ -449,7 +449,7 @@ window_dispatch_event(	IN WindowPtr window,
 }
 
 void
-window_focus_ctrl(	IN WindowPtr window,
+WinmgrFocusControl(	IN WindowPtr window,
 					IN uint32 cid)
 {
 	if(window == NULL)
@@ -458,7 +458,7 @@ window_focus_ctrl(	IN WindowPtr window,
 }
 
 void
-window_unfocus_ctrl(IN WindowPtr window)
+WinmgrUnfocusControl(IN WindowPtr window)
 {
 	if(window == NULL)
 		return;

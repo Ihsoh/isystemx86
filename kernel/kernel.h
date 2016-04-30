@@ -13,58 +13,58 @@
 
 extern
 BOOL
-kernel_is_knltask(void);
+KnlIsCurrentlyKernelTask(void);
 
 extern
 int32
-kernel_get_current_tid(void);
+KnlGetCurrentTaskId(void);
 
 extern
 void
-get_mouse_position(	OUT int32 * x,
+KnlGetMousePosition(OUT int32 * x,
 					OUT int32 * y);
 
 extern
 BOOL
-is_mouse_left_button_down(void);
+KnlIsMouseLeftButtonDown(void);
 
 extern
 BOOL
-is_mouse_right_button_down(void);
+KnlIsMouseRightButtonDown(void);
 
 extern
 void
-shutdown_system(void);
+KnlShutdownSystem(void);
 
 extern
 void
-reboot_system(void);
+KnlRebootSystem(void);
 
 extern
 BOOL
-reset_syscall(IN int32 tid);
+KnlResetSystemCall(IN int32 tid);
 
 extern
 void
-free_syscall(IN int32 tid);
+KnlFreeSystemCall(IN int32 tid);
 
 extern
 BOOL
-get_ide_signal(IN BOOL primary);
+KnlGetIdeSignal(IN BOOL primary);
 
-#define GET_ALL_IDE_SIGNAL() (get_ide_signal(TRUE) || get_ide_signal(FALSE))
-
-extern
-void
-clear_ide_signal(IN BOOL primary);
-
-#define CLEAR_ALL_IDE_SIGNAL() { clear_ide_signal(TRUE); clear_ide_signal(FALSE); }
+#define GET_ALL_IDE_SIGNAL() (KnlGetIdeSignal(TRUE) || KnlGetIdeSignal(FALSE))
 
 extern
 void
-reset_ide_signal(IN BOOL primary);
+KnlClearIdeSignal(IN BOOL primary);
 
-#define RESET_ALL_IDE_SIGNAL() { reset_ide_signal(TRUE); reset_ide_signal(FALSE); }
+#define CLEAR_ALL_IDE_SIGNAL() { KnlClearIdeSignal(TRUE); KnlClearIdeSignal(FALSE); }
+
+extern
+void
+KnlResetIdeSignal(IN BOOL primary);
+
+#define RESET_ALL_IDE_SIGNAL() { KnlResetIdeSignal(TRUE); KnlResetIdeSignal(FALSE); }
 
 DEFINE_LOCK_EXTERN(kernel)
 

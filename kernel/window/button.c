@@ -131,7 +131,7 @@ CtrlBtnUpdate(	IN OUT ButtonPtr button,
 		return FALSE;
 	if(!top && !(button->style & BUTTON_STYLE_REFRESH))
 		return TRUE;
-	uint8 * enfont = get_enfont_ptr();
+	uint8 * enfont = EnfntGetFontDataPtr();
 	uint32 id = button->id;
 	uint32 x = button->x;
 	uint32 y = button->y;
@@ -188,10 +188,10 @@ CtrlBtnUpdate(	IN OUT ButtonPtr button,
 
 		// BUTTON_HOVER。
 		Point point;
-		get_mouse_position(&point.x, &point.y);
+		KnlGetMousePosition(&point.x, &point.y);
 		event(id, BUTTON_HOVER, &point);
 
-		if(is_mouse_left_button_down())
+		if(KnlIsMouseLeftButtonDown())
 		{
 			if(!button->lbdown && top)
 				event(id, BUTTON_LBDOWN, NULL);
@@ -203,7 +203,7 @@ CtrlBtnUpdate(	IN OUT ButtonPtr button,
 				event(id, BUTTON_LBUP, NULL);
 				button->lbdown = FALSE;
 			}
-		if(is_mouse_right_button_down())
+		if(KnlIsMouseRightButtonDown())
 		{
 			if(!button->rbdown && top)
 				event(id, BUTTON_RBDOWN, NULL);

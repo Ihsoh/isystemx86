@@ -19,22 +19,22 @@ extern uint32 __enfont_height;
 
 extern
 uint8 *
-get_enfont_ptr(void);
+EnfntGetFontDataPtr(void);
 
 extern
 uint8 *
-get_enfont(IN uint8 chr);
+EnfntGetFontData(IN uint8 chr);
 
 extern
 uint8 *
-get_enfontx_ptr(void);
+EnfntGetFontXDataPtr(void);
 
 extern
 void
-init_enfont(void);
+EnfntInit(void);
 
 extern
 BOOL
-enfontx_enabled(void);
+EnfntIsEnabled(void);
 
 #endif

@@ -44,19 +44,19 @@
 	{	\
 		if(_name##Test())	\
 		{	\
-			print_str(_name##_get_test_file());	\
-			print_str_p(" [OK]\n", CC_GREEN);	\
+			ScrPrintString(_name##_get_test_file());	\
+			ScrPrintStringWithProperty(" [OK]\n", CC_GREEN);	\
 		}	\
 		else	\
 		{	\
-			print_str(_name##_get_test_file());	\
-			print_str_p(" [FAILED]\n", CC_RED);	\
-			print_str(_name##_get_failed_func());	\
-			print_str(":");	\
+			ScrPrintString(_name##_get_test_file());	\
+			ScrPrintStringWithProperty(" [FAILED]\n", CC_RED);	\
+			ScrPrintString(_name##_get_failed_func());	\
+			ScrPrintString(":");	\
 			printn(_name##_get_failed_ln());	\
-			print_str(":");	\
+			ScrPrintString(":");	\
 			printn(_name##_get_failed_no());	\
-			print_str("\n");	\
+			ScrPrintString("\n");	\
 		}	\
 	}
 

@@ -18,6 +18,6 @@
 
 extern
 BOOL
-mouse_init(void);
+MouseInit(void);
 
 #endif

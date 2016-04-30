@@ -15,7 +15,7 @@ static uint32		_ticks;
 static TimerPtr		_timers[MAX_TIMER_COUNT];
 
 /**
-	@Function:		timer_init
+	@Function:		TmrInit
 	@Access:		Public
 	@Description:
 		初始化定时器。
@@ -25,7 +25,7 @@ static TimerPtr		_timers[MAX_TIMER_COUNT];
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_init(void)
+TmrInit(void)
 {
 	_ticks = 0;
 	uint32 ui;
@@ -35,7 +35,7 @@ timer_init(void)
 }
 
 /**
-	@Function:		_timer_dispatch_tick
+	@Function:		_TmrDispatchTick
 	@Access:		Private
 	@Description:
 		分发Tick事件。
@@ -44,7 +44,7 @@ timer_init(void)
 */
 static
 void
-_timer_dispatch_tick(void)
+_TmrDispatchTick(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TIMER_COUNT; ui++)
@@ -56,7 +56,7 @@ _timer_dispatch_tick(void)
 }
 
 /**
-	@Function:		timer_dispatch_tick
+	@Function:		TmrDispatchTick
 	@Access:		Public
 	@Description:
 		执行各个定时器的事件。
@@ -64,7 +64,7 @@ _timer_dispatch_tick(void)
 	@Return:
 */
 void
-timer_dispatch_tick(void)
+TmrDispatchTick(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TIMER_COUNT; ui++)
@@ -79,7 +79,7 @@ timer_dispatch_tick(void)
 }
 
 /**
-	@Function:		timer_inc_ticks
+	@Function:		TmrIncTicks
 	@Access:		Public
 	@Description:
 		滴答数递增1。
@@ -87,15 +87,14 @@ timer_dispatch_tick(void)
 	@Return:
 */
 void
-timer_inc_ticks(void)
+TmrIncTicks(void)
 {
 	_ticks++;
-	_timer_dispatch_tick();
-	//timer_dispatch_tick();
+	_TmrDispatchTick();
 }
 
 /**
-	@Function:		timer_get_ticks
+	@Function:		TmrGetTicks
 	@Access:		Public
 	@Description:
 		获取从定时器初始化以来的滴答数。
@@ -105,13 +104,13 @@ timer_inc_ticks(void)
 			从定时器初始化以来的滴答数。
 */
 uint32
-timer_get_ticks(void)
+TmrGetTicks(void)
 {
 	return _ticks;
 }
 
 /**
-	@Function:		timer_new
+	@Function:		TmrNew
 	@Access:		Public
 	@Description:
 		新建一个定时器。
@@ -125,8 +124,8 @@ timer_get_ticks(void)
 			指向定时器对象的指针。返回NULL则新建失败。
 */
 TimerPtr
-timer_new(	IN uint32 interval,
-			IN TimerEvent event)
+TmrNew(	IN uint32 interval,
+		IN TimerEvent event)
 {
 	if(interval == 0 || event == NULL)
 		return NULL;
@@ -149,7 +148,7 @@ timer_new(	IN uint32 interval,
 }
 
 /**
-	@Function:		timer_delete
+	@Function:		TmrDelete
 	@Access:		Public
 	@Description:
 		删除一个定时器。
@@ -161,7 +160,7 @@ timer_new(	IN uint32 interval,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_delete(IN TimerPtr timer)
+TmrDelete(IN TimerPtr timer)
 {
 	if(timer == NULL)
 		return FALSE;
@@ -177,7 +176,7 @@ timer_delete(IN TimerPtr timer)
 }
 
 /**
-	@Function:		timer_set_interval
+	@Function:		TmrSetInterval
 	@Access:		Public
 	@Description:
 		设置一个定时器的时间间隔。
@@ -191,8 +190,8 @@ timer_delete(IN TimerPtr timer)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_set_interval(	OUT TimerPtr timer,
-					IN uint32 interval)
+TmrSetInterval(	OUT TimerPtr timer,
+				IN uint32 interval)
 {
 	if(timer == NULL || interval == 0)
 		return FALSE;
@@ -201,7 +200,7 @@ timer_set_interval(	OUT TimerPtr timer,
 }
 
 /**
-	@Function:		timer_start
+	@Function:		TmrStart
 	@Access:		Public
 	@Description:
 		开始一个定时器。
@@ -213,7 +212,7 @@ timer_set_interval(	OUT TimerPtr timer,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_start(OUT TimerPtr timer)
+TmrStart(OUT TimerPtr timer)
 {
 	if(timer == NULL)
 		return FALSE;
@@ -222,7 +221,7 @@ timer_start(OUT TimerPtr timer)
 }
 
 /**
-	@Function:		timer_stop
+	@Function:		TmrStop
 	@Access:		Public
 	@Description:
 		停止一个定时器。
@@ -234,7 +233,7 @@ timer_start(OUT TimerPtr timer)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_stop(OUT TimerPtr timer)
+TmrStop(OUT TimerPtr timer)
 {
 	if(timer == NULL)
 		return FALSE;
@@ -243,7 +242,7 @@ timer_stop(OUT TimerPtr timer)
 }
 
 /**
-	@Function:		timer_count
+	@Function:		TmrGetCount
 	@Access:		Public
 	@Description:
 		获取定时器数量。
@@ -253,7 +252,7 @@ timer_stop(OUT TimerPtr timer)
 			定时器数量。
 */
 uint32
-timer_count(void)
+TmrGetCount(void)
 {
 	uint32 count = 0;
 	uint32 ui;
@@ -264,7 +263,7 @@ timer_count(void)
 }
 
 /**
-	@Function:		timer_clear
+	@Function:		TmrClear
 	@Access:		Public
 	@Description:
 		清除所有定时器。
@@ -272,7 +271,7 @@ timer_count(void)
 	@Return:
 */
 void
-timer_clear(void)
+TmrClear(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TIMER_COUNT; ui++)
@@ -284,7 +283,7 @@ timer_clear(void)
 }
 
 /**
-	@Function:		timer_set_event
+	@Function:		TmrSetEvent
 	@Access:		Public
 	@Description:
 		设置一个定时器的事件函数。
@@ -298,7 +297,7 @@ timer_clear(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-timer_set_event(OUT TimerPtr timer,
+TmrSetEvent(OUT TimerPtr timer,
 				IN TimerEvent event)
 {
 	if(timer == NULL || event == NULL)

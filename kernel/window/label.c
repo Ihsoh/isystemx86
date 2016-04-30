@@ -180,7 +180,7 @@ CtrlLblUpdate(	IN OUT LabelPtr label,
 		return FALSE;
 	if(!top && !(label->style & LABEL_STYLE_REFRESH))
 		return TRUE;
-	uint8 * enfont = get_enfont_ptr();
+	uint8 * enfont = EnfntGetFontDataPtr();
 	uint32 id = label->id;
 	uint32 x = label->x;
 	uint32 y = label->y;
@@ -239,10 +239,10 @@ CtrlLblUpdate(	IN OUT LabelPtr label,
 
 		// LABEL_HOVER。
 		Point point;
-		get_mouse_position(&point.x, &point.y);
+		KnlGetMousePosition(&point.x, &point.y);
 		event(id, LABEL_HOVER, &point);
 
-		if(is_mouse_left_button_down())
+		if(KnlIsMouseLeftButtonDown())
 		{
 			if(!label->lbdown && top)
 				event(id, LABEL_LBDOWN, NULL);
@@ -254,7 +254,7 @@ CtrlLblUpdate(	IN OUT LabelPtr label,
 				event(id, LABEL_LBUP, NULL);
 				label->lbdown = FALSE;
 			}
-		if(is_mouse_right_button_down())
+		if(KnlIsMouseRightButtonDown())
 		{
 			if(!label->rbdown && top)
 				event(id, LABEL_RBDOWN, NULL);

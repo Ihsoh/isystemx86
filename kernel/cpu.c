@@ -29,7 +29,7 @@ static struct CacheInfo * L3 = NULL;
 uint32 cpu_feature_ecx = 0, cpu_feature_edx = 0;
 
 /**
-	@Function:		fill_cache_info
+	@Function:		_CpuFillCacheInfo
 	@Access:		Private
 	@Description:
 		填充缓冲区信息。
@@ -48,11 +48,11 @@ uint32 cpu_feature_ecx = 0, cpu_feature_edx = 0;
 */
 static
 void
-fill_cache_info(OUT struct CacheInfo * cache_info, 
-				IN int32 level, 
-				IN int32 size, 
-				IN int32 way, 
-				IN int32 linesize)
+_CpuFillCacheInfo(	OUT struct CacheInfo * cache_info, 
+					IN int32 level, 
+					IN int32 size, 
+					IN int32 way, 
+					IN int32 linesize)
 {
 	cache_info->level = level;
 	cache_info->size = size;
@@ -61,7 +61,7 @@ fill_cache_info(OUT struct CacheInfo * cache_info,
 }
 
 /**
-	@Function:		init_cache_info_list
+	@Function:		_CpuInitCacheInfoList
 	@Access:		Private
 	@Description:
 		初始化缓存信息列表。
@@ -70,91 +70,91 @@ fill_cache_info(OUT struct CacheInfo * cache_info,
 */
 static
 void
-init_cache_info_list(void)
+_CpuInitCacheInfoList(void)
 {
 	uint32 ui = 0;
 	for(ui = 0; ui < CACHE_INFO_LIST_LEN; ui++)
-		fill_cache_info(&cache_info_list[ui], 0, 0, 0, 0);
+		_CpuFillCacheInfo(&cache_info_list[ui], 0, 0, 0, 0);
 
-	fill_cache_info(&cache_info_list[0x06], 1, 8, 4, 32);
-	fill_cache_info(&cache_info_list[0x08], 1, 16, 4, 32);
-	fill_cache_info(&cache_info_list[0x09], 1, 32, 4, 64);
-	fill_cache_info(&cache_info_list[0x0a], 1, 8, 2, 32);
-	fill_cache_info(&cache_info_list[0x0c], 1, 16, 4, 32);
-	fill_cache_info(&cache_info_list[0x0d], 1, 16, 4, 64);
-	fill_cache_info(&cache_info_list[0x0e], 1, 24, 6, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x06], 1, 8, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x08], 1, 16, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x09], 1, 32, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x0a], 1, 8, 2, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x0c], 1, 16, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x0d], 1, 16, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x0e], 1, 24, 6, 64);
 
-	fill_cache_info(&cache_info_list[0x1d], 2, 128, 2, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x1d], 2, 128, 2, 64);
 
-	fill_cache_info(&cache_info_list[0x21], 2, 256, 8, 64);
-	fill_cache_info(&cache_info_list[0x22], 3, 512, 4, 64);
-	fill_cache_info(&cache_info_list[0x23], 3, 1024, 8, 64);
-	fill_cache_info(&cache_info_list[0x24], 2, 1024, 16, 64);
-	fill_cache_info(&cache_info_list[0x25], 3, 2048, 8, 64);
-	fill_cache_info(&cache_info_list[0x29], 3, 4096, 8, 64);
-	fill_cache_info(&cache_info_list[0x2c], 1, 32, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x21], 2, 256, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x22], 3, 512, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x23], 3, 1024, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x24], 2, 1024, 16, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x25], 3, 2048, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x29], 3, 4096, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x2c], 1, 32, 8, 64);
 
-	fill_cache_info(&cache_info_list[0x30], 1, 32, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x30], 1, 32, 8, 64);
 
-	fill_cache_info(&cache_info_list[0x41], 2, 128, 4, 32);
-	fill_cache_info(&cache_info_list[0x42], 2, 256, 4, 32);
-	fill_cache_info(&cache_info_list[0x43], 2, 512, 4, 32);
-	fill_cache_info(&cache_info_list[0x44], 2, 1024, 4, 32);
-	fill_cache_info(&cache_info_list[0x45], 2, 2048, 4, 32);
-	fill_cache_info(&cache_info_list[0x46], 3, 4096, 4, 64);
-	fill_cache_info(&cache_info_list[0x47], 3, 8192, 8, 64);
-	fill_cache_info(&cache_info_list[0x48], 2, 3072, 12, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x41], 2, 128, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x42], 2, 256, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x43], 2, 512, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x44], 2, 1024, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x45], 2, 2048, 4, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x46], 3, 4096, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x47], 3, 8192, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x48], 2, 3072, 12, 64);
 	//0x49 - Cache
 	//3rd-level cache: 4MB, 16-way set associative, 64-byte line size (Intel Xeon processor MP, Family 0FH, Model 06H);
 	//2nd-level cache: 4 MByte, 16-way set associative, 64 byte line size
-	fill_cache_info(&cache_info_list[0x4a], 3, 6144, 12, 64);
-	fill_cache_info(&cache_info_list[0x4b], 3, 8192, 16, 64);
-	fill_cache_info(&cache_info_list[0x4c], 3, 12288, 12, 64);
-	fill_cache_info(&cache_info_list[0x4d], 3, 16384, 16, 64);
-	fill_cache_info(&cache_info_list[0x4e], 3, 6144, 24, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x4a], 3, 6144, 12, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x4b], 3, 8192, 16, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x4c], 3, 12288, 12, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x4d], 3, 16384, 16, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x4e], 3, 6144, 24, 64);
 
-	fill_cache_info(&cache_info_list[0x60], 1, 16, 8, 64);
-	fill_cache_info(&cache_info_list[0x66], 1, 8, 4, 64);
-	fill_cache_info(&cache_info_list[0x67], 1, 16, 4, 64);
-	fill_cache_info(&cache_info_list[0x68], 1, 32, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x60], 1, 16, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x66], 1, 8, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x67], 1, 16, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x68], 1, 32, 4, 64);
 
-	fill_cache_info(&cache_info_list[0x78], 2, 1024, 4, 64);
-	fill_cache_info(&cache_info_list[0x79], 2, 128, 8, 64);
-	fill_cache_info(&cache_info_list[0x7a], 2, 256, 8, 64);
-	fill_cache_info(&cache_info_list[0x7b], 2, 512, 8, 64);
-	fill_cache_info(&cache_info_list[0x7c], 2, 1024, 8, 64);
-	fill_cache_info(&cache_info_list[0x7d], 2, 2048, 8, 64);
-	fill_cache_info(&cache_info_list[0x7f], 2, 512, 2, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x78], 2, 1024, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x79], 2, 128, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x7a], 2, 256, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x7b], 2, 512, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x7c], 2, 1024, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x7d], 2, 2048, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x7f], 2, 512, 2, 64);
 
-	fill_cache_info(&cache_info_list[0x80], 2, 512, 8, 64);
-	fill_cache_info(&cache_info_list[0x82], 2, 256, 8, 32);
-	fill_cache_info(&cache_info_list[0x83], 2, 512, 8, 32);
-	fill_cache_info(&cache_info_list[0x84], 2, 1024, 8, 32);
-	fill_cache_info(&cache_info_list[0x85], 2, 2048, 8, 32);
-	fill_cache_info(&cache_info_list[0x86], 2, 512, 4, 64);
-	fill_cache_info(&cache_info_list[0x87], 2, 1024, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x80], 2, 512, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x82], 2, 256, 8, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x83], 2, 512, 8, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x84], 2, 1024, 8, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x85], 2, 2048, 8, 32);
+	_CpuFillCacheInfo(&cache_info_list[0x86], 2, 512, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0x87], 2, 1024, 8, 64);
 
-	fill_cache_info(&cache_info_list[0xd0], 3, 512, 4, 64);
-	fill_cache_info(&cache_info_list[0xd1], 3, 1024, 4, 64);
-	fill_cache_info(&cache_info_list[0xd2], 3, 2048, 4, 64);
-	fill_cache_info(&cache_info_list[0xd6], 3, 1024, 8, 64);
-	fill_cache_info(&cache_info_list[0xd7], 3, 2048, 8, 64);
-	fill_cache_info(&cache_info_list[0xd8], 3, 4096, 8, 64);
-	fill_cache_info(&cache_info_list[0xdc], 3, 1536, 12, 64);
-	fill_cache_info(&cache_info_list[0xdd], 3, 3072, 12, 64);
-	fill_cache_info(&cache_info_list[0xde], 3, 6144, 12, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xd0], 3, 512, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xd1], 3, 1024, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xd2], 3, 2048, 4, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xd6], 3, 1024, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xd7], 3, 2048, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xd8], 3, 4096, 8, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xdc], 3, 1536, 12, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xdd], 3, 3072, 12, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xde], 3, 6144, 12, 64);
 
-	fill_cache_info(&cache_info_list[0xe2], 3, 2048, 16, 64);
-	fill_cache_info(&cache_info_list[0xe3], 3, 4096, 16, 64);
-	fill_cache_info(&cache_info_list[0xe4], 3, 8192, 16, 64);
-	fill_cache_info(&cache_info_list[0xea], 3, 12288, 24, 64);
-	fill_cache_info(&cache_info_list[0xeb], 3, 18432, 24, 64);
-	fill_cache_info(&cache_info_list[0xec], 3, 24576, 24, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xe2], 3, 2048, 16, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xe3], 3, 4096, 16, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xe4], 3, 8192, 16, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xea], 3, 12288, 24, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xeb], 3, 18432, 24, 64);
+	_CpuFillCacheInfo(&cache_info_list[0xec], 3, 24576, 24, 64);
 
 }
 
 /**
-	@Function:		init_cpu
+	@Function:		CpuInit
 	@Access:		Public
 	@Description:
 		获取CPU信息。
@@ -162,7 +162,7 @@ init_cache_info_list(void)
 	@Return:
 */
 void 
-init_cpu(void)
+CpuInit(void)
 {
 	uint32 eax, ebx, ecx, edx;
 	uint32 ui, ui1;
@@ -250,7 +250,7 @@ init_cpu(void)
 	cpu_feature_edx = edx;
 
 	//获取CPU缓存信息，通过 CPUID EAX=2。
-	init_cache_info_list();
+	_CpuInitCacheInfoList();
 	asm volatile (
 			"pushal\n\t"
 			"movl	$2, %%eax\n\t"
@@ -342,7 +342,7 @@ init_cpu(void)
 }
 
 /**
-	@Function:		get_vendor_id_string
+	@Function:		CpuGetVendorIdString
 	@Access:		Public
 	@Description:
 		获取CPU制造商名称。
@@ -353,13 +353,13 @@ init_cpu(void)
 	@Return:
 */
 void
-get_vendor_id_string(OUT int8 * buffer)
+CpuGetVendorIdString(OUT int8 * buffer)
 {
 	UtlCopyString(buffer, sizeof(vendor_id_string), vendor_id_string);
 }
 
 /**
-	@Function:		get_brand_string
+	@Function:		CpuGetBrandString
 	@Access:		Public
 	@Description:
 		获取CPU商标。
@@ -370,13 +370,13 @@ get_vendor_id_string(OUT int8 * buffer)
 	@Return:	
 */
 void
-get_brand_string(OUT int8 * buffer)
+CpuGetBrandString(OUT int8 * buffer)
 {
 	UtlCopyString(buffer, sizeof(brand_string), brand_string);
 }
 
 /**
-	@Function:		get_cpu_L1
+	@Function:		CpuGetL1
 	@Access:		Public
 	@Description:
 		获取CPU的L1缓存信息。
@@ -388,7 +388,7 @@ get_brand_string(OUT int8 * buffer)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-get_cpu_L1(OUT struct CacheInfo * cache_info)
+CpuGetL1(OUT struct CacheInfo * cache_info)
 {
 	if(L1 == NULL)
 		return FALSE;
@@ -397,7 +397,7 @@ get_cpu_L1(OUT struct CacheInfo * cache_info)
 }
 
 /**
-	@Function:		get_cpu_L2
+	@Function:		CpuGetL2
 	@Access:		Public
 	@Description:
 		获取CPU的L2缓存信息。
@@ -409,7 +409,7 @@ get_cpu_L1(OUT struct CacheInfo * cache_info)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-get_cpu_L2(OUT struct CacheInfo * cache_info)
+CpuGetL2(OUT struct CacheInfo * cache_info)
 {
 	if(L2 == NULL)
 		return FALSE;
@@ -418,7 +418,7 @@ get_cpu_L2(OUT struct CacheInfo * cache_info)
 }
 
 /**
-	@Function:		get_cpu_L3
+	@Function:		CpuGetL3
 	@Access:		Public
 	@Description:
 		获取CPU的L3缓存信息。
@@ -430,7 +430,7 @@ get_cpu_L2(OUT struct CacheInfo * cache_info)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-get_cpu_L3(OUT struct CacheInfo * cache_info)
+CpuGetL3(OUT struct CacheInfo * cache_info)
 {
 	if(L3 == NULL)
 		return FALSE;
@@ -439,7 +439,7 @@ get_cpu_L3(OUT struct CacheInfo * cache_info)
 }
 
 /**
-	@Function:		cpu_write_to_file
+	@Function:		CpuWriteInfoToFile
 	@Access:		Public
 	@Description:
 		把 CPU 信息写入文件。
@@ -451,7 +451,7 @@ get_cpu_L3(OUT struct CacheInfo * cache_info)
 			返回TRUE则成功，否则失败。	
 */
 BOOL
-cpu_write_to_file(IN const int8 * path)
+CpuWriteInfoToFile(IN const int8 * path)
 {
 	FileObject * fptr = Ifs1OpenFile(path, FILE_MODE_WRITE | FILE_MODE_APPEND);
 	if(fptr == NULL)

@@ -14,19 +14,19 @@ int32 lock_level = 0;
 static BOOL _common_lock_state = FALSE;
 
 void
-enable_common_lock(void)
+KnlEnableCommonLock(void)
 {
 	_common_lock_state = TRUE;
 }
 
 void
-disable_common_lock(void)
+KnlDisableCommonLock(void)
 {
 	_common_lock_state = FALSE;
 }
 
 void
-_common_lock(void)
+_KnlCommonLock(void)
 {
 	if(_common_lock_state)
 	{
@@ -36,8 +36,8 @@ _common_lock(void)
 }
 
 void
-_common_unlock(	IN const int8 * file,
-				IN uint32 line)
+_KnlCommonUnlock(	IN const int8 * file,
+					IN uint32 line)
 {
 	if(_common_lock_state)
 		if(lock_level == 0)
@@ -45,11 +45,11 @@ _common_unlock(	IN const int8 * file,
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"Invalid common_unlock() calling, because lock_level already is 0. File: %s, Line: %d.\n",
+						"Invalid _KnlCommonUnlock() calling, because lock_level already is 0. File: %s, Line: %d.\n",
 						file,
 						line);
-			print_str_p(buffer, CC_RED);
-			log(LOG_ERROR, buffer);
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			Log(LOG_ERROR, buffer);
 		}
 		else if(--lock_level == 0)
 		{
@@ -58,7 +58,7 @@ _common_unlock(	IN const int8 * file,
 }
 
 void
-_common_unlock_without_sti(	IN const int8 * file,
+_KnlCommonUnlockWithoutSti(	IN const int8 * file,
 							IN uint32 line)
 {
 	if(_common_lock_state)
@@ -67,11 +67,11 @@ _common_unlock_without_sti(	IN const int8 * file,
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
-						"Invalid common_unlock_without_sti() calling, because lock_level already is 0. File: %s, Line: %d.\n",
+						"Invalid _KnlCommonUnlockWithoutSti() calling, because lock_level already is 0. File: %s, Line: %d.\n",
 						file,
 						line);
-			print_str_p(buffer, CC_RED);
-			log(LOG_ERROR, buffer);
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			Log(LOG_ERROR, buffer);
 		}
 		else if(--lock_level == 0)
 		{

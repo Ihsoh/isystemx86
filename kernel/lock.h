@@ -44,8 +44,8 @@
 							"Invalid unlock() calling, because lock_level already is 0. File: %s, Line: %d.\n",	\
 							file,	\
 							line);	\
-				print_str_p(buffer, CC_RED);	\
-				log(LOG_ERROR, buffer);	\
+				ScrPrintStringWithProperty(buffer, CC_RED);	\
+				Log(LOG_ERROR, buffer);	\
 			}	\
 			else if(--lock_level == 0)	\
 			{	\
@@ -65,8 +65,8 @@
 							"Invalid unlock_without_sti() calling, because lock_level already is 0. File: %s, Line: %d.\n",	\
 							file,	\
 							line);	\
-				print_str_p(buffer, CC_RED);	\
-				log(LOG_ERROR, buffer);	\
+				ScrPrintStringWithProperty(buffer, CC_RED);	\
+				Log(LOG_ERROR, buffer);	\
 			}	\
 			else if(--lock_level == 0)	\
 			{	\

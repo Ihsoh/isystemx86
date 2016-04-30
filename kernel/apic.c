@@ -190,10 +190,10 @@ _LApicReadRegister(IN uint32 reg)
 BOOL
 ApicInit(void)
 {
-	if(!madt_init())
+	if(!MadtInit())
 		return FALSE;
-	lapic_address = madt_get()->lcaddr;
-	struct MADTEntryType1 * e = madt_get_type1_entry(0);
+	lapic_address = MadtGet()->lcaddr;
+	struct MADTEntryType1 * e = MadtGetType1Entry(0);
 	if(e == NULL)
 		return FALSE;
 	ioapic_address = e->ioapic_address;
@@ -287,8 +287,8 @@ BOOL
 ApicEnable(void)
 {
 	_ApicSetBase(_ApicGetBase());
-	_LApicWriteRegister(	LAPIC_REG_SPRS_INT_VEC, 
-							_LApicReadRegister(LAPIC_REG_SPRS_INT_VEC) | 0x100);
+	_LApicWriteRegister(LAPIC_REG_SPRS_INT_VEC, 
+						_LApicReadRegister(LAPIC_REG_SPRS_INT_VEC) | 0x100);
 	apic_ok = TRUE;
 	return TRUE;
 }

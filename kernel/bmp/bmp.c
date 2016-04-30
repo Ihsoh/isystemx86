@@ -47,7 +47,7 @@ _BmpApplyMask(	IN IMGLBMPPtr bmpobj,
 IMGLBMPPtr
 BmpCreate(IN CASCTEXT file)
 {
-	IMGLBMPPtr bmpobj = (IMGLBMPPtr)alloc_memory(sizeof(IMGLBMP));
+	IMGLBMPPtr bmpobj = (IMGLBMPPtr)MemAlloc(sizeof(IMGLBMP));
 	if(bmpobj == NULL)
 		return NULL;
 
@@ -105,7 +105,7 @@ BmpCreate(IN CASCTEXT file)
 	actual_size = (int32)*(uint32 *)(head + 0x2);
 	pixel_array_offset = (int32)*(uint32 *)(head + 0xa);
 
-	bmpobj->data_ptr = (uint8 *)alloc_memory(actual_size - 0xe);
+	bmpobj->data_ptr = (uint8 *)MemAlloc(actual_size - 0xe);
 	if(bmpobj->data_ptr == NULL)
 	{
 		BmpDestroy(bmpobj);
@@ -208,7 +208,7 @@ BmpDestroy(IN IMGLBMPPtr bmpobj)
 	if(bmpobj == NULL)
 		return FALSE;
 	if(bmpobj->data_ptr != NULL)
-		free_memory(bmpobj->data_ptr);
+		MemFree(bmpobj->data_ptr);
 	if(bmpobj->imgfile_ptr != NULL)
 		Ifs1CloseFile(bmpobj->imgfile_ptr);
 	if(bmpobj->palette_r != NULL)
@@ -226,7 +226,7 @@ BmpDestroy(IN IMGLBMPPtr bmpobj)
 		dsl_lst_delete_all_value(bmpobj->palette_b);
 		dsl_lst_free(bmpobj->palette_b);
 	}
-	free_memory(bmpobj);
+	MemFree(bmpobj);
 	return TRUE;
 }
 

@@ -79,7 +79,7 @@ static BOOL mouse_left_button_down = 0;
 static int32 old_mouse_x = 0, old_mouse_y = 0;
 
 /**
-	@Function:		screen_write_console_buffer
+	@Function:		ScrWriteConsoleBuffer
 	@Access:		Public
 	@Description:
 		写控制台字符缓冲区。
@@ -93,11 +93,11 @@ static int32 old_mouse_x = 0, old_mouse_y = 0;
 			返回TRUE则成功，否则失败。
 */
 BOOL
-screen_write_console_buffer(IN const uint8 * buffer,
-							IN uint32 size)
+ScrWriteConsoleBuffer(	IN const uint8 * buffer,
+						IN uint32 size)
 {
 	uint8 * off;
-	if(vesa_is_valid())
+	if(VesaIsEnabled())
 			off = (uint8 *)screen_char_buffer;
 		else
 			off = (uint8 *)VIDEO_MEM;
@@ -110,7 +110,7 @@ screen_write_console_buffer(IN const uint8 * buffer,
 }
 
 /**
-	@Function:		flush_char_buffer
+	@Function:		ScrEnableFlushConsoleBuffer
 	@Access:		Public
 	@Description:
 		允许刷新字符缓冲区。
@@ -118,13 +118,13 @@ screen_write_console_buffer(IN const uint8 * buffer,
 	@Return:	
 */
 void
-flush_char_buffer(void)
+ScrEnableFlushConsoleBuffer(void)
 {
 	flush_cbuffer = TRUE;
 }
 
 /**
-	@Function:		no_flush_char_buffer
+	@Function:		ScrDisableFlushConsoleBuffer
 	@Access:		Public
 	@Description:
 		禁止刷新字符缓冲区。
@@ -132,13 +132,13 @@ flush_char_buffer(void)
 	@Return:	
 */
 void
-no_flush_char_buffer(void)
+ScrDisableFlushConsoleBuffer(void)
 {
 	flush_cbuffer = FALSE;
 }
 
 /**
-	@Function:		set_char_color
+	@Function:		ScrSetConsoleCharColor
 	@Access:		Public
 	@Description:
 		设置字符颜色属性。
@@ -148,13 +148,13 @@ no_flush_char_buffer(void)
 	@Return:	
 */
 void
-set_char_color(IN uint8 cc)
+ScrSetConsoleCharColor(IN uint8 cc)
 {
 	char_color = cc;
 }
 
 /**
-	@Function:		get_char_color
+	@Function:		ScrGetConsoleCharColor
 	@Access:		Public
 	@Description:
 		获取字符颜色属性。
@@ -164,13 +164,13 @@ set_char_color(IN uint8 cc)
 			字符颜色属性。		
 */
 uint8
-get_char_color(void)
+ScrGetConsoleCharColor(void)
 {
 	return char_color;
 }
 
 /**
-	@Function:		set_cursor_color
+	@Function:		ScrSetConsoleCursorColor
 	@Access:		Public
 	@Description:
 		设置光标颜色属性。
@@ -180,13 +180,13 @@ get_char_color(void)
 	@Return:		
 */
 void
-set_cursor_color(IN uint8 cc)
+ScrSetConsoleCursorColor(IN uint8 cc)
 {
 	cursor_color = cc;
 }
 
 /**
-	@Function:		get_cursor_color
+	@Function:		ScrGetConsoleCursorColor
 	@Access:		Public
 	@Description:
 		获取光标颜色属性。
@@ -196,41 +196,41 @@ set_cursor_color(IN uint8 cc)
 			光标颜色属性。		
 */
 uint8
-get_cursor_color(void)
+ScrGetConsoleCursorColor(void)
 {
 	return cursor_color;
 }
 
 /**
-	@Function:		lock_cursor
+	@Function:		ScrLockConsoleCursor
 	@Access:		Public
 	@Description:
-		锁定窗体。
+		锁定光标。
 	@Parameters:
 	@Return:	
 */
 void
-lock_cursor(void)
+ScrLockConsoleCursor(void)
 {
 	lock_csr = 1;
 }
 
 /**
-	@Function:		unlock_cursor
+	@Function:		ScrUnlockConsoleCursor
 	@Access:		Public
 	@Description:
-		解锁窗体。
+		解锁光标。
 	@Parameters:
 	@Return:	
 */
 void
-unlock_cursor(void)
+ScrUnlockConsoleCursor(void)
 {
 	lock_csr = 0;
 }
 
 /**
-	@Function:		set_cursor_pos
+	@Function:		ScrSetConsoleCursorPosition
 	@Access:		Public
 	@Description:
 		设置光标位置，但不改变在屏幕上的显示位置。
@@ -242,15 +242,15 @@ unlock_cursor(void)
 	@Return:	
 */
 void
-set_cursor_pos(	IN uint16 x,
-				IN uint16 y)
+ScrSetConsoleCursorPosition(IN uint16 x,
+							IN uint16 y)
 {
 	cursor_x = x;
 	cursor_y = y;
 }
 
 /**
-	@Function:		set_cursor
+	@Function:		ScrSetConsoleCursor
 	@Access:		Public
 	@Description:
 		设置光标位置，并且改变在屏幕上的显示位置。
@@ -259,15 +259,15 @@ set_cursor_pos(	IN uint16 x,
 			X 坐标。
 		y, uint16, IN
 			Y 坐标。
-	@Return:	
+	@Return:
 */
 void
-set_cursor(	IN uint16 x,
-			IN uint16 y)
+ScrSetConsoleCursor(IN uint16 x,
+					IN uint16 y)
 {
-	set_cursor_pos(x, y);
+	ScrSetConsoleCursorPosition(x, y);
 	if(!lock_csr)
-		if(!vesa_is_valid())
+		if(!VesaIsEnabled())
 		{
 			uint16 off = y * COLUMN + x;
 			uint8 offl = (uint8)off;
@@ -280,7 +280,7 @@ set_cursor(	IN uint16 x,
 }
 
 /**
-	@Function:		get_cursor
+	@Function:		ScrGetConsoleCursor
 	@Access:		Public
 	@Description:
 		获取光标位置。
@@ -292,15 +292,15 @@ set_cursor(	IN uint16 x,
 	@Return:	
 */
 void
-get_cursor(	OUT uint16 * x,
-			OUT uint16 * y)
+ScrGetConsoleCursor(OUT uint16 * x,
+					OUT uint16 * y)
 {
 	*x = cursor_x;
 	*y = cursor_y;
 }
 
 /**
-	@Function:		screen_up
+	@Function:		ScrScreenUp
 	@Access:		Public
 	@Description:
 		向上滚一行。
@@ -308,11 +308,11 @@ get_cursor(	OUT uint16 * x,
 	@Return:	
 */
 void
-screen_up(void)
+ScrScreenUp(void)
 {
 	uint8 * dst;
 	uint8 * src;
-	if(vesa_is_valid())
+	if(VesaIsEnabled())
 	{
 		dst = (uint8 *)screen_char_buffer;
 		src = (uint8 *)screen_char_buffer + 1 * COLUMN * 2 + 0 * 2;
@@ -333,7 +333,7 @@ screen_up(void)
 }
 
 /**
-	@Function:		print_char_p_screen
+	@Function:		ScrPrintCharToScreenWithProperty
 	@Access:		Private
 	@Description:
 		打印一个字符到屏幕，并且附带字符属性。
@@ -346,31 +346,31 @@ screen_up(void)
 */
 static
 void
-print_char_p_screen(IN int8 chr,
-					IN uint8 p)
+ScrPrintCharToScreenWithProperty(	IN int8 chr,
+									IN uint8 p)
 {
 	uint8 * off;
 	if(chr == '\n')
 		if(cursor_y == ROW - 1)
 		{
-			screen_up();
-			set_cursor(0, cursor_y);
+			ScrScreenUp();
+			ScrSetConsoleCursor(0, cursor_y);
 		}
 		else
-			set_cursor(0, cursor_y + 1);
+			ScrSetConsoleCursor(0, cursor_y + 1);
 	else if(chr == '\r')
-		set_cursor(0, cursor_y);
+		ScrSetConsoleCursor(0, cursor_y);
 	else if(chr == '\t')
 	{
 		uint16 x = ((uint16)(cursor_x / 4) + 1) * 4;
 		if(x < COLUMN)
-			set_cursor(x, cursor_y);
+			ScrSetConsoleCursor(x, cursor_y);
 		else
-			set_cursor(COLUMN - 1, cursor_y);
+			ScrSetConsoleCursor(COLUMN - 1, cursor_y);
 	}
 	else
 	{	
-		if(vesa_is_valid())
+		if(VesaIsEnabled())
 			off = (uint8 *)screen_char_buffer + cursor_y * COLUMN * 2 + cursor_x * 2;
 		else
 			off = (uint8 *)VIDEO_MEM + cursor_y * COLUMN * 2 + cursor_x * 2;
@@ -378,18 +378,18 @@ print_char_p_screen(IN int8 chr,
 		*(off + 1) = p;
 		if(cursor_x == COLUMN - 1 && cursor_y == ROW - 1)
 		{
-			screen_up();
-			set_cursor(0, cursor_y);
+			ScrScreenUp();
+			ScrSetConsoleCursor(0, cursor_y);
 		}
 		else if(cursor_x == COLUMN - 1 && cursor_y != ROW - 1)
-			set_cursor(0, cursor_y + 1);
+			ScrSetConsoleCursor(0, cursor_y + 1);
 		else
-			set_cursor(cursor_x + 1, cursor_y);
+			ScrSetConsoleCursor(cursor_x + 1, cursor_y);
 	}
 }
 
 /**
-	@Function:		print_char_p
+	@Function:		ScrPrintCharWithProperty
 	@Access:		Public
 	@Description:
 		打印一个字符到标准输出，并且附带字符属性。
@@ -403,25 +403,25 @@ print_char_p_screen(IN int8 chr,
 	@Return:	
 */
 void
-print_char_p(	IN int8 chr,
+ScrPrintCharWithProperty(	IN int8 chr,
 				IN uint8 p)
 {
-	if(kernel_is_knltask())
-		print_char_p_screen(chr, p);
+	if(KnlIsCurrentlyKernelTask())
+		ScrPrintCharToScreenWithProperty(chr, p);
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stdout == NULL)
-				print_char_p_screen(chr, p);
+				ScrPrintCharToScreenWithProperty(chr, p);
 			else
 				Ifs1AppendFile(task->stdout, &chr, 1);
 	}
 }
 
 /**
-	@Function:		print_char
+	@Function:		ScrPrintChar
 	@Access:		Public
 	@Description:
 		打印一个字符到标准输出。
@@ -433,13 +433,13 @@ print_char_p(	IN int8 chr,
 	@Return:	
 */
 void
-print_char(IN int8 chr)
+ScrPrintChar(IN int8 chr)
 {
-	print_char_p(chr, char_color);
+	ScrPrintCharWithProperty(chr, char_color);
 }
 
 /**
-	@Function:		print_str
+	@Function:		ScrPrintString
 	@Access:		Public
 	@Description:
 		打印字符串到标准输出。
@@ -451,26 +451,26 @@ print_char(IN int8 chr)
 	@Return:
 */
 void
-print_str(IN const int8 * str)
+ScrPrintString(IN const int8 * str)
 {
-	if(kernel_is_knltask())
+	if(KnlIsCurrentlyKernelTask())
 		while(*str != '\0')
-			print_char(*(str++));
+			ScrPrintChar(*(str++));
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stdout == NULL)
 				while(*str != '\0')
-					print_char(*(str++));
+					ScrPrintChar(*(str++));
 			else
 				Ifs1AppendFile(task->stdout, str, strlen(str));
 	}
 }
 
 /**
-	@Function:		print_str_p
+	@Function:		ScrPrintStringWithProperty
 	@Access:		Public
 	@Description:
 		打印字符串到标准输出，并且附带字符属性。
@@ -484,27 +484,27 @@ print_str(IN const int8 * str)
 	@Return:
 */
 void
-print_str_p(IN const int8 * str,
-			IN uint8 p)
+ScrPrintStringWithProperty(	IN const int8 * str,
+							IN uint8 p)
 {
-	if(kernel_is_knltask())
+	if(KnlIsCurrentlyKernelTask())
 		while(*str != '\0')
-			print_char_p(*(str++), p);
+			ScrPrintCharWithProperty(*(str++), p);
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stdout == NULL)
 				while(*str != '\0')
-					print_char_p(*(str++), p);
+					ScrPrintCharWithProperty(*(str++), p);
 			else
 				Ifs1AppendFile(task->stdout, str, strlen(str));
 	}
 }
 
 /**
-	@Function:		print_err_char_p
+	@Function:		ScrPrintCharToStderrWithProperty
 	@Access:		Public
 	@Description:
 		打印一个字符到标准错误，并且附带字符属性。
@@ -517,25 +517,25 @@ print_str_p(IN const int8 * str,
 			字符颜色属性。
 	@Return:	
 */
-print_err_char_p(	IN int8 chr,
-					IN uint8 p)
+ScrPrintCharToStderrWithProperty(	IN int8 chr,
+									IN uint8 p)
 {
-	if(kernel_is_knltask())
-		print_char_p_screen(chr, p);
+	if(KnlIsCurrentlyKernelTask())
+		ScrPrintCharToScreenWithProperty(chr, p);
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stderr == NULL)
-				print_char_p_screen(chr, p);
+				ScrPrintCharToScreenWithProperty(chr, p);
 			else
 				Ifs1AppendFile(task->stderr, &chr, 1);
 	}
 }
 
 /**
-	@Function:		print_err_char
+	@Function:		ScrPrintCharToStderr
 	@Access:		Public
 	@Description:
 		打印一个字符到标准错误。
@@ -547,13 +547,13 @@ print_err_char_p(	IN int8 chr,
 	@Return:	
 */
 void
-print_err_char(IN int8 chr)
+ScrPrintCharToStderr(IN int8 chr)
 {
-	print_err_char_p(chr, char_color);
+	ScrPrintCharToStderrWithProperty(chr, char_color);
 }
 
 /**
-	@Function:		print_err_str
+	@Function:		ScrPrintStringToStderr
 	@Access:		Public
 	@Description:
 		打印字符串到标准错误。
@@ -565,26 +565,26 @@ print_err_char(IN int8 chr)
 	@Return:
 */
 void
-print_err_str(IN const int8 * str)
+ScrPrintStringToStderr(IN const int8 * str)
 {
-	if(kernel_is_knltask())
+	if(KnlIsCurrentlyKernelTask())
 		while(*str != '\0')
-			print_err_char(*(str++));
+			ScrPrintCharToStderr(*(str++));
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stderr == NULL)
 				while(*str != '\0')
-					print_char(*(str++));
+					ScrPrintChar(*(str++));
 			else
 				Ifs1AppendFile(task->stderr, str, strlen(str));
 	}
 }
 
 /**
-	@Function:		print_err_str_p
+	@Function:		ScrPrintStringToStderrWithProperty
 	@Access:		Public
 	@Description:
 		打印字符串到标准错误，并且附带字符属性。
@@ -598,27 +598,27 @@ print_err_str(IN const int8 * str)
 	@Return:
 */
 void
-print_err_str_p(IN const int8 * str,
-				IN uint8 p)
+ScrPrintStringToStderrWithProperty(	IN const int8 * str,
+									IN uint8 p)
 {
-	if(kernel_is_knltask())
+	if(KnlIsCurrentlyKernelTask())
 		while(*str != '\0')
-			print_err_char_p(*(str++), p);
+			ScrPrintCharToStderrWithProperty(*(str++), p);
 	else
 	{
-		int32 tid = kernel_get_current_tid();
-		struct Task * task = get_task_info_ptr(tid);
+		int32 tid = KnlGetCurrentTaskId();
+		struct Task * task = TskmgrGetTaskInfoPtr(tid);
 		if(task != NULL)
 			if(task->stderr == NULL)
 				while(*str != '\0')
-					print_char_p(*(str++), p);
+					ScrPrintCharWithProperty(*(str++), p);
 			else
 				Ifs1AppendFile(task->stderr, str, strlen(str));
 	}
 }
 
 /**
-	@Function:		clear_screen
+	@Function:		ScrClearScreen
 	@Access:		Public
 	@Description:
 		清除屏幕。
@@ -626,17 +626,17 @@ print_err_str_p(IN const int8 * str,
 	@Return:		
 */
 void
-clear_screen(void)
+ScrClearScreen(void)
 {
 	int32 i;
-	set_cursor(0, 0);
+	ScrSetConsoleCursor(0, 0);
 	for(i = 0; i < COLUMN * ROW; i++)
-		print_char(' ');
-	set_cursor(0, 0);
+		ScrPrintChar(' ');
+	ScrSetConsoleCursor(0, 0);
 }
 
 /**
-	@Function:		init_screen
+	@Function:		ScrInit
 	@Access:		Public
 	@Description:
 		初始化屏幕功能。
@@ -644,10 +644,10 @@ clear_screen(void)
 	@Return:		
 */
 void
-init_screen(void)
+ScrInit(void)
 {
-	if(!vesa_is_valid())
-		clear_screen();
+	if(!VesaIsEnabled())
+		ScrClearScreen();
 	else
 	{
 		// 获取关于背景的设置。
@@ -667,8 +667,8 @@ init_screen(void)
 		uint32 ui;
 		char_color = CC_GRAYWHITE;
 		struct die_info info;
-		screen_width = vesa_get_width();
-		screen_height = vesa_get_height();
+		screen_width = VesaGetWidth();
+		screen_height = VesaGetHeight();
 		if(!new_empty_image0(&screen_buffer, screen_width, screen_height))
 		{
 			fill_info(info, DC_INIT_SCREEN, DI_INIT_SCREEN);
@@ -690,7 +690,7 @@ init_screen(void)
 		fill_image_by_byte(&pointer_image, 0x00);
 
 		int32 screen_char_buffer_len = ROW * COLUMN * 2;
-		screen_char_buffer = alloc_memory(screen_char_buffer_len);
+		screen_char_buffer = MemAlloc(screen_char_buffer_len);
 		if(screen_char_buffer == NULL)
 		{
 			fill_info(info, DC_INIT_SCREEN, DI_INIT_SCREEN);
@@ -760,10 +760,10 @@ init_screen(void)
 			fill_info(info, DC_INIT_SCREEN, DI_INIT_SCREEN);
 			die(&info);
 		}
-		init_window_resources();
+		WinmgrInit();
 		for(ui = 0; ui < MAX_WINDOW_COUNT; ui++)
 		{
-			windows[ui] = alloc_memory(sizeof(struct Window));
+			windows[ui] = MemAlloc(sizeof(struct Window));
 			if(windows[ui] == NULL)
 			{
 				fill_info(info, DC_INIT_SCREEN, DI_INIT_SCREEN);
@@ -788,7 +788,7 @@ init_screen(void)
 }
 
 /**
-	@Function:		print_date
+	@Function:		ScrPrintDate
 	@Access:		Public
 	@Description:
 		打印日期。
@@ -798,21 +798,21 @@ init_screen(void)
 	@Return:	
 */
 void
-print_date(IN struct CMOSDateTime * date)
+ScrPrintDate(IN struct CMOSDateTime * date)
 {
 	printn(date->year);
-	print_str("-");
+	ScrPrintString("-");
 	if(date->month < 10)
-		print_str("0");
+		ScrPrintString("0");
 	printn(date->month);
-	print_str("-");
+	ScrPrintString("-");
 	if(date->day < 10)
-		print_str("0");
+		ScrPrintString("0");
 	printn(date->day);
 }
 
 /**
-	@Function:		print_time
+	@Function:		ScrPrintTime
 	@Access:		Public
 	@Description:
 		打印时间。
@@ -822,23 +822,23 @@ print_date(IN struct CMOSDateTime * date)
 	@Return:	
 */
 void
-print_time(IN struct CMOSDateTime * time)
+ScrPrintTime(IN struct CMOSDateTime * time)
 {
 	if(time->hour < 10)
-		print_str("0");
+		ScrPrintString("0");
 	printn(time->hour);
-	print_str(":");
+	ScrPrintString(":");
 	if(time->minute < 10)
-		print_str("0");
+		ScrPrintString("0");
 	printn(time->minute);
-	print_str(":");
+	ScrPrintString(":");
 	if(time->second < 10)
-		print_str("0");
+		ScrPrintString("0");
 	printn(time->second);
 }
 
 /**
-	@Function:		print_datetime
+	@Function:		ScrPrintDateTime
 	@Access:		Public
 	@Description:
 		打印日期和时间。
@@ -848,15 +848,15 @@ print_time(IN struct CMOSDateTime * time)
 	@Return:	
 */
 void
-print_datetime(IN struct CMOSDateTime * dt)
+ScrPrintDateTime(IN struct CMOSDateTime * dt)
 {
-	print_date(dt);
-	print_str(" ");
-	print_time(dt);
+	ScrPrintDate(dt);
+	ScrPrintString(" ");
+	ScrPrintTime(dt);
 }
 
 /**
-	@Function:		set_target_screen
+	@Function:		ScrSetTargetScreen
 	@Access:		Public
 	@Description:
 		设置目标屏幕。
@@ -866,7 +866,7 @@ print_datetime(IN struct CMOSDateTime * dt)
 	@Return:	
 */
 void
-set_target_screen(IN struct CommonImage * ts)
+ScrSetTargetScreen(IN struct CommonImage * ts)
 {
 	target_screen = ts;
 }
@@ -876,7 +876,7 @@ set_target_screen(IN struct CommonImage * ts)
 */
 
 /**
-	@Function:		property_to_real_color
+	@Function:		_ScrConvertPropertyToRGB
 	@Access:		Private
 	@Description:
 		把属性颜色转换为真彩色。
@@ -889,7 +889,7 @@ set_target_screen(IN struct CommonImage * ts)
 */
 static
 uint32
-property_to_real_color(IN uint8 p)
+_ScrConvertPropertyToRGB(IN uint8 p)
 {
 	switch(p)
 	{
@@ -929,7 +929,7 @@ property_to_real_color(IN uint8 p)
 }
 
 /**
-	@Function:		new_window
+	@Function:		_ScrNewWindow
 	@Access:		Private
 	@Description:
 		新建窗体。
@@ -940,7 +940,7 @@ property_to_real_color(IN uint8 p)
 */
 static 
 struct Window * 
-new_window(void)
+_ScrNewWindow(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_WINDOW_COUNT; ui++)
@@ -954,7 +954,7 @@ new_window(void)
 }
 
 /**
-	@Function:		free_window
+	@Function:		_ScrFreeWindow
 	@Access:		Private
 	@Description:
 		释放窗体。
@@ -967,7 +967,7 @@ new_window(void)
 */
 static
 BOOL
-free_window(OUT struct Window * window)
+_ScrFreeWindow(OUT struct Window * window)
 {
 	if(window == NULL)
 		return FALSE;
@@ -986,7 +986,7 @@ free_window(OUT struct Window * window)
 }
 
 /**
-	@Function:		_switch_window
+	@Function:		_ScrSwitchWindow
 	@Access:		Private
 	@Description:
 		切换窗体。
@@ -998,7 +998,7 @@ free_window(OUT struct Window * window)
 */
 static
 void
-_switch_window(IN WindowPtr top)
+_ScrSwitchWindow(IN WindowPtr top)
 {
 	if(top == NULL || window_count < 2)
 		return;
@@ -1011,11 +1011,11 @@ _switch_window(IN WindowPtr top)
 		return;
 	if(	windows[0]->state == WINDOW_STATE_HIDDEN
 		|| windows[0]->state == WINDOW_STATE_CLOSED)
-		_switch_window(top);
+		_ScrSwitchWindow(top);
 }
 
 /**
-	@Function:		switch_window
+	@Function:		ScrSwitchWindow
 	@Access:		Public
 	@Description:
 		切换窗体。
@@ -1023,13 +1023,13 @@ _switch_window(IN WindowPtr top)
 	@Return:
 */
 void
-switch_window(void)
+ScrSwitchWindow(void)
 {
-	_switch_window(windows[0]);
+	_ScrSwitchWindow(windows[0]);
 }
 
 /**
-	@Function:		set_top_window
+	@Function:		ScrSetTopWindow
 	@Access:		Public
 	@Description:
 		把指定窗体置顶。
@@ -1041,7 +1041,7 @@ switch_window(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-set_top_window(IN WindowPtr window)
+ScrSetTopWindow(IN WindowPtr window)
 {
 	if(window == NULL || window_count == 0)
 		return FALSE;
@@ -1064,7 +1064,7 @@ set_top_window(IN WindowPtr window)
 }
 
 /**
-	@Function:		create_window
+	@Function:		ScrCreateWindow
 	@Access:		Public
 	@Description:
 		创建窗体。
@@ -1084,14 +1084,14 @@ set_top_window(IN WindowPtr window)
 			指向窗体结构体。如果创建失败则返回 NULL。	
 */
 struct Window *
-create_window(	IN uint32		width,
+ScrCreateWindow(IN uint32		width,
 				IN uint32		height,
 				IN uint32		bgcolor,
 				IN uint32		style,
 				IN int8 *		title,
 				IN WindowEvent	event)
 {
-	struct Window * window = new_window();
+	struct Window * window = _ScrNewWindow();
 	window->uwid = -1;
 	window->x = 0;
 	window->y = 0;
@@ -1110,14 +1110,14 @@ create_window(	IN uint32		width,
 	window->is_top = FALSE;
 	if(!new_empty_image0(&window->workspace, width, height))
 	{
-		free_window(window);
+		_ScrFreeWindow(window);
 		return NULL;
 	}
 	if(!(style & WINDOW_STYLE_NO_TITLE))
 		if(!new_empty_image0(&window->title_bar, width, TITLE_BAR_HEIGHT))
 		{
 			destroy_common_image(&window->workspace);
-			free_window(window);
+			_ScrFreeWindow(window);
 			return NULL;
 		}
 	window->key_count = 0;
@@ -1125,7 +1125,7 @@ create_window(	IN uint32		width,
 }
 
 /**
-	@Function:		destroy_window
+	@Function:		ScrDestroyWindow
 	@Access:		Public
 	@Description:
 		销毁窗体。
@@ -1137,11 +1137,11 @@ create_window(	IN uint32		width,
 			返回TRUE则成功，否则失败。		
 */
 BOOL
-destroy_window(IN struct Window * window)
+ScrDestroyWindow(IN struct Window * window)
 {
 	if(window == NULL || window->id == 0)
 		return FALSE;
-	free_window(window);
+	_ScrFreeWindow(window);
 	disable_memory_lock();
 	destroy_common_image(&window->workspace);
 	destroy_common_image(&window->title_bar);
@@ -1150,7 +1150,7 @@ destroy_window(IN struct Window * window)
 }
 
 /**
-	@Function:		get_top_window
+	@Function:		ScrGetTopWindow
 	@Access:		Public
 	@Description:
 		获取顶层窗体的结构体的指针。
@@ -1160,7 +1160,7 @@ destroy_window(IN struct Window * window)
 			顶层窗体的结构体的指针。		
 */
 struct Window *
-get_top_window(void)
+ScrGetTopWindow(void)
 {
 	if(window_count == 0)
 		return NULL;
@@ -1169,7 +1169,7 @@ get_top_window(void)
 }
 
 /**
-	@Function:		render_text_buffer_ex
+	@Function:		ScrRenderTextBufferEx
 	@Access:		Public
 	@Description:
 		渲染文本缓冲区。
@@ -1195,7 +1195,7 @@ get_top_window(void)
 			顶层窗体的结构体的指针。		
 */
 BOOL
-render_text_buffer_ex(	IN OUT ImagePtr image,
+ScrRenderTextBufferEx(	IN OUT ImagePtr image,
 						IN uint32 start_x,
 						IN uint32 start_y,
 						IN uint8 * txtbuf,
@@ -1213,15 +1213,15 @@ render_text_buffer_ex(	IN OUT ImagePtr image,
 			uint8 * offset = txtbuf + (y * column + x) * 2;
 			int8 chr = *offset;
 			uint8 p = *(offset + 1);
-			uint32 color = property_to_real_color(p & 0x0F);
-			uint32 bg_color = property_to_real_color((p >> 4) & 0x0F);
+			uint32 color = _ScrConvertPropertyToRGB(p & 0x0F);
+			uint32 bg_color = _ScrConvertPropertyToRGB((p >> 4) & 0x0F);
 			rect_common_image(	image, 
 								start_x + x * ENFONT_WIDTH, 
 								start_y + y * (ENFONT_HEIGHT + CURSOR_HEIGHT), 
 								ENFONT_WIDTH, 
 								ENFONT_HEIGHT + CURSOR_HEIGHT, 
 								bg_color);
-			uint8 * font = get_enfont_ptr();
+			uint8 * font = EnfntGetFontDataPtr();
 
 			if(font != NULL)
 				text_common_image(	image,
@@ -1232,7 +1232,7 @@ render_text_buffer_ex(	IN OUT ImagePtr image,
 									1,
 									color);
 		}
-	uint32 cursor_real_color = property_to_real_color(cursor_color);
+	uint32 cursor_real_color = _ScrConvertPropertyToRGB(cursor_color);
 	uint32 c_x = curx, c_y = cury;
 	uint32 s_w = image->width;
 	for(x = 0; x < ENFONT_WIDTH; x++)
@@ -1249,7 +1249,7 @@ render_text_buffer_ex(	IN OUT ImagePtr image,
 }
 
 /**
-	@Function:		render_text_buffer
+	@Function:		ScrRenderTextBuffer
 	@Access:		Public
 	@Description:
 		渲染文本缓冲区。
@@ -1271,18 +1271,18 @@ render_text_buffer_ex(	IN OUT ImagePtr image,
 			顶层窗体的结构体的指针。		
 */
 BOOL
-render_text_buffer(	IN OUT ImagePtr image,
+ScrRenderTextBuffer(IN OUT ImagePtr image,
 					IN uint8 * txtbuf,
 					IN uint32 row,
 					IN uint32 column,
 					IN uint32 curx,
 					IN uint32 cury)
 {
-	return render_text_buffer_ex(image, 0, 0, txtbuf, row, column, curx, cury);
+	return ScrRenderTextBufferEx(image, 0, 0, txtbuf, row, column, curx, cury);
 }
 
 /**
-	@Function:		flush_screen
+	@Function:		ScrFlushScreen
 	@Access:		Public
 	@Description:
 		刷新屏幕。
@@ -1290,7 +1290,7 @@ render_text_buffer(	IN OUT ImagePtr image,
 	@Return:
 */
 void
-flush_screen(void)
+ScrFlushScreen(void)
 {
 	uint32 x, y;
 	uint32 ui;
@@ -1318,15 +1318,15 @@ flush_screen(void)
 				uint8 * offset = screen_char_buffer + (y * COLUMN + x) * 2;
 				int8 chr = *offset;
 				uint8 p = *(offset + 1);
-				uint32 color = property_to_real_color(p & 0x0F);
-				uint32 bg_color = property_to_real_color((p >> 4) & 0x0F);
+				uint32 color = _ScrConvertPropertyToRGB(p & 0x0F);
+				uint32 bg_color = _ScrConvertPropertyToRGB((p >> 4) & 0x0F);
 				rect_common_image(	&console_screen_buffer, 
 									x * ENFONT_WIDTH, 
 									y * (ENFONT_HEIGHT + CURSOR_HEIGHT), 
 									ENFONT_WIDTH, 
 									ENFONT_HEIGHT + CURSOR_HEIGHT, 
 									bg_color);
-				uint8 * font = get_enfont_ptr();
+				uint8 * font = EnfntGetFontDataPtr();
 
 				if(font != NULL)
 					text_common_image(	&console_screen_buffer,
@@ -1337,7 +1337,7 @@ flush_screen(void)
 										1,
 										color);
 			}
-		uint32 cursor_real_color = property_to_real_color(cursor_color);
+		uint32 cursor_real_color = _ScrConvertPropertyToRGB(cursor_color);
 		uint32 c_x = cursor_x, c_y = cursor_y;
 		for(x = 0; x < ENFONT_WIDTH; x++)
 			for(y = 0; y < CURSOR_HEIGHT; y++)
@@ -1353,7 +1353,7 @@ flush_screen(void)
 
 	//绘制窗体
 	int32 mouse_x, mouse_y;
-	get_mouse_position(&mouse_x, &mouse_y);
+	KnlGetMousePosition(&mouse_x, &mouse_y);
 	if(window_count != 0)
 	{
 		struct Window * top_window = windows[0];
@@ -1379,7 +1379,7 @@ flush_screen(void)
 				top_window->over_hidden_button = 0;
 		}
 	}
-	mouse_left_button_down = is_mouse_left_button_down();
+	mouse_left_button_down = KnlIsMouseLeftButtonDown();
 	if(mouse_left_button_down)
 	{
 		if(window_count != 0)
@@ -1399,7 +1399,7 @@ flush_screen(void)
 											CLOSE_BUTTON_WIDTH, 
 											CLOSE_BUTTON_HEIGHT))
 					{
-						window_dispatch_event(	top_window,
+						WinmgrDispatchEvent(	top_window,
 												WINDOW_EVENT_WILL_CLOSE,
 												NULL);
 						return;
@@ -1493,7 +1493,7 @@ flush_screen(void)
 		BOOL has_title_bar = !(wstyle & WINDOW_STYLE_NO_TITLE);
 		if(has_title_bar)
 		{
-			if(render_window(window, top))
+			if(WinmgrRenderWindow(window, top))
 			{
 				draw_common_image(	&screen_buffer,
 									&window->title_bar,
@@ -1533,7 +1533,7 @@ flush_screen(void)
 			}
 		}
 		else
-			if(render_window(window, top))
+			if(WinmgrRenderWindow(window, top))
 			{
 				draw_common_image(	&screen_buffer,
 									&window->workspace,
@@ -1576,7 +1576,7 @@ flush_screen(void)
 						TCOLOR);
 
 	if(target_screen == NULL)	
-		vesa_draw_image(0, 
+		VesaDrawImage(0, 
 						0, 
 						screen_width, 
 						screen_height, 
@@ -1591,7 +1591,7 @@ flush_screen(void)
 }
 
 /**
-	@Function:		get_windows
+	@Function:		ScrGetWindows
 	@Access:		Public
 	@Description:
 		获取指向所有窗体数组的指针。
@@ -1603,7 +1603,7 @@ flush_screen(void)
 			指向所有窗体数组的指针。
 */
 WindowPtr *
-get_windows(OUT uint32 * count)
+ScrGetWindows(OUT uint32 * count)
 {
 	*count = window_count;
 	return windows;

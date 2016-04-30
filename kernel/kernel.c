@@ -102,10 +102,10 @@ static uint8 *	xf_stack			= NULL;
 
 static BOOL		mouse_loop_was_enabled 		= FALSE;	//!!!警告!!!
 														//在使用APIC模式时，不知道为什么
-														//在执行enter_system()附近的代码
+														//在执行_KnlEnterSystem()附近的代码
 														//时会引发一次鼠标中断，导致鼠标驱动
 														//程序错误的递增了mouse_count。所以
-														//在调用完毕enter_system()之后才将
+														//在调用完毕_KnlEnterSystem()之后才将
 														//mouse_loop_was_enabled设为TRUE。
 static BOOL 	keyboard_loop_was_enabled	= FALSE;
 static BOOL		use_rtc_for_task_scheduler	= FALSE;
@@ -149,10 +149,10 @@ main(void)
 	gdt_addr = get_gdt_addr();
 	idt_addr = get_idt_addr();
 	
-	init_memory();
+	MemInit();
 	
 	//必须在这里禁用所有锁
-	disable_common_lock();
+	KnlDisableCommonLock();
 	disable_memory_lock();
 	disable_paging_lock();
 	disable_kernel_lock();
@@ -178,40 +178,40 @@ main(void)
 		"mov	%eax, %cr4\n\t"
 		);
 
-	init_vesa();
-	init_paging();
+	VesaInit();
+	PgInit();
 
-	interrupts_init();
-	init_noimpl();
-	init_gp();
-	init_pf();
-	init_dividing_by_zero();
-	init_bound_check();
-	init_invalid_opcode();
-	init_double_fault();
-	init_invalid_tss();
-	init_invalid_seg();
-	init_invalid_stack();
-	init_mf();
-	init_ac();
-	init_mc();
-	init_xf();
-	init_interrupt();
+	KnlInitInterrupts();
+	_KnlInitUnimplementedInterruptException();
+	_KnlInitGlobalProtectionException();
+	_KnlInitPageFaultException();
+	_KnlInitDividingByZeroException();
+	_KnlInitBoundCheckException();
+	_KnlInitInvalidOpcodeException();
+	_KnlInitDoubleFaultException();
+	_KnlInitInvalidTSSException();
+	_KnlInitInvalidSegmentException();
+	_KnlInitInvalidStackException();
+	_KnlInitMathFaultException();
+	_KnlInitAlignCheckException();
+	_KnlInitMachineCheckException();
+	_KnlInitSIMDFloatPointException();
+	_KnlInitInterrupt();
 
 	// 初始化PCI。
 	PciInitDevices();
 
-	init_disk("VA");
-	init_disk("VB");
-	init_disk("HD");
-	init_ide();
-	init_ide1();
+	DskInit("VA");
+	DskInit("VB");
+	DskInit("HD");
+	_KnlInitIde();
+	_KnlInitIde1();
 
 	// 初始化外部库。DSLIB，JSONLIB，PATHLIB, MEMPOOLLIB。 
-	init_dsl();
-	init_jsonl();
-	init_pathl();
-	init_mempooll();
+	_KnlLibInitDSL();
+	_KnlLibInitJson();
+	_KnlLibInitPath();
+	_KnlLibInitMemPool();
 
 	kmpool_init();
 
@@ -220,26 +220,26 @@ main(void)
 	Ifs1Init();
 	ConInit();
 
-	timer_init();
-	init_enfont();
-	init_screen();
-	init_timer();
-	init_mouse();
-	mouse_init();
+	TmrInit();
+	EnfntInit();
+	ScrInit();
+	_KnlInitTimer();
+	_KnlInitMouse();
+	MouseInit();
 	
-	init_keyboard();
-	init_fpu();
-	init_tasks();
-	init_system_call();
+	_KnlInitKeyboard();
+	_KnlInitFpu();
+	TskmgrInit();
+	_KnlInitSystemCall();
 	
 	init_keyboard_driver();
-	init_cpu();
-	enable_paging();
-	init_log();
-	mqueue_init();
+	CpuInit();
+	PgEnablePaging();
+	LogInit();
+	MqInit();
 	AcpiInit();
-	serial_init();
-	gui_init();
+	SrlInit();
+	GuiInit();
 
 	//检测 APIC 是否初始化成功。
 	//如果初始化失败则使用 PIC。
@@ -247,13 +247,13 @@ main(void)
 	config_system_get_bool("EnableAPIC", &enable_apic);
 	if(enable_apic && ApicInit())
 	{
-		pic_mask_all();
+		PicMaskAll();
 		ApicEnable();
 	}
 	else
 	{
-		pic_init();
-		pic_unmask_all();
+		PicInit();
+		PicUnmaskAll();
 	}
 
 	Ifs1InitBlocks();
@@ -274,7 +274,7 @@ main(void)
 	sti();
 
 	//在这里启用所有锁
-	enable_common_lock();
+	KnlEnableCommonLock();
 	enable_memory_lock();	
 	enable_paging_lock();
 	enable_kernel_lock();
@@ -283,11 +283,11 @@ main(void)
 	//enable_ifs1_lock();
 	enable_gui_lock();
 
-	dma_init();
+	DmaInit();
 	pci_init();
-	disk_va_init();
+	_KnlInitDiskVA();
 
-	enter_system();
+	_KnlEnterSystem();
 
 	config_system_get_bool(	"UseRTCForTaskScheduler", 
 							&use_rtc_for_task_scheduler);
@@ -305,19 +305,21 @@ main(void)
 	mouse_loop_was_enabled = TRUE;
 	keyboard_loop_was_enabled = TRUE;
 
-	common_lock();
-	int32 sys_screen_tid = create_sys_task_by_file(	SYSTEM_PATH"sys/screen.sys",
-													SYSTEM_PATH"sys/screen.sys",
-													SYSTEM_PATH"sys/");
-	get_task_info_ptr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
-	task_ready(sys_screen_tid);
+	COMMON_LOCK();
+	int32 sys_screen_tid = TskmgrCreateSystemTaskByFile(
+		SYSTEM_PATH"sys/screen.sys",
+		SYSTEM_PATH"sys/screen.sys",
+		SYSTEM_PATH"sys/");
+	TskmgrGetTaskInfoPtr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
+	TskmgrSetTaskToReady(sys_screen_tid);
 
-	int32 sys_timer_tid = create_sys_task_by_file(	SYSTEM_PATH"sys/timer.sys",
-													SYSTEM_PATH"sys/timer.sys",
-													SYSTEM_PATH"sys/");
-	get_task_info_ptr(sys_timer_tid)->priority = TASK_PRIORITY_LOW;
-	task_ready(sys_timer_tid);
-	common_unlock();
+	int32 sys_timer_tid = TskmgrCreateSystemTaskByFile(
+		SYSTEM_PATH"sys/timer.sys",
+		SYSTEM_PATH"sys/timer.sys",
+		SYSTEM_PATH"sys/");
+	TskmgrGetTaskInfoPtr(sys_timer_tid)->priority = TASK_PRIORITY_LOW;
+	TskmgrSetTaskToReady(sys_timer_tid);
+	COMMON_UNLOCK();
 
 	ConEnterConsole();
 }
@@ -325,7 +327,7 @@ main(void)
 DEFINE_LOCK_IMPL(kernel)
 
 /**
-	@Function:		kernel_is_knltask
+	@Function:		KnlIsCurrentlyKernelTask
 	@Access:		Public
 	@Description:
 		获取当前任务是否为内核任务。
@@ -335,13 +337,13 @@ DEFINE_LOCK_IMPL(kernel)
 			如果是内核任务则返回TRUE，否则返回FALSE。
 */
 BOOL
-kernel_is_knltask(void)
+KnlIsCurrentlyKernelTask(void)
 {
 	return is_kernel_task;
 }
 
 /**
-	@Function:		kernel_get_current_tid
+	@Function:		KnlGetCurrentTaskId
 	@Access:		Public
 	@Description:
 		获取当前的用户任务的TID。
@@ -351,13 +353,13 @@ kernel_is_knltask(void)
 			任务的TID。
 */
 int32
-kernel_get_current_tid(void)
+KnlGetCurrentTaskId(void)
 {
 	return current_tid;
 }
 
 /**
-	@Function:		reset_all_exceptions
+	@Function:		_KnlResetAllExceptions
 	@Access:		Private
 	@Description:
 		重置所有异常处理程序。
@@ -368,7 +370,7 @@ kernel_get_current_tid(void)
 */
 static
 void
-reset_all_exceptions(void)
+_KnlResetAllExceptions(void)
 {
 	struct Desc tss_desc;
 
@@ -376,47 +378,47 @@ reset_all_exceptions(void)
 		KnlGetDescFromGDT(__desc_idx, &tss_desc);	\
 		tss_desc.attr = AT386TSS + DPL0;	\
 		KnlSetDescToGDT(__desc_idx, &tss_desc);	\
-		fill_tss(__tss, __eip, __esp);
+		_KnlFillTSS(__tss, __eip, __esp);
 
 	// 除以0。
-	RESET_EXCEPTION(21, &divby0_tss, &dividing_by_zero_int, divby0_stack);
+	RESET_EXCEPTION(21, &divby0_tss, &_KnlDividingByZeroExceptionInterrupt, divby0_stack);
 
 	// 边界检查。
-	RESET_EXCEPTION(22, &bndchk_tss, &bound_check_int, bndchk_stack);
+	RESET_EXCEPTION(22, &bndchk_tss, &_KnlBoundCheckExceptionInterrupt, bndchk_stack);
 	
 	// 错误的操作码。
-	RESET_EXCEPTION(23, &invalidopc_tss, &invalid_opcode_int, invalidopc_stack);
+	RESET_EXCEPTION(23, &invalidopc_tss, &_KnlInvalidOpcodeExceptionInterrupt, invalidopc_stack);
 	
 	// 错误的 TSS。
-	RESET_EXCEPTION(24, &invalidtss_tss, &invalid_tss_int, invalidtss_stack);
+	RESET_EXCEPTION(24, &invalidtss_tss, &_KnlInvalidTSSExceptionInterrupt, invalidtss_stack);
 	
 	// 段不存在故障。
-	RESET_EXCEPTION(25, &invalidseg_tss, &invalid_seg_int, invalidseg_stack);
+	RESET_EXCEPTION(25, &invalidseg_tss, &_KnlInvalidSegmentExceptionInterrupt, invalidseg_stack);
 
 	// 堆栈段故障。
-	RESET_EXCEPTION(26, &invalidstck_tss, &invalid_stack_int, invalidstck_stack);
+	RESET_EXCEPTION(26, &invalidstck_tss, &_KnlInvalidStackExceptionInterrupt, invalidstck_stack);
 
 	// 未实现中断。
-	RESET_EXCEPTION(27, &noimpl_tss, &noimpl_int, noimpl_stack);
+	RESET_EXCEPTION(27, &noimpl_tss, &_KnlUnimplementedInterrupt, noimpl_stack);
 
 	// 通用保护异常。
-	RESET_EXCEPTION(18, &gp_tss, &gp_int, gp_stack);
+	RESET_EXCEPTION(18, &gp_tss, &_KnlGlobalProtectionExceptionInterrupt, gp_stack);
 
 	// 页故障。
-	RESET_EXCEPTION(20, &pf_tss, &pf_int, pf_stack);
+	RESET_EXCEPTION(20, &pf_tss, &_KnlPageFaultExceptionInterrupt, pf_stack);
 
 	// x87 FPU浮点错误（数学错误）的故障。
-	RESET_EXCEPTION(29, &mf_tss, &mf_int, mf_stack);
+	RESET_EXCEPTION(29, &mf_tss, &_KnlMathFaultExceptionInterrupt, mf_stack);
 
 	// 对齐检查故障。
-	RESET_EXCEPTION(158, &ac_tss, &ac_int, ac_stack);
+	RESET_EXCEPTION(158, &ac_tss, &_KnlAlignCheckExceptionInterrupt, ac_stack);
 
 	// SIMD浮点异常。
-	RESET_EXCEPTION(160, &xf_tss, &xf_int, xf_stack);
+	RESET_EXCEPTION(160, &xf_tss, &_KnlSIMDFloatPointExceptionInterrupt, xf_stack);
 }
 
 /**
-	@Function:		disk_va_init
+	@Function:		_KnlInitDiskVA
 	@Access:		Private
 	@Description:
 		初始化虚拟磁盘 VA。
@@ -425,7 +427,7 @@ reset_all_exceptions(void)
 */
 static
 void
-disk_va_init(void)
+_KnlInitDiskVA(void)
 {
 	Ifs1Format("VA");
 	Ifs1CreateDir("VA:/", "data");
@@ -434,14 +436,14 @@ disk_va_init(void)
 	pci_write_to_file("VA:/data/pci.dat");
 	
 	Ifs1CreateFile("VA:/data/", "cpu.dat");
-	cpu_write_to_file("VA:/data/cpu.dat");
+	CpuWriteInfoToFile("VA:/data/cpu.dat");
 
 	Ifs1CreateFile("VA:/data/", "madt.dat");
-	madt_write_to_file("VA:/data/madt.dat");
+	MadtWriteToFile("VA:/data/madt.dat");
 }
 
 /**
-	@Function:		knl_lib_malloc
+	@Function:		_KnlLibMalloc
 	@Access:		Private
 	@Description:
 		为库准备的释放 malloc 函数。
@@ -454,13 +456,13 @@ disk_va_init(void)
 */
 static
 void *
-knl_lib_malloc(IN uint32 num_bytes)
+_KnlLibMalloc(IN uint32 num_bytes)
 {
-	return alloc_memory(num_bytes);
+	return MemAlloc(num_bytes);
 }
 
 /**
-	@Function:		knl_lib_calloc
+	@Function:		_KnlLibCalloc
 	@Access:		Private
 	@Description:
 		为库准备的释放 calloc 函数。
@@ -475,14 +477,14 @@ knl_lib_malloc(IN uint32 num_bytes)
 */
 static
 void *
-knl_lib_calloc(	IN uint32 n, 
+_KnlLibCalloc(	IN uint32 n, 
 				IN uint32 size)
 {
-	return alloc_memory(n * size);
+	return MemAlloc(n * size);
 }
 
 /**
-	@Function:		knl_lib_free
+	@Function:		_KnlLibFree
 	@Access:		Private
 	@Description:
 		为 DSL 库准备的释放 free 函数。
@@ -493,13 +495,13 @@ knl_lib_calloc(	IN uint32 n,
 */
 static
 void
-knl_lib_free(IN void * ptr)
+_KnlLibFree(IN void * ptr)
 {
-	free_memory(ptr);
+	MemFree(ptr);
 }
 
 /**
-	@Function:		init_dsl
+	@Function:		_KnlLibInitDSL
 	@Access:		Private
 	@Description:
 		初始化 DSL 库。
@@ -510,17 +512,17 @@ knl_lib_free(IN void * ptr)
 */
 static
 BOOL
-init_dsl(void)
+_KnlLibInitDSL(void)
 {
 	DSLEnvironment env;
-	env.dsl_malloc = knl_lib_malloc;
-	env.dsl_calloc = knl_lib_calloc;
-	env.dsl_free = knl_lib_free;
+	env.dsl_malloc = _KnlLibMalloc;
+	env.dsl_calloc = _KnlLibCalloc;
+	env.dsl_free = _KnlLibFree;
 	return dsl_init(&env);
 }
 
 /**
-	@Function:		init_jsonl
+	@Function:		_KnlLibInitJson
 	@Access:		Private
 	@Description:
 		初始化 JSON 库。
@@ -531,17 +533,17 @@ init_dsl(void)
 */
 static
 BOOL
-init_jsonl(void)
+_KnlLibInitJson(void)
 {
 	JSONLEnvironment env;
-	env.jsonl_malloc = knl_lib_malloc;
-	env.jsonl_calloc = knl_lib_calloc;
-	env.jsonl_free = knl_lib_free;
+	env.jsonl_malloc = _KnlLibMalloc;
+	env.jsonl_calloc = _KnlLibCalloc;
+	env.jsonl_free = _KnlLibFree;
 	return jsonl_init(&env);
 }
 
 /**
-	@Function:		init_pathl
+	@Function:		_KnlLibInitPath
 	@Access:		Private
 	@Description:
 		初始化 PATH 库。
@@ -552,17 +554,17 @@ init_jsonl(void)
 */
 static
 BOOL
-init_pathl(void)
+_KnlLibInitPath(void)
 {
 	PATHLEnvironment env;
-	env.pathl_malloc = knl_lib_malloc;
-	env.pathl_calloc = knl_lib_calloc;
-	env.pathl_free = knl_lib_free;
+	env.pathl_malloc = _KnlLibMalloc;
+	env.pathl_calloc = _KnlLibCalloc;
+	env.pathl_free = _KnlLibFree;
 	return pathl_init(&env);
 }
 
 /**
-	@Function:		init_mempooll
+	@Function:		_KnlLibInitMemPool
 	@Access:		Private
 	@Description:
 		初始化 MEMPOOL 库。
@@ -573,17 +575,17 @@ init_pathl(void)
 */
 static
 BOOL
-init_mempooll(void)
+_KnlLibInitMemPool(void)
 {
 	MEMPOOLLEnvironment env;
-	env.mempooll_malloc = knl_lib_malloc;
-	env.mempooll_calloc = knl_lib_calloc;
-	env.mempooll_free = knl_lib_free;
+	env.mempooll_malloc = _KnlLibMalloc;
+	env.mempooll_calloc = _KnlLibCalloc;
+	env.mempooll_free = _KnlLibFree;
 	return mempooll_init(&env);
 }
 
 /**
-	@Function:		irq_ack
+	@Function:		_KnlIrqAck
 	@Access:		Private
 	@Description:
 		发送 EOI。
@@ -594,7 +596,7 @@ init_mempooll(void)
 */
 static
 void
-irq_ack(IN uint32 no)
+_KnlIrqAck(IN uint32 no)
 {
 	if(ApicIsEnabled())
 		ApicEOI();
@@ -607,7 +609,7 @@ irq_ack(IN uint32 no)
 }
 
 /**
-	@Function:		init_interrupt
+	@Function:		_KnlInitInterrupt
 	@Access:		Private
 	@Description:
 		初始化中断。
@@ -616,16 +618,16 @@ irq_ack(IN uint32 no)
 */
 static
 void
-init_interrupt(void)
+_KnlInitInterrupt(void)
 {
-	uint32 fpu_error_int_addr = (uint32)&fpu_error_int;
+	uint32 fpu_error_int_addr = (uint32)&_KnlFpuErrorInterrupt;
 	KnlSetInterrupt(0x07, fpu_error_int_addr);
-	uint32 system_call_int_addr = (uint32)&system_call_int;
+	uint32 system_call_int_addr = (uint32)&_KnlSystemCallInterrupt;
 	KnlSetInterrupt(0xa0, system_call_int_addr);
 }
 
 /**
-	@Function:		fpu_error_int
+	@Function:		_KnlFpuErrorInterrupt
 	@Access:		Private
 	@Description:
 		FPU 错误的中断处理函数。
@@ -634,14 +636,14 @@ init_interrupt(void)
 */
 static
 void
-fpu_error_int(void)
+_KnlFpuErrorInterrupt(void)
 {
 	asm volatile ("clts");
 	INT_EXIT();
 }
 
 /**
-	@Function:		fill_tss
+	@Function:		_KnlFillTSS
 	@Access:		Public
 	@Description:
 		填充 TSS 结构体。
@@ -656,7 +658,7 @@ fpu_error_int(void)
 */
 static
 void
-fill_tss(	OUT struct TSS * tss, 
+_KnlFillTSS(OUT struct TSS * tss, 
 			IN uint32 eip,
 			IN uint32 esp)
 {
@@ -667,7 +669,7 @@ fill_tss(	OUT struct TSS * tss,
 	tss->ss1 = 0;
 	tss->esp2 = 0;
 	tss->ss2 = 0;
-	tss->cr3 = get_kernel_cr3();
+	tss->cr3 = PgGetKernelCR3();
 	tss->eip = eip;
 	tss->flags = 0x0; //x200;
 	tss->eax = 0;
@@ -692,7 +694,7 @@ fill_tss(	OUT struct TSS * tss,
 static uint32 _timer_stack = 0;
 
 /**
-	@Function:		init_timer
+	@Function:		_KnlInitTimer
 	@Access:		Private
 	@Description:
 		初始化定时器的中断程序。
@@ -701,11 +703,11 @@ static uint32 _timer_stack = 0;
 */
 static
 void
-init_timer(void)
+_KnlInitTimer(void)
 {
 	struct die_info info;
 	struct TSS * tss = &timer_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	_timer_stack = (uint32)stack;
 	if(tss == NULL)
 	{
@@ -739,11 +741,11 @@ init_timer(void)
 	KnlSetGateToIDT(0x70, (uint8 *)&task_gate);
 	
 
-	fill_tss(tss, (uint32)timer_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlTimerInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		init_mouse
+	@Function:		_KnlInitMouse
 	@Access:		Private
 	@Description:
 		初始化鼠标的中断程序。
@@ -752,11 +754,11 @@ init_timer(void)
 */
 static
 void
-init_mouse(void)
+_KnlInitMouse(void)
 {
 	struct die_info info;
 	struct TSS * tss = &mouse_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_MOUSE, DI_INIT_MOUSE);
@@ -785,11 +787,11 @@ init_mouse(void)
 	KnlSetDescToGDT(163, (uint8 *)&task_gate);
 	KnlSetInterruptGate(0x74, _irq12);
 
-	fill_tss(tss, (uint32)mouse_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlMouseInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		init_keyboard
+	@Function:		_KnlInitKeyboard
 	@Access:		Private
 	@Description:
 		初始化键盘的中断程序。
@@ -798,11 +800,11 @@ init_mouse(void)
 */
 static
 void
-init_keyboard(void)
+_KnlInitKeyboard(void)
 {
 	struct die_info info;
 	struct TSS * tss = &keyboard_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_KEYBOARD, DI_INIT_KEYBOARD);
@@ -831,11 +833,11 @@ init_keyboard(void)
 	KnlSetInterruptGate(0x41, _irq1);
 	KnlSetDescToGDT(162, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)keyboard_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlKeyboardInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		init_ide
+	@Function:		_KnlInitIde
 	@Access:		Private
 	@Description:
 		初始化第一IDE的中断程序。
@@ -844,11 +846,11 @@ init_keyboard(void)
 */
 static
 void
-init_ide(void)
+_KnlInitIde(void)
 {
 	struct die_info info;
 	struct TSS * tss = &ide_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_IDE, DI_INIT_IDE);
@@ -877,11 +879,11 @@ init_ide(void)
 	KnlSetDescToGDT(164, (uint8 *)&task_gate);
 	KnlSetInterruptGate(0x76, _irq14);
 
-	fill_tss(tss, (uint32)ide_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlIdeInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		init_ide1
+	@Function:		_KnlInitIde1
 	@Access:		Private
 	@Description:
 		初始化第二IDE的中断程序。
@@ -890,11 +892,11 @@ init_ide(void)
 */
 static
 void
-init_ide1(void)
+_KnlInitIde1(void)
 {
 	struct die_info info;
 	struct TSS * tss = &ide1_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_IDE, DI_INIT_IDE);
@@ -923,24 +925,24 @@ init_ide1(void)
 	KnlSetDescToGDT(166, (uint8 *)&task_gate);
 	KnlSetInterruptGate(0x77, _irq15);
 
-	fill_tss(tss, (uint32)ide1_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlIde1Interrupt, (uint32)stack);
 }
 
 /**
-	@Function:		init_fpu
+	@Function:		_KnlInitFpu
 	@Access:		Private
 	@Description:
 		初始化 FPU 的中断程序。
 	@Parameters:
-	@Return:		
+	@Return:
 */
 static
 void
-init_fpu(void)
+_KnlInitFpu(void)
 {
 	struct die_info info;
 	struct TSS * tss = &fpu_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_FPU, DI_INIT_FPU);
@@ -969,20 +971,20 @@ init_fpu(void)
 	KnlSetDescToGDT(165, (uint8 *)&task_gate);
 	KnlSetInterruptGate(0x75, _irq13);
 	
-	fill_tss(tss, (uint32)fpu_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlFpuInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		free_system_call_tss
+	@Function:		_KnlFreeSystemCallTSS
 	@Access:		Private
 	@Description:
 		释放系统调用的 TSS。清除系统调用的 TSS 的 BUSY 状态。
 	@Parameters:
-	@Return:	
+	@Return:
 */
 static
 void
-free_system_call_tss(void)
+_KnlFreeSystemCallTSS(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
@@ -995,7 +997,7 @@ free_system_call_tss(void)
 }
 
 /**
-	@Function:		free_task_tss
+	@Function:		_KnlFreeTaskTSS
 	@Access:		Private
 	@Description:
 		释放所有任务的 TSS。清除所有任务的 TSS 的 BUSY 状态。
@@ -1004,7 +1006,7 @@ free_system_call_tss(void)
 */
 static
 void
-free_task_tss(void)
+_KnlFreeTaskTSS(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
@@ -1019,9 +1021,9 @@ free_task_tss(void)
 static int32	counter						= 1;
 static int32	clock_counter				= 100;
 static int32	is_system_call				= 0;
-static BOOL	switch_to_kernel			= FALSE;
-static BOOL	kt_jk_lock					= TRUE;
-static BOOL	will_reset_all_exceptions	= FALSE;
+static BOOL		switch_to_kernel			= FALSE;
+static BOOL		kt_jk_lock					= TRUE;
+static BOOL		will_reset_all_exceptions	= FALSE;
 
 static BOOL				kernel_init_i387	= FALSE;
 static struct I387State	kernel_i387_state;
@@ -1029,7 +1031,7 @@ static BOOL				kernel_task_ran		= FALSE;
 static SSEState			kernel_sse_state;
 
 /**
-	@Function:		timer_int
+	@Function:		_KnlTimerInterrupt
 	@Access:		Private
 	@Description:
 		定时器的中断程序。
@@ -1040,7 +1042,7 @@ static SSEState			kernel_sse_state;
 */
 static
 void
-timer_int(void)
+_KnlTimerInterrupt(void)
 {
 	while(1)
 	{
@@ -1048,14 +1050,14 @@ timer_int(void)
 
 		_func_name = __FUNCTION__;
 
-		timer_inc_ticks();
+		TmrIncTicks();
 
 		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
 			ApicStopTimer();
 		kt_jk_lock = FALSE;
 		if(will_reset_all_exceptions)
 		{
-			reset_all_exceptions();
+			_KnlResetAllExceptions();
 			will_reset_all_exceptions = FALSE;
 		}
 		if(--clock_counter == 0)
@@ -1063,10 +1065,10 @@ timer_int(void)
 			ConUpdateClock();
 			clock_counter = 100;
 		}
-		int32 running_tid = get_running_tid();
-		int32 tid = get_next_task_id();
+		int32 running_tid = TaskmgrGetRunningTaskID();
+		int32 tid = TskmgrGetNextTaskID();
 		current_tid = tid;
-		int32 task_count = tasks_get_count();
+		int32 task_count = TaskmgrGetTaskCount();
 		if(counter >= task_count || tid == -1 || switch_to_kernel)
 		{
 			switch_to_kernel = FALSE;
@@ -1078,10 +1080,10 @@ timer_int(void)
 			//则保存任务的I387的状态。
 			if(running_tid != -1)
 			{
-				get_task_info(running_tid, &task);
+				TskmgrGetTaskInfo(running_tid, &task);
 				asm volatile ("fnsave %0"::"m"(task.i387_state));
 				asm volatile ("fxsave %0"::"m"(task.sse_state));
-				set_task_info(running_tid, &task);
+				TskmgrSetTaskInfo(running_tid, &task);
 			}
 
 			//加载内核的I387的状态，如果未初始化则先初始化。
@@ -1108,16 +1110,16 @@ timer_int(void)
 			KnlSetDescToGDT(6, (uint8 *)&kernel_tss_desc);
 
 			// 释放所有系统调用的TSS。
-			free_system_call_tss();
+			_KnlFreeSystemCallTSS();
 
 			if(!use_rtc_for_task_scheduler && ApicIsEnabled())
 				ApicStartTimer();
 			CmosEndOfRtc();
 			unlock_without_sti();
 			if(use_rtc_for_task_scheduler)
-				irq_ack(8);
+				_KnlIrqAck(8);
 			else
-				irq_ack(0);
+				_KnlIrqAck(0);
 			asm volatile ("ljmp	$56, $0;");
 		}
 		else
@@ -1137,13 +1139,13 @@ timer_int(void)
 				if(running_tid != -1)
 				{
 					//刚才执行的不是内核任务，保存上一个任务的I387状态。
-					get_task_info(running_tid, &task);
+					TskmgrGetTaskInfo(running_tid, &task);
 					asm volatile ("fnsave %0"::"m"(task.i387_state));
 					asm volatile ("fxsave %0"::"m"(task.sse_state));
-					set_task_info(running_tid, &task);
+					TskmgrSetTaskInfo(running_tid, &task);
 				}
 
-			get_task_info(tid, &task);
+			TskmgrGetTaskInfo(tid, &task);
 			if(task.init_i387)
 			{
 				asm volatile ("frstor %0"::"m"(task.i387_state));
@@ -1153,18 +1155,18 @@ timer_int(void)
 			{
 				asm volatile ("fninit");
 				task.init_i387 = 1;
-				set_task_info(tid, &task);
+				TskmgrSetTaskInfo(tid, &task);
 			}
-			set_task_ran_state(tid);
-			free_system_call_tss();
+			TaskmgrSetTaskRunningStatus(tid);
+			_KnlFreeSystemCallTSS();
 			if(!use_rtc_for_task_scheduler && ApicIsEnabled())
 				ApicStartTimer();
 			CmosEndOfRtc();
 			unlock_without_sti();
 			if(use_rtc_for_task_scheduler)
-				irq_ack(8);
+				_KnlIrqAck(8);
 			else
-				irq_ack(0);
+				_KnlIrqAck(0);
 
 			if(task.is_system_call)
 			{
@@ -1282,7 +1284,7 @@ static int32	y_sign = 0;
 #define MOUSE_V_BIT		0x08
 
 /**
-	@Function:		mouse_int
+	@Function:		_KnlMouseInterrupt
 	@Access:		Private
 	@Description:
 		鼠标的中断程序。
@@ -1291,7 +1293,7 @@ static int32	y_sign = 0;
 */
 static
 void
-mouse_int(void)
+_KnlMouseInterrupt(void)
 {
 	while(1)
 	{
@@ -1301,8 +1303,8 @@ mouse_int(void)
 		{
 			if(status & MOUSE_F_BIT)
 			{
-				int32 max_screen_width = vesa_get_width();
-				int32 max_screen_height = vesa_get_height();
+				int32 max_screen_width = VesaGetWidth();
+				int32 max_screen_height = VesaGetHeight();
 				uint8 data = KnlInByte(MOUSE_DEVICE);
 
 				if(mouse_loop_was_enabled)
@@ -1345,13 +1347,13 @@ mouse_int(void)
 		}
 end:
 		unlock_without_sti();
-		irq_ack(12);
+		_KnlIrqAck(12);
 		asm volatile ("iret");
 	}
 }
 
 /**
-	@Function:		get_mouse_position
+	@Function:		KnlGetMousePosition
 	@Access:		Public
 	@Description:
 		获取鼠标的位置。
@@ -1363,7 +1365,7 @@ end:
 	@Return:	
 */
 void
-get_mouse_position(	OUT int32 * x,
+KnlGetMousePosition(OUT int32 * x,
 					OUT int32 * y)
 {
 	if(mouse_count == 0)
@@ -1381,7 +1383,7 @@ get_mouse_position(	OUT int32 * x,
 }
 
 /**
-	@Function:		is_mouse_left_button_down
+	@Function:		KnlIsMouseLeftButtonDown
 	@Access:		Public
 	@Description:
 		获取鼠标的左键是否被按下。
@@ -1391,7 +1393,7 @@ get_mouse_position(	OUT int32 * x,
 			返回TRUE则被按下，否则没被按下。
 */
 BOOL
-is_mouse_left_button_down(void)
+KnlIsMouseLeftButtonDown(void)
 {
 	if(mouse_count == 0)
 		return mouse_left_button_down;
@@ -1400,7 +1402,7 @@ is_mouse_left_button_down(void)
 }
 
 /**
-	@Function:		is_mouse_right_button_down
+	@Function:		KnlIsMouseRightButtonDown
 	@Access:		Public
 	@Description:
 		获取鼠标的右键是否被按下。
@@ -1410,7 +1412,7 @@ is_mouse_left_button_down(void)
 			返回TRUE则被按下，否则没被按下。
 */
 BOOL
-is_mouse_right_button_down(void)
+KnlIsMouseRightButtonDown(void)
 {
 	if(mouse_count == 0)
 		return mouse_right_button_down;
@@ -1422,16 +1424,16 @@ is_mouse_right_button_down(void)
 #define KEYBOARD_PENDING 0x64
 
 /**
-	@Function:		keyboard_int
+	@Function:		_KnlKeyboardInterrupt
 	@Access:		Private
 	@Description:
 		键盘的中断程序。
 	@Parameters:
-	@Return:	
+	@Return:
 */
 static
 void
-keyboard_int(void)
+_KnlKeyboardInterrupt(void)
 {
 	while(1)
 	{
@@ -1442,13 +1444,13 @@ keyboard_int(void)
 		if(keyboard_loop_was_enabled)
 			tran_key(scan_code);
 		unlock_without_sti();
-		irq_ack(1);
+		_KnlIrqAck(1);
 		asm volatile ("iret;");
 	}
 }
 
 /**
-	@Function:		ide_int
+	@Function:		_KnlIdeInterrupt
 	@Access:		Private
 	@Description:
 		第一IDE的中断程序。
@@ -1457,7 +1459,7 @@ keyboard_int(void)
 */
 static
 void
-ide_int(void)
+_KnlIdeInterrupt(void)
 {
 	while(1)
 	{
@@ -1468,13 +1470,13 @@ ide_int(void)
 		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
 			ApicStartTimer();
 		unlock_without_sti();
-		irq_ack(14);
+		_KnlIrqAck(14);
 		asm volatile ("iret;");
 	}
 }
 
 /**
-	@Function:		ide1_int
+	@Function:		_KnlIde1Interrupt
 	@Access:		Private
 	@Description:
 		第二IDE的中断程序。
@@ -1483,7 +1485,7 @@ ide_int(void)
 */
 static
 void
-ide1_int(void)
+_KnlIde1Interrupt(void)
 {
 	while(1)
 	{
@@ -1494,22 +1496,22 @@ ide1_int(void)
 		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
 			ApicStartTimer();
 		unlock_without_sti();
-		irq_ack(15);
+		_KnlIrqAck(15);
 		asm volatile ("iret;");
 	}
 }
 
 /**
-	@Function:		fpu_int
+	@Function:		_KnlFpuInterrupt
 	@Access:		Private
 	@Description:
 		FPU 的中断程序。
 	@Parameters:
-	@Return:	
+	@Return:
 */
 static
 void
-fpu_int(void)
+_KnlFpuInterrupt(void)
 {
 	while(1)
 	{
@@ -1520,7 +1522,7 @@ fpu_int(void)
 		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
 			ApicStartTimer();
 		unlock_without_sti();
-		irq_ack(13);
+		_KnlIrqAck(13);
 		asm volatile ("iret;");
 	}
 }
@@ -1528,7 +1530,7 @@ fpu_int(void)
 static uint8 * scall_stacks[MAX_TASK_COUNT];
 
 /**
-	@Function:		init_system_call
+	@Function:		_KnlInitSystemCall
 	@Access:		Private
 	@Description:
 		初始化系统调用。
@@ -1537,7 +1539,7 @@ static uint8 * scall_stacks[MAX_TASK_COUNT];
 */
 static
 void
-init_system_call(void)
+_KnlInitSystemCall(void)
 {
 	uint32 ui;
 	for(ui = 0; ui < MAX_TASK_COUNT; ui++)
@@ -1545,7 +1547,7 @@ init_system_call(void)
 }
 
 /**
-	@Function:		reset_syscall
+	@Function:		KnlResetSystemCall
 	@Access:		Public
 	@Description:
 		重置系统调用。
@@ -1557,13 +1559,13 @@ init_system_call(void)
 			返回TRUE则成功，否则失败。
 */
 BOOL
-reset_syscall(IN int32 tid)
+KnlResetSystemCall(IN int32 tid)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT)
 		return FALSE;
 	struct TSS * tss = &(scall_tss[tid]);
-	uint8 * stack = (uint8 *)alloc_memory(SYSCALL_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(SYSCALL_PROCEDURE_STACK_SIZE);
 	if(stack == NULL)
 		return FALSE;
 	scall_stacks[tid] = stack;
@@ -1586,13 +1588,13 @@ reset_syscall(IN int32 tid)
 	task_gate.attr = ATTASKGATE | DPL3;
 	KnlSetDescToGDT(30 + tid * 2 + 1, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)system_call, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlProcessSystemCall, (uint32)stack);
 
 	return TRUE;
 }
 
 /**
-	@Function:		free_syscall
+	@Function:		KnlFreeSystemCall
 	@Access:		Public
 	@Description:
 		释放系统调用。
@@ -1602,25 +1604,25 @@ reset_syscall(IN int32 tid)
 	@Return:
 */
 void
-free_syscall(IN int32 tid)
+KnlFreeSystemCall(IN int32 tid)
 {
 	if(	tid < 0
 		|| tid >= MAX_TASK_COUNT)
 		return;
-	free_memory(scall_stacks[tid]);
+	MemFree(scall_stacks[tid]);
 }
 
 /**
-	@Function:		system_call
+	@Function:		_KnlProcessSystemCall
 	@Access:		Private
 	@Description:
 		系统调用。由系统调用中断程序调用。
 	@Parameters:
-	@Return:	
+	@Return:
 */
 static
 void
-system_call(void)
+_KnlProcessSystemCall(void)
 {
 	// 该区域处于关中断状态 {
 	uint32 eax, ecx, edx;
@@ -1637,13 +1639,13 @@ system_call(void)
 
 	_func_name = __FUNCTION__;
 
-	struct Task * task = get_task_info_ptr(ecx);
+	struct Task * task = TskmgrGetTaskInfoPtr(ecx);
 	task->is_system_call = TRUE;
 
 	is_system_call++;
 
-	uint32 base = (uint32)get_physical_address(ecx, 0x01300000); 
-	struct SParams * sparams = get_physical_address(ecx, edx); 
+	uint32 base = (uint32)TaskmgrConvertLAddrToPAddr(ecx, 0x01300000); 
+	struct SParams * sparams = TaskmgrConvertLAddrToPAddr(ecx, edx); 
 	// }
 
 	UNLOCK_TASK();
@@ -1685,7 +1687,7 @@ system_call(void)
 }
 
 /**
-	@Function:		system_call_int
+	@Function:		_KnlSystemCallInterrupt
 	@Access:		Private
 	@Description:
 		系统调用中断程序。
@@ -1694,7 +1696,7 @@ system_call(void)
 */
 static
 void
-system_call_int(void)
+_KnlSystemCallInterrupt(void)
 {
 	uint32 edx, eax;
 	asm volatile (
@@ -1725,7 +1727,7 @@ system_call_int(void)
 	uint8 * system_call_stack = scall_stacks[tid];
 
 	//重置System Call的TSS。
-	system_call_tss->eip = (uint32)system_call;
+	system_call_tss->eip = (uint32)_KnlProcessSystemCall;
 	system_call_tss->esp0 = (uint32)(system_call_stack + SYSCALL_PROCEDURE_STACK_SIZE);
 	system_call_tss->esp = (uint32)(system_call_stack + SYSCALL_PROCEDURE_STACK_SIZE);
 	system_call_tss->flags = 0x0;
@@ -1824,7 +1826,7 @@ system_call_int(void)
 }
 
 /**
-	@Function:		kill_task_and_jump_to_kernel
+	@Function:		_KnlKillTaskAndJumpToKernel
 	@Access:		Private
 	@Description:
 		杀死任务后等待任务调度器执行，
@@ -1836,44 +1838,47 @@ system_call_int(void)
 */
 static
 void
-kill_task_and_jump_to_kernel(IN uint32 tid)
+_KnlKillTaskAndJumpToKernel(IN uint32 tid)
 {
 	is_kernel_task = TRUE;
 
 	// 检测screen.sys任务是不是被杀死了。
-	if(strcmp(get_task_info_ptr(tid)->name, SYSTEM_PATH"sys/screen.sys") == 0)
+	if(strcmp(TskmgrGetTaskInfoPtr(tid)->name, SYSTEM_PATH"sys/screen.sys") == 0)
 	{
-		int32 sys_screen_tid = create_sys_task_by_file(	SYSTEM_PATH"sys/screen.sys",
-														SYSTEM_PATH"sys/screen.sys",
-														SYSTEM_PATH"sys/");
-		get_task_info_ptr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
-		task_ready(sys_screen_tid);
+		int32 sys_screen_tid = TskmgrCreateSystemTaskByFile(
+			SYSTEM_PATH"sys/screen.sys",
+			SYSTEM_PATH"sys/screen.sys",
+			SYSTEM_PATH"sys/");
+		TskmgrGetTaskInfoPtr(sys_screen_tid)->priority = TASK_PRIORITY_HIGH;
+		TskmgrSetTaskToReady(sys_screen_tid);
 	}
 
 	// 检测pci.sys任务是不是被杀死了。
-	if(strcmp(get_task_info_ptr(tid)->name, SYSTEM_PATH"sys/pci.sys") == 0)
+	if(strcmp(TskmgrGetTaskInfoPtr(tid)->name, SYSTEM_PATH"sys/pci.sys") == 0)
 	{
-		int32 sys_pci_tid = create_sys_task_by_file(SYSTEM_PATH"sys/pci.sys",
-													SYSTEM_PATH"sys/pci.sys",
-													SYSTEM_PATH"sys/");
-		task_ready(sys_pci_tid);
+		int32 sys_pci_tid = TskmgrCreateSystemTaskByFile(
+			SYSTEM_PATH"sys/pci.sys",
+			SYSTEM_PATH"sys/pci.sys",
+			SYSTEM_PATH"sys/");
+		TskmgrSetTaskToReady(sys_pci_tid);
 	}
 
 	// 检测timer.sys任务是不是被杀死了。
-	if(strcmp(get_task_info_ptr(tid)->name, SYSTEM_PATH"sys/timer.sys") == 0)
+	if(strcmp(TskmgrGetTaskInfoPtr(tid)->name, SYSTEM_PATH"sys/timer.sys") == 0)
 	{
-		int32 sys_pci_tid = create_sys_task_by_file(SYSTEM_PATH"sys/timer.sys",
-													SYSTEM_PATH"sys/timer.sys",
-													SYSTEM_PATH"sys/");
-		get_task_info_ptr(sys_pci_tid)->priority = TASK_PRIORITY_LOW;
-		task_ready(sys_pci_tid);
+		int32 sys_pci_tid = TskmgrCreateSystemTaskByFile(
+			SYSTEM_PATH"sys/timer.sys",
+			SYSTEM_PATH"sys/timer.sys",
+			SYSTEM_PATH"sys/");
+		TskmgrGetTaskInfoPtr(sys_pci_tid)->priority = TASK_PRIORITY_LOW;
+		TskmgrSetTaskToReady(sys_pci_tid);
 	}
 
 	int32 wait_app_tid = ConGetCurrentApplicationTid();
 	if(tid == wait_app_tid)
 		ConSetCurrentApplicationTid(-1);
 	
-	kill_sys_task(tid);
+	TskmgrKillSystemTask(tid);
 
 	switch_to_kernel = TRUE;			//强制让任务调度器执行内核任务。
 	kt_jk_lock = TRUE;					//unlock()之后等待任务调度器的执行。
@@ -1935,7 +1940,7 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 ================================================================================*/
 
 /**
-	@Function:		init_dividing_by_zero
+	@Function:		_KnlInitDividingByZeroException
 	@Access:		Private
 	@Description:
 		设置除以0时引发的异常处理程序。
@@ -1944,11 +1949,11 @@ kill_task_and_jump_to_kernel(IN uint32 tid)
 */
 static
 void
-init_dividing_by_zero(void)
+_KnlInitDividingByZeroException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &divby0_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	divby0_stack = stack;
 	if(tss == NULL)
 	{
@@ -1973,11 +1978,11 @@ init_dividing_by_zero(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x00, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)dividing_by_zero_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlDividingByZeroExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		dividing_by_zero_int
+	@Function:		_KnlDividingByZeroExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理除以0时引发的异常的中断过程。
@@ -1986,7 +1991,7 @@ init_dividing_by_zero(void)
 */
 static
 void
-dividing_by_zero_int(void)
+_KnlDividingByZeroExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -1994,7 +1999,7 @@ dividing_by_zero_int(void)
 		{
 			struct die_info info;
 			fill_info(info, DC_DIV_BY_0, DI_DIV_BY_0);
-			log(LOG_ERROR, DI_DIV_BY_0);
+			Log(LOG_ERROR, DI_DIV_BY_0);
 			die(&info);
 		}
 		else
@@ -2002,7 +2007,7 @@ dividing_by_zero_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
@@ -2011,12 +2016,12 @@ dividing_by_zero_int(void)
 						", the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2026,7 +2031,7 @@ dividing_by_zero_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_bound_check
+	@Function:		_KnlInitBoundCheckException
 	@Access:		Private
 	@Description:
 		设置边界检查时引发的异常处理程序。
@@ -2035,11 +2040,11 @@ dividing_by_zero_int(void)
 */
 static
 void
-init_bound_check(void)
+_KnlInitBoundCheckException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &bndchk_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	bndchk_stack = stack;
 	if(tss == NULL)
 	{
@@ -2064,11 +2069,11 @@ init_bound_check(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x05, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)bound_check_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlBoundCheckExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		bound_check_int
+	@Function:		_KnlBoundCheckExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理边界检查时引发的异常的中断过程。
@@ -2077,7 +2082,7 @@ init_bound_check(void)
 */
 static
 void
-bound_check_int(void)
+_KnlBoundCheckExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2092,7 +2097,7 @@ bound_check_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
@@ -2101,12 +2106,12 @@ bound_check_int(void)
 						", the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2116,7 +2121,7 @@ bound_check_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_invalid_opcode
+	@Function:		_KnlInitInvalidOpcodeException
 	@Access:		Private
 	@Description:
 		设置检测到错误的操作码时引发的异常处理程序。
@@ -2125,11 +2130,11 @@ bound_check_int(void)
 */
 static
 void
-init_invalid_opcode(void)
+_KnlInitInvalidOpcodeException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &invalidopc_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	invalidopc_stack = stack;
 	if(tss == NULL)
 	{
@@ -2154,11 +2159,11 @@ init_invalid_opcode(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x06, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)invalid_opcode_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlInvalidOpcodeExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		invalid_opcode_int
+	@Function:		_KnlInvalidOpcodeExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理检测到错误的操作码引发的异常的中断过程。
@@ -2167,7 +2172,7 @@ init_invalid_opcode(void)
 */
 static
 void
-invalid_opcode_int(void)
+_KnlInvalidOpcodeExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2182,7 +2187,7 @@ invalid_opcode_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
@@ -2191,12 +2196,12 @@ invalid_opcode_int(void)
 						", the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2206,7 +2211,7 @@ invalid_opcode_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_double_fault
+	@Function:		_KnlInitDoubleFaultException
 	@Access:		Private
 	@Description:
 		设置检测到双重故障时引发的异常处理程序。
@@ -2215,11 +2220,11 @@ invalid_opcode_int(void)
 */
 static
 void
-init_double_fault(void)
+_KnlInitDoubleFaultException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &df_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	df_stack = stack;
 	if(tss == NULL)
 	{
@@ -2244,11 +2249,11 @@ init_double_fault(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x08, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)double_fault_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlDoubleFaultExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		double_fault_int
+	@Function:		_KnlDoubleFaultExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理检测到双重故障引发的异常的中断过程。
@@ -2257,7 +2262,7 @@ init_double_fault(void)
 */
 static
 void
-double_fault_int(void)
+_KnlDoubleFaultExceptionInterrupt(void)
 {
 	if(is_kernel_task)
 	{
@@ -2267,7 +2272,7 @@ double_fault_int(void)
 	}
 	else
 	{
-		struct Task * task = get_task_info_ptr(current_tid);
+		struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 		int8 buffer[1024];
 		sprintf_s(	buffer,
 					1024,
@@ -2285,20 +2290,20 @@ double_fault_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_invalid_tss
+	@Function:		_KnlInitInvalidTSSException
 	@Access:		Private
 	@Description:
 		初始化检测到非法的TSS的中断程序。
 	@Parameters:
-	@Return:	
+	@Return:
 */
 static
 void
-init_invalid_tss(void)
+_KnlInitInvalidTSSException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &invalidtss_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	invalidtss_stack = stack;
 	if(tss == NULL)
 	{
@@ -2323,11 +2328,11 @@ init_invalid_tss(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x0a, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)invalid_tss_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlInvalidTSSExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		invalid_tss_int
+	@Function:		_KnlInvalidTSSExceptionInterrupt
 	@Access:		Private
 	@Description:
 		检测到非法的TSS的中断程序
@@ -2336,7 +2341,7 @@ init_invalid_tss(void)
 */
 static
 void
-invalid_tss_int(void)
+_KnlInvalidTSSExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2351,7 +2356,7 @@ invalid_tss_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			uint32 errcode = 0;
 			GET_ERROR_CODE(&errcode);
@@ -2369,12 +2374,12 @@ invalid_tss_int(void)
 						ext ? "True" : "False",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2384,7 +2389,7 @@ invalid_tss_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_invalid_seg
+	@Function:		_KnlInitInvalidSegmentException
 	@Access:		Private
 	@Description:
 		初始化处理段不存在故障的中断程序。
@@ -2393,11 +2398,11 @@ invalid_tss_int(void)
 */
 static
 void
-init_invalid_seg(void)
+_KnlInitInvalidSegmentException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &invalidseg_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	invalidseg_stack = stack;
 	if(tss == NULL)
 	{
@@ -2422,11 +2427,11 @@ init_invalid_seg(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x0b, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)invalid_seg_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlInvalidSegmentExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		invalid_seg_int
+	@Function:		_KnlInvalidSegmentExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理段不存在故障的中断程序。
@@ -2435,7 +2440,7 @@ init_invalid_seg(void)
 */
 static
 void
-invalid_seg_int(void)
+_KnlInvalidSegmentExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2450,7 +2455,7 @@ invalid_seg_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			uint32 errcode = 0;
 			GET_ERROR_CODE(&errcode);
@@ -2468,12 +2473,12 @@ invalid_seg_int(void)
 						ext ? "True" : "False",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2483,7 +2488,7 @@ invalid_seg_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_invalid_stack
+	@Function:		_KnlInitInvalidStackException
 	@Access:		Private
 	@Description:
 		初始化处理堆栈段故障的中断程序。
@@ -2492,11 +2497,11 @@ invalid_seg_int(void)
 */
 static
 void
-init_invalid_stack(void)
+_KnlInitInvalidStackException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &invalidstck_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	invalidstck_stack = stack;
 	if(tss == NULL)
 	{
@@ -2521,11 +2526,11 @@ init_invalid_stack(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x0c, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)invalid_stack_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlInvalidStackExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		invalid_stack_int
+	@Function:		_KnlInvalidStackExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理堆栈段故障的中断程序。
@@ -2534,7 +2539,7 @@ init_invalid_stack(void)
 */
 static
 void
-invalid_stack_int(void)
+_KnlInvalidStackExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2549,7 +2554,7 @@ invalid_stack_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			uint32 errcode = 0;
 			GET_ERROR_CODE(&errcode);
@@ -2567,12 +2572,12 @@ invalid_stack_int(void)
 						ext ? "True" : "False",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2582,7 +2587,7 @@ invalid_stack_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_gp
+	@Function:		_KnlInitGlobalProtectionException
 	@Access:		Private
 	@Description:
 		初始化通用保护的中断程序。
@@ -2591,11 +2596,11 @@ invalid_stack_int(void)
 */
 static
 void
-init_gp(void)
+_KnlInitGlobalProtectionException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &gp_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	gp_stack = stack;
 	if(tss == NULL)
 	{
@@ -2620,11 +2625,11 @@ init_gp(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x0d, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)gp_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlGlobalProtectionExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		gp_int
+	@Function:		_KnlGlobalProtectionExceptionInterrupt
 	@Access:		Private
 	@Description:
 		通用保护的中断程序。
@@ -2633,7 +2638,7 @@ init_gp(void)
 */
 static
 void
-gp_int(void)
+_KnlGlobalProtectionExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2648,7 +2653,7 @@ gp_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 			struct TSS * syscall_tss = scall_tss + current_tid;
 			struct Desc syscall_tss_desc;
 			KnlGetDescFromGDT(30 + current_tid * 2, &syscall_tss_desc);
@@ -2723,12 +2728,12 @@ gp_int(void)
 						timer_tss.cs, timer_tss.eip,
 						timer_tss.esp);
 			UtlConcatString(buffer, sizeof(buffer), buffer00);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2738,7 +2743,7 @@ gp_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_pf
+	@Function:		_KnlInitPageFaultException
 	@Access:		Private
 	@Description:
 		初始化页失败的中断程序。
@@ -2747,11 +2752,11 @@ gp_int(void)
 */
 static
 void
-init_pf(void)
+_KnlInitPageFaultException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &pf_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	pf_stack = stack;
 	if(tss == NULL)
 	{
@@ -2776,11 +2781,11 @@ init_pf(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x0e, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)pf_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlPageFaultExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		pf_int
+	@Function:		_KnlPageFaultExceptionInterrupt
 	@Access:		Private
 	@Description:
 		页失败的中断程序。
@@ -2789,7 +2794,7 @@ init_pf(void)
 */
 static
 void
-pf_int(void)
+_KnlPageFaultExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2804,7 +2809,7 @@ pf_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			// 获取导致异常的线性地址。
 			uint32 badaddr = 0;
@@ -2847,11 +2852,11 @@ pf_int(void)
 						us ? "User" : "System",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
-			kill_task_and_jump_to_kernel(current_tid);
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2861,7 +2866,7 @@ pf_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_mf
+	@Function:		_KnlInitMathFaultException
 	@Access:		Private
 	@Description:
 		初始化处理x87 FPU浮点错误（数学错误）故障的中断处理程序。
@@ -2870,11 +2875,11 @@ pf_int(void)
 */
 static
 void
-init_mf(void)
+_KnlInitMathFaultException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &mf_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	mf_stack = stack;
 	if(tss == NULL)
 	{
@@ -2899,11 +2904,11 @@ init_mf(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x10, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)mf_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlMathFaultExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		mf_int
+	@Function:		_KnlMathFaultExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理x87 FPU浮点错误（数学错误）故障的中断处理程序。
@@ -2912,7 +2917,7 @@ init_mf(void)
 */
 static
 void
-mf_int(void)
+_KnlMathFaultExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -2927,7 +2932,7 @@ mf_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
@@ -2935,11 +2940,11 @@ mf_int(void)
 						"A task causes a exception of FPU float point error, the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
-			kill_task_and_jump_to_kernel(current_tid);
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -2949,7 +2954,7 @@ mf_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_ac
+	@Function:		_KnlInitAlignCheckException
 	@Access:		Private
 	@Description:
 		初始化处理对齐检查故障的中断处理程序。
@@ -2958,11 +2963,11 @@ mf_int(void)
 */
 static
 void
-init_ac(void)
+_KnlInitAlignCheckException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &ac_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	ac_stack = stack;
 	if(tss == NULL)
 	{
@@ -2987,11 +2992,11 @@ init_ac(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x11, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)ac_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlAlignCheckExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		ac_int
+	@Function:		_KnlAlignCheckExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理对齐检查故障的中断处理程序。
@@ -3000,7 +3005,7 @@ init_ac(void)
 */
 static
 void
-ac_int(void)
+_KnlAlignCheckExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -3015,7 +3020,7 @@ ac_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
@@ -3023,11 +3028,11 @@ ac_int(void)
 						"A task causes a exception of alignment check, the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
-			kill_task_and_jump_to_kernel(current_tid);
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -3037,7 +3042,7 @@ ac_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_mc
+	@Function:		_KnlInitMachineCheckException
 	@Access:		Private
 	@Description:
 		初始化处理机器检查故障的中断程序。
@@ -3046,11 +3051,11 @@ ac_int(void)
 */
 static
 void
-init_mc(void)
+_KnlInitMachineCheckException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &mc_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	mc_stack = stack;
 	if(tss == NULL)
 	{
@@ -3075,11 +3080,11 @@ init_mc(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x12, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)mc_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlMachineCheckExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		mc_int
+	@Function:		_KnlMachineCheckExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理机器检查故障的中断程序。
@@ -3088,7 +3093,7 @@ init_mc(void)
 */
 static
 void
-mc_int(void)
+_KnlMachineCheckExceptionInterrupt(void)
 {
 	if(is_kernel_task)
 	{
@@ -3098,7 +3103,7 @@ mc_int(void)
 	}
 	else
 	{
-		struct Task * task = get_task_info_ptr(current_tid);
+		struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 		int8 buffer[1024];
 		sprintf_s(	buffer,
 					1024,
@@ -3116,7 +3121,7 @@ mc_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_xf
+	@Function:		_KnlInitSIMDFloatPointException
 	@Access:		Private
 	@Description:
 		初始化处理SIMD浮点异常故障的中断处理程序。
@@ -3125,11 +3130,11 @@ mc_int(void)
 */
 static
 void
-init_xf(void)
+_KnlInitSIMDFloatPointException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &xf_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	xf_stack = stack;
 	if(tss == NULL)
 	{
@@ -3154,11 +3159,11 @@ init_xf(void)
 	task_gate.attr = ATTASKGATE | DPL0;
 	KnlSetGateToIDT(0x13, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)xf_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlSIMDFloatPointExceptionInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		xf_int
+	@Function:		_KnlSIMDFloatPointExceptionInterrupt
 	@Access:		Private
 	@Description:
 		处理SIMD浮点异常故障的中断处理程序。
@@ -3167,7 +3172,7 @@ init_xf(void)
 */
 static
 void
-xf_int(void)
+_KnlSIMDFloatPointExceptionInterrupt(void)
 {
 	while(1)
 	{
@@ -3182,7 +3187,7 @@ xf_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
@@ -3190,11 +3195,11 @@ xf_int(void)
 						"A task causes a exception of SIMD float point, the id is %d, the name is '%s'\n",
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
-			kill_task_and_jump_to_kernel(current_tid);
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
@@ -3204,7 +3209,7 @@ xf_int(void)
 ================================================================================*/
 
 /**
-	@Function:		init_noimpl
+	@Function:		_KnlInitUnimplementedInterruptException
 	@Access:		Private
 	@Description:
 		初始化未被使用的中断的 TSS 结构体。
@@ -3213,11 +3218,11 @@ xf_int(void)
 */
 static
 void
-init_noimpl(void)
+_KnlInitUnimplementedInterruptException(void)
 {
 	struct die_info info;
 	struct TSS * tss = &noimpl_tss;
-	uint8 * stack = (uint8 *)alloc_memory(INTERRUPT_PROCEDURE_STACK_SIZE);
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
 	if(tss == NULL)
 	{
 		fill_info(info, DC_INIT_NOIMPL, DI_INIT_NOIMPL);
@@ -3241,11 +3246,11 @@ init_noimpl(void)
 	task_gate.attr = ATTASKGATE | DPL3;
 	KnlSetDescToGDT(27, (uint8 *)&task_gate);
 
-	fill_tss(tss, (uint32)noimpl_int, (uint32)stack);
+	_KnlFillTSS(tss, (uint32)_KnlUnimplementedInterrupt, (uint32)stack);
 }
 
 /**
-	@Function:		set_noimpl
+	@Function:		_KnlSetUnimplementedInterrupt
 	@Access:		Private
 	@Description:
 		可以设置相应的中断为未实现。
@@ -3256,7 +3261,7 @@ init_noimpl(void)
 */
 static
 void
-set_noimpl(IN uint32 int_num)
+_KnlSetUnimplementedInterrupt(IN uint32 int_num)
 {
 	if(int_num >= 256)
 		return;
@@ -3270,7 +3275,7 @@ set_noimpl(IN uint32 int_num)
 }
 
 /**
-	@Function:		noimpl_int
+	@Function:		_KnlUnimplementedInterrupt
 	@Access:		Private
 	@Description:
 		未被使用的中断的中断过程。
@@ -3279,7 +3284,7 @@ set_noimpl(IN uint32 int_num)
 */
 static
 void
-noimpl_int(void)
+_KnlUnimplementedInterrupt(void)
 {
 	while(1)
 	{
@@ -3287,7 +3292,7 @@ noimpl_int(void)
 		{
 			struct die_info info;
 
-			int32 intn = get_unimpl_intn();
+			int32 intn = KnlGetUnimplementedInterruptNo();
 			int8 buffer[1024];
 			sprintf_s(	buffer,
 						1024,
@@ -3303,8 +3308,8 @@ noimpl_int(void)
 			lock();
 			if(!use_rtc_for_task_scheduler)
 				ApicStopTimer();
-			struct Task * task = get_task_info_ptr(current_tid);
-			int32 intn = get_unimpl_intn();
+			struct Task * task = TskmgrGetTaskInfoPtr(current_tid);
+			int32 intn = KnlGetUnimplementedInterruptNo();
 
 			int8 buffer[1024];
 			sprintf_s(	buffer,
@@ -3315,18 +3320,18 @@ noimpl_int(void)
 						intn,
 						current_tid,
 						task->name);
-			log(LOG_ERROR, buffer);
+			Log(LOG_ERROR, buffer);
 
-			print_str_p(buffer, CC_RED);
-			print_str("\n");
+			ScrPrintStringWithProperty(buffer, CC_RED);
+			ScrPrintString("\n");
 
-			kill_task_and_jump_to_kernel(current_tid);
+			_KnlKillTaskAndJumpToKernel(current_tid);
 		}
 	}
 }
 
 /**
-	@Function:		shutdown_system
+	@Function:		KnlShutdownSystem
 	@Access:		Public
 	@Description:
 		关闭系统。
@@ -3334,15 +3339,15 @@ noimpl_int(void)
 	@Return:	
 */
 void
-shutdown_system(void)
+KnlShutdownSystem(void)
 {
-	leave_system();
+	_KnlLeaveSystem();
 	AcpiPowerOff();
 	KnlHaltCpu();
 }
 
 /**
-	@Function:		reboot_system
+	@Function:		KnlRebootSystem
 	@Access:		Public
 	@Description:
 		重启系统。
@@ -3350,20 +3355,20 @@ shutdown_system(void)
 	@Return:	
 */
 void
-reboot_system(void)
+KnlRebootSystem(void)
 {
-	leave_system();
+	_KnlLeaveSystem();
 	KnlResetCpu();
 }
 
-#define	press_key_to_continue()	\
+#define	_PRESS_KEY_TO_CONTINUE()	\
 {	\
-	print_str("Press any key to continue!\n");	\
+	ScrPrintString("Press any key to continue!\n");	\
 	get_char();	\
 }
 
 /**
-	@Function:		enter_system
+	@Function:		_KnlEnterSystem
 	@Access:		Private
 	@Description:
 		初始化所有资源后被调用。该过程会对系统进行安全检测。
@@ -3372,9 +3377,9 @@ reboot_system(void)
 */
 static
 void
-enter_system(void)
+_KnlEnterSystem(void)
 {
-	print_str("Checking system...\n");
+	ScrPrintString("Checking system...\n");
 
 	//检查文件系统
 	FileObject * fptr = Ifs1OpenFile(SYSTEM_PATH"lock/system.lock", FILE_MODE_ALL);
@@ -3382,36 +3387,36 @@ enter_system(void)
 		if(flen(fptr) != 0)
 		{
 			Ifs1CloseFile(fptr);
-			print_str("The file system has some error!\n");
-			if(get_disk_size("DA") != 0)
+			ScrPrintString("The file system has some error!\n");
+			if(DskGetSize("DA") != 0)
 				if(Ifs1Repair("DA"))
-					print_str("The file system(DA) has been repaired!\n");
+					ScrPrintString("The file system(DA) has been repaired!\n");
 				else				
-					print_str("Failed to repair the file system(DA)!\n");
-			if(get_disk_size("DB") != 0)
+					ScrPrintString("Failed to repair the file system(DA)!\n");
+			if(DskGetSize("DB") != 0)
 				if(Ifs1Repair("DB"))
-					print_str("The file system(DB) has been repaired!\n");
+					ScrPrintString("The file system(DB) has been repaired!\n");
 				else				
-					print_str("Failed to repair the file system(DB)!\n");
+					ScrPrintString("Failed to repair the file system(DB)!\n");
 		}
 		else
 		{
 			Ifs1WriteFile(fptr, "1", 1);
-			print_str("The file system is OK!\n");
+			ScrPrintString("The file system is OK!\n");
 			Ifs1CloseFile(fptr);
 		}
 	else
 	{
-		print_str("The file system has some error!\n");
-		print_str("Failed to repair the file System!\n");
+		ScrPrintString("The file system has some error!\n");
+		ScrPrintString("Failed to repair the file System!\n");
 	}
-	//press_key_to_continue();
-	clear_screen();
-	log(LOG_NORMAL, "Enter system.");
+	//_PRESS_KEY_TO_CONTINUE();
+	ScrClearScreen();
+	Log(LOG_NORMAL, "Enter system.");
 }
 
 /**
-	@Function:		leave_system
+	@Function:		_KnlLeaveSystem
 	@Access:		Private
 	@Description:
 		离开系统时被调用。
@@ -3420,7 +3425,7 @@ enter_system(void)
 */
 static
 void
-leave_system(void)
+_KnlLeaveSystem(void)
 {
 	FileObject * fptr = Ifs1OpenFile(SYSTEM_PATH"lock/system.lock", FILE_MODE_WRITE);
 	if(fptr != NULL)
@@ -3428,12 +3433,12 @@ leave_system(void)
 		Ifs1WriteFile(fptr, "", 0);
 		Ifs1CloseFile(fptr);
 	}
-	log(LOG_NORMAL, "Leave system.");
-	free_log();
+	Log(LOG_NORMAL, "Leave system.");
+	LogFree();
 }
 
 /**
-	@Function:		get_ide_signal
+	@Function:		KnlGetIdeSignal
 	@Access:		Public
 	@Description:
 		检查IDE是否有信号到达。
@@ -3445,7 +3450,7 @@ leave_system(void)
 			返回TRUE则表示有信号到达。
 */
 BOOL
-get_ide_signal(IN BOOL primary)
+KnlGetIdeSignal(IN BOOL primary)
 {
 	if(primary)
 		return _ide0_signal != 0;
@@ -3454,7 +3459,7 @@ get_ide_signal(IN BOOL primary)
 }
 
 /**
-	@Function:		clear_ide_signal
+	@Function:		KnlClearIdeSignal
 	@Access:		Public
 	@Description:
 		清除IDE的信号。
@@ -3464,7 +3469,7 @@ get_ide_signal(IN BOOL primary)
 	@Return:
 */
 void
-clear_ide_signal(IN BOOL primary)
+KnlClearIdeSignal(IN BOOL primary)
 {
 	if(primary)
 	{
@@ -3479,7 +3484,7 @@ clear_ide_signal(IN BOOL primary)
 }
 
 /**
-	@Function:		reset_ide_signal
+	@Function:		KnlResetIdeSignal
 	@Access:		Public
 	@Description:
 		重置IDE的信号。
@@ -3489,7 +3494,7 @@ clear_ide_signal(IN BOOL primary)
 	@Return:
 */
 void
-reset_ide_signal(IN BOOL primary)
+KnlResetIdeSignal(IN BOOL primary)
 {
 	if(primary)
 		_ide0_signal = 0;

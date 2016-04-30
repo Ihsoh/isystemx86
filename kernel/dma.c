@@ -10,7 +10,7 @@
 #include "types.h"
 
 BOOL
-dma_init(void)
+DmaInit(void)
 {
 
 	return TRUE;

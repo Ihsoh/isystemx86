@@ -14,49 +14,49 @@
 
 extern
 void
-init_vesa(void);
+VesaInit(void);
 
 extern
 uint8 *
-get_vesa_addr(void);
+VesaGetVideoBufferAddress(void);
 
 extern
 BOOL
-vesa_is_valid(void);
+VesaIsEnabled(void);
 
 extern
 uint32
-vesa_get_width(void);
+VesaGetWidth(void);
 
 extern
 uint32
-vesa_get_height(void);
+VesaGetHeight(void);
 
 extern
 void
-vesa_set_pixel(	IN uint32 x,
+VesaSetPixel(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 color);
 
 extern
 uint32
-vesa_get_pixel(	IN uint32 x,
+VesaGetPixel(	IN uint32 x,
 				IN uint32 y);
 
 extern
 void
-vesa_clear_screen(IN uint32 color);
+VesaClearVideoBuffer(IN uint32 color);
 
 extern
 void
-vesa_draw_line(	IN uint32 x,
+VesaDrawHLine(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 len,
 				IN uint32 color);
 
 extern
 void
-vesa_draw_rect(	IN uint32 x,
+VesaDrawRect(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 width,
 				IN uint32 height,
@@ -64,7 +64,7 @@ vesa_draw_rect(	IN uint32 x,
 
 extern
 void
-vesa_draw_image(IN uint32 x,
+VesaDrawImage(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 width,
 				IN uint32 height,

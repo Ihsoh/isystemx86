@@ -37,32 +37,32 @@ static PCIDevice pci_devices[MAX_PCI_DEVICES_COUNT];
 BOOL
 pci_init(void)
 {
-	tid = create_sys_task_by_file(	SYSTEM_PATH"sys/pci.sys", 
+	tid = TskmgrCreateSystemTaskByFile(	SYSTEM_PATH"sys/pci.sys", 
 									SYSTEM_PATH"sys/pci.sys", 
 									SYSTEM_PATH"sys/");
 	if(tid == -1)
 		return FALSE;
-	if(!task_ready(tid))
+	if(!TskmgrSetTaskToReady(tid))
 		return FALSE;
 	uint32 retry = RETRY_COUNT;
-	while(	(mqueue = mqueue_get_ptr_by_name("System-PCI")) == NULL 
+	while(	(mqueue = MqGetPtrByName("System-PCI")) == NULL 
 			&& --retry != 0);
 	if(mqueue == NULL)
 		return FALSE;
 	MQueueMessage message;
 	message.tid = MESSAGE_TID;
 	message.message = FUNC_INIT;
-	if(!mqueue_add_message(mqueue, MQUEUE_OUT, &message))
+	if(!MqAddMessage(mqueue, MQUEUE_OUT, &message))
 		return FALSE;
 	MQueueMessagePtr messageptr = NULL;
 	retry = RETRY_COUNT;
-	while(	(messageptr = mqueue_pop_message(mqueue, MQUEUE_IN)) == NULL
+	while(	(messageptr = MqPopMessage(mqueue, MQUEUE_IN)) == NULL
 			&& --retry != 0);
 	BOOL r = FALSE;
 	if(messageptr != NULL)
 	{
 		r = messageptr->param0.bool_value;
-		free_memory(messageptr);
+		MemFree(messageptr);
 	}
 	return r;
 }
@@ -83,7 +83,7 @@ pci_update(void)
 	MQueueMessage message;
 	message.tid = MESSAGE_TID;
 	message.message = FUNC_UPDATE;
-	mqueue_add_message(mqueue, MQUEUE_OUT, &message);
+	MqAddMessage(mqueue, MQUEUE_OUT, &message);
 }
 
 /**
@@ -107,17 +107,17 @@ pci_get_device(IN uint32 index)
 	message.tid = MESSAGE_TID;
 	message.message = FUNC_GET_DEV;
 	message.param0.uint32_value = index;
-	if(!mqueue_add_message(mqueue, MQUEUE_OUT, &message))
+	if(!MqAddMessage(mqueue, MQUEUE_OUT, &message))
 		return NULL;
 	MQueueMessagePtr messageptr = NULL;
 	uint32 retry = RETRY_COUNT;
-	while(	(messageptr = mqueue_pop_message(mqueue, MQUEUE_IN)) == NULL
+	while(	(messageptr = MqPopMessage(mqueue, MQUEUE_IN)) == NULL
 			&& --retry != 0);
 	if(messageptr == NULL)
 		return NULL;
 	PCIDevicePtr p = (PCIDevicePtr)messageptr->param0.uint32_value;
-	free_memory(messageptr);
-	p = (PCIDevicePtr)get_physical_address(tid, p);
+	MemFree(messageptr);
+	p = (PCIDevicePtr)TaskmgrConvertLAddrToPAddr(tid, p);
 	if(p == NULL)
 		return NULL;
 	if(index >= 64)
@@ -126,9 +126,9 @@ pci_get_device(IN uint32 index)
 	pci_devices[index].vendorid = p->vendorid;
 	pci_devices[index].deviceid = p->deviceid;
 	pci_devices[index].vendor_name
-		= (const int8 *)get_physical_address(tid, p->vendor_name);
+		= (const int8 *)TaskmgrConvertLAddrToPAddr(tid, p->vendor_name);
 	pci_devices[index].device_name
-		= (const int8 *)get_physical_address(tid, p->device_name);
+		= (const int8 *)TaskmgrConvertLAddrToPAddr(tid, p->device_name);
 	return pci_devices + index;
 }
 
@@ -156,17 +156,17 @@ pci_write_to_file(IN const int8 * path)
 	if(strlen(path) >= sizeof(message.bsparam0))
 		return FALSE;
 	UtlCopyString(message.bsparam0, sizeof(message.bsparam0), path);
-	if(!mqueue_add_message(mqueue, MQUEUE_OUT, &message))
+	if(!MqAddMessage(mqueue, MQUEUE_OUT, &message))
 		return FALSE;
 	MQueueMessagePtr messageptr = NULL;
 	uint32 retry = RETRY_COUNT;
-	while(	(messageptr = mqueue_pop_message(mqueue, MQUEUE_IN)) == NULL
+	while(	(messageptr = MqPopMessage(mqueue, MQUEUE_IN)) == NULL
 			&& --retry != 0);
 	BOOL r = FALSE;
 	if(messageptr != NULL)
 	{
 		r = messageptr->param0.bool_value;
-		free_memory(messageptr);
+		MemFree(messageptr);
 	}
 	return r;
 }

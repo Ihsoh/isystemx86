@@ -118,7 +118,7 @@ void
 _WinRunEvent(	IN struct Window * window,
 				IN struct WindowEventParams * params)
 {
-	BOOL top = get_top_window() == window;
+	BOOL top = ScrGetTopWindow() == window;
 	switch(params->event_type)
 	{
 		case WINDOW_EVENT_WILL_CLOSE:
@@ -150,15 +150,16 @@ WinRunShow(void)
 {
 	if(_window == NULL)
 	{
-		_window = create_window(_WIDTH, _HEIGHT,
-								0xffffffff,
-								WINDOW_STYLE_CLOSE | WINDOW_STYLE_MINIMIZE,
-								_TITLE,
-								_WinRunEvent);
+		_window = ScrCreateWindow(
+			_WIDTH, _HEIGHT,
+			0xffffffff,
+			WINDOW_STYLE_CLOSE | WINDOW_STYLE_MINIMIZE,
+			_TITLE,
+			_WinRunEvent);
 		if(_window == NULL)
 			return FALSE;
 		_window->x = 0;
-		_window->y = vesa_get_height() - TASKBAR_HEIGHT - _HEIGHT - TITLE_BAR_HEIGHT;
+		_window->y = VesaGetHeight() - TASKBAR_HEIGHT - _HEIGHT - TITLE_BAR_HEIGHT;
 		rect_common_image(&_window->workspace, 0, 0, _WIDTH, _HEIGHT, 0xffffffff);	
 		_edt_cmd = NEW(Edit);
 		INIT_EDIT(	_edt_cmd,
@@ -178,10 +179,10 @@ WinRunShow(void)
 	}
 	if(_window != NULL)
 	{
-		window_focus_ctrl(_window, _edt_cmd->id);
+		WinmgrFocusControl(_window, _edt_cmd->id);
 		SET_EDIT_TEXT(_edt_cmd, "");
 		_window->state = WINDOW_STATE_SHOW;
-		set_top_window(_window);
+		ScrSetTopWindow(_window);
 	}
 	return TRUE;
 }

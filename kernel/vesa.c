@@ -33,7 +33,7 @@ static uint32 vesa_width = 80;
 static uint32 vesa_height = 25;
 
 /**
-	@Function:		init_vesa
+	@Function:		VesaInit
 	@Access:		Public
 	@Description:
 		初始化 VESA。
@@ -41,7 +41,7 @@ static uint32 vesa_height = 25;
 	@Return:	
 */
 void
-init_vesa(void)
+VesaInit(void)
 {
 	uint32 mode;
 	uint8 * ucptr = (uint8 *)get_vesa_info_addr(&mode);
@@ -105,12 +105,12 @@ init_vesa(void)
 		}
 		vesa_addr = *((uint32 *)(vesa_info + 40));
 		vesa_addr_ptr = (uint8 *)vesa_addr;
-		alloc_memory_with_start(vesa_addr, vesa_width * vesa_height * 3);
+		MemAllocWithStart(vesa_addr, vesa_width * vesa_height * 3);
 	}
 }
 
 /**
-	@Function:		get_vesa_addr
+	@Function:		VesaGetVideoBufferAddress
 	@Access:		Public
 	@Description:
 		获取视频缓冲区地址。
@@ -120,13 +120,13 @@ init_vesa(void)
 			视频缓冲区地址。		
 */
 uint8 *
-get_vesa_addr(void)
+VesaGetVideoBufferAddress(void)
 {
 	return vesa_addr_ptr;
 }
 
 /**
-	@Function:		vesa_is_valid
+	@Function:		VesaIsEnabled
 	@Access:		Public
 	@Description:
 		获取 VESA 是否可用。
@@ -136,13 +136,13 @@ get_vesa_addr(void)
 			返回TRUE则可用，否则不可用。	
 */
 BOOL
-vesa_is_valid(void)
+VesaIsEnabled(void)
 {
 	return use_vesa;
 }
 
 /**
-	@Function:		vesa_get_width
+	@Function:		VesaGetWidth
 	@Access:		Public
 	@Description:
 		获取视频缓冲区的宽度。
@@ -152,13 +152,13 @@ vesa_is_valid(void)
 			视频缓冲区的宽度。		
 */
 uint32
-vesa_get_width(void)
+VesaGetWidth(void)
 {
 	return vesa_width;
 }
 
 /**
-	@Function:		vesa_get_height
+	@Function:		VesaGetHeight
 	@Access:		Public
 	@Description:
 		获取视频缓冲区的高度。
@@ -168,13 +168,13 @@ vesa_get_width(void)
 			视频缓冲区的高度。		
 */
 uint32
-vesa_get_height(void)
+VesaGetHeight(void)
 {
 	return vesa_height;
 }
 
 /**
-	@Function:		vesa_set_pixel
+	@Function:		VesaSetPixel
 	@Access:		Public
 	@Description:
 		设置像素到视频缓冲区。
@@ -188,7 +188,7 @@ vesa_get_height(void)
 	@Return:	
 */
 void
-vesa_set_pixel(	IN uint32 x,
+VesaSetPixel(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 color)
 {
@@ -201,7 +201,7 @@ vesa_set_pixel(	IN uint32 x,
 }
 
 /**
-	@Function:		vesa_get_pixel
+	@Function:		VesaGetPixel
 	@Access:		Public
 	@Description:
 		获取视频缓冲区中得指定的像素值。
@@ -215,7 +215,7 @@ vesa_set_pixel(	IN uint32 x,
 			像素值。		
 */
 uint32
-vesa_get_pixel(	IN uint32 x,
+VesaGetPixel(	IN uint32 x,
 				IN uint32 y)
 {
 	if(x >= vesa_width || y >= vesa_height)
@@ -227,7 +227,7 @@ vesa_get_pixel(	IN uint32 x,
 }
 
 /**
-	@Function:		vesa_clear_screen
+	@Function:		VesaClearVideoBuffer
 	@Access:		Public
 	@Description:
 		清除视频缓冲区。
@@ -237,16 +237,16 @@ vesa_get_pixel(	IN uint32 x,
 	@Return:	
 */
 void
-vesa_clear_screen(IN uint32 color)
+VesaClearVideoBuffer(IN uint32 color)
 {
 	uint32 x, y;
 	for(x = 0; x < vesa_width; x++)
 		for(y = 0; y < vesa_height; y++)
-			vesa_set_pixel(x, y, color);
+			VesaSetPixel(x, y, color);
 }
 
 /**
-	@Function:		vesa_draw_line
+	@Function:		VesaDrawHLine
 	@Access:		Public
 	@Description:
 		画一条水平线。
@@ -262,18 +262,18 @@ vesa_clear_screen(IN uint32 color)
 	@Return:	
 */
 void
-vesa_draw_line(	IN uint32 x,
+VesaDrawHLine(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 len,
 				IN uint32 color)
 {
 	uint32 ui;
 	for(ui = 0; ui < len; ui++)
-		vesa_set_pixel(x + ui, y, color);
+		VesaSetPixel(x + ui, y, color);
 }
 
 /**
-	@Function:		vesa_draw_rect
+	@Function:		VesaDrawRect
 	@Access:		Public
 	@Description:
 		画一个矩形。
@@ -291,7 +291,7 @@ vesa_draw_line(	IN uint32 x,
 	@Return:	
 */
 void
-vesa_draw_rect(	IN uint32 x,
+VesaDrawRect(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 width,
 				IN uint32 height,
@@ -299,11 +299,11 @@ vesa_draw_rect(	IN uint32 x,
 {
 	uint32 ui;
 	for(ui = 0; ui < height; ui++)
-		vesa_draw_line(x, y + ui, width, color);
+		VesaDrawHLine(x, y + ui, width, color);
 }
 
 /**
-	@Function:		vesa_draw_image
+	@Function:		VesaDrawImage
 	@Access:		Public
 	@Description:
 		往视频缓冲区画一张位图。
@@ -321,7 +321,7 @@ vesa_draw_rect(	IN uint32 x,
 	@Return:	
 */
 void
-vesa_draw_image(IN uint32 x,
+VesaDrawImage(	IN uint32 x,
 				IN uint32 y,
 				IN uint32 width,
 				IN uint32 height,

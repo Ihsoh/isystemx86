@@ -72,7 +72,7 @@ BOOL
 _ScFsCheckPrivilege(IN int32 tid,
 					IN FileObject * fptr)
 {
-	struct Task * task = get_task_info_ptr(tid);
+	struct Task * task = TskmgrGetTaskInfoPtr(tid);
 	if(task != NULL)
 	{
 		uint32 ui;
@@ -116,7 +116,7 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_FOPEN:
 		{
 			int32 tid = sparams->tid;
-			struct Task * task = get_task_info_ptr(tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(tid);
 			if(task != NULL) 
 			{
 				uint32 ui;
@@ -126,8 +126,9 @@ _ScFsProcess(	IN uint32 func,
 				if(ui < MAX_TASK_OPENED_FILE_COUNT)
 				{
 					int8 * filename = NULL;
-					filename = (int8 *)get_physical_address(tid, 
-															VOID_PTR_SPARAM(sparams->param0));
+					filename = (int8 *)TaskmgrConvertLAddrToPAddr(
+						tid, 
+						VOID_PTR_SPARAM(sparams->param0));
 					int32 mode = INT32_SPARAM(sparams->param1);
 					FileObject * fptr = Ifs1OpenFile(filename, mode);
 					task->opened_file_ptrs[ui] = fptr;
@@ -155,7 +156,7 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_FCLOSE:
 		{
 			int32 tid = sparams->tid;
-			struct Task * task = get_task_info_ptr(tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(tid);
 			FileObject * fptr = (FileObject *)(sparams->param0);
 			if(task != NULL && fptr != NULL) 
 			{
@@ -197,8 +198,9 @@ _ScFsProcess(	IN uint32 func,
 			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				uint8 * buffer = NULL;
-				buffer = (uint8 *)get_physical_address(	tid, 
-														VOID_PTR_SPARAM(sparams->param1));
+				buffer = (uint8 *)TaskmgrConvertLAddrToPAddr(
+					tid, 
+					VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
 				BOOL r = Ifs1WriteFile(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
@@ -225,8 +227,9 @@ _ScFsProcess(	IN uint32 func,
 			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				uint8 * buffer = NULL;
-				buffer = (uint8 *)get_physical_address(	tid, 
-														VOID_PTR_SPARAM(sparams->param1));
+				buffer = (uint8 *)TaskmgrConvertLAddrToPAddr(
+					tid, 
+					VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
 				uint32 real_len = Ifs1ReadFile(fptr, buffer, len);
 				sparams->param0 = SPARAM(real_len);
@@ -253,8 +256,9 @@ _ScFsProcess(	IN uint32 func,
 			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				uint8 * buffer = NULL;
-				buffer = (uint8 *)get_physical_address(	tid, 
-														VOID_PTR_SPARAM(sparams->param1));
+				buffer = (uint8 *)TaskmgrConvertLAddrToPAddr(
+					tid, 
+					VOID_PTR_SPARAM(sparams->param1));
 				uint32 len = UINT32_SPARAM(sparams->param2);
 				BOOL r = Ifs1AppendFile(fptr, buffer, len);
 				sparams->param0 = SPARAM(r);
@@ -287,8 +291,9 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_EXISTS_DF:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = Ifs1Exists(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -303,11 +308,13 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_CREATE_DIR:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			int8 * name = NULL;
-			name = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param1));
+			name = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = Ifs1CreateDir(path, name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -322,11 +329,13 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_CREATE_FILE:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			int8 * name = NULL;
-			name = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param1));
+			name = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = Ifs1CreateFile(path, name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -340,8 +349,9 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_DEL_DIR:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = Ifs1DeleteDir(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -355,8 +365,9 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_DEL_FILE:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = Ifs1DeleteFile(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -370,8 +381,9 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_DEL_DIRS:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			BOOL r = Ifs1DeleteDirRecursively(path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -386,11 +398,13 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_RENAME_DIR:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			int8 * new_name = NULL;
-			new_name = (int8 *)get_physical_address(sparams->tid,
-													VOID_PTR_SPARAM(sparams->param1));
+			new_name = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = Ifs1RenameDir(path, new_name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -405,11 +419,13 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_RENAME_FILE:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			int8 * new_name = NULL;
-			new_name = (int8 *)get_physical_address(sparams->tid,
-													VOID_PTR_SPARAM(sparams->param1));
+			new_name = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = Ifs1RenameFile(path, new_name);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -445,8 +461,9 @@ _ScFsProcess(	IN uint32 func,
 			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				struct CMOSDateTime * dt = NULL;
-				dt = (struct CMOSDateTime *)get_physical_address(	tid, 
-																	VOID_PTR_SPARAM(sparams->param1));
+				dt = (struct CMOSDateTime *)TaskmgrConvertLAddrToPAddr(
+					tid, 
+					VOID_PTR_SPARAM(sparams->param1));
 				memcpy(dt, &(fptr->file_block->create), sizeof(struct CMOSDateTime));
 			}
 			break;
@@ -463,8 +480,9 @@ _ScFsProcess(	IN uint32 func,
 			if(_ScFsCheckPrivilege(tid, fptr))
 			{
 				struct CMOSDateTime * dt = NULL;
-				dt = (struct CMOSDateTime *)get_physical_address(	tid, 
-																	VOID_PTR_SPARAM(sparams->param1));
+				dt = (struct CMOSDateTime *)TaskmgrConvertLAddrToPAddr(
+					tid, 
+					VOID_PTR_SPARAM(sparams->param1));
 				memcpy(dt, &(fptr->file_block->change), sizeof(struct CMOSDateTime));
 			}
 			break;
@@ -478,8 +496,9 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_DF_COUNT:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			int32 count = Ifs1GetItemCount(path);
 			sparams->param0 = SPARAM(count);
 			break;
@@ -495,11 +514,13 @@ _ScFsProcess(	IN uint32 func,
 		case SCALL_DF:
 		{
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			struct RawBlock * raw_blocks = NULL;
-			raw_blocks = (struct RawBlock *)get_physical_address(	sparams->tid,
-																	VOID_PTR_SPARAM(sparams->param1));
+			raw_blocks = (struct RawBlock *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
 			uint32 max = 0;
 			max = UINT32_SPARAM(sparams->param2);
 			int32 count = Ifs1GetItems(path, raw_blocks, max);
@@ -515,13 +536,15 @@ _ScFsProcess(	IN uint32 func,
 		//	Param0=1则成功, 0则失败
 		case SCALL_FIX_PATH:
 		{
-			struct Task * task = get_task_info_ptr(sparams->tid);
+			struct Task * task = TskmgrGetTaskInfoPtr(sparams->tid);
 			int8 * path = NULL;
-			path = (int8 *)get_physical_address(sparams->tid,
-												VOID_PTR_SPARAM(sparams->param0));
+			path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param0));
 			int8 * new_path = NULL;
-			new_path = (int8 *)get_physical_address(sparams->tid,
-													VOID_PTR_SPARAM(sparams->param1));
+			new_path = (int8 *)TaskmgrConvertLAddrToPAddr(
+				sparams->tid,
+				VOID_PTR_SPARAM(sparams->param1));
 			BOOL r = Ifs1GetAbsolutePath(path, task->working_dir, new_path);
 			sparams->param0 = SPARAM(r);
 			break;
@@ -536,7 +559,7 @@ _ScFsProcess(	IN uint32 func,
 			BOOL r = _ScFsLockFileSystem();
 			if(r)
 			{
-				struct Task * task = get_task_info_ptr(tid);
+				struct Task * task = TskmgrGetTaskInfoPtr(tid);
 				if(task == NULL)
 				{
 					ScFsUnlockFileSystem();
