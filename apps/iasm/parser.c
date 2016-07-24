@@ -259,6 +259,48 @@ static int IsReg32N(uchar Reg)
 			Reg == REG_ESP;
 }
 
+static int IsControlReg(char * Token)
+{
+	assert(Token != NULL);
+
+	return	StringCmp(Token, INS_REG_PREFIX REGS_CR0)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_CR1)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_CR2)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_CR3)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_CR4)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_CR5)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_CR6)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_CR7);
+}
+
+static int IsDebugReg(char * Token)
+{
+	assert(Token != NULL);
+
+	return	StringCmp(Token, INS_REG_PREFIX REGS_DR0)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_DR1)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_DR2)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_DR3)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_DR4)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_DR5)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_DR6)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_DR7);
+}
+
+static int IsTestReg(char * Token)
+{
+	assert(Token != NULL);
+
+	return	StringCmp(Token, INS_REG_PREFIX REGS_TR0)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_TR1)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_TR2)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_TR3)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_TR4)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_TR5)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_TR6)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_TR7);
+}
+
 static uint Number(const char * S)
 {
 	assert(S != NULL);
@@ -368,130 +410,243 @@ static uchar GetReg(char * RegName)
 {
 	assert(RegName != NULL);
 
+	if(GetStringLen(RegName) < 2 || RegName[0] != '%')
+	{
+		ERROR("Invalid register.");
+	}
+
 	uchar Reg;
 	char * Name = RegName + 1;
-	
-	if(StringCmp(Name, "EAX"))
+
+	if(StringCmp(Name, REGS_EAX))
 	{
 		Reg = REG_EAX;
 	}
-	else if(StringCmp(Name, "AX"))
+	else if(StringCmp(Name, REGS_AX))
 	{
 		Reg = REG_AX;
 	}
-	else if(StringCmp(Name, "AL"))
+	else if(StringCmp(Name, REGS_AL))
 	{
 		Reg = REG_AL;
 	}
-	else if(StringCmp(Name, "EBX"))
+	else if(StringCmp(Name, REGS_EBX))
 	{
 		Reg = REG_EBX;
 	}
-	else if(StringCmp(Name, "BX"))
+	else if(StringCmp(Name, REGS_BX))
 	{
 		Reg = REG_BX;
 	}
-	else if(StringCmp(Name, "BL"))
+	else if(StringCmp(Name, REGS_BL))
 	{
 		Reg = REG_BL;
 	}
-	else if(StringCmp(Name, "ECX"))
+	else if(StringCmp(Name, REGS_ECX))
 	{
 		Reg = REG_ECX;
 	}
-	else if(StringCmp(Name, "CX"))
+	else if(StringCmp(Name, REGS_CX))
 	{
 		Reg = REG_CX;
 	}
-	else if(StringCmp(Name, "CL"))
+	else if(StringCmp(Name, REGS_CL))
 	{
 		Reg = REG_CL;
 	}
-	else if(StringCmp(Name, "EDX"))
+	else if(StringCmp(Name, REGS_EDX))
 	{
 		Reg = REG_EDX;
 	}
-	else if(StringCmp(Name, "DX"))
+	else if(StringCmp(Name, REGS_DX))
 	{
 		Reg = REG_DX;
 	}
-	else if(StringCmp(Name, "DL"))
+	else if(StringCmp(Name, REGS_DL))
 	{
 		Reg = REG_DL;
 	}
-	else if(StringCmp(Name, "ESP"))
+	else if(StringCmp(Name, REGS_ESP))
 	{
 		Reg = REG_ESP;
 	}
-	else if(StringCmp(Name, "SP"))
+	else if(StringCmp(Name, REGS_SP))
 	{
 		Reg = REG_SP;
 	}
-	else if(StringCmp(Name, "AH"))
+	else if(StringCmp(Name, REGS_AH))
 	{
 		Reg = REG_AH;
 	}
-	else if(StringCmp(Name, "EDI"))
+	else if(StringCmp(Name, REGS_EDI))
 	{
 		Reg = REG_EDI;
 	}
-	else if(StringCmp(Name, "DI"))
+	else if(StringCmp(Name, REGS_DI))
 	{
 		Reg = REG_DI;
 	}
-	else if(StringCmp(Name, "BH"))
+	else if(StringCmp(Name, REGS_BH))
 	{
 		Reg = REG_BH;
 	}
-	else if(StringCmp(Name, "EBP"))
+	else if(StringCmp(Name, REGS_EBP))
 	{
 		Reg = REG_EBP;
 	}
-	else if(StringCmp(Name, "BP"))
+	else if(StringCmp(Name, REGS_BP))
 	{
 		Reg = REG_BP;
 	}
-	else if(StringCmp(Name, "CH"))
+	else if(StringCmp(Name, REGS_CH))
 	{
 		Reg = REG_CH;
 	}
-	else if(StringCmp(Name, "ESI"))
+	else if(StringCmp(Name, REGS_ESI))
 	{
 		Reg = REG_ESI;
 	}
-	else if(StringCmp(Name, "SI"))
+	else if(StringCmp(Name, REGS_SI))
 	{
 		Reg = REG_SI;
 	}
-	else if(StringCmp(Name, "DH"))
+	else if(StringCmp(Name, REGS_DH))
 	{
 		Reg = REG_DH;
 	}
-	else if(StringCmp(Name, "CS"))
+
+	// 控制寄存器。
+	else if(StringCmp(Name, REGS_CR0))
+	{
+		Reg = REG_CR0;
+	}
+	else if(StringCmp(Name, REGS_CR1))
+	{
+		Reg = REG_CR1;
+	}
+	else if(StringCmp(Name, REGS_CR2))
+	{
+		Reg = REG_CR2;
+	}
+	else if(StringCmp(Name, REGS_CR3))
+	{
+		Reg = REG_CR3;
+	}
+	else if(StringCmp(Name, REGS_CR4))
+	{
+		Reg = REG_CR4;
+	}
+	else if(StringCmp(Name, REGS_CR5))
+	{
+		Reg = REG_CR5;
+	}
+	else if(StringCmp(Name, REGS_CR6))
+	{
+		Reg = REG_CR6;
+	}
+	else if(StringCmp(Name, REGS_CR7))
+	{
+		Reg = REG_CR7;
+	}
+
+	// 调试寄存器。
+	else if(StringCmp(Name, REGS_DR0))
+	{
+		Reg = REG_DR0;
+	}
+	else if(StringCmp(Name, REGS_DR1))
+	{
+		Reg = REG_DR1;
+	}
+	else if(StringCmp(Name, REGS_DR2))
+	{
+		Reg = REG_DR2;
+	}
+	else if(StringCmp(Name, REGS_DR3))
+	{
+		Reg = REG_DR3;
+	}
+	else if(StringCmp(Name, REGS_DR4))
+	{
+		Reg = REG_DR4;
+	}
+	else if(StringCmp(Name, REGS_DR5))
+	{
+		Reg = REG_DR5;
+	}
+	else if(StringCmp(Name, REGS_DR6))
+	{
+		Reg = REG_DR6;
+	}
+	else if(StringCmp(Name, REGS_DR7))
+	{
+		Reg = REG_DR7;
+	}
+
+	// 测试寄存器。
+	else if(StringCmp(Name, REGS_TR0))
+	{
+		Reg = REG_TR0;
+	}
+	else if(StringCmp(Name, REGS_TR1))
+	{
+		Reg = REG_TR1;
+	}
+	else if(StringCmp(Name, REGS_TR2))
+	{
+		Reg = REG_TR2;
+	}
+	else if(StringCmp(Name, REGS_TR3))
+	{
+		Reg = REG_TR3;
+	}
+	else if(StringCmp(Name, REGS_TR4))
+	{
+		Reg = REG_TR4;
+	}
+	else if(StringCmp(Name, REGS_TR5))
+	{
+		Reg = REG_TR5;
+	}
+	else if(StringCmp(Name, REGS_TR6))
+	{
+		Reg = REG_TR6;
+	}
+	else if(StringCmp(Name, REGS_TR7))
+	{
+		Reg = REG_TR7;
+	}
+
+
+	// 段寄存器。
+	else if(StringCmp(Name, REGS_CS))
 	{
 		Reg = REG_CS;
 	}
-	else if(StringCmp(Name, "DS"))
+	else if(StringCmp(Name, REGS_DS))
 	{
 		Reg = REG_DS;
 	}
-	else if(StringCmp(Name, "ES"))
+	else if(StringCmp(Name, REGS_ES))
 	{
 		Reg = REG_ES;
 	}
-	else if(StringCmp(Name, "SS"))
+	else if(StringCmp(Name, REGS_SS))
 	{
 		Reg = REG_SS;
 	}
-	else if(StringCmp(Name, "FS"))
+	else if(StringCmp(Name, REGS_FS))
 	{
 		Reg = REG_FS;
 	}
-	else if(StringCmp(Name, "GS"))
+	else if(StringCmp(Name, REGS_GS))
 	{
 		Reg = REG_GS;
 	}
-	else ERROR("Invalid register");
+	else
+	{
+		ERROR("Invalid register.");
+	}
 	
 	return Reg;
 }
@@ -1964,6 +2119,36 @@ static void _Parse(void)
 			else if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2))
 			{
 				EncodeMOV_Reg32_Reg32(GetReg(OPRD1), GetReg(OPRD2));	
+			}
+			/* OPCODE_MOV_REG32_CR */
+			else if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsControlReg(OPRD2))
+			{
+				EncodeMOV_Reg32_Cr(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_MOV_CR_REG32 */
+			else if(IsReg(OPRD1) && IsControlReg(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2))
+			{
+				EncodeMOV_Cr_Reg32(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_MOV_REG32_DR */
+			else if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsDebugReg(OPRD2))
+			{
+				EncodeMOV_Reg32_Dr(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_MOV_DR_REG32 */
+			else if(IsReg(OPRD1) && IsDebugReg(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2))
+			{
+				EncodeMOV_Dr_Reg32(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_MOV_REG32_TR */
+			else if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsTestReg(OPRD2))
+			{
+				EncodeMOV_Reg32_Tr(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_MOV_TR_REG32 */
+			else if(IsReg(OPRD1) && IsTestReg(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2))
+			{
+				EncodeMOV_Tr_Reg32(GetReg(OPRD1), GetReg(OPRD2));
 			}
 			else
 			{

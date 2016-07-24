@@ -684,7 +684,13 @@ extern void EncodeMOV_Seg_Mem16(	uchar Seg,
 									uchar Reg2, 
 									uint OffType, 
 									uint Off);
-									
+extern void EncodeMOV_Reg32_Cr(uchar Reg, uchar Cr);
+extern void EncodeMOV_Cr_Reg32(uchar Cr, uchar Reg);
+extern void EncodeMOV_Reg32_Dr(uchar Reg, uchar Dr);
+extern void EncodeMOV_Dr_Reg32(uchar Dr, uchar Reg);
+extern void EncodeMOV_Reg32_Tr(uchar Reg, uchar Tr);
+extern void EncodeMOV_Tr_Reg32(uchar Tr, uchar Reg);
+	
 /*
 	MOVSB
 */

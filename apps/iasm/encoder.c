@@ -112,9 +112,6 @@ void SetCurrentPos(uint NewCurrentPos)
 	CurrentPos = NewCurrentPos;
 }
 
-static uchar TempBuffer[20];
-static uint TempBufferPos = 0;
-
 static void ToBuffer(uchar Byte)
 {
 	if (Offset < _MAX_BUFFER_SIZE)
@@ -325,35 +322,59 @@ static void GetReg_Mod_RM(	uchar Reg,
 	assert(RM != NULL);
 
 	*Mod = 0x3;
-	if(Reg == REG_AL || Reg == REG_AX || Reg == REG_EAX)
+	if(	Reg == REG_AL ||
+		Reg == REG_AX ||
+		Reg == REG_EAX ||
+		Reg == REG_CR0)
 	{
 		*RM = 0x0;
 	}
-	else if(Reg == REG_CL || Reg == REG_CX || Reg == REG_ECX)
+	else if(Reg == REG_CL 	||
+			Reg == REG_CX 	||
+			Reg == REG_ECX	||
+			Reg == REG_CR1)
 	{
 		*RM = 0x1;
 	}
-	else if(Reg == REG_DL || Reg == REG_DX || Reg == REG_EDX)
+	else if(Reg == REG_DL	||
+			Reg == REG_DX	||
+			Reg == REG_EDX	||
+			Reg == REG_CR2)
 	{
 		*RM = 0x2;
 	}
-	else if(Reg == REG_BL || Reg == REG_BX || Reg == REG_EBX)
+	else if(Reg == REG_BL	||
+			Reg == REG_BX	||
+			Reg == REG_EBX	||
+			Reg == REG_CR3)
 	{
 		*RM = 0x3;
 	}
-	else if(Reg == REG_AH || Reg == REG_SP || Reg == REG_ESP)
+	else if(Reg == REG_AH	||
+			Reg == REG_SP	||
+			Reg == REG_ESP	||
+			Reg == REG_CR4)
 	{
 		*RM = 0x4;
 	}
-	else if(Reg == REG_CH || Reg == REG_BP || Reg == REG_EBP)
+	else if(Reg == REG_CH	||
+			Reg == REG_BP	||
+			Reg == REG_EBP	||
+			Reg == REG_CR5)
 	{
 		*RM = 0x5;
 	}
-	else if(Reg == REG_DH || Reg == REG_SI || Reg == REG_ESI)
+	else if(Reg == REG_DH	||
+			Reg == REG_SI	||
+			Reg == REG_ESI	||
+			Reg == REG_CR6)
 	{
 		*RM = 0x6;
 	}
-	else if(Reg == REG_BH || Reg == REG_DI || Reg == REG_EDI)
+	else if(Reg == REG_BH	||
+			Reg == REG_DI	||
+			Reg == REG_EDI	||
+			Reg == REG_CR7)
 	{
 		*RM = 0x7;
 	}
@@ -543,6 +564,18 @@ static void OpcodeW_Reg(uint Opcode, uchar Reg)
 	GetReg_Mod_RM(Reg, &Mod, &RM);
 	Opcode |= (uint)RM & 0xFF;
 	Opcode |= ((uint)Mod << 6) & 0xFF;
+	ToBuffer((uchar)(Opcode >> 8));
+	ToBuffer((uchar)Opcode);
+}
+
+static void Opcode3B_Reg(uint Opcode, uchar Reg)
+{
+	uchar Mod, RM;
+	
+	GetReg_Mod_RM(Reg, &Mod, &RM);
+	Opcode |= (uint)RM & 0xFF;
+	Opcode |= ((uint)Mod << 6) & 0xFF;
+	ToBuffer((uchar)(Opcode >> 16));
 	ToBuffer((uchar)(Opcode >> 8));
 	ToBuffer((uchar)Opcode);
 }
@@ -1805,6 +1838,66 @@ void EncodeMOV_Seg_Mem16(	uchar Seg,
 	Opcode = OPCODE_MOV_SEG_MEM16;
 	Opcode |= ((uint)Seg << 3) & 0xFF;
 	OpcodeW_Mem_X(Opcode, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeMOV_Reg32_Cr(uchar Reg, uchar Cr)
+{
+	uint Opcode;
+
+	Opcode = OPCODE_MOV_REG32_CR;
+	Opcode |= ((uint)Cr << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, Reg);
+	InstructionEnd();
+}
+
+void EncodeMOV_Cr_Reg32(uchar Cr, uchar Reg)
+{
+	uint Opcode;
+
+	Opcode = OPCODE_MOV_CR_REG32;
+	Opcode |= ((uint)Cr << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, Reg);
+	InstructionEnd();
+}
+
+void EncodeMOV_Reg32_Dr(uchar Reg, uchar Dr)
+{
+	uint Opcode;
+
+	Opcode = OPCODE_MOV_REG32_DR;
+	Opcode |= ((uint)Dr << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, Reg);
+	InstructionEnd();
+}
+
+void EncodeMOV_Dr_Reg32(uchar Dr, uchar Reg)
+{
+	uint Opcode;
+
+	Opcode = OPCODE_MOV_DR_REG32;
+	Opcode |= ((uint)Dr << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, Reg);
+	InstructionEnd();
+}
+
+void EncodeMOV_Reg32_Tr(uchar Reg, uchar Tr)
+{
+	uint Opcode;
+
+	Opcode = OPCODE_MOV_REG32_TR;
+	Opcode |= ((uint)Tr << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, Reg);
+	InstructionEnd();
+}
+
+void EncodeMOV_Tr_Reg32(uchar Tr, uchar Reg)
+{
+	uint Opcode;
+
+	Opcode = OPCODE_MOV_TR_REG32;
+	Opcode |= ((uint)Tr << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, Reg);
 	InstructionEnd();
 }
 
