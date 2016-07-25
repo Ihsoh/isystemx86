@@ -1363,6 +1363,44 @@ static int _Parse_1(char * Token)
 			InvalidInstruction();
 		}
 	}
+	else if(StringCmp(Token, INS_LGDT))
+	{
+		char OPRD[OPRD_SIZE];
+
+		GET_TOKEN(OPRD);
+
+		if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeLGDT_Mem1632(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	else if(StringCmp(Token, INS_LIDT))
+	{
+		char OPRD[OPRD_SIZE];
+
+		GET_TOKEN(OPRD);
+
+		if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeLIDT_Mem1632(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
 	else if(StringCmp(Token, INS_LODSB))
 	{
 		EncodeLODSB();
@@ -1645,7 +1683,7 @@ static int _Parse_1(char * Token)
 	{
 		return 0;
 	}
-	assert(0);
+	return 1;
 }
 
 static void _Parse(void)

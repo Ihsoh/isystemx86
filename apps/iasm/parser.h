@@ -141,6 +141,8 @@
 #define	INS_LDS		"LDS"
 #define	INS_LES		"LES"
 #define	INS_LEA		"LEA"
+#define	INS_LGDT	"LGDT"
+#define	INS_LIDT	"LIDT"
 #define	INS_LODSB	"LODSB"
 #define	INS_LODSW	"LODSW"
 #define	INS_MOV		"MOV"

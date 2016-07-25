@@ -384,13 +384,14 @@ static void GetReg_Mod_RM(	uchar Reg,
 	}
 }
 
-static void OpcodeW_Mem_X(	uint Opcode,
+static void Opcode_Mem_X(	uint Opcode,
 							uchar Reg1,
 							uchar Reg2,
 							uchar OffType,
 							uint Off,
 							uint ImmType,
-							uint Imm)
+							uint Imm,
+							int OpcodeLength)
 {
 	#define	__IMM_TO_BUFFER__	\
 		if(ImmType == 3)	\
@@ -408,6 +409,13 @@ static void OpcodeW_Mem_X(	uint Opcode,
 		else if(ImmType == 1)	\
 		{	\
 			ToBuffer((uchar)Imm);	\
+		}	\
+		else if(ImmType == 0)	\
+		{	\
+		}	\
+		else	\
+		{	\
+			assert(0);	\
 		}
 
 	#define	__INS_PREFIX__	\
@@ -420,6 +428,30 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			ToBuffer(OPCODE_PREFIX_ADDRSZ_OVR);	\
 		}
 
+	#define	__OPCODE_TO_BUFFER__	\
+		if(OpcodeLength == 2)	\
+		{	\
+			ToBuffer((uchar)(Opcode >> 8));	\
+			ToBuffer((uchar)Opcode);	\
+		}	\
+		else if(OpcodeLength == 3)	\
+		{	\
+			ToBuffer((uchar)(Opcode >> 16));	\
+			ToBuffer((uchar)(Opcode >> 8));	\
+			ToBuffer((uchar)Opcode);	\
+		}	\
+		else if(OpcodeLength == 4)	\
+		{	\
+			ToBuffer((uchar)(Opcode >> 24));	\
+			ToBuffer((uchar)(Opcode >> 16));	\
+			ToBuffer((uchar)(Opcode >> 8));	\
+			ToBuffer((uchar)Opcode);	\
+		}	\
+		else	\
+		{	\
+			assert(0);	\
+		}
+
 	if (AddrMode == _MODE_BIT16)
 	{
 		uchar Mod, RM;
@@ -430,8 +462,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			ToBuffer((uchar)Off);
 			ToBuffer((uchar)(Off >> 8));
 			__IMM_TO_BUFFER__
@@ -442,8 +473,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			__IMM_TO_BUFFER__
 		}
 		else if(Reg1 != REG_NONE && OffType == 1)
@@ -452,8 +482,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			ToBuffer((uchar)Off);
 			__IMM_TO_BUFFER__
 		}
@@ -463,8 +492,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			ToBuffer((uchar)Off);
 			ToBuffer((uchar)(Off >> 8));
 			__IMM_TO_BUFFER__
@@ -484,8 +512,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			if(RM == 4)
 			{
 				ToBuffer(SIB);
@@ -502,8 +529,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			if(RM == 4)
 			{
 				ToBuffer(SIB);
@@ -516,8 +542,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			if(RM == 4)
 			{
 				ToBuffer(SIB);
@@ -531,8 +556,7 @@ static void OpcodeW_Mem_X(	uint Opcode,
 			Opcode |= (uint)RM & 0xFF;
 			Opcode |= ((uint)Mod << 6) & 0xFF;
 			__INS_PREFIX__
-			ToBuffer((uchar)(Opcode >> 8));
-			ToBuffer((uchar)Opcode);
+			__OPCODE_TO_BUFFER__
 			if(RM == 4)
 			{
 				ToBuffer(SIB);
@@ -555,6 +579,61 @@ static void OpcodeW_Mem_X(	uint Opcode,
 
 	#undef	__IMM_TO_BUFFER__
 	#undef	__INS_PREFIX__
+	#undef	__OPCODE_TO_BUFFER__
+}
+
+static void OpcodeW_Mem_X(	uint Opcode,
+							uchar Reg1,
+							uchar Reg2,
+							uchar OffType,
+							uint Off,
+							uint ImmType,
+							uint Imm)
+{
+	Opcode_Mem_X(	Opcode,
+					Reg1,
+					Reg2,
+					OffType,
+					Off,
+					ImmType,
+					Imm,
+					2);
+}
+
+static void Opcode3B_Mem_X(	uint Opcode,
+							uchar Reg1,
+							uchar Reg2,
+							uchar OffType,
+							uint Off,
+							uint ImmType,
+							uint Imm)
+{
+	Opcode_Mem_X(	Opcode,
+					Reg1,
+					Reg2,
+					OffType,
+					Off,
+					ImmType,
+					Imm,
+					3);
+}
+
+static void OpcodeD_Mem_X(	uint Opcode,
+							uchar Reg1,
+							uchar Reg2,
+							uchar OffType,
+							uint Off,
+							uint ImmType,
+							uint Imm)
+{
+	Opcode_Mem_X(	Opcode,
+					Reg1,
+					Reg2,
+					OffType,
+					Off,
+					ImmType,
+					Imm,
+					4);
 }
 
 static void OpcodeW_Reg(uint Opcode, uchar Reg)
@@ -1523,6 +1602,30 @@ void EncodeLEA_Reg16_Mem(	uchar Reg16,
 							uint Off)
 {
 	OpcodeW_Reg16_Mem16(OPCODE_LEA_REG16_MEM, Reg16, Reg1, Reg2, OffType, Off);
+	InstructionEnd();
+}
+
+/*
+	LGDT
+*/
+void EncodeLGDT_Mem1632(uchar Reg1,
+						uchar Reg2,
+						uchar OffType,
+						uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_LGDT_MEM1632, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+/*
+	LIDT
+*/
+void EncodeLIDT_Mem1632(uchar Reg1,
+						uchar Reg2,
+						uchar OffType,
+						uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_LIDT_MEM1632, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
 

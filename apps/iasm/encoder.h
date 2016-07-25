@@ -603,6 +603,22 @@ extern void EncodeLEA_Reg16_Mem(uchar Reg16,
 								uint Off);
 
 /*
+	LGDT
+*/
+void EncodeLGDT_Mem1632(uchar Reg1,
+						uchar Reg2,
+						uchar OffType,
+						uint Off);
+
+/*
+	LIDT
+*/
+void EncodeLIDT_Mem1632(uchar Reg1,
+						uchar Reg2,
+						uchar OffType,
+						uint Off);
+
+/*
 	LODSB
 */
 extern void EncodeLODSB(void);
