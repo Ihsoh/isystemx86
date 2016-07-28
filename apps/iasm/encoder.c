@@ -456,7 +456,7 @@ static void Opcode_Mem_X(	uint Opcode,
 	{
 		uchar Mod, RM;
 		/* !!!!直接寻址时偏移地址必须是16位!!!! */
-		if(Reg1 == REG_NONE && Reg2 == REG_NONE && OffType != 0)
+		if(Reg1 == REG_NONE && Reg2 == REG_NONE)
 		{
 			GetMem_Mod_RM16(REG_NONE, REG_NONE, 0, 1, &Mod, &RM);
 			Opcode |= (uint)RM & 0xFF;
@@ -506,7 +506,7 @@ static void Opcode_Mem_X(	uint Opcode,
 	{
 		uchar Mod, RM, SIB;
 		/* !!!!直接寻址时偏移地址必须是32位!!!! */
-		if(Reg1 == REG_NONE && Reg2 == REG_NONE && OffType != 0)
+		if(Reg1 == REG_NONE && Reg2 == REG_NONE)
 		{
 			GetMem_Mod_RM32(REG_NONE, REG_NONE, 0, 1, &Mod, &RM, &SIB);
 			Opcode |= (uint)RM & 0xFF;
