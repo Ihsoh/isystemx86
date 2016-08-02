@@ -115,6 +115,15 @@
 #define	INS_ADC		"ADC"
 #define	INS_ADD		"ADD"
 #define	INS_AND		"AND"
+#define	INS_ARPL	"ARPL"
+#define	INS_BOUND	"BOUND"
+#define	INS_BSF		"BSF"
+#define	INS_BSR		"BSR"
+
+
+
+
+
 #define	INS_CBW		"CBW"
 #define	INS_CLC		"CLC"
 #define	INS_CLD		"CLD"

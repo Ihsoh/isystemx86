@@ -1049,6 +1049,30 @@ static int _Parse_1(char * Token)
 			InvalidInstruction();
 		}
 	}
+	else if(StringCmp(Token, INS_DEC INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_DEC_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeDEC_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_DEC_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeDEC_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
 	else if(StringCmp(Token, INS_DIV INS_BYTE))
 	{
 		char OPRD[OPRD_SIZE];
@@ -1091,6 +1115,30 @@ static int _Parse_1(char * Token)
 			
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodeDIV_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	else if(StringCmp(Token, INS_DIV INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_DIV_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeDIV_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_DIV_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeDIV_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
 		}
 		else
 		{
@@ -1150,6 +1198,30 @@ static int _Parse_1(char * Token)
 			InvalidInstruction();
 		}
 	}
+	else if(StringCmp(Token, INS_IDIV INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_IDIV_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeIDIV_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_IDIV_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeIDIV_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
 	else if(StringCmp(Token, INS_IMUL INS_BYTE))
 	{
 		char OPRD[OPRD_SIZE];
@@ -1192,6 +1264,30 @@ static int _Parse_1(char * Token)
 			
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodeIMUL_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	else if(StringCmp(Token, INS_IMUL INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_IMUL_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeIMUL_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_IMUL_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeIMUL_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
 		}
 		else
 		{
@@ -1280,6 +1376,30 @@ static int _Parse_1(char * Token)
 			
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodeINC_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	else if(StringCmp(Token, INS_INC INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_INC_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeINC_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_INC_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeINC_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
 		}
 		else
 		{
@@ -1462,6 +1582,30 @@ static int _Parse_1(char * Token)
 			
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodeMUL_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	else if(StringCmp(Token, INS_MUL INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_MUL_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeMUL_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_MUL_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeMUL_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
 		}
 		else
 		{
@@ -1892,6 +2036,197 @@ static void _Parse(void)
 		/* Operator */
 		else if(ParseOperator(Token));
 		
+		else if(StringCmp(Token, INS_ARPL))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+
+			/* OPCODE_ARPL_REG16_REG16 */
+			if(IsReg(OPRD1) && IsReg16(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2))
+			{
+				EncodeARPL_Reg16_Reg16(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_ARPL_MEM16_REG16 */
+			else if(IsMem(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+
+				EncodeARPL_Mem16_Reg16(Reg1, Reg2, GetOffType(Offset), Offset, GetReg(OPRD2));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		/* OPCODE_BOUND_REG16_MEM1616 */
+		else if(StringCmp(Token, INS_BOUND INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+
+			if(IsReg(OPRD1) && IsReg16(OPRD1) && IsMem(OPRD2))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD2, &Reg1, &Reg2, &Offset);
+
+				EncodeBOUND_Reg16_Mem1616(GetReg(OPRD1), Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		/* OPCODE_BOUND_REG32_MEM3232 */
+		else if(StringCmp(Token, INS_BOUND INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+
+			if(IsReg(OPRD1) && IsReg32(OPRD1) && IsMem(OPRD2))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD2, &Reg1, &Reg2, &Offset);
+
+				EncodeBOUND_Reg32_Mem3232(GetReg(OPRD1), Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_BSF INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+
+			/* OPCODE_BSF_REG16_REG16 */
+			if(IsReg(OPRD1) && IsReg16(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2))
+			{
+				EncodeBSF_Reg16_Reg16(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_BSF_REG16_MEM16 */
+			else if(IsReg(OPRD1) && IsReg16(OPRD1) && IsMem(OPRD2))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD2, &Reg1, &Reg2, &Offset);
+
+				EncodeBSF_Reg16_Mem16(GetReg(OPRD1), Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_BSF INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+
+			/* OPCODE_BSF_REG32_REG32 */
+			if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2))
+			{
+				EncodeBSF_Reg32_Reg32(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_BSF_REG32_MEM32 */
+			else if(IsReg(OPRD1) && IsReg32(OPRD1) && IsMem(OPRD2))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD2, &Reg1, &Reg2, &Offset);
+
+				EncodeBSF_Reg32_Mem32(GetReg(OPRD1), Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_BSR INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+
+			/* OPCODE_BSR_REG16_REG16 */
+			if(IsReg(OPRD1) && IsReg16(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2))
+			{
+				EncodeBSR_Reg16_Reg16(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_BSR_REG16_MEM16 */
+			else if(IsReg(OPRD1) && IsReg16(OPRD1) && IsMem(OPRD2))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD2, &Reg1, &Reg2, &Offset);
+
+				EncodeBSR_Reg16_Mem16(GetReg(OPRD1), Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_BSR INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+
+			/* OPCODE_BSR_REG32_REG32 */
+			if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2))
+			{
+				EncodeBSR_Reg32_Reg32(GetReg(OPRD1), GetReg(OPRD2));
+			}
+			/* OPCODE_BSR_REG32_MEM32 */
+			else if(IsReg(OPRD1) && IsReg32(OPRD1) && IsMem(OPRD2))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD2, &Reg1, &Reg2, &Offset);
+
+				EncodeBSR_Reg32_Mem32(GetReg(OPRD1), Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+
+
+
 		/* OPCODE_INT_3 */
 		else if(StringCmp(Token, INS_INT3))
 		{
