@@ -1305,7 +1305,7 @@ static int _Parse_1(char * Token)
 			EncodeINB_Imm8((uchar)GetConstant(OPRD));
 		}
 		/* OPCODE_INB_DX */
-		else if(StringCmp(Token, INS_REG_PREFIX REGS_DX))
+		else if(StringCmp(OPRD, INS_REG_PREFIX REGS_DX))
 		{
 			EncodeINB_DX();
 		}
@@ -1325,7 +1325,7 @@ static int _Parse_1(char * Token)
 			EncodeINW_Imm8(GetConstant(OPRD));
 		}
 		/* OPCODE_INW_DX */
-		else if(StringCmp(Token, INS_REG_PREFIX REGS_DX))
+		else if(StringCmp(OPRD, INS_REG_PREFIX REGS_DX))
 		{
 			EncodeINW_DX();	
 		}
@@ -1333,6 +1333,41 @@ static int _Parse_1(char * Token)
 		{
 			InvalidInstruction();
 		}
+	}
+	else if(StringCmp(Token, INS_IN INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_IND_Imm8 */
+		if(IsConstant(OPRD))
+		{
+			EncodeIND_Imm8(GetConstant(OPRD));
+		}
+		/* OPCODE_IND_DX */
+		else if(StringCmp(OPRD, INS_REG_PREFIX REGS_DX))
+		{
+			EncodeIND_DX();	
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* OPCODE_INSB */
+	else if(StringCmp(Token, INS_INS INS_BYTE))
+	{
+		EncodeINSB();
+	}
+	/* OPCODE_INSW */
+	else if(StringCmp(Token, INS_INS INS_WORD))
+	{
+		EncodeINSW();
+	}
+	/* OPCODE_INSD */
+	else if(StringCmp(Token, INS_INS INS_DWORD))
+	{
+		EncodeINSD();
 	}
 	else if(StringCmp(Token, INS_INC INS_BYTE))
 	{
@@ -1722,7 +1757,7 @@ static int _Parse_1(char * Token)
 			EncodeOUTB_Imm8(GetConstant(OPRD));
 		}
 		/* OPCODE_OUTB_DX */
-		else if(StringCmp(Token, INS_REG_PREFIX REGS_DX))
+		else if(StringCmp(OPRD, INS_REG_PREFIX REGS_DX))
 		{
 			EncodeOUTB_DX();
 		}
@@ -1742,7 +1777,7 @@ static int _Parse_1(char * Token)
 			EncodeOUTW_Imm8(GetConstant(OPRD));
 		}
 		/* OPCODE_OUTW_DX */
-		else if(StringCmp(Token, INS_REG_PREFIX REGS_DX))
+		else if(StringCmp(OPRD, INS_REG_PREFIX REGS_DX))
 		{
 			EncodeOUTW_DX();
 		}
@@ -1750,6 +1785,41 @@ static int _Parse_1(char * Token)
 		{
 			InvalidInstruction();
 		}
+	}
+	else if(StringCmp(Token, INS_OUT INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		/* OPCODE_OUTD_Imm8 */
+		if(IsConstant(OPRD))
+		{
+			EncodeOUTD_Imm8(GetConstant(OPRD));
+		}
+		/* OPCODE_OUTD_DX */
+		else if(StringCmp(OPRD, INS_REG_PREFIX REGS_DX))
+		{
+			EncodeOUTD_DX();
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* OPCODE_OUTSB */
+	else if(StringCmp(Token, INS_OUTS INS_BYTE))
+	{
+		EncodeOUTSB();
+	}
+	/* OPCODE_OUTSW */
+	else if(StringCmp(Token, INS_OUTS INS_WORD))
+	{
+		EncodeOUTSW();
+	}
+	/* OPCODE_OUTSD */
+	else if(StringCmp(Token, INS_OUTS INS_DWORD))
+	{
+		EncodeOUTSD();
 	}
 	/* POPW */
 	else if(StringCmp(Token, INS_POP INS_WORD))

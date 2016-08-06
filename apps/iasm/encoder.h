@@ -644,8 +644,17 @@ extern void EncodeIMUL_Mem32(uchar Reg1, uchar Reg2, uint OffType, uint Off);
 */
 extern void EncodeINB_Imm8(uchar Imm8);
 extern void EncodeINW_Imm8(uchar Imm8);
+extern void EncodeIND_Imm8(uchar Imm8);
 extern void EncodeINB_DX(void);
 extern void EncodeINW_DX(void);
+extern void EncodeIND_DX(void);
+
+/*
+	INS
+*/
+extern void EncodeINSB(void);
+extern void EncodeINSW(void);
+extern void EncodeINSD(void);
 
 /*
 	INT
@@ -878,8 +887,17 @@ DeclareEncodeOpt_X_X(OR)
 */
 extern void EncodeOUTB_Imm8(uchar Imm8);
 extern void EncodeOUTW_Imm8(uchar Imm8);
+extern void EncodeOUTD_Imm8(uchar Imm8);
 extern void EncodeOUTB_DX(void);
 extern void EncodeOUTW_DX(void);
+extern void EncodeOUTD_DX(void);
+
+/*
+	OUTSB
+*/
+extern void EncodeOUTSB(void);
+extern void EncodeOUTSW(void);
+extern void EncodeOUTSD(void);
 
 /*
 	POP

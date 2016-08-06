@@ -167,8 +167,14 @@
 
 #define	OPCODE_INB_Imm8	0xE4
 #define	OPCODE_INW_Imm8	0xE5
+#define	OPCODE_IND_Imm8	0xE5
 #define	OPCODE_INB_DX	0xEC
 #define	OPCODE_INW_DX	0xED
+#define	OPCODE_IND_DX	0xED
+
+#define	OPCODE_INSB		0x6C
+#define	OPCODE_INSW		0x6D
+#define	OPCODE_INSD		0x6D
 
 #define	OPCODE_INT_3		0xCC
 #define	OPCODE_INT_IMM8		0xCD
@@ -280,8 +286,14 @@
 
 #define	OPCODE_OUTB_Imm8	0xE6
 #define	OPCODE_OUTW_Imm8	0xE7
+#define	OPCODE_OUTD_Imm8	0xE7
 #define	OPCODE_OUTB_DX		0xEE
 #define	OPCODE_OUTW_DX		0xEF
+#define	OPCODE_OUTD_DX		0xEF
+
+#define	OPCODE_OUTSB	0x6E
+#define	OPCODE_OUTSW	0x6F
+#define	OPCODE_OUTSD	0x6F
 
 #define	OPCODE_POP_REG16	0x58
 #define	OPCODE_POP_MEM16	0x8F00

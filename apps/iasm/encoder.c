@@ -1690,6 +1690,14 @@ void EncodeINW_Imm8(uchar Imm8)
 	InstructionEnd();
 }
 
+void EncodeIND_Imm8(uchar Imm8)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_IND_Imm8);
+	ToBuffer(Imm8);
+	InstructionEnd();
+}
+
 void EncodeINB_DX(void)
 {
 	ToBuffer(OPCODE_INB_DX);
@@ -1700,6 +1708,36 @@ void EncodeINW_DX(void)
 {
 	InstructionPrefix();
 	ToBuffer(OPCODE_INW_DX);
+	InstructionEnd();
+}
+
+void EncodeIND_DX(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_IND_DX);
+	InstructionEnd();
+}
+
+/*
+	INS
+*/
+void EncodeINSB(void)
+{
+	ToBuffer(OPCODE_INSB);
+	InstructionEnd();
+}
+
+void EncodeINSW(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_INSW);
+	InstructionEnd();
+}
+
+void EncodeINSD(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_INSD);
 	InstructionEnd();
 }
 
@@ -2394,6 +2432,14 @@ void EncodeOUTW_Imm8(uchar Imm8)
 	InstructionEnd();
 }
 
+void EncodeOUTD_Imm8(uchar Imm8)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_OUTD_Imm8);
+	ToBuffer(Imm8);
+	InstructionEnd();
+}
+
 void EncodeOUTB_DX(void)
 {
 	ToBuffer(OPCODE_OUTB_DX);
@@ -2404,6 +2450,36 @@ void EncodeOUTW_DX(void)
 {
 	InstructionPrefix();
 	ToBuffer(OPCODE_OUTW_DX);
+	InstructionEnd();
+}
+
+void EncodeOUTD_DX(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_OUTD_DX);
+	InstructionEnd();
+}
+
+/*
+	OUT
+*/
+void EncodeOUTSB(void)
+{
+	ToBuffer(OPCODE_OUTSB);
+	InstructionEnd();
+}
+
+void EncodeOUTSW(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_OUTSW);
+	InstructionEnd();
+}
+
+void EncodeOUTSD(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_OUTSD);
 	InstructionEnd();
 }
 
