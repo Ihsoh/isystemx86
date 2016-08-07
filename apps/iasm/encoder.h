@@ -903,8 +903,15 @@ extern void EncodeOUTSD(void);
 	POP
 */
 extern void EncodePOP_Reg16(uchar Reg16);
+extern void EncodePOP_Reg32(uchar Reg32);
 extern void EncodePOP_Mem16(uchar Reg1, uchar Reg2, uint OffType, uint Off);
+extern void EncodePOP_Mem32(uchar Reg1, uchar Reg2, uint OffType, uint Off);
 extern void EncodePOP_Seg(uchar Seg);
+
+/*
+	POPA
+*/
+extern void EncodePOPA(void);
 
 /*
 	POPF
@@ -915,8 +922,18 @@ extern void EncodePOPF(void);
 	PUSH
 */
 extern void EncodePUSH_Reg16(uchar Reg16);
+extern void EncodePUSH_Reg32(uchar Reg32);
 extern void EncodePUSH_Mem16(uchar Reg1, uchar Reg2, uint OffType, uint Off);
+extern void EncodePUSH_Mem32(uchar Reg1, uchar Reg2, uint OffType, uint Off);
+extern void EncodePUSH_Imm8(uint Imm8);
+extern void EncodePUSH_Imm16(uint Imm16);
+extern void EncodePUSH_Imm32(uint Imm32);
 extern void EncodePUSH_Seg(uchar Seg);
+
+/*
+	PUSHA
+*/
+extern void EncodePUSHA(void);
 
 /*
 	PUSHF
@@ -934,12 +951,27 @@ DeclareEncodeShift_X_X(RCL)
 DeclareEncodeShift_X_X(RCR)
 
 /*
+	RDMSR
+*/
+extern void EncodeRDMSR(void);
+
+/*
+	RDTSC
+*/
+extern void EncodeRDTSC(void);
+
+/*
 	RET
 */
 extern void EncodeRET_Near(void);
 extern void EncodeRET_Imm16Near(uint Imm16);
 extern void EncodeRET_Far(void);
 extern void EncodeRET_Imm16Far(uint Imm16);
+
+/*
+	RDPMC
+*/
+extern void EncodeRDPMC(void);
 
 /*
 	ROL
@@ -950,6 +982,17 @@ DeclareEncodeShift_X_X(ROL)
 	ROR
 */
 DeclareEncodeShift_X_X(ROR)
+
+/*
+	RSM
+*/
+extern void EncodeRSM(void);
+
+/*
+	SETcc
+*/
+extern void EncodeSETcc_Reg8(uchar CCCC, uchar Reg8);
+extern void EncodeSETcc_Mem8(uchar CCCC, uchar Reg1, uchar Reg2, uint OffType, uint Off);
 
 /*
 	SAHF
@@ -990,6 +1033,24 @@ extern void EncodeSCANSB(void);
 	SCANSW
 */
 extern void EncodeSCANSW(void);
+
+/*
+	SCANSD
+*/
+extern void EncodeSCANSD(void);
+
+/*
+	SGDT
+*/
+extern void EncodeSGDT_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
+
+
+
+
 
 /*
 	STC

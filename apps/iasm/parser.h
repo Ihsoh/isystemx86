@@ -119,11 +119,6 @@
 #define	INS_BOUND	"BOUND"
 #define	INS_BSF		"BSF"
 #define	INS_BSR		"BSR"
-
-
-
-
-
 #define	INS_CBW		"CBW"
 #define	INS_CLC		"CLC"
 #define	INS_CLD		"CLD"
@@ -166,14 +161,20 @@
 #define	INS_OUT		"OUT"
 #define	INS_OUTS	"OUTS"
 #define	INS_POP		"POP"
+#define	INS_POPA	"POPA"
 #define	INS_POPF	"POPF"
 #define	INS_PUSH	"PUSH"
+#define	INS_PUSHA	"PUSHA"
 #define	INS_PUSHF	"PUSHF"
 #define	INS_RCL		"RCL"
 #define	INS_RCR		"RCR"
+#define	INS_RDMSR	"RDMSR"
+#define	INS_RDTSC	"RDTSC"
 #define	INS_RET		"RET"
+#define	INS_RDPMC	"RDPMC"
 #define	INS_ROL		"ROL"
 #define	INS_ROR		"ROR"
+#define	INS_RSM		"RSM"
 #define	INS_SAHF	"SAHF"
 #define	INS_SAL		"SAL"
 #define	INS_SAR		"SAR"
@@ -182,6 +183,11 @@
 #define	INS_SBB		"SBB"
 #define	INS_SCANSB	"SCANSB"
 #define	INS_SCANSW	"SCANSW"
+#define	INS_SCANSD	"SCANSD"
+#define	INS_SGDT	"SGDT"
+
+
+
 #define	INS_STC		"STC"
 #define	INS_STD		"STD"
 #define	INS_STI		"STI"
@@ -194,8 +200,8 @@
 #define	INS_XLAT	"XLAT"
 #define	INS_XOR		"XOR"
 #define	INS_CALL	"CALL"
-/*Jcc*/
 
+/* Jcc */
 #define	INS_JXXXX	"JXXXX"
 #define	INS_JO		"JO"
 #define	INS_JNO		"JNO"
@@ -228,6 +234,38 @@
 #define	INS_JG		"JG"
 #define	INS_JNLE	"JNLE"
 
+/* SETcc */
+#define	INS_SETXXXX	"SETXXXX"
+#define	INS_SETO	"SETO"
+#define	INS_SETNO	"SETNO"
+#define	INS_SETC	"SETC"
+#define	INS_SETB	"SETB"
+#define	INS_SETNAE	"SETNAE"
+#define	INS_SETNC	"SETNC"
+#define	INS_SETAE	"SETAE"
+#define	INS_SETNB	"SETNB"
+#define	INS_SETE	"SETE"
+#define	INS_SETZ	"SETZ"
+#define	INS_SETNE	"SETNE"
+#define	INS_SETNZ	"SETNZ"
+#define	INS_SETBE	"SETBE"
+#define	INS_SETNA	"SETNA"
+#define	INS_SETA	"SETA"
+#define	INS_SETNBE	"SETNBE"
+#define	INS_SETS	"SETS"
+#define	INS_SETNS	"SETNS"
+#define	INS_SETP	"SETP"
+#define	INS_SETPE	"SETPE"
+#define	INS_SETNP	"SETNP"
+#define	INS_SETPO	"SETPO"
+#define	INS_SETL	"SETL"
+#define	INS_SETNGE	"SETNGE"
+#define	INS_SETGE	"SETGE"
+#define	INS_SETNL	"SETNL"
+#define	INS_SETLE	"SETLE"
+#define	INS_SETNG	"SETNG"
+#define	INS_SETG	"SETG"
+#define	INS_SETNLE	"SETNLE"
 
 
 #define	INS_JCXZ	"JCXZ"
@@ -402,12 +440,42 @@
 										char OPRD[OPRD_SIZE];	\
 										uint Offset;	\
 										uint CurrentPos = GetCurrentPos();	\
-											\
 										GET_TOKEN(OPRD);	\
-										Offset = GetConstant(OPRD);	\
-										Offset = Offset - (CurrentPos + 2);	\
-										EncodeJcc_SHORT((uchar)CCCC_##cccc1, Offset);	\
+										if(IsConstant(OPRD))	\
+										{	\
+											Offset = GetConstant(OPRD);	\
+											Offset = Offset - (CurrentPos + 2);	\
+											EncodeJcc_SHORT((uchar)CCCC_##cccc1, Offset);	\
+										}	\
+										else	\
+										{	\
+											InvalidInstruction();	\
+										}	\
 									}
+
+#define	SETCC(cccc1, cccc2, cccc3)	\
+	else if(StringCmp(Token, INS_SET##cccc1)	||	\
+			StringCmp(Token, INS_SET##cccc2)	||	\
+			StringCmp(Token, INS_SET##cccc3))	\
+	{	\
+		char OPRD[OPRD_SIZE];	\
+		GET_TOKEN(OPRD);	\
+		if(IsReg(OPRD) && IsReg8(OPRD))	\
+		{	\
+			EncodeSETcc_Reg8((uchar)CCCC_##cccc1, GetReg(OPRD));	\
+		}	\
+		else if(IsMem(OPRD))	\
+		{	\
+			uchar Reg1, Reg2;	\
+			uint Offset;	\
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);	\
+			EncodeSETcc_Mem8((uchar)CCCC_##cccc1, Reg1, Reg2, GetOffType(Offset), Offset);	\
+		}	\
+		else	\
+		{	\
+			InvalidInstruction();	\
+		}	\
+	}
 
 #define	SHIFT(x)	else if(StringCmp(Token, INS_##x INS_BYTE))	\
 					{	\

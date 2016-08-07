@@ -961,6 +961,67 @@ static int ParseShift(char * Token)
 	return 1;
 }
 
+static int ParseSETcc(char * Token)
+{
+		assert(Token != NULL);
+
+	if(0)
+	{
+	}
+	/* SETO */
+	SETCC(O, XXXX, XXXX)
+	
+	/* SETNO */
+	SETCC(NO, XXXX, XXXX)
+	
+	/* SETC, SETB, SETNAE */
+	SETCC(C, B, NAE)
+	
+	/* SETNC, SETAE, SETNB */
+	SETCC(NC, AE, NB)
+	
+	/* SETE, SETZ */
+	SETCC(E, Z, XXXX)
+	
+	/* SETNE, SETNZ */
+	SETCC(NE, NZ, XXXX)
+	
+	/* SETBE, SETNA */
+	SETCC(BE, NA, XXXX)
+	
+	/* SETA, SETNBE */
+	SETCC(A, NBE, XXXX)
+	
+	/* SETS */
+	SETCC(S, XXXX, XXXX)
+	
+	/* SETNS */
+	SETCC(NS, XXXX, XXXX)
+	
+	/* SETP, SETPE */
+	SETCC(P, PE, XXXX)
+	
+	/* SETNP, SETPO */
+	SETCC(NP, PO, XXXX)
+	
+	/* SETL, SETNGE */
+	SETCC(L, NGE, XXXX)
+	
+	/* SETGE, SETNL */
+	SETCC(GE, NL, XXXX)
+	
+	/* SETLE, SETNG */
+	SETCC(LE, NG, XXXX)
+	
+	/* SETG, SETNLE */
+	SETCC(G, NLE, XXXX)
+	else
+	{
+		return 0;
+	}
+	return 1;
+}
+
 static int _Parse_1(char * Token)
 {
 	assert(Token != NULL);
@@ -1834,11 +1895,6 @@ static int _Parse_1(char * Token)
 			EncodePOP_Reg16(GetReg(OPRD));
 		}
 		/* OPCODE_POP_MEM16 */
-		else if(IsSeg(OPRD))
-		{
-			EncodePOP_Seg(GetReg(OPRD));
-		}
-		/* OPCODE_POP_SEG */
 		else if(IsMem(OPRD))
 		{
 			uchar Reg1, Reg2;
@@ -1847,15 +1903,68 @@ static int _Parse_1(char * Token)
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodePOP_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
 		}
+		/* OPCODE_POP_SEG */
+		else if(IsSeg(OPRD))
+		{
+			EncodePOP_Seg(GetReg(OPRD));
+		}
 		else
 		{
 			InvalidInstruction();
 		}
 	}
+	/* POPD */
+	else if(StringCmp(Token, INS_POP INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		
+		/* OPCODE_POP_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodePOP_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_POP_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodePOP_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* POPA */
+	else if(StringCmp(Token, INS_POPA))
+	{
+		EncodePOPA();
+	}
 	/* POPF */
 	else if(StringCmp(Token, INS_POPF))
 	{
 		EncodePOPF();
+	}
+	/* PUSHB */
+	else if(StringCmp(Token, INS_PUSH INS_BYTE))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		
+		/* OPCODE_PUSH_IMM8 */
+		if(IsConstant(OPRD))
+		{
+			EncodePUSH_Imm8(GetConstant(OPRD));
+		}
+		else
+		{
+			InvalidInstruction();
+		}
 	}
 	/* PUSHW */
 	else if(StringCmp(Token, INS_PUSH INS_WORD))
@@ -1870,11 +1979,6 @@ static int _Parse_1(char * Token)
 			EncodePUSH_Reg16(GetReg(OPRD));
 		}
 		/* OPCODE_PUSH_MEM16 */
-		else if(IsSeg(OPRD))
-		{
-			EncodePUSH_Seg(GetReg(OPRD));
-		}
-		/* OPCODE_PUSH_SEG */
 		else if(IsMem(OPRD))
 		{
 			uchar Reg1, Reg2;
@@ -1883,16 +1987,106 @@ static int _Parse_1(char * Token)
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodePUSH_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
 		}
+		/* OPCODE_PUSH_IMM16 */
+		else if(IsConstant(OPRD))
+		{
+			EncodePUSH_Imm16(GetConstant(OPRD));
+		}
+		/* OPCODE_PUSH_SEG */
+		else if(IsSeg(OPRD))
+		{
+			EncodePUSH_Seg(GetReg(OPRD));
+		}
 		else
 		{
 			InvalidInstruction();
 		}
+	}
+	/* PUSHD */
+	else if(StringCmp(Token, INS_PUSH INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		
+		GET_TOKEN(OPRD);
+		
+		/* OPCODE_PUSH_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodePUSH_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_PUSH_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodePUSH_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		/* OPCODE_PUSH_IMM32 */
+		else if(IsConstant(OPRD))
+		{
+			EncodePUSH_Imm32(GetConstant(OPRD));
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* PUSHA */
+	else if(StringCmp(Token, INS_PUSHA))
+	{
+		EncodePUSHA();
 	}
 	/* PUSHF */
 	else if(StringCmp(Token, INS_PUSHF))
 	{
 		EncodePUSHF();
 	}
+	/* RDMSR */
+	else if(StringCmp(Token, INS_RDMSR))
+	{
+		EncodeRDMSR();
+	}
+	/* RDTSC */
+	else if(StringCmp(Token, INS_RDTSC))
+	{
+		EncodeRDTSC();
+	}
+	/* RDPMC */
+	else if(StringCmp(Token, INS_RDPMC))
+	{
+		EncodeRDPMC();
+	}
+	/* RSM */
+	else if(StringCmp(Token, INS_RSM))
+	{
+		EncodeRSM();
+	}
+
+	/* SETcc */
+	else if(ParseSETcc(Token))
+	{
+	}
+
+	/* SGDT */
+	else if(StringCmp(Token, INS_SGDT))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeSGDT_Mem1632(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+
 	else
 	{
 		return 0;
@@ -2620,6 +2814,11 @@ static void _Parse(void)
 		else if(StringCmp(Token, INS_SCANSW))
 		{
 			EncodeSCANSW();
+		}
+		/* OPCODE_SCANSD */
+		else if(StringCmp(Token, INS_SCANSD))
+		{
+			EncodeSCANSD();
 		}
 		/* OPCODE_STC */
 		else if(StringCmp(Token, INS_STC))

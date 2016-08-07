@@ -2493,6 +2493,13 @@ void EncodePOP_Reg16(uchar Reg16)
 	InstructionEnd();
 }
 
+void EncodePOP_Reg32(uchar Reg32)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_POP_REG32 | Reg32);
+	InstructionEnd();
+}
+
 void EncodePOP_Mem16(uchar Reg1, uchar Reg2, uint OffType, uint Off)
 {
 	InstructionPrefix();
@@ -2500,10 +2507,63 @@ void EncodePOP_Mem16(uchar Reg1, uchar Reg2, uint OffType, uint Off)
 	InstructionEnd();
 }
 
-void EncodePOP_Seg(uchar Seg)
+void EncodePOP_Mem32(uchar Reg1, uchar Reg2, uint OffType, uint Off)
 {
 	InstructionPrefix();
-	ToBuffer(OPCODE_POP_SEG | (Seg << 3));
+	OpcodeW_Mem_X(OPCODE_POP_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodePOP_Seg(uchar Seg)
+{
+	switch(Seg)
+	{
+		case REG_ES:
+		{
+			ToBuffer(OPCODE_POP_ES);
+			break;
+		}
+		case REG_CS:
+		{
+			ToBuffer(OPCODE_POP_CS);
+			break;
+		}
+		case REG_SS:
+		{
+			ToBuffer(OPCODE_POP_SS);
+			break;
+		}
+		case REG_DS:
+		{
+			ToBuffer(OPCODE_POP_DS);
+			break;
+		}
+		case REG_FS:
+		{
+			ToBuffer((uchar)(OPCODE_POP_FS >> 8));
+			ToBuffer((uchar)OPCODE_POP_FS);
+			break;
+		}
+		case REG_GS:
+		{
+			ToBuffer((uchar)(OPCODE_POP_GS >> 8));
+			ToBuffer((uchar)OPCODE_POP_GS);
+			break;
+		}
+		default:
+		{
+			assert(0);
+		}
+	}
+	InstructionEnd();
+}
+
+/*
+	POPA
+*/
+void EncodePOPA(void)
+{
+	ToBuffer(OPCODE_POPA);
 	InstructionEnd();
 }
 
@@ -2526,6 +2586,13 @@ void EncodePUSH_Reg16(uchar Reg16)
 	InstructionEnd();
 }
 
+void EncodePUSH_Reg32(uchar Reg32)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_PUSH_REG32 | Reg32);
+	InstructionEnd();
+}
+
 void EncodePUSH_Mem16(uchar Reg1, uchar Reg2, uint OffType, uint Off)
 {
 	InstructionPrefix();
@@ -2533,10 +2600,96 @@ void EncodePUSH_Mem16(uchar Reg1, uchar Reg2, uint OffType, uint Off)
 	InstructionEnd();
 }
 
-void EncodePUSH_Seg(uchar Seg)
+void EncodePUSH_Mem32(uchar Reg1, uchar Reg2, uint OffType, uint Off)
 {
 	InstructionPrefix();
-	ToBuffer(OPCODE_PUSH_SEG | (Seg << 3));
+	OpcodeW_Mem_X(OPCODE_PUSH_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodePUSH_Imm8(uint Imm8)
+{
+	ToBuffer(OPCODE_PUSH_IMM8);
+	ToBuffer(Imm8);
+	InstructionEnd();
+}
+
+void EncodePUSH_Imm16(uint Imm16)
+{
+	if(Mode != _MODE_BIT16)
+	{
+		Error("Invalid PUSH instruction with 16 bits immediate operand.");
+	}
+	ToBuffer(OPCODE_PUSH_IMM16);
+	ToBuffer((uchar)Imm16);
+	ToBuffer((uchar)(Imm16 >> 8));
+	InstructionEnd();
+}
+
+void EncodePUSH_Imm32(uint Imm32)
+{
+	if(Mode != _MODE_BIT32)
+	{
+		Error("Invalid PUSH instruction with 32 bits immediate operand.");
+	}
+	ToBuffer(OPCODE_PUSH_IMM32);
+	ToBuffer((uchar)Imm32);
+	ToBuffer((uchar)(Imm32 >> 8));
+	ToBuffer((uchar)(Imm32 >> 16));
+	ToBuffer((uchar)(Imm32 >> 24));
+	InstructionEnd();
+}
+
+void EncodePUSH_Seg(uchar Seg)
+{
+	switch(Seg)
+	{
+		case REG_ES:
+		{
+			ToBuffer(OPCODE_PUSH_ES);
+			break;
+		}
+		case REG_CS:
+		{
+			ToBuffer(OPCODE_PUSH_CS);
+			break;
+		}
+		case REG_SS:
+		{
+			ToBuffer(OPCODE_PUSH_SS);
+			break;
+		}
+		case REG_DS:
+		{
+			ToBuffer(OPCODE_PUSH_DS);
+			break;
+		}
+		case REG_FS:
+		{
+			ToBuffer((uchar)(OPCODE_PUSH_FS >> 8));
+			ToBuffer((uchar)OPCODE_PUSH_FS);
+			break;
+		}
+		case REG_GS:
+		{
+			ToBuffer((uchar)(OPCODE_PUSH_GS >> 8));
+			ToBuffer((uchar)OPCODE_PUSH_GS);
+			break;
+		}
+		default:
+		{
+			assert(0);
+		}
+	}
+	InstructionEnd();
+}
+
+/*
+	PUSHA
+*/
+void EncodePUSHA(void)
+{
+	ToBuffer(OPCODE_PUSHA);
 	InstructionEnd();
 }
 
@@ -2558,6 +2711,26 @@ DefineEncodeShift_X_X(RCL)
 	RCR
 */
 DefineEncodeShift_X_X(RCR)
+
+/*
+	RDMSR
+*/
+void EncodeRDMSR(void)
+{
+	ToBuffer((uchar)(OPCODE_RDMSR >> 8));
+	ToBuffer((uchar)OPCODE_RDMSR);
+	InstructionEnd();
+}
+
+/*
+	RDTSC
+*/
+void EncodeRDTSC(void)
+{
+	ToBuffer((uchar)(OPCODE_RDTSC >> 8));
+	ToBuffer((uchar)OPCODE_RDTSC);
+	InstructionEnd();
+}
 
 /*
 	RET
@@ -2591,6 +2764,16 @@ void EncodeRET_Imm16Far(uint Imm16)
 }
 
 /*
+	RDPMC
+*/
+void EncodeRDPMC(void)
+{
+	ToBuffer((uchar)(OPCODE_RDPMC >> 8));
+	ToBuffer((uchar)OPCODE_RDPMC);
+	InstructionEnd();
+}
+
+/*
 	ROL
 */
 DefineEncodeShift_X_X(ROL)
@@ -2599,6 +2782,34 @@ DefineEncodeShift_X_X(ROL)
 	ROR
 */
 DefineEncodeShift_X_X(ROR)
+
+/*
+	RSM
+*/
+void EncodeRSM(void)
+{
+	ToBuffer((uchar)(OPCODE_RSM >> 8));
+	ToBuffer((uchar)OPCODE_RSM);
+	InstructionEnd();
+}
+
+/*
+	SETcc
+*/
+void EncodeSETcc_Reg8(uchar CCCC, uchar Reg8)
+{
+	uint Opcode = OPCODE_SETcc;
+	Opcode |= CCCC;
+	Opcode3B_Reg(Opcode << 8, Reg8);
+}
+
+void EncodeSETcc_Mem8(uchar CCCC, uchar Reg1, uchar Reg2, uint OffType, uint Off)
+{
+	uint Opcode = OPCODE_SETcc;
+	Opcode |= CCCC;
+	OpcodeW_Mem_X(Opcode << 8, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
 
 /*
 	SAHF
@@ -2652,6 +2863,37 @@ void EncodeSCANSW(void)
 	ToBuffer(OPCODE_SCANSW);
 	InstructionEnd();
 }
+
+/*
+	SCANSD
+*/
+void EncodeSCANSD(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_SCANSD);
+	InstructionEnd();
+}
+
+/*
+	SGDT
+*/
+void EncodeSGDT_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_SGDT_MEM1632, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+
+
+
+
 
 /*
 	STC
