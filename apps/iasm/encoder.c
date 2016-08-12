@@ -635,13 +635,27 @@ static void OpcodeW_Reg(uint Opcode, uchar Reg)
 static void Opcode3B_Reg(uint Opcode, uchar Reg)
 {
 	uchar Mod, RM;
-	
 	GetReg_Mod_RM(Reg, &Mod, &RM);
 	Opcode |= (uint)RM & 0xFF;
 	Opcode |= ((uint)Mod << 6) & 0xFF;
 	ToBuffer((uchar)(Opcode >> 16));
 	ToBuffer((uchar)(Opcode >> 8));
 	ToBuffer((uchar)Opcode);
+}
+
+static void Opcode3B_Reg_Imm8(
+	uint Opcode,
+	uchar Reg,
+	uint Imm8)
+{
+	uchar Mod, RM;
+	GetReg_Mod_RM(Reg, &Mod, &RM);
+	Opcode |= (uint)RM & 0xFF;
+	Opcode |= ((uint)Mod << 6) & 0xFF;
+	ToBuffer((uchar)(Opcode >> 16));
+	ToBuffer((uchar)(Opcode >> 8));
+	ToBuffer((uchar)Opcode);
+	ToBuffer((uchar)Imm8);
 }
 
 /*
@@ -2887,9 +2901,15 @@ void EncodeSGDT_Mem1632(
 	InstructionEnd();
 }
 
+/*
+	SHLD
+*/
+DefineEncodeSHxD(SHLD);
 
-
-
+/*
+	SHRD
+*/
+DefineEncodeSHxD(SHRD);
 
 
 

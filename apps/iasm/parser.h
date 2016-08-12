@@ -185,6 +185,13 @@
 #define	INS_SCANSW	"SCANSW"
 #define	INS_SCANSD	"SCANSD"
 #define	INS_SGDT	"SGDT"
+#define	INS_SHLD	"SHLD"
+#define	INS_SHRD	"SHRD"
+
+
+
+
+
 
 
 
@@ -600,6 +607,86 @@
 							InvalidInstruction();	\
 						}	\
 					}
+
+#define	SHxD(Ins)	\
+	else if(StringCmp(Token, INS_##Ins INS_WORD))	\
+	{	\
+		char OPRD1[OPRD_SIZE];	\
+		char OPRD2[OPRD_SIZE];	\
+		char OPRD3[OPRD_SIZE];	\
+		GET_TOKEN(OPRD1);	\
+		GET_TOKEN(OPRD2);	\
+		ExpectComma(OPRD2);	\
+		GET_TOKEN(OPRD2);	\
+		GET_TOKEN(OPRD3);	\
+		ExpectComma(OPRD3);	\
+		GET_TOKEN(OPRD3);	\
+		if(IsReg(OPRD1) && IsReg16(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2) && IsImm8(OPRD3))	\
+		{	\
+			Encode##Ins##_Reg16_Reg16_Imm8(GetReg(OPRD1), GetReg(OPRD2), GetConstant(OPRD3));	\
+		}	\
+		else if(IsMem(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2) && IsImm8(OPRD3))	\
+		{	\
+			uchar Reg1, Reg2;	\
+			uint Offset;	\
+			GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+			Encode##Ins##_Mem16_Reg16_Imm8(Reg1, Reg2, GetOffType(Offset), Offset, GetReg(OPRD2), GetConstant(OPRD3));	\
+		}	\
+		else if(IsReg(OPRD1) && IsReg16(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2) && IsReg(OPRD3) && StringCmp(OPRD3, INS_REG_PREFIX REGS_CL))	\
+		{	\
+			Encode##Ins##_Reg16_Reg16_CL(GetReg(OPRD1), GetReg(OPRD2));	\
+		}	\
+		else if(IsMem(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2) && IsReg(OPRD3) && StringCmp(OPRD3, INS_REG_PREFIX REGS_CL))	\
+		{	\
+			uchar Reg1, Reg2;	\
+			uint Offset;	\
+			GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+			Encode##Ins##_Mem16_Reg16_CL(Reg1, Reg2, GetOffType(Offset), Offset, GetReg(OPRD2));	\
+		}	\
+		else	\
+		{	\
+			InvalidInstruction();	\
+		}	\
+	}	\
+	else if(StringCmp(Token, INS_##Ins INS_DWORD))	\
+	{	\
+		char OPRD1[OPRD_SIZE];	\
+		char OPRD2[OPRD_SIZE];	\
+		char OPRD3[OPRD_SIZE];	\
+		GET_TOKEN(OPRD1);	\
+		GET_TOKEN(OPRD2);	\
+		ExpectComma(OPRD2);	\
+		GET_TOKEN(OPRD2);	\
+		GET_TOKEN(OPRD3);	\
+		ExpectComma(OPRD3);	\
+		GET_TOKEN(OPRD3);	\
+		if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2) && IsImm8(OPRD3))	\
+		{	\
+			Encode##Ins##_Reg32_Reg32_Imm8(GetReg(OPRD1), GetReg(OPRD2), GetConstant(OPRD3));	\
+		}	\
+		else if(IsMem(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2) && IsImm8(OPRD3))	\
+		{	\
+			uchar Reg1, Reg2;	\
+			uint Offset;	\
+			GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+			Encode##Ins##_Mem32_Reg32_Imm8(Reg1, Reg2, GetOffType(Offset), Offset, GetReg(OPRD2), GetConstant(OPRD3));	\
+		}	\
+		else if(IsReg(OPRD1) && IsReg32(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2) && IsReg(OPRD3) && StringCmp(OPRD3, INS_REG_PREFIX REGS_CL))	\
+		{	\
+			Encode##Ins##_Reg32_Reg32_CL(GetReg(OPRD1), GetReg(OPRD2));	\
+		}	\
+		else if(IsMem(OPRD1) && IsReg(OPRD2) && IsReg32(OPRD2) && IsReg(OPRD3) && StringCmp(OPRD3, INS_REG_PREFIX REGS_CL))	\
+		{	\
+			uchar Reg1, Reg2;	\
+			uint Offset;	\
+			GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+			Encode##Ins##_Mem32_Reg32_CL(Reg1, Reg2, GetOffType(Offset), Offset, GetReg(OPRD2));	\
+		}	\
+		else	\
+		{	\
+			InvalidInstruction();	\
+		}	\
+	}
 
 extern void InitParser(char * Src);
 extern void DestroyParser(void);

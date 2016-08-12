@@ -1048,6 +1048,155 @@ extern void EncodeSGDT_Mem1632(
 	uchar OffType,
 	uint Off);
 
+#define	DeclareEncodeSHxD(Ins)	\
+	extern void Encode##Ins##_Reg16_Reg16_Imm8(	\
+		uchar DstReg,	\
+		uchar SrcReg,	\
+		uint Imm8);	\
+	extern void Encode##Ins##_Reg32_Reg32_Imm8(	\
+		uchar DstReg,	\
+		uchar SrcReg,	\
+		uint Imm8);	\
+	extern void Encode##Ins##_Mem16_Reg16_Imm8(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg,	\
+		uint Imm8);	\
+	extern void Encode##Ins##_Mem32_Reg32_Imm8(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg,	\
+		uint Imm8);	\
+	extern void Encode##Ins##_Reg16_Reg16_CL(	\
+		uchar DstReg,	\
+		uchar SrcReg);	\
+	extern void Encode##Ins##_Reg32_Reg32_CL(	\
+		uchar DstReg,	\
+		uchar SrcReg);	\
+	extern void Encode##Ins##_Mem16_Reg16_CL(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg);	\
+	extern void Encode##Ins##_Mem32_Reg32_CL(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg);
+
+#define	DefineEncodeSHxD(Ins)	\
+	void Encode##Ins##_Reg16_Reg16_Imm8(	\
+		uchar DstReg,	\
+		uchar SrcReg,	\
+		uint Imm8)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_REG16_REG16_IMM8;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Reg_Imm8(Opcode, DstReg, Imm8);	\
+		InstructionEnd();	\
+	}	\
+	void Encode##Ins##_Reg32_Reg32_Imm8(	\
+		uchar DstReg,	\
+		uchar SrcReg,	\
+		uint Imm8)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_REG32_REG32_IMM8;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Reg_Imm8(Opcode, DstReg, Imm8);	\
+		InstructionEnd();	\
+	}	\
+	void Encode##Ins##_Mem16_Reg16_Imm8(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg,	\
+		uint Imm8)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_MEM16_REG16_IMM8;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Mem_X(Opcode, Reg1, Reg2, OffType, Off, 1, Imm8);	\
+		InstructionEnd();	\
+	}	\
+	void Encode##Ins##_Mem32_Reg32_Imm8(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg,	\
+		uint Imm8)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_MEM32_REG32_IMM8;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Mem_X(Opcode, Reg1, Reg2, OffType, Off, 1, Imm8);	\
+		InstructionEnd();	\
+	}	\
+	void Encode##Ins##_Reg16_Reg16_CL(	\
+		uchar DstReg,	\
+		uchar SrcReg)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_REG16_REG16_CL;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Reg(Opcode, DstReg);	\
+		InstructionEnd();	\
+	}	\
+	void Encode##Ins##_Reg32_Reg32_CL(	\
+		uchar DstReg,	\
+		uchar SrcReg)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_REG32_REG32_CL;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Reg(Opcode, DstReg);	\
+		InstructionEnd();	\
+	}	\
+	void Encode##Ins##_Mem16_Reg16_CL(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_MEM16_REG16_CL;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Mem_X(Opcode, Reg1, Reg2, OffType, Off, 0, 0);	\
+		InstructionEnd();	\
+	}	\
+	void Encode##Ins##_Mem32_Reg32_CL(	\
+		uchar Reg1,	\
+		uchar Reg2,	\
+		uint OffType,	\
+		uint Off,	\
+		uchar SrcReg)	\
+	{	\
+		InstructionPrefix();	\
+		uint Opcode = OPCODE_##Ins##_MEM32_REG32_CL;	\
+		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
+		Opcode3B_Mem_X(Opcode, Reg1, Reg2, OffType, Off, 0, 0);	\
+		InstructionEnd();	\
+	}
+
+/*
+	SHLD
+*/
+DeclareEncodeSHxD(SHLD)
+
+/*
+	SHRD
+*/
+DeclareEncodeSHxD(SHRD)
 
 
 

@@ -2087,6 +2087,12 @@ static int _Parse_1(char * Token)
 		}
 	}
 
+	/* SHLD */
+	SHxD(SHLD)
+
+	/* SHRD */
+	SHxD(SHRD)
+
 	else
 	{
 		return 0;
