@@ -97,7 +97,7 @@
 #define	INS_DBS		"DBS"
 #define	INS_DWS		"DWS"
 #define	INS_DDS		"DDS"
-#define	INS_STR		"STR"
+#define	INS_STRING	"STRING"
 #define	INS_BIT16	"BIT16"
 #define	INS_BIT32	"BIT32"
 #define	INS_ORG		"ORG"
@@ -148,8 +148,11 @@
 #define	INS_LEA		"LEA"
 #define	INS_LGDT	"LGDT"
 #define	INS_LIDT	"LIDT"
+#define	INS_LMSW	"LMSW"
 #define	INS_LODSB	"LODSB"
 #define	INS_LODSW	"LODSW"
+#define	INS_LODSD	"LODSD"
+#define	INS_LTR		"LTR"
 #define	INS_MOV		"MOV"
 #define	INS_MOVSB	"MOVSB"
 #define	INS_MOVSW	"MOVSW"
@@ -187,19 +190,16 @@
 #define	INS_SGDT	"SGDT"
 #define	INS_SHLD	"SHLD"
 #define	INS_SHRD	"SHRD"
-
-
-
-
-
-
-
-
+#define	INS_SIDT	"SIDT"
+#define	INS_SLDT	"SLDT"
+#define	INS_SMSW	"SMSW"
 #define	INS_STC		"STC"
 #define	INS_STD		"STD"
 #define	INS_STI		"STI"
 #define	INS_STOSB	"STOSB"
 #define	INS_STOSW	"STOSW"
+#define	INS_STOSD	"STOSD"
+#define	INS_STR		"STR"
 #define	INS_SUB		"SUB"
 #define	INS_TEST	"TEST"
 #define	INS_WAIT	"WAIT"

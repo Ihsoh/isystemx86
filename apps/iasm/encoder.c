@@ -1899,6 +1899,25 @@ void EncodeLIDT_Mem1632(uchar Reg1,
 }
 
 /*
+	LMSW
+*/
+void EncodeLMSW_Reg16(uchar Reg16)
+{
+	Opcode3B_Reg(OPCODE_LMSW_REG16, Reg16);
+	InstructionEnd();
+}
+
+void EncodeLMSW_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_LMSW_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+/*
 	LODSB
 */
 void EncodeLODSB(void)
@@ -1914,6 +1933,35 @@ void EncodeLODSW(void)
 {
 	InstructionPrefix();
 	ToBuffer(OPCODE_LODSB);
+	InstructionEnd();
+}
+
+/*
+	LODSD
+*/
+void EncodeLODSD(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_LODSD);
+	InstructionEnd();
+}
+
+/*
+	LTR
+*/
+void EncodeLTR_Reg16(uchar Reg16)
+{
+	Opcode3B_Reg(OPCODE_LTR_REG16, Reg16);
+	InstructionEnd();
+}
+
+void EncodeLTR_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_LTR_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
 
@@ -2911,9 +2959,65 @@ DefineEncodeSHxD(SHLD);
 */
 DefineEncodeSHxD(SHRD);
 
+/*
+	SIDT
+*/
+void EncodeSIDT_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_SIDT_MEM1632, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
 
+/*
+	SLDT
+*/
+void EncodeSLDT_Reg16(uchar Reg16)
+{
+	InstructionPrefix();
+	Opcode3B_Reg(OPCODE_SLDT_REG16, Reg16);
+	InstructionEnd();
+}
 
+void EncodeSLDT_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_SLDT_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
 
+/*
+	SMSW
+*/
+void EncodeSMSW_Reg16(uchar Reg16)
+{
+	InstructionPrefix();
+	Opcode3B_Reg(OPCODE_SMSW_REG16, Reg16);
+	InstructionEnd();
+}
+
+void EncodeSMSW_Reg32(uchar Reg32)
+{
+	InstructionPrefix();
+	Opcode3B_Reg(OPCODE_SMSW_REG32, Reg32);
+	InstructionEnd();
+}
+
+void EncodeSMSW_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_SMSW_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
 
 /*
 	STC
@@ -2958,6 +3062,36 @@ void EncodeSTOSW(void)
 {
 	InstructionPrefix();
 	ToBuffer(OPCODE_STOSW);
+	InstructionEnd();
+}
+
+/*
+	STOSD
+*/
+void EncodeSTOSD(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_STOSD);
+	InstructionEnd();
+}
+
+/*
+	STR
+*/
+void EncodeSTR_Reg16(uchar Reg16)
+{
+	InstructionPrefix();
+	Opcode3B_Reg(OPCODE_STR_REG16, Reg16);
+	InstructionEnd();
+}
+
+void EncodeSTR_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_STR_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
 

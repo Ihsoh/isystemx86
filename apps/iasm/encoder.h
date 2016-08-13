@@ -713,18 +713,30 @@ extern void EncodeLEA_Reg16_Mem(uchar Reg16,
 /*
 	LGDT
 */
-void EncodeLGDT_Mem1632(uchar Reg1,
-						uchar Reg2,
-						uchar OffType,
-						uint Off);
+extern void EncodeLGDT_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
 
 /*
 	LIDT
 */
-void EncodeLIDT_Mem1632(uchar Reg1,
-						uchar Reg2,
-						uchar OffType,
-						uint Off);
+extern void EncodeLIDT_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
+
+/*
+	LMSW
+*/
+extern void EncodeLMSW_Reg16(uchar Reg16);
+extern void EncodeLMSW_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
 
 /*
 	LODSB
@@ -735,7 +747,22 @@ extern void EncodeLODSB(void);
 	LODSW
 */
 extern void EncodeLODSW(void);
-								
+
+/*
+	LODSD
+*/
+extern void EncodeLODSD(void);
+
+/*
+	LTR
+*/
+extern void EncodeLTR_Reg16(uchar Reg16);
+extern void EncodeLTR_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
+
 /* 
 	MOV
 */
@@ -1198,8 +1225,35 @@ DeclareEncodeSHxD(SHLD)
 */
 DeclareEncodeSHxD(SHRD)
 
+/*
+	SIDT
+*/
+extern void EncodeSIDT_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
 
+/*
+	SLDT
+*/
+extern void EncodeSLDT_Reg16(uchar Reg16);
+extern void EncodeSLDT_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
 
+/*
+	SMSW
+*/
+extern void EncodeSMSW_Reg16(uchar Reg16);
+extern void EncodeSMSW_Reg32(uchar Reg32);
+extern void EncodeSMSW_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
 
 /*
 	STC
@@ -1225,6 +1279,21 @@ extern void EncodeSTOSB(void);
 	STOSW
 */
 extern void EncodeSTOSW(void);
+
+/*
+	STOSD
+*/
+extern void EncodeSTOSD(void);
+
+/*
+	STR
+*/
+extern void EncodeSTR_Reg16(uchar Reg16);
+extern void EncodeSTR_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
 
 /*
 	SUB

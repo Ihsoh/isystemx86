@@ -1626,6 +1626,11 @@ static int _Parse_1(char * Token)
 	{
 		EncodeLODSW();
 	}
+	/* OPCODE_LODSD */
+	else if(StringCmp(Token, INS_LODSD))
+	{
+		EncodeLODSD();
+	}
 	/* OPCODE_MOVSB */
 	else if(StringCmp(Token, INS_MOVSB))
 	{
@@ -2093,6 +2098,133 @@ static int _Parse_1(char * Token)
 	/* SHRD */
 	SHxD(SHRD)
 
+	/* SIDT */
+	else if(StringCmp(Token, INS_SIDT))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeSIDT_Mem1632(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* SLDT */
+	else if(StringCmp(Token, INS_SLDT))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsReg(OPRD) && IsReg16(OPRD))
+		{
+			EncodeSLDT_Reg16(GetReg(OPRD));
+		}
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeSLDT_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* SMSW */
+	else if(StringCmp(Token, INS_SMSW))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsReg(OPRD) && IsReg16(OPRD))
+		{
+			EncodeSMSW_Reg16(GetReg(OPRD));
+		}
+		else if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeSMSW_Reg32(GetReg(OPRD));
+		}
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeSMSW_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* STR */
+	else if(StringCmp(Token, INS_STR))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsReg(OPRD) && IsReg16(OPRD))
+		{
+			EncodeSTR_Reg16(GetReg(OPRD));
+		}
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeSTR_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* LTR */
+	else if(StringCmp(Token, INS_LTR))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsReg(OPRD) && IsReg16(OPRD))
+		{
+			EncodeLTR_Reg16(GetReg(OPRD));
+		}
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeLTR_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* LMSW */
+	else if(StringCmp(Token, INS_LMSW))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsReg(OPRD) && IsReg16(OPRD))
+		{
+			EncodeLMSW_Reg16(GetReg(OPRD));
+		}
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeLMSW_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+
 	else
 	{
 		return 0;
@@ -2211,7 +2343,7 @@ static void _Parse(void)
 				EncodeDD(0);
 			}
 		}
-		else if(StringCmp(Token, INS_STR))
+		else if(StringCmp(Token, INS_STRING))
 		{
 			char String[STRING_SIZE];
 			char OPRD[STRING_SIZE];
@@ -2850,6 +2982,11 @@ static void _Parse(void)
 		else if(StringCmp(Token, INS_STOSW))
 		{
 			EncodeSTOSW();
+		}
+		/* OPCODE_STOSD */
+		else if(StringCmp(Token, INS_STOSD))
+		{
+			EncodeSTOSD();
 		}
 		/* OPCODE_WAIT */
 		else if(StringCmp(Token, INS_WAIT))
