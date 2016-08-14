@@ -1947,6 +1947,59 @@ void EncodeLODSD(void)
 }
 
 /*
+	LSL
+*/
+void EncodeLSL_Reg16_Reg16(
+	uchar DstReg,
+	uchar SrcReg)
+{
+	InstructionPrefix();
+	uint Opcode = OPCODE_LSL;
+	Opcode |= ((uint)DstReg << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, SrcReg);
+	InstructionEnd();
+}
+
+void EncodeLSL_Reg16_Mem16(
+	uchar DstReg,
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	InstructionPrefix();
+	uint Opcode = OPCODE_LSL;
+	Opcode |= ((uint)DstReg << 3) & 0xFF;
+	Opcode3B_Mem_X(Opcode, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeLSL_Reg32_Reg32(
+	uchar DstReg,
+	uchar SrcReg)
+{
+	InstructionPrefix();
+	uint Opcode = OPCODE_LSL;
+	Opcode |= ((uint)DstReg << 3) & 0xFF;
+	Opcode3B_Reg(Opcode, SrcReg);
+	InstructionEnd();
+}
+
+void EncodeLSL_Reg32_Mem16(
+	uchar DstReg,
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off)
+{
+	InstructionPrefix();
+	uint Opcode = OPCODE_LSL;
+	Opcode |= ((uint)DstReg << 3) & 0xFF;
+	Opcode3B_Mem_X(Opcode, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+/*
 	LTR
 */
 void EncodeLTR_Reg16(uchar Reg16)
@@ -2341,6 +2394,16 @@ void EncodeMOVSW(void)
 }
 
 /*
+	MOVSD
+*/
+void EncodeMOVSD(void)
+{
+	InstructionPrefix();
+	ToBuffer(OPCODE_MOVSD);
+	InstructionEnd();
+}
+
+/*
 	MUL
 */
 void EncodeMUL_Reg8(uchar Reg8)
@@ -2401,15 +2464,6 @@ void EncodeNEG_Reg8(uchar Reg8)
 	InstructionEnd();
 }
 
-void EncodeNEG_Mem8(uchar Reg1, 
-					uchar Reg2, 
-					uint OffType, 
-					uint Off)
-{
-	OpcodeW_Mem_X(OPCODE_NEG_MEM8, Reg1, Reg2, OffType, Off, 0, 0);
-	InstructionEnd();
-}
-
 void EncodeNEG_Reg16(uchar Reg16)
 {
 	InstructionPrefix();
@@ -2417,13 +2471,42 @@ void EncodeNEG_Reg16(uchar Reg16)
 	InstructionEnd();
 }
 
-void EncodeNEG_Mem16(	uchar Reg1, 
-						uchar Reg2, 
-						uint OffType, 
-						uint Off)
+void EncodeNEG_Reg32(uchar Reg32)
+{
+	InstructionPrefix();
+	OpcodeW_Reg(OPCODE_NEG_REG32, Reg32);
+	InstructionEnd();
+}
+
+void EncodeNEG_Mem8(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	OpcodeW_Mem_X(OPCODE_NEG_MEM8, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeNEG_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
 {
 	InstructionPrefix();
 	OpcodeW_Mem_X(OPCODE_NEG_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeNEG_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_NEG_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
 
@@ -2445,15 +2528,6 @@ void EncodeNOT_Reg8(uchar Reg8)
 	InstructionEnd();
 }
 
-void EncodeNOT_Mem8(uchar Reg1, 
-					uchar Reg2, 
-					uint OffType, 
-					uint Off)
-{
-	OpcodeW_Mem_X(OPCODE_NOT_MEM8, Reg1, Reg2, OffType, Off, 0, 0);
-	InstructionEnd();
-}
-
 void EncodeNOT_Reg16(uchar Reg16)
 {
 	InstructionPrefix();
@@ -2461,13 +2535,42 @@ void EncodeNOT_Reg16(uchar Reg16)
 	InstructionEnd();
 }
 
-void EncodeNOT_Mem16(	uchar Reg1, 
-						uchar Reg2, 
-						uint OffType, 
-						uint Off)
+void EncodeNOT_Reg32(uchar Reg32)
+{
+	InstructionPrefix();
+	OpcodeW_Reg(OPCODE_NOT_REG32, Reg32);
+	InstructionEnd();
+}
+
+void EncodeNOT_Mem8(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	OpcodeW_Mem_X(OPCODE_NOT_MEM8, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeNOT_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
 {
 	InstructionPrefix();
 	OpcodeW_Mem_X(OPCODE_NOT_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeNOT_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_NOT_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
 

@@ -1641,6 +1641,11 @@ static int _Parse_1(char * Token)
 	{
 		EncodeMOVSW();
 	}
+	/* OPCODE_MOVSD */
+	else if(StringCmp(Token, INS_MOVSD))
+	{
+		EncodeMOVSD();
+	}
 	else if(StringCmp(Token, INS_MUL INS_BYTE))
 	{
 		char OPRD[OPRD_SIZE];
@@ -1761,6 +1766,28 @@ static int _Parse_1(char * Token)
 			InvalidInstruction();
 		}
 	}
+	else if(StringCmp(Token, INS_NEG INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		/* OPCODE_NEG_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeNEG_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_NEG_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeNEG_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
 	/* OPCODE_NOP */
 	else if(StringCmp(Token, INS_NOP))
 		EncodeNOP();
@@ -1806,6 +1833,28 @@ static int _Parse_1(char * Token)
 			
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodeNOT_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	else if(StringCmp(Token, INS_NOT INS_DWORD))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		/* OPCODE_NOT_REG32 */
+		if(IsReg(OPRD) && IsReg32(OPRD))
+		{
+			EncodeNOT_Reg32(GetReg(OPRD));
+		}
+		/* OPCODE_NOT_MEM32 */
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeNOT_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
 		}
 		else
 		{
@@ -2218,6 +2267,23 @@ static int _Parse_1(char * Token)
 			uint Offset;
 			GetMem(OPRD, &Reg1, &Reg2, &Offset);
 			EncodeLMSW_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	/* LSL */
+	else if(StringCmp(Token, INS_LSL))
+	{
+		char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+		GET_TOKEN(OPRD1);
+		GET_TOKEN(OPRD2);
+		ExpectComma(OPRD2);
+		GET_TOKEN(OPRD2);
+		if(IsReg(OPRD1) && IsReg16(OPRD1) && IsReg(OPRD2) && IsReg16(OPRD2))
+		{
+			EncodeLSL_Reg16_Reg16(GetReg(OPRD1), GetReg(OPRD2));
 		}
 		else
 		{

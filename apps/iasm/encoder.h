@@ -538,12 +538,6 @@ extern void EncodeBSR_Reg32_Mem32(	uchar DstReg,
 									uint OffType,
 									uint Off);
 
-
-
-
-
-
-
 /*
 	CBW
 */
@@ -754,6 +748,28 @@ extern void EncodeLODSW(void);
 extern void EncodeLODSD(void);
 
 /*
+	LSL
+*/
+extern void EncodeLSL_Reg16_Reg16(
+	uchar DstReg,
+	uchar SrcReg);
+extern void EncodeLSL_Reg16_Mem16(
+	uchar DstReg,
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
+extern void EncodeLSL_Reg32_Reg32(
+	uchar DstReg,
+	uchar SrcReg);
+extern void EncodeLSL_Reg32_Mem16(
+	uchar DstReg,
+	uchar Reg1,
+	uchar Reg2,
+	uchar OffType,
+	uint Off);
+
+/*
 	LTR
 */
 extern void EncodeLTR_Reg16(uchar Reg16);
@@ -875,16 +891,24 @@ extern void EncodeMUL_Mem32(uchar Reg1,
 	NEG
 */
 extern void EncodeNEG_Reg8(uchar Reg8);
-extern void EncodeNEG_Mem8(	uchar Reg1, 
-							uchar Reg2, 
-							uint OffType, 
-							uint Off);
 extern void EncodeNEG_Reg16(uchar Reg16);
-extern void EncodeNEG_Mem16(uchar Reg1, 
-							uchar Reg2, 
-							uint OffType, 
-							uint Off);
-							
+extern void EncodeNEG_Reg32(uchar Reg32);
+extern void EncodeNEG_Mem8(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeNEG_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeNEG_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+						
 /*
 	NOP
 */
@@ -894,16 +918,24 @@ extern void EncodeNOP(void);
 	NOT
 */
 extern void EncodeNOT_Reg8(uchar Reg8);
-extern void EncodeNOT_Mem8(	uchar Reg1, 
-							uchar Reg2, 
-							uint OffType, 
-							uint Off);
 extern void EncodeNOT_Reg16(uchar Reg16);
-extern void EncodeNOT_Mem16(uchar Reg1, 
-							uchar Reg2, 
-							uint OffType, 
-							uint Off);
-							
+extern void EncodeNOT_Reg32(uchar Reg32);
+extern void EncodeNOT_Mem8(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeNOT_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeNOT_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+				
 /*
 	OR
 */
