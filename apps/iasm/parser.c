@@ -1206,6 +1206,23 @@ static int _Parse_1(char * Token)
 			InvalidInstruction();
 		}
 	}
+	/* ENTER */
+	else if(StringCmp(Token, INS_ENTER))
+	{
+		char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+		GET_TOKEN(OPRD1);
+		GET_TOKEN(OPRD2);
+		ExpectComma(OPRD2);
+		GET_TOKEN(OPRD2);
+		if(IsConstant(OPRD1) && IsConstant(OPRD2))
+		{
+			EncodeENTER_Imm16_Imm8(GetConstant(OPRD1), GetConstant(OPRD2));
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
 	/* OPCODE_HLT */
 	else if(StringCmp(Token, INS_HLT))
 	{
@@ -1578,6 +1595,10 @@ static int _Parse_1(char * Token)
 		{
 			InvalidInstruction();
 		}
+	}
+	else if(StringCmp(Token, INS_LEAVE))
+	{
+		EncodeLEAVE();
 	}
 	else if(StringCmp(Token, INS_LGDT))
 	{

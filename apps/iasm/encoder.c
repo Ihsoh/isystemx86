@@ -1604,6 +1604,20 @@ void EncodeDIV_Mem32(uchar Reg1, uchar Reg2, uint OffType, uint Off)
 }
 
 /*
+	ENTER
+*/
+void EncodeENTER_Imm16_Imm8(
+	uchar imm16,
+	uchar imm8)
+{
+	ToBuffer(OPCODE_ENTER_IMM16_IMM8);
+	ToBuffer((uchar)imm16);
+	ToBuffer((uchar)(imm16 >> 8));
+	ToBuffer(imm8);
+	InstructionEnd();
+}
+
+/*
 	HLT
 */
 void EncodeHLT(void)
@@ -1871,6 +1885,15 @@ void EncodeLEA_Reg16_Mem(	uchar Reg16,
 {
 	InstructionPrefix();
 	OpcodeW_Reg16_Mem16(OPCODE_LEA_REG16_MEM, Reg16, Reg1, Reg2, OffType, Off);
+	InstructionEnd();
+}
+
+/*
+	LEAVE
+*/
+void EncodeLEAVE(void)
+{
+	ToBuffer(OPCODE_LEAVE);
 	InstructionEnd();
 }
 

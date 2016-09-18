@@ -609,6 +609,13 @@ extern void EncodeDIV_Mem16(uchar Reg1, uchar Reg2, uint OffType, uint Off);
 extern void EncodeDIV_Mem32(uchar Reg1, uchar Reg2, uint OffType, uint Off);
 
 /*
+	ENTER
+*/
+extern void EncodeENTER_Imm16_Imm8(
+	uchar imm16,
+	uchar imm8);
+
+/*
 	HLT
 */
 extern void EncodeHLT(void);
@@ -703,6 +710,11 @@ extern void EncodeLEA_Reg16_Mem(uchar Reg16,
 								uchar Reg2,
 								uint OffType,
 								uint Off);
+
+/*
+	LEAVE
+*/
+extern void EncodeLEAVE(void);
 
 /*
 	LGDT
