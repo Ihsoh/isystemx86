@@ -2311,6 +2311,46 @@ static int _Parse_1(char * Token)
 			InvalidInstruction();
 		}
 	}
+	else if(StringCmp(Token, INS_VERR))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsReg(OPRD) && IsReg16(OPRD))
+		{
+			EncodeVERR_Reg16(GetReg(OPRD));
+		}
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeVERR_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
+	else if(StringCmp(Token, INS_VERW))
+	{
+		char OPRD[OPRD_SIZE];
+		GET_TOKEN(OPRD);
+		if(IsReg(OPRD) && IsReg16(OPRD))
+		{
+			EncodeVERW_Reg16(GetReg(OPRD));
+		}
+		else if(IsMem(OPRD))
+		{
+			uchar Reg1, Reg2;
+			uint Offset;
+			GetMem(OPRD, &Reg1, &Reg2, &Offset);
+			EncodeVERW_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+		}
+		else
+		{
+			InvalidInstruction();
+		}
+	}
 
 	else
 	{

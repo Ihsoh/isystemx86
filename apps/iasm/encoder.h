@@ -1350,6 +1350,26 @@ DeclareEncodeOpt_X_X(SUB)
 DeclareEncodeOpt_X_X(TEST)
 
 /*
+	VERR
+*/
+extern void EncodeVERR_Reg16(uchar reg);
+extern void EncodeVERR_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+/*
+	VERW
+*/
+extern void EncodeVERW_Reg16(uchar Reg);
+extern void EncodeVERW_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+/*
 	WAIT
 */
 extern void EncodeWAIT(void);

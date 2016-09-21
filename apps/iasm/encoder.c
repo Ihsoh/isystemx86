@@ -3232,6 +3232,40 @@ DefineEncodeOpt_X_X(SUB)
 DefineEncodeOpt_X_X(TEST)
 
 /*
+	VERR
+*/
+void EncodeVERR_Reg16(uchar Reg)
+{
+	Opcode3B_Reg(OPCODE_VERR_REG16, Reg);
+}
+
+void EncodeVERR_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_VERR_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+}
+
+/*
+	VERW
+*/
+void EncodeVERW_Reg16(uchar Reg)
+{
+	Opcode3B_Reg(OPCODE_VERW_REG16, Reg);
+}
+
+void EncodeVERW_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	Opcode3B_Mem_X(OPCODE_VERW_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+}
+
+/*
 	WAIT
 */
 void EncodeWAIT(void)

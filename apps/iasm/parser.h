@@ -206,6 +206,8 @@
 #define	INS_STR		"STR"
 #define	INS_SUB		"SUB"
 #define	INS_TEST	"TEST"
+#define	INS_VERR	"VERR"
+#define	INS_VERW	"VERW"
 #define	INS_WAIT	"WAIT"
 #define	INS_XCHG	"XCHG"
 #define	INS_XLAT	"XLAT"
