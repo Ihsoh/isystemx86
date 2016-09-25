@@ -2351,6 +2351,14 @@ static int _Parse_1(char * Token)
 			InvalidInstruction();
 		}
 	}
+	else if(StringCmp(Token, INS_WBINVD))
+	{
+		EncodeWBINVD();
+	}
+	else if(StringCmp(Token, INS_WRMSR))
+	{
+		EncodeWRMSR();
+	}
 
 	else
 	{

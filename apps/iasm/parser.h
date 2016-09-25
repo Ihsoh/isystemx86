@@ -209,6 +209,9 @@
 #define	INS_VERR	"VERR"
 #define	INS_VERW	"VERW"
 #define	INS_WAIT	"WAIT"
+#define	INS_WBINVD	"WBINVD"
+#define	INS_WRMSR	"WRMSR"
+
 #define	INS_XCHG	"XCHG"
 #define	INS_XLAT	"XLAT"
 #define	INS_XOR		"XOR"

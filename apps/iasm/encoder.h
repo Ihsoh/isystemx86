@@ -5,7 +5,9 @@
 
 extern void InitEncoder(void);
 extern void DestroyEncoder(void);
+extern void EnableListing(void);
 extern void SaveToFile(char * Filename);
+extern void SaveListingToFile(char * Filename);
 extern void ResetEncoder(void);
 extern uint GetCurrentPos(void);
 extern void SwitchToBit16(void);
@@ -128,13 +130,6 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 	extern void Encode##Opt##_Acc8_Imm8(uchar Imm8);	\
 	extern void Encode##Opt##_Acc16_Imm16(uint Imm16);	\
 	extern void Encode##Opt##_Acc32_Imm32(uint Imm32);	\
-	extern void Encode##Opt##_Reg_Imm8(uint RegW, uchar Reg, uchar Imm8);	\
-	extern void Encode##Opt##_Mem_Imm8(	uint RegW,	\
-										uchar Reg1,	\
-										uchar Reg2,	\
-										uint OffType,	\
-										uint Off,	\
-										uchar Imm8);	\
 	extern void Encode##Opt##_Reg8_Imm8(uchar Reg8, uchar Imm8);	\
 	extern void Encode##Opt##_Reg16_Imm16(uchar Reg16, uint Imm16);	\
 	extern void Encode##Opt##_Reg32_Imm32(uchar Reg32, uint Imm32);	\
@@ -157,17 +152,25 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 #define	DefineEncodeOpt_X_X(Opt)	\
 	void Encode##Opt##_Reg8_Reg8(uchar DstReg, uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
 		EncodeOpt_Reg8_Reg8(OPCODE_##Opt##_REG8_REG8, DstReg, SrcReg);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg16_Reg16(uchar DstReg, uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit16();	\
 		InstructionPrefix();	\
 		EncodeOpt_Reg16_Reg16(OPCODE_##Opt##_REG16_REG16, DstReg, SrcReg);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg32_Reg32(uchar DstReg, uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit32();	\
 		InstructionPrefix();	\
 		EncodeOpt_Reg32_Reg32(OPCODE_##Opt##_REG32_REG32, DstReg, SrcReg);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Mem8_Reg8(	uchar Reg1,	\
 									uchar Reg2,	\
@@ -175,7 +178,9 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint Off,	\
 									uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
 		EncodeOpt_Mem8_Reg8(OPCODE_##Opt##_MEM8_REG8, Reg1, Reg2, OffType, Off, SrcReg);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Mem16_Reg16(	uchar Reg1,	\
 									uchar Reg2,	\
@@ -183,8 +188,11 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint Off,	\
 									uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit16();	\
 		InstructionPrefix();	\
 		EncodeOpt_Mem16_Reg16(OPCODE_##Opt##_MEM16_REG16, Reg1, Reg2, OffType, Off, SrcReg);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Mem32_Reg32(	uchar Reg1,	\
 									uchar Reg2,	\
@@ -192,8 +200,11 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint Off,	\
 									uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit32();	\
 		InstructionPrefix();	\
 		EncodeOpt_Mem32_Reg32(OPCODE_##Opt##_MEM32_REG32, Reg1, Reg2, OffType, Off, SrcReg);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg8_Mem8(	uchar DstReg,	\
 									uchar Reg1,	\
@@ -201,7 +212,9 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint OffType,	\
 									uint Off)	\
 	{	\
+		InstructionBegin();	\
 		EncodeOpt_Reg8_Mem8(OPCODE_##Opt##_REG8_MEM8, DstReg, Reg1, Reg2, OffType, Off);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg16_Mem16(	uchar DstReg,	\
 									uchar Reg1,	\
@@ -209,8 +222,11 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint OffType,	\
 									uint Off)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit16();	\
 		InstructionPrefix();	\
 		EncodeOpt_Reg16_Mem16(OPCODE_##Opt##_REG16_MEM16, DstReg, Reg1, Reg2, OffType, Off);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg32_Mem32(	uchar DstReg,	\
 									uchar Reg1,	\
@@ -218,57 +234,55 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint OffType,	\
 									uint Off)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit32();	\
 		InstructionPrefix();	\
 		EncodeOpt_Reg32_Mem32(OPCODE_##Opt##_REG32_MEM32, DstReg, Reg1, Reg2, OffType, Off);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Acc8_Imm8(uchar Imm8)	\
 	{	\
+		InstructionBegin();	\
 		EncodeOpt_Acc8_Imm8(OPCODE_##Opt##_ACC8_IMM8, Imm8);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Acc16_Imm16(uint Imm16)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit16();	\
 		InstructionPrefix();	\
 		EncodeOpt_Acc16_Imm16(OPCODE_##Opt##_ACC16_IMM16, Imm16);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Acc32_Imm32(uint Imm32)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit32();	\
 		InstructionPrefix();	\
 		EncodeOpt_Acc32_Imm32(OPCODE_##Opt##_ACC32_IMM32, Imm32);	\
-	}	\
-	void Encode##Opt##_Reg_Imm8(uint RegW, uchar Reg, uchar Imm)	\
-	{	\
-		if(RegW)	\
-		{	\
-			InstructionPrefix();	\
-		}	\
-		EncodeOpt_Reg_Imm8(OPCODE_##Opt##_REG_IMM8, RegW, Reg, Imm);	\
-	}	\
-	void Encode##Opt##_Mem_Imm8(uint RegW, 	\
-								uchar Reg1, \
-								uchar Reg2, 	\
-								uint OffType, 	\
-								uint Off, 	\
-								uchar Imm8)	\
-	{	\
-		if(RegW)	\
-		{	\
-			InstructionPrefix();	\
-		}	\
-		EncodeOpt_Mem_Imm8(OPCODE_##Opt##_MEM_IMM8, RegW, Reg1, Reg2, OffType, Off, Imm8);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg8_Imm8(uchar Reg8, uchar Imm8)	\
 	{	\
+		InstructionBegin();	\
 		EncodeOpt_Reg8_Imm8(OPCODE_##Opt##_REG8_IMM8, Reg8, Imm8);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg16_Imm16(uchar Reg16, uint Imm16)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit16();	\
 		InstructionPrefix();	\
 		EncodeOpt_Reg16_Imm16(OPCODE_##Opt##_REG16_IMM16, Reg16, Imm16);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Reg32_Imm32(uchar Reg32, uint Imm32)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit32();	\
 		InstructionPrefix();	\
 		EncodeOpt_Reg32_Imm32(OPCODE_##Opt##_REG32_IMM32, Reg32, Imm32);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Mem8_Imm8(	uchar Reg1,	\
 									uchar Reg2,	\
@@ -276,7 +290,9 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint Off,	\
 									uchar Imm8)	\
 	{	\
+		InstructionBegin();	\
 		EncodeOpt_Mem8_Imm8(OPCODE_##Opt##_MEM8_IMM8, Reg1, Reg2, OffType, Off, Imm8);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Mem16_Imm16(	uchar Reg1,	\
 									uchar Reg2,	\
@@ -284,8 +300,11 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint Off,	\
 									uint Imm16)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit16();	\
 		InstructionPrefix();	\
 		EncodeOpt_Mem16_Imm16(OPCODE_##Opt##_MEM16_IMM16, Reg1, Reg2, OffType, Off, Imm16);	\
+		InstructionEnd();	\
 	}	\
 	void Encode##Opt##_Mem32_Imm32(	uchar Reg1,	\
 									uchar Reg2,	\
@@ -293,8 +312,11 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint Off,	\
 									uint Imm32)	\
 	{	\
+		InstructionBegin();	\
+		SwitchOprdToBit32();	\
 		InstructionPrefix();	\
 		EncodeOpt_Mem32_Imm32(OPCODE_##Opt##_MEM32_IMM32, Reg1, Reg2, OffType, Off, Imm32);	\
+		InstructionEnd();	\
 	}
 	
 #define	DeclareEncodeShift_X_X(Shift)	\
@@ -314,68 +336,80 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 #define	DefineEncodeShift_X_X(Shift)	\
 	void Encode##Shift##_Reg8_1(uchar Reg8)	\
 	{	\
+		InstructionBegin();	\
 		OpcodeW_Reg(OPCODE_##Shift##_REG8_1, Reg8);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Reg16_1(uchar Reg16)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Reg(OPCODE_##Shift##_REG16_1, Reg16);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Reg32_1(uchar Reg32)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Reg(OPCODE_##Shift##_REG32_1, Reg32);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Mem8_1(uchar Reg1, uchar Reg2, uint OffType, uint Off)	\
 	{	\
+		InstructionBegin();	\
 		OpcodeW_Mem_X(OPCODE_##Shift##_MEM8_1, Reg1, Reg2, OffType, Off, 0, 0);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Mem16_1(uchar Reg1, uchar Reg2, uint OffType, uint Off)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Mem_X(OPCODE_##Shift##_MEM16_1, Reg1, Reg2, OffType, Off, 0, 0);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Mem32_1(uchar Reg1, uchar Reg2, uint OffType, uint Off)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Mem_X(OPCODE_##Shift##_MEM32_1, Reg1, Reg2, OffType, Off, 0, 0);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Reg8_CL(uchar Reg8)	\
 	{	\
+		InstructionBegin();	\
 		OpcodeW_Reg(OPCODE_##Shift##_REG8_CL, Reg8);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Reg16_CL(uchar Reg16)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Reg(OPCODE_##Shift##_REG16_CL, Reg16);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Reg32_CL(uchar Reg32)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Reg(OPCODE_##Shift##_REG32_CL, Reg32);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Mem8_CL(uchar Reg1, uchar Reg2, uint OffType, uint Off)	\
 	{	\
+		InstructionBegin();	\
 		OpcodeW_Mem_X(OPCODE_##Shift##_MEM8_CL, Reg1, Reg2, OffType, Off, 0, 0);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Mem16_CL(uchar Reg1, uchar Reg2, uint OffType, uint Off)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Mem_X(OPCODE_##Shift##_MEM16_CL, Reg1, Reg2, OffType, Off, 0, 0);	\
 		InstructionEnd();	\
 	}	\
 	void Encode##Shift##_Mem32_CL(uchar Reg1, uchar Reg2, uint OffType, uint Off)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		OpcodeW_Mem_X(OPCODE_##Shift##_MEM32_CL, Reg1, Reg2, OffType, Off, 0, 0);	\
 		InstructionEnd();	\
@@ -1167,6 +1201,7 @@ extern void EncodeSGDT_Mem1632(
 		uchar SrcReg,	\
 		uint Imm8)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_REG16_REG16_IMM8;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1178,6 +1213,7 @@ extern void EncodeSGDT_Mem1632(
 		uchar SrcReg,	\
 		uint Imm8)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_REG32_REG32_IMM8;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1192,6 +1228,7 @@ extern void EncodeSGDT_Mem1632(
 		uchar SrcReg,	\
 		uint Imm8)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_MEM16_REG16_IMM8;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1206,6 +1243,7 @@ extern void EncodeSGDT_Mem1632(
 		uchar SrcReg,	\
 		uint Imm8)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_MEM32_REG32_IMM8;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1216,6 +1254,7 @@ extern void EncodeSGDT_Mem1632(
 		uchar DstReg,	\
 		uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_REG16_REG16_CL;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1226,6 +1265,7 @@ extern void EncodeSGDT_Mem1632(
 		uchar DstReg,	\
 		uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_REG32_REG32_CL;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1239,6 +1279,7 @@ extern void EncodeSGDT_Mem1632(
 		uint Off,	\
 		uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_MEM16_REG16_CL;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1252,6 +1293,7 @@ extern void EncodeSGDT_Mem1632(
 		uint Off,	\
 		uchar SrcReg)	\
 	{	\
+		InstructionBegin();	\
 		InstructionPrefix();	\
 		uint Opcode = OPCODE_##Ins##_MEM32_REG32_CL;	\
 		Opcode |= ((uint)SrcReg << 3) & 0xFF;	\
@@ -1373,6 +1415,16 @@ extern void EncodeVERW_Mem16(
 	WAIT
 */
 extern void EncodeWAIT(void);
+
+/*
+	WBINVD	
+*/
+extern void EncodeWBINVD(void);
+
+/*
+	WRMSR
+*/
+extern void EncodeWRMSR(void);
 
 /*
 	XCHG
