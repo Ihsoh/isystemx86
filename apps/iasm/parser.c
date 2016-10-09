@@ -3245,32 +3245,107 @@ static void _Parse(void)
 			GET_TOKEN(OPRD);
 			EncodeRET_Imm16Far(GetConstant(OPRD));
 		}
-		/* OPCODE_CALL_MEMFAR */
-		else if(StringCmp(Token, INS_CALL INS_FAR))
-		{
-			char OPRD[OPRD_SIZE];
-			uchar Reg1, Reg2;
-			uint Offset;
-			
-			GET_TOKEN(OPRD);
-			if(!IsMem(OPRD))
-			{
-				ERROR("Invalid " INS_CALL INS_FAR ".");
-			}
-			GetMem(OPRD, &Reg1, &Reg2, &Offset);
-			EncodeCALL_MemFar(Reg1, Reg2, GetOffType(Offset), Offset);
-		}
-		/* OPCODE_CALL_NEAR */
+		/* CALLN */
 		else if(StringCmp(Token, INS_CALL INS_NEAR))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Offset;
-			uint CurrentPos = GetCurrentPos();
-			
 			GET_TOKEN(OPRD);
-			Offset = GetConstant(OPRD);
-			Offset = Offset - (CurrentPos + 3);
-			EncodeCALL_Near(Offset);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				if (IsBit16())
+				{
+					uint Offset = GetConstant(OPRD) - (CurrentPos + 3);
+					EncodeCALL_Near_Rel16(Offset);
+				}
+				else if (IsBit32())
+				{
+					uint Offset = GetConstant(OPRD) - (CurrentPos + 5);
+					EncodeCALL_Near_Rel32(Offset);
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+			else if (IsMem(OPRD))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD, &Reg1, &Reg2, &Offset);
+				if (IsBit16())
+				{
+					EncodeCALL_Near_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else if (IsBit32())
+				{
+					EncodeCALL_Near_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		/* CALLF */
+		else if(StringCmp(Token, INS_CALL INS_FAR))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			PEEK_TOKEN(OPRD2);
+			if (StringCmp(OPRD2, ","))
+			{
+				GET_TOKEN(OPRD2);
+				ExpectComma(OPRD2);
+				GET_TOKEN(OPRD2);
+				if (IsConstant(OPRD1) && IsConstant(OPRD2))
+				{
+					uint Seg = GetConstant(OPRD1);
+					uint Offset = GetConstant(OPRD2);
+					if (IsBit16())
+					{
+						EncodeCALL_Far_Ptr1616(Seg, Offset);
+					}
+					else if (IsBit32())
+					{
+						EncodeCALL_Far_Ptr1632(Seg, Offset);
+					}
+					else
+					{
+						assert(0);
+					}
+				}
+				else
+				{
+					InvalidInstruction();
+				}
+			}
+			else if (IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				if (IsBit16())
+				{
+					Encode_CALL_Far_Mem1616(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else if (IsBit32())
+				{
+					Encode_CALL_Far_Mem1632(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
 		/* OPCODE_JCC_SHORT */
 		else if(ParseJcc(Token))

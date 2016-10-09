@@ -16,7 +16,7 @@
 static uchar * Buffer = NULL;
 static char * ListingBuffer = NULL;
 static uint ListingBufferLen = 0;
-static char InstructionBuffer[32];
+static char InstructionBuffer[2048];
 static uint InstructionByteCount = 0;
 static uint InstructionBeginPos = 0;
 static uint CurrentPos = 0;
@@ -71,18 +71,6 @@ void SaveToFile(char * Filename)
 {
 	assert(Filename != NULL);
 
-	uint ui, ui1;
-	for(ui = 0; ui < Offset / 16 + 1; ui++)
-	{
-		printf("%X: ", ui * 16);
-		for(ui1 = 0; ui1 < 16 && ui * 16 + ui1 < Offset; ui1++)
-		{
-			ILPrintUCharHex(Buffer[ui * 16 + ui1]);
-			ILPrintChar(' ');
-		}
-		printf("\n");
-	}
-
 	FILE * FilePtr = fopen(Filename, "wb");
 	if(FilePtr == NULL)
 	{
@@ -112,6 +100,16 @@ void ResetEncoder(void)
 uint GetCurrentPos(void)
 {
 	return CurrentPos;
+}
+
+int IsBit16(void)
+{
+	return Mode == _MODE_BIT16;
+}
+
+int IsBit32(void)
+{
+	return Mode == _MODE_BIT32;
 }
 
 void SwitchToBit16(void)
@@ -169,6 +167,20 @@ static void ToBuffer(uchar InsByte)
 	{
 		Error("Binary file is too big.");
 	}
+}
+
+static void ToBufferW(uint W)
+{
+	ToBuffer((uchar)W);
+	ToBuffer((uchar)(W >> 8));
+}
+
+static void ToBufferD(uint D)
+{
+	ToBuffer((uchar)D);
+	ToBuffer((uchar)(D >> 8));
+	ToBuffer((uchar)(D >> 16));
+	ToBuffer((uchar)(D >> 24));
 }
 
 static void InstructionBegin(void)
@@ -3673,22 +3685,96 @@ DefineEncodeOpt_X_X(XOR)
 /*
 	CALL
 */
-void EncodeCALL_MemFar(	uchar Reg1,
-						uchar Reg2,
-						uint OffType,
-						uint Off)
+
+void EncodeCALL_Near_Rel16(
+	uint Rel16)
 {
 	InstructionBegin();
-	OpcodeW_Mem_X(OPCODE_CALL_MEMFAR, Reg1, Reg2, OffType, Off, 0, 0);
+	ToBuffer(OPCODE_CALL_NEAR_REL16);
+	ToBufferW(Rel16);
 	InstructionEnd();
 }
 
-void EncodeCALL_Near(uint Offset)
+void EncodeCALL_Near_Rel32(
+	uint Rel32)
 {
 	InstructionBegin();
-	ToBuffer(OPCODE_CALL_NEAR);
-	ToBuffer((uchar)Offset);
-	ToBuffer((uchar)(Offset >> 8));
+	ToBuffer(OPCODE_CALL_NEAR_REL32);
+	ToBufferD(Rel32);
+	InstructionEnd();
+}
+
+void EncodeCALL_Near_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit16();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_CALL_NEAR_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeCALL_Near_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit32();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_CALL_NEAR_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeCALL_Far_Ptr1616(
+	uint Seg,
+	uint Offset)
+{
+	InstructionBegin();
+	ToBuffer(OPCODE_CALL_FAR_PTR1616);
+	ToBufferW(Offset);
+	ToBufferW(Seg);
+	InstructionEnd();
+}
+
+void EncodeCALL_Far_Ptr1632(
+	uint Seg,
+	uint Offset)
+{
+	InstructionBegin();
+	ToBuffer(OPCODE_CALL_FAR_PTR1632);
+	ToBufferD(Offset);
+	ToBufferW(Seg);
+	InstructionEnd();
+}
+
+void Encode_CALL_Far_Mem1616(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit16();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_CALL_FAR_MEM1616, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void Encode_CALL_Far_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit32();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_CALL_FAR_MEM1632, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
 

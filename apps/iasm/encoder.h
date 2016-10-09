@@ -9,6 +9,8 @@ extern void EnableListing(void);
 extern void SaveToFile(char * Filename);
 extern void SaveListingToFile(char * Filename);
 extern void ResetEncoder(void);
+extern int IsBit16(void);
+extern int IsBit32(void);
 extern uint GetCurrentPos(void);
 extern void SwitchToBit16(void);
 extern void SwitchToBit32(void);
@@ -1467,11 +1469,36 @@ DeclareEncodeOpt_X_X(XOR)
 /*
 	CALL
 */
-extern void EncodeCALL_MemFar(	uchar Reg1,
-								uchar Reg2,
-								uint OffType,
-								uint Off);
-extern void EncodeCALL_Near(uint Offset);
+extern void EncodeCALL_Near_Rel16(
+	uint Rel16);
+extern void EncodeCALL_Near_Rel32(
+	uint Rel32);
+extern void EncodeCALL_Near_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeCALL_Near_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeCALL_Far_Ptr1616(
+	uint Seg,
+	uint Offset);
+extern void EncodeCALL_Far_Ptr1632(
+	uint Seg,
+	uint Offset);
+extern void Encode_CALL_Far_Mem1616(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void Encode_CALL_Far_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
 	
 /*
 	Jcc
