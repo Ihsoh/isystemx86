@@ -3351,29 +3351,123 @@ static void _Parse(void)
 		else if(ParseJcc(Token))
 		{
 		}
-		/* OPCODE_JMP_SHORT */
-		else if(StringCmp(Token, INS_JMP INS_SHORT))
+		/* JMPS  */
+		else if (StringCmp(Token, INS_JMP INS_SHORT))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Offset;
-			uint CurrentPos = GetCurrentPos();
-			
 			GET_TOKEN(OPRD);
-			Offset = GetConstant(OPRD);
-			Offset = Offset - (CurrentPos + 2);
-			EncodeJMP_SHORT(Offset);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				uint Offset = GetConstant(OPRD) - (CurrentPos + 2);
+				EncodeJMP_Near_Rel8(Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
-		/* OPCODE_JMP_NEAR */
-		else if(StringCmp(Token, INS_JMP INS_NEAR))
+		/* JMPN */
+		else if (StringCmp(Token, INS_JMP INS_NEAR))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Offset;
-			uint CurrentPos = GetCurrentPos();
-			
 			GET_TOKEN(OPRD);
-			Offset = GetConstant(OPRD);
-			Offset = Offset - (CurrentPos + 3);
-			EncodeJMP_NEAR(Offset);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				if (IsBit16())
+				{
+					uint Offset = GetConstant(OPRD) - (CurrentPos + 3);
+					EncodeJMP_Near_Rel16(Offset);
+				}
+				else if (IsBit32())
+				{
+					uint Offset = GetConstant(OPRD) - (CurrentPos + 5);
+					EncodeJMP_Near_Rel32(Offset);
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+			else if (IsMem(OPRD))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD, &Reg1, &Reg2, &Offset);
+				if (IsBit16())
+				{
+					EncodeJMP_Near_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else if (IsBit32())
+				{
+					EncodeJMP_Near_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		/* JMPF */
+		else if (StringCmp(Token, INS_JMP INS_FAR))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			PEEK_TOKEN(OPRD2);
+			if (StringCmp(OPRD2, ","))
+			{
+				GET_TOKEN(OPRD2);
+				ExpectComma(OPRD2);
+				GET_TOKEN(OPRD2);
+				if (IsConstant(OPRD1) && IsConstant(OPRD2))
+				{
+					uint Seg = GetConstant(OPRD1);
+					uint Offset = GetConstant(OPRD2);
+					if (IsBit16())
+					{
+						EncodeJMP_Far_Ptr1616(Seg, Offset);
+					}
+					else if (IsBit32())
+					{
+						EncodeJMP_Far_Ptr1632(Seg, Offset);
+					}
+					else
+					{
+						assert(0);
+					}
+				}
+				else
+				{
+					InvalidInstruction();
+				}
+			}
+			else if (IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				if (IsBit16())
+				{
+					Encode_JMP_Far_Mem1616(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else if (IsBit32())
+				{
+					Encode_JMP_Far_Mem1632(Reg1, Reg2, GetOffType(Offset), Offset);
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
 		/* OPCODE_JCXZ_SHORT */
 		else if(StringCmp(Token, INS_JCXZ))

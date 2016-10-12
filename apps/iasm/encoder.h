@@ -1508,9 +1508,39 @@ extern void EncodeJcc_SHORT(uchar CCCC, uchar Offset);
 /*
 	JMP
 */
-extern void EncodeJMP_SHORT(uchar Offset);
-extern void EncodeJMP_NEAR(uint Offset);
-		
+extern void EncodeJMP_Near_Rel8(
+	uint Rel8);
+extern void EncodeJMP_Near_Rel16(
+	uint Rel16);
+extern void EncodeJMP_Near_Rel32(
+	uint Rel32);
+extern void EncodeJMP_Near_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeJMP_Near_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeJMP_Far_Ptr1616(
+	uint Seg,
+	uint Offset);
+extern void EncodeJMP_Far_Ptr1632(
+	uint Seg,
+	uint Offset);
+extern void Encode_JMP_Far_Mem1616(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void Encode_JMP_Far_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
 /*
 	JCXZ
 */

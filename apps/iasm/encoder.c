@@ -3792,20 +3792,104 @@ void EncodeJcc_SHORT(uchar CCCC, uchar Offset)
 /*
 	JMP
 */
-void EncodeJMP_SHORT(uchar Offset)
+void EncodeJMP_Near_Rel8(
+	uint Rel8)
 {
 	InstructionBegin();
-	ToBuffer(OPCODE_JMP_SHORT);
-	ToBuffer(Offset);
+	ToBuffer(OPCODE_JMP_NEAR_REL8);
+	ToBuffer(Rel8);
 	InstructionEnd();
 }
 
-void EncodeJMP_NEAR(uint Offset)
+void EncodeJMP_Near_Rel16(
+	uint Rel16)
 {
 	InstructionBegin();
-	ToBuffer(OPCODE_JMP_NEAR);
-	ToBuffer((uchar)Offset);
-	ToBuffer((uchar)(Offset >> 8));
+	ToBuffer(OPCODE_JMP_NEAR_REL16);
+	ToBufferW(Rel16);
+	InstructionEnd();
+}
+
+void EncodeJMP_Near_Rel32(
+	uint Rel32)
+{
+	InstructionBegin();
+	ToBuffer(OPCODE_JMP_NEAR_REL32);
+	ToBufferD(Rel32);
+	InstructionEnd();
+}
+
+void EncodeJMP_Near_Mem16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit16();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_JMP_NEAR_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeJMP_Near_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit32();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_JMP_NEAR_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeJMP_Far_Ptr1616(
+	uint Seg,
+	uint Offset)
+{
+	InstructionBegin();
+	ToBuffer(OPCODE_JMP_FAR_PTR1616);
+	ToBufferW(Offset);
+	ToBufferW(Seg);
+	InstructionEnd();
+}
+
+void EncodeJMP_Far_Ptr1632(
+	uint Seg,
+	uint Offset)
+{
+	InstructionBegin();
+	ToBuffer(OPCODE_JMP_FAR_PTR1632);
+	ToBufferD(Offset);
+	ToBufferW(Seg);
+	InstructionEnd();
+}
+
+void Encode_JMP_Far_Mem1616(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit16();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_JMP_FAR_MEM1616, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void Encode_JMP_Far_Mem1632(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	SwitchOprdToBit32();
+	InstructionPrefix();
+	OpcodeW_Mem_X(OPCODE_JMP_FAR_MEM1632, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
 
