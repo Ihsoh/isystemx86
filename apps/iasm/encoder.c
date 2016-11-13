@@ -5,7 +5,7 @@
 
 #include <ilib/ilib.h>
 
-#define	_MAX_BUFFER_SIZE	(64 * 1024)
+#define	_MAX_BUFFER_SIZE			(64 * 1024)
 #define	_MAX_LISTING_BUFFER_SIZE	(64 * 1024)
 
 #define	_MODE_BIT16		1
@@ -3900,6 +3900,17 @@ void EncodeJCXZ_SHORT(uchar Offset)
 {
 	InstructionBegin();
 	ToBuffer(OPCODE_JCXZ_SHORT);
+	ToBuffer(Offset);
+	InstructionEnd();
+}
+
+/*
+	JECXZ
+*/
+void EncodeJECXZ_SHORT(uchar Offset)
+{
+	InstructionBegin();
+	ToBuffer(OPCODE_JECXZ_SHORT);
 	ToBuffer(Offset);
 	InstructionEnd();
 }

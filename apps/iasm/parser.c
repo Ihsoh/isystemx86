@@ -5,6 +5,8 @@
 #include "string.h"
 #include "reg.h"
 #include "opcode.h"
+#include "cexpr.h"
+#include "error.h"
 
 #include <ilib/ilib.h>
 
@@ -175,20 +177,14 @@ static int IsLabel(char * Token)
 {
 	assert(Token != NULL);
 
-	uint Len = GetStringLen(Token);
-	if(Len == 0)
-	{
-		return 0;
-	}
-
-	return (Token[0] >= 'A' && Token[0] <= 'Z') || (Token[0] >= 'a' && Token[0] <= 'z');
+	return IsValidLabelName(Token);
 }
 
-static int IsConstant(char * Token)
+int IsConstant(char * Token)
 {
 	assert(Token != NULL);
 
-	return IsNumber(Token) || IsLabel(Token);
+	return IsNumber(Token) || IsLabel(Token) || IsCExpr(Token);
 }
 
 static int IsMem(char * Token)
@@ -353,20 +349,39 @@ static uint Number(const char * S)
 	return N;
 }
 
-static uint GetConstant(char * Constant)
+uint GetConstant(char * Constant)
 {
 	assert(Constant != NULL);
 
-	if(IsNumber(Constant)) return Number(Constant);
-	else if(IsLabel(Constant))
+	if (IsNumber(Constant))
+	{
+		return Number(Constant);
+	}
+	else if (IsLabel(Constant))
 	{
 		int Found;
 		uint Value;
-		
-		if(CurrentOperation == OPT_SCAN) return 0;
+		if (CurrentOperation == OPT_SCAN && !HasLabel(Constant))
+		{
+			return 0;
+		}
 		Value = GetLabelOffsetFromSTable(Constant, &Found);
-		if(Found) return Value;
-		else ERROR("Unknow label");
+		if (Found)
+		{
+			return Value;
+		}
+		else
+		{
+			ERROR("Unknown label.");
+		}
+	}
+	else if (IsCExpr(Constant))
+	{
+		return GetCExprResult(Constant);
+	}
+	else
+	{
+		Error("Invalid constant.");
 	}
 }
 
@@ -2375,159 +2390,328 @@ static void _Parse(void)
 	{
 		GET_TOKEN(Token);
 		
-		if(StringCmp(Token, INS_EOF))
+		if(StringCmp(Token, PINS_EOF))
 		{
 			break;
 		}
-		else if(StringCmp(Token, INS_END))
+		else if(StringCmp(Token, PINS_END))
 		{
 			break;
 		}
-		else if(StringCmp(Token, INS_LF))
+		else if(StringCmp(Token, PINS_LF))
 		{
 		}
-		else if(StringCmp(Token, INS_DB))
-		{
-			char OPRD[OPRD_SIZE];
-			uint Byte;
-			
-			GET_TOKEN(OPRD);
-			Byte = GetConstant(OPRD);
-			EncodeDB((uchar)Byte);
-		}
-		else if(StringCmp(Token, INS_DW))
+		else if(StringCmp(Token, PINS_DB))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Word;
-			
 			GET_TOKEN(OPRD);
-			Word = GetConstant(OPRD);
-			EncodeDW(Word);
+			if (IsConstant(OPRD))
+			{
+				uint ByteData = GetConstant(OPRD);
+				EncodeDB(ByteData);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
-		else if(StringCmp(Token, INS_DD))
+		else if(StringCmp(Token, PINS_DW))
 		{
 			char OPRD[OPRD_SIZE];
-			uint DWord;
-			
 			GET_TOKEN(OPRD);
-			DWord = GetConstant(OPRD);
-			EncodeDD(DWord);
+			if (IsConstant(OPRD))
+			{
+				uint WordData = GetConstant(OPRD);
+				EncodeDW(WordData);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
-		else if(StringCmp(Token, INS_SET))
+		else if(StringCmp(Token, PINS_DD))
+		{
+			char OPRD[OPRD_SIZE];
+			GET_TOKEN(OPRD);
+			if (IsConstant(OPRD))
+			{
+				uint DWordData = GetConstant(OPRD);
+				EncodeDD(DWordData);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, PINS_SET))
 		{
 			char Label[OPRD_SIZE];
 			char Value[OPRD_SIZE];
-			
 			GET_TOKEN(Label);
 			GET_TOKEN(Value);
-			if(CurrentOperation == OPT_SCAN)
+			ExpectComma(Value);
+			GET_TOKEN(Value);
+			if (IsLabel(Label) && IsConstant(Value))
 			{
-				AddLabelToSTable(Label, GetConstant(Value));
+				if (CurrentOperation == OPT_SCAN)
+				{
+					AddLabelToSTable(Label, GetConstant(Value));
+				}
+			}
+			else
+			{
+				InvalidInstruction();
 			}
 		}
-		else if(StringCmp(Token, INS_LABEL))
+		else if(StringCmp(Token, PINS_LABEL))
 		{
 			char Label[OPRD_SIZE];
-			
 			GET_TOKEN(Label);
-			if(CurrentOperation == OPT_SCAN && HasLabel(Label))
+			if (IsLabel(Label))
 			{
-				ERROR("Redefined label.");
+				if (CurrentOperation == OPT_SCAN)
+				{
+					if (HasLabel(Label))
+					{
+						ERROR("Label is redefined.");
+					}
+					AddLabelToSTable(Label, GetCurrentPos());
+				}
 			}
-			if(CurrentOperation == OPT_SCAN)
+			else
 			{
-				AddLabelToSTable(Label, GetCurrentPos());
+				InvalidInstruction();
 			}
 		}
-		else if(StringCmp(Token, INS_DBS))
+		else if(StringCmp(Token, PINS_DBS))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Count;
-			int i;
-			
 			GET_TOKEN(OPRD);
-			Count = GetConstant(OPRD);
-			for(i = 0; i < Count; i++)
+			if (IsConstant(OPRD))
 			{
-				EncodeDB(0);
+				uint Count = GetConstant(OPRD);
+				int i;
+				for(i = 0; i < Count; i++)
+				{
+					EncodeDB(0);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
 			}
 		}
-		else if(StringCmp(Token, INS_DWS))
+		else if(StringCmp(Token, PINS_DWS))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Count;
-			int i;
-			
 			GET_TOKEN(OPRD);
-			Count = GetConstant(OPRD);
-			for(i = 0; i < Count; i++)
+			if (IsConstant(OPRD))
 			{
-				EncodeDW(0);
+				uint Count = GetConstant(OPRD);
+				int i;
+				for(i = 0; i < Count; i++)
+				{
+					EncodeDW(0);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
 			}
 		}
-		else if(StringCmp(Token, INS_DDS))
+		else if(StringCmp(Token, PINS_DDS))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Count;
-			int i;
-			
 			GET_TOKEN(OPRD);
-			Count = GetConstant(OPRD);
-			for(i = 0; i < Count; i++)
+			if (IsConstant(OPRD))
 			{
-				EncodeDD(0);
+				uint Count = GetConstant(OPRD);
+				int i;
+				for(i = 0; i < Count; i++)
+				{
+					EncodeDD(0);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
 			}
 		}
-		else if(StringCmp(Token, INS_STRING))
+		else if(StringCmp(Token, PINS_STRING))
 		{
 			char String[STRING_SIZE];
 			char OPRD[STRING_SIZE];
-			
 			GET_TOKEN(OPRD);
 			if(IsString(OPRD))
 			{
-				int i;
-				
 				GetString(OPRD, String);
+				int i;
 				for(i = 0; i < GetStringLen(String); i++)
 				{
 					EncodeDB(String[i]);
 				}
 			}
 		}
-		else if(StringCmp(Token, INS_BIT16))
+		else if(StringCmp(Token, PINS_BIT16))
 		{
 			SwitchToBit16();
 		}
-		else if(StringCmp(Token, INS_BIT32))
+		else if(StringCmp(Token, PINS_BIT32))
 		{
 			SwitchToBit32();
 		}
-		else if(StringCmp(Token, INS_ORG))
+		else if(StringCmp(Token, PINS_ORG))
 		{
 			char OPRD[OPRD_SIZE];
-			uint NewCurrentPos;
-			int i;
-			
 			GET_TOKEN(OPRD);
-			NewCurrentPos = GetConstant(OPRD);
-			SetCurrentPos(NewCurrentPos);
+			if (IsConstant(OPRD))
+			{
+				uint NewCurrentPos = GetConstant(OPRD);
+				SetCurrentPos(NewCurrentPos);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
-		else if(StringCmp(Token, INS_OPRD16))
+		else if(StringCmp(Token, PINS_OPRD16))
 		{
 			SwitchOprdToBit16();
 		}
-		else if(StringCmp(Token, INS_OPRD32))
+		else if(StringCmp(Token, PINS_OPRD32))
 		{
 			SwitchOprdToBit32();
 		}
-		else if(StringCmp(Token, INS_ADDR16))
+		else if(StringCmp(Token, PINS_ADDR16))
 		{
 			SwitchAddrToBit16();
 		}
-		else if(StringCmp(Token, INS_ADDR32))
+		else if(StringCmp(Token, PINS_ADDR32))
 		{
 			SwitchAddrToBit32();
+		}
+		else if (StringCmp(Token, PINS_PEEK))
+		{
+			char OPRD[OPRD_SIZE];
+			GET_TOKEN(OPRD);
+			if (IsConstant(OPRD))
+			{
+				if (CurrentOperation == OPT_PARSE)
+				{
+					uint Value = GetConstant(OPRD);
+					printf(">>>> IASM Peek(%u): %s = %u, %X.\n", CurrentLine, OPRD, Value, Value);
+				}
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if (StringCmp(Token, PINS_CALC))
+		{
+			char OPT[OPRD_SIZE];
+			GET_TOKEN(OPT);
+			if (StringCmp(OPT, PINS_ADD)
+				|| StringCmp(OPT, PINS_SUB)
+				|| StringCmp(OPT, PINS_MUL)
+				|| StringCmp(OPT, PINS_DIV)
+				|| StringCmp(OPT, PINS_MOD)
+				|| StringCmp(OPT, PINS_AND)
+				|| StringCmp(OPT, PINS_OR)
+				|| StringCmp(OPT, PINS_XOR))
+			{
+				char ResultOPRD[OPRD_SIZE], OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+				GET_TOKEN(ResultOPRD);
+				GET_TOKEN(OPRD1);
+				ExpectComma(OPRD1);
+				GET_TOKEN(OPRD1);
+				GET_TOKEN(OPRD2);
+				ExpectComma(OPRD2);
+				GET_TOKEN(OPRD2);
+				if (IsLabel(ResultOPRD) && IsConstant(OPRD1) && IsConstant(OPRD2))
+				{
+					uint Value1 = GetConstant(OPRD1);
+					uint Value2 = GetConstant(OPRD2);
+					uint Result = 0;
+					if (StringCmp(OPT, PINS_ADD))
+					{
+						Result = Value1 + Value2;
+					}
+					else if (StringCmp(OPT, PINS_SUB))
+					{
+						Result = Value1 - Value2;
+					}
+					else if (StringCmp(OPT, PINS_MUL))
+					{
+						Result = Value1 * Value2;
+					}
+					else if (StringCmp(OPT, PINS_DIV))
+					{
+						Result = Value1 / Value2;
+					}
+					else if (StringCmp(OPT, PINS_MOD))
+					{
+						Result = Value1 % Value2;
+					}
+					else if (StringCmp(OPT, PINS_AND))
+					{
+						Result = Value1 & Value2;
+					}
+					else if (StringCmp(OPT, PINS_OR))
+					{
+						Result = Value1 | Value2;
+					}
+					else if (StringCmp(OPT, PINS_XOR))
+					{
+						Result = Value1 ^ Value2;
+					}
+					else
+					{
+						InvalidInstruction();
+					}
+					if (CurrentOperation == OPT_SCAN1)
+					{
+						SetLabelToSTable(ResultOPRD, Result);	
+					}
+				}
+				else
+				{
+					InvalidInstruction();
+				}
+			}
+			else if (StringCmp(OPT, PINS_NOT))
+			{
+				char ResultOPRD[OPRD_SIZE], OPRD[OPRD_SIZE];
+				GET_TOKEN(ResultOPRD);
+				GET_TOKEN(OPRD);
+				ExpectComma(OPRD);
+				GET_TOKEN(OPRD);
+				if (IsLabel(ResultOPRD) && IsConstant(OPRD))
+				{
+					uint Value = GetConstant(OPRD);
+					uint Result = 0;
+					if (StringCmp(OPT, PINS_NOT))
+					{
+						Result = ~Value;
+					}
+					else
+					{
+						InvalidInstruction();
+					}
+					if (CurrentOperation == OPT_SCAN1)
+					{
+						SetLabelToSTable(ResultOPRD, Result);
+					}
+				}
+				else
+				{
+					InvalidInstruction();
+				}
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
 		/* OPCODE_AAA */
 		else if(StringCmp(Token, INS_AAA))
@@ -2760,10 +2944,6 @@ static void _Parse(void)
 				InvalidInstruction();
 			}
 		}
-
-
-
-
 		/* OPCODE_INT_3 */
 		else if(StringCmp(Token, INS_INT3))
 		{
@@ -3473,49 +3653,81 @@ static void _Parse(void)
 		else if(StringCmp(Token, INS_JCXZ))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Offset;
-			uint CurrentPos = GetCurrentPos();
-			
 			GET_TOKEN(OPRD);
-			Offset = GetConstant(OPRD);
-			Offset = Offset - (CurrentPos + 2);
-			EncodeJCXZ_SHORT((uchar)Offset);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				uint Offset = GetConstant(OPRD) - (CurrentPos + 2);
+				EncodeJCXZ_SHORT(Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		/* OPCODE_JECXZ_SHORT */
+		else if(StringCmp(Token, INS_JECXZ))
+		{
+			char OPRD[OPRD_SIZE];
+			GET_TOKEN(OPRD);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				uint Offset = GetConstant(OPRD) - (CurrentPos + 2);
+				EncodeJECXZ_SHORT(Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
 		/* OPCODE_LOOP_SHORT */
 		else if(StringCmp(Token, INS_LOOP))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Offset;
-			uint CurrentPos = GetCurrentPos();
-			
 			GET_TOKEN(OPRD);
-			Offset = GetConstant(OPRD);
-			Offset = Offset - (CurrentPos + 2);
-			EncodeLOOP_SHORT((uchar)Offset);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				uint Offset = GetConstant(OPRD) - (CurrentPos + 2);
+				EncodeLOOP_SHORT(Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
 		/* OPCODE_LOOPZ_SHORT */
-		else if(StringCmp(Token, INS_LOOP))
+		else if(StringCmp(Token, INS_LOOPZ))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Offset;
-			uint CurrentPos = GetCurrentPos();
-			
 			GET_TOKEN(OPRD);
-			Offset = GetConstant(OPRD);
-			Offset = Offset - (CurrentPos + 2);
-			EncodeLOOPZ_SHORT((uchar)Offset);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				uint Offset = GetConstant(OPRD) - (CurrentPos + 2);
+				EncodeLOOPZ_SHORT(Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
 		/* OPCODE_LOOPNZ_SHORT */
-		else if(StringCmp(Token, INS_LOOP))
+		else if(StringCmp(Token, INS_LOOPNZ))
 		{
 			char OPRD[OPRD_SIZE];
-			uint Offset;
-			uint CurrentPos = GetCurrentPos();
-			
 			GET_TOKEN(OPRD);
-			Offset = GetConstant(OPRD);
-			Offset = Offset - (CurrentPos + 2);
-			EncodeLOOPNZ_SHORT((uchar)Offset);
+			if (IsConstant(OPRD))
+			{
+				uint CurrentPos = GetCurrentPos();
+				uint Offset = GetConstant(OPRD) - (CurrentPos + 2);
+				EncodeLOOPNZ_SHORT(Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
 		}
 		/* OPCODE_PREFIX_LOCK */
 		else if(StringCmp(Token, INS_LOCK))
@@ -3573,6 +3785,15 @@ static void _Parse(void)
 void Scan(void)
 {
 	CurrentOperation = OPT_SCAN;
+	_Parse();
+	ResetLexer();
+	ResetEncoder();
+	CurrentOperation = OPT_NONE;
+}
+
+void Scan1(void)
+{
+	CurrentOperation = OPT_SCAN1;
 	_Parse();
 	ResetLexer();
 	ResetEncoder();

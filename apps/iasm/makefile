@@ -3,7 +3,7 @@ Out=iasm.bin
 Target=$(TargetDir)/$(Out)
 CC=gcc
 CFlags=-O0 -fno-stack-protector -nostdinc -m32 -march=i386 -mtune=i386 -w
-Objs=bin/main.obj bin/error.obj bin/lexer.obj bin/encoder.obj bin/stable.obj bin/string.obj bin/parser.obj
+Objs=bin/main.obj bin/error.obj bin/lexer.obj bin/encoder.obj bin/stable.obj bin/string.obj bin/parser.obj bin/cexpr.obj
 Linker=ld -m elf_i386
 Include=-I../../libs
 AppMaker=../../tools/appmaker/bin/appmaker
@@ -38,6 +38,9 @@ bin/string.obj: string.c string.h
 
 bin/parser.obj: parser.c parser.h
 	$(CC) $(CFlags) -c parser.c -o bin/parser.obj $(Include)
+
+bin/cexpr.obj: cexpr.c cexpr.h
+	$(CC) $(CFlags) -c cexpr.c -o bin/cexpr.obj $(Include)
 
 .PHONY:clean
 

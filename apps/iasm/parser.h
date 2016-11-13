@@ -3,15 +3,16 @@
 
 #include <ilib/ilib.h>
 
-#define	OPRD_SIZE	50
-#define	STRING_SIZE	100
+#define	OPRD_SIZE	256
+#define	STRING_SIZE	1024
 
 #define	MEMREF_TOKEN_COUNT		64
 #define	MEMREF_PER_TOKEN_SIZE	64
 
 #define	OPT_SCAN	0
-#define	OPT_PARSE	1
-#define	OPT_NONE	2
+#define	OPT_SCAN1	1
+#define	OPT_PARSE	2
+#define	OPT_NONE	3
 
 #define	REGS_AX		"AX"
 #define	REGS_BX		"BX"
@@ -86,27 +87,37 @@
 
 
 
-#define	INS_LF		"\n"
-#define	INS_EOF		""
-#define	INS_END		"END"
-#define	INS_LABEL	"LABEL"
-#define	INS_SET		"SET"
-#define	INS_DB		"DB"
-#define	INS_DW		"DW"
-#define	INS_DD		"DD"
-#define	INS_DBS		"DBS"
-#define	INS_DWS		"DWS"
-#define	INS_DDS		"DDS"
-#define	INS_STRING	"STRING"
-#define	INS_BIT16	"BIT16"
-#define	INS_BIT32	"BIT32"
-#define	INS_ORG		"ORG"
-#define	INS_OPRD16	"OPRD16"
-#define	INS_OPRD32	"OPRD32"
-#define	INS_ADDR16	"ADDR16"
-#define	INS_ADDR32	"ADDR32"
+#define	PINS_LF			"\n"
+#define	PINS_EOF		""
+#define	PINS_END		".END"
+#define	PINS_LABEL		".LABEL"
+#define	PINS_SET		".SET"
+#define	PINS_DB			".DB"
+#define	PINS_DW			".DW"
+#define	PINS_DD			".DD"
+#define	PINS_DBS		".DBS"
+#define	PINS_DWS		".DWS"
+#define	PINS_DDS		".DDS"
+#define	PINS_STRING		".STRING"
+#define	PINS_BIT16		".BIT16"
+#define	PINS_BIT32		".BIT32"
+#define	PINS_ORG		".ORG"
+#define	PINS_OPRD16		".OPRD16"
+#define	PINS_OPRD32		".OPRD32"
+#define	PINS_ADDR16		".ADDR16"
+#define	PINS_ADDR32		".ADDR32"
+#define	PINS_PEEK		".PEEK"
 
-
+#define	PINS_CALC		".CALC"
+#define	PINS_ADD		".ADD"
+#define	PINS_SUB		".SUB"
+#define	PINS_MUL		".MUL"
+#define	PINS_DIV		".DIV"
+#define	PINS_MOD		".MOD"
+#define	PINS_AND		".AND"
+#define	PINS_OR			".OR"
+#define	PINS_XOR		".XOR"
+#define	PINS_NOT		".NOT"
 
 #define	INS_AAA		"AAA"
 #define	INS_AAD		"AAD"
@@ -285,6 +296,7 @@
 
 
 #define	INS_JCXZ	"JCXZ"
+#define	INS_JECXZ	"JECXZ"
 #define	INS_JMP		"JMP"
 #define	INS_LOOP	"LOOP"
 #define	INS_LOOPZ	"LOOPZ"
@@ -699,5 +711,10 @@
 
 extern void InitParser(char * Src);
 extern void DestroyParser(void);
+extern void Scan(void);
+extern void Scan1(void);
+extern void Parse(void);
+extern int IsConstant(char * Token);
+extern uint GetConstant(char * Constant);
 
 #endif

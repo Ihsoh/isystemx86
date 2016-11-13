@@ -1545,6 +1545,11 @@ extern void Encode_JMP_Far_Mem1632(
 	JCXZ
 */
 extern void EncodeJCXZ_SHORT(uchar Offset);
+
+/*
+	JECXZ
+*/
+extern void EncodeJECXZ_SHORT(uchar Offset);
 		
 /*
 	LOOP

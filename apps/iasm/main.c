@@ -95,6 +95,7 @@ int main(int argc, char * argv[])
 	fclose(SourceFilePtr);
 	InitParser(SourceFileContent);
 	Scan();
+	Scan1();
 	if (ListingFileFlag)
 	{
 		EnableListing();

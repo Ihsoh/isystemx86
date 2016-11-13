@@ -10,6 +10,7 @@ static uint SourceLength = 0;
 #define	_STATUS_STRING		2
 #define	_STATUS_MEMORY		3
 #define	_STATUS_LF			4
+#define	_STATUS_CEXPR		5
 
 void InitLexer(char * Src)
 {
@@ -26,7 +27,7 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 
 	static int Pos = 0;
 	static uint Line = 1;
-	int Status = _STATUS_NONE;	/* 0:空白, 1:记号的一部分, 2:字符串, 3:内存引用, 4:换行 */
+	int Status = _STATUS_NONE;	/* 0:空白, 1:记号的一部分, 2:字符串, 3:内存引用, 4:换行, 5:常量表达式 */
 	int End = 0;
 	char * T = Token;
 
@@ -34,7 +35,7 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 	int OldPos = Pos;
 	int OldLine = Line;
 	
-	if(Token == NULL) 
+	if (Token == NULL) 
 	{
 		Pos = 0;
 		Line = 1;
@@ -42,14 +43,14 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 	}
 	else
 	{
-		while(Pos != SourceLength && !End)
+		while (Pos != SourceLength && !End)
 		{
 			char Char = Source[Pos++];
-			switch(Char)
+			switch (Char)
 			{
 				case '\n':
 				{
-					if(Status == _STATUS_NONE)
+					if (Status == _STATUS_NONE)
 					{
 						Line++;
 						__CHECK_TOKEN_BUFFER_SIZE__
@@ -62,15 +63,17 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 					End = 1;
 					break;	
 				}
-				case '\r':
 				case '\t':
+				case '\r':
+				case '\f':
+				case '\v':
 				case ' ':
 				{
-					if(Status == _STATUS_TOKEN)
+					if (Status == _STATUS_TOKEN)
 					{
-						End = 1;	
+						End = 1;
 					}
-					else if(Status == _STATUS_STRING || Status == _STATUS_MEMORY)
+					else if (Status == _STATUS_STRING || Status == _STATUS_MEMORY || Status == _STATUS_CEXPR)
 					{
 						__CHECK_TOKEN_BUFFER_SIZE__
 						*(Token++) = Char;
@@ -79,17 +82,17 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 				}
 				case ',':
 				{
-					if(Status != _STATUS_MEMORY)
+					if (Status == _STATUS_STRING || Status == _STATUS_MEMORY || Status == _STATUS_CEXPR)
 					{
-						if(Status == _STATUS_TOKEN)
+						__CHECK_TOKEN_BUFFER_SIZE__
+						*(Token++) = Char;
+					}
+					else
+					{
+						if (Status == _STATUS_TOKEN)
 						{
 							Pos--;
 							End = 1;
-						}
-						else if(Status == _STATUS_STRING)
-						{
-							__CHECK_TOKEN_BUFFER_SIZE__
-							*(Token++) = Char;	
 						}
 						else 
 						{
@@ -98,38 +101,49 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 							End = 1;
 						}
 					}
-					else
-					{
-						__CHECK_TOKEN_BUFFER_SIZE__
-						*(Token++) = Char;
-					}
-					break;	
+					break;
 				}
 				case '\'':
 				{
-					if(Status == _STATUS_NONE)
+					if (Status == _STATUS_NONE)
 					{
 						__CHECK_TOKEN_BUFFER_SIZE__
 						*(Token++) = '\'';
 						Status = _STATUS_STRING;
 					}
-					else if(Status == _STATUS_STRING)
+					else if (Status == _STATUS_STRING)
 					{
 						__CHECK_TOKEN_BUFFER_SIZE__
 						*(Token++) = '\'';
 						End = 1;
 					}
-					break;	
+					break;
+				}
+				case '`':
+				{
+					if (Status == _STATUS_NONE)
+					{
+						__CHECK_TOKEN_BUFFER_SIZE__
+						*(Token++) = '`';
+						Status = _STATUS_CEXPR;
+					}
+					else if (Status == _STATUS_CEXPR)
+					{
+						__CHECK_TOKEN_BUFFER_SIZE__
+						*(Token++) = '`';
+						End = 1;
+					}
+					break;
 				}
 				case '[':
 				{
-					if(Status == _STATUS_NONE)
+					if (Status == _STATUS_NONE)
 					{
 						__CHECK_TOKEN_BUFFER_SIZE__
 						*(Token++) = '[';
 						Status = _STATUS_MEMORY;
 					}
-					else if(Status == _STATUS_STRING)
+					else if (Status == _STATUS_STRING || Status == _STATUS_CEXPR)
 					{
 						__CHECK_TOKEN_BUFFER_SIZE__
 						*(Token++) = '[';
@@ -138,13 +152,13 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 				}
 				case ']':
 				{
-					if(Status == _STATUS_MEMORY)
+					if (Status == _STATUS_MEMORY)
 					{
 						__CHECK_TOKEN_BUFFER_SIZE__
 						*(Token++) = ']';
 						End = 1;
 					}
-					else if(Status == _STATUS_STRING)
+					else if (Status == _STATUS_STRING || Status == _STATUS_CEXPR)
 					{
 						__CHECK_TOKEN_BUFFER_SIZE__
 						*(Token++) = ']';	
@@ -153,12 +167,12 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 				}
 				case ';':
 				{
-					if(Status == _STATUS_NONE)
+					if (Status == _STATUS_NONE)
 					{
-						while(1)
+						while (1)
 						{
 							Char = Source[Pos++];
-							if(Char == '\n' || Pos == SourceLength)
+							if (Char == '\n' || Pos == SourceLength)
 							{
 								break;
 							}
@@ -175,7 +189,7 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 				{
 					__CHECK_TOKEN_BUFFER_SIZE__
 					*(Token++) = Char;
-					if(Status != _STATUS_STRING && Status != _STATUS_MEMORY)
+					if (Status != _STATUS_STRING && Status != _STATUS_MEMORY && Status != _STATUS_CEXPR)
 					{
 						Status = _STATUS_TOKEN;
 					}
@@ -187,7 +201,7 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 		
 	*Token = '\0';
 
-	if(Peek)
+	if (Peek)
 	{
 		Pos = OldPos;
 		Line = OldLine;
