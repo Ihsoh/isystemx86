@@ -151,4 +151,16 @@ die(IN struct die_info * info);
 	#define	DC_INIT_ENFONT			0x00000029
 	#define	DI_INIT_ENFONT			"Failed to initialize enfont"
 
+	#define	DC_INIT_PERIPHERAL0		0x0000002a
+	#define	DI_INIT_PERIPHERAL0		"Failed to initialize peripheral 0"
+
+	#define	DC_INIT_PERIPHERAL1		0x0000002b
+	#define	DI_INIT_PERIPHERAL1		"Failed to initialize peripheral 1"
+
+	#define	DC_INIT_PERIPHERAL2		0x0000002c
+	#define	DI_INIT_PERIPHERAL2		"Failed to initialize peripheral 2"
+
+	#define	DC_INIT_PERIPHERAL3		0x0000002d
+	#define	DI_INIT_PERIPHERAL3		"Failed to initialize peripheral 3"
+
 #endif

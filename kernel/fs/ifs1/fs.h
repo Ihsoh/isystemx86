@@ -224,6 +224,7 @@ BOOL
 Ifs1Repair(IN int8 * symbol);
 
 #define	flen(fptr)	((fptr)->file_block->length)
+#define	Ifs1GetFileLength(fptr)	(flen((fptr)))
 
 DEFINE_LOCK_EXTERN(ifs1)
 

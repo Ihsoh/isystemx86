@@ -75,7 +75,7 @@ _irq4:
 .globl  _irq5
 .type   _irq5, @function
 _irq5:
-	// ..........
+	lcall	$0x543, $0
 	clear_nt
 	iret
 

@@ -2414,6 +2414,11 @@ _ConExecuteCommand(	IN int8 * cmd,
 			#include "test.h"
 			RUN_UNIT_TEST(UtlSfstr);
 		}
+		else if (strcmp(name, "sb16") == 0)
+		{
+			#include "sb16.h"
+			SB16Init();
+		}
 		#endif
 		//Batch
 		else if(strcmp(name, "goto") == 0)

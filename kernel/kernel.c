@@ -37,6 +37,7 @@
 #include "sse.h"
 #include "timer.h"
 #include "gui.h"
+#include "sb16.h"
 
 #include "syscall/fs.h"
 #include "syscall/keyboard.h"
@@ -83,6 +84,10 @@ static struct TSS keyboard_tss;					//键盘的任务的TSS。
 static struct TSS ide_tss;						//第一IDE的任务的TSS。
 static struct TSS ide1_tss;						//第二IDE的任务的TSS。
 static struct TSS fpu_tss;						//FPU的任务的TSS。
+static struct TSS peripheral0_tss;				//外设0的任务额TSS。
+static struct TSS peripheral1_tss;				//外设1的任务额TSS。
+static struct TSS peripheral2_tss;				//外设2的任务额TSS。
+static struct TSS peripheral3_tss;				//外设3的任务额TSS。
 static struct TSS scall_tss[MAX_TASK_COUNT];	//各个系统调用的任务的TSS。
 
 static uint8 *	divby0_stack		= NULL;
@@ -229,6 +234,7 @@ main(void)
 	
 	_KnlInitKeyboard();
 	_KnlInitFpu();
+	_KnlInitPeripheral0();
 	TskmgrInit();
 	_KnlInitSystemCall();
 	
@@ -975,6 +981,52 @@ _KnlInitFpu(void)
 }
 
 /**
+	@Function:		_KnlInitPeripheral0
+	@Access:		Private
+	@Description:
+		初始化外部设备0的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlInitPeripheral0(void)
+{
+	struct die_info info;
+	struct TSS * tss = &peripheral0_tss;
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_PERIPHERAL0, DI_INIT_PERIPHERAL0);
+		die(&info);
+	}
+	struct Desc tss_desc;
+	struct Gate task_gate;
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	KnlSetDescToGDT(167, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (167 << 3) | RPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
+
+	// IRQ5
+	//KnlSetGateToIDT(0x45, (uint8 *)&task_gate);
+	KnlSetDescToGDT(168, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x45, _irq5);
+	
+	_KnlFillTSS(tss, (uint32)_KnlPeripheral0Interrupt, (uint32)stack);
+}
+
+/**
 	@Function:		_KnlFreeSystemCallTSS
 	@Access:		Private
 	@Description:
@@ -1523,6 +1575,107 @@ _KnlFpuInterrupt(void)
 			ApicStartTimer();
 		unlock_without_sti();
 		_KnlIrqAck(13);
+		asm volatile ("iret;");
+	}
+}
+
+/**
+	@Function:		_KnlPeripheral0Interrupt
+	@Access:		Private
+	@Description:
+		外部设备0的中断程序（IRQ5）。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlPeripheral0Interrupt(void)
+{
+	while (1)
+	{
+		// lock();
+		// if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+		// 	ApicStopTimer();
+		SB16Interrupt(0, 5);
+		// if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+		// 	ApicStartTimer();
+		// unlock_without_sti();
+		_KnlIrqAck(5);
+		asm volatile ("iret;");
+	}
+}
+
+/**
+	@Function:		_KnlPeripheral1Interrupt
+	@Access:		Private
+	@Description:
+		外部设备1的中断程序（IRQ9）。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlPeripheral1Interrupt(void)
+{
+	while (1)
+	{
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStopTimer();
+		SB16Interrupt(1, 9);
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStartTimer();
+		unlock_without_sti();
+		_KnlIrqAck(9);
+		asm volatile ("iret;");
+	}
+}
+
+/**
+	@Function:		_KnlPeripheral2Interrupt
+	@Access:		Private
+	@Description:
+		外部设备2的中断程序（IRQ10）。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlPeripheral2Interrupt(void)
+{
+	while (1)
+	{
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStopTimer();
+		SB16Interrupt(2, 10);
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStartTimer();
+		unlock_without_sti();
+		_KnlIrqAck(10);
+		asm volatile ("iret;");
+	}
+}
+
+/**
+	@Function:		_KnlPeripheral3Interrupt
+	@Access:		Private
+	@Description:
+		外部设备3的中断程序（IRQ11）。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlPeripheral3Interrupt(void)
+{
+	while (1)
+	{
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStopTimer();
+		SB16Interrupt(3, 11);
+		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
+			ApicStartTimer();
+		unlock_without_sti();
+		_KnlIrqAck(11);
 		asm volatile ("iret;");
 	}
 }

@@ -245,6 +245,9 @@ WRITE_FILE	VA:/isystem/test/test_elfso test/test_elfso/bin/test_elfso.bin
 MAKE_FILE	VA:/isystem/ girl.bmp
 WRITE_FILE	VA:/isystem/girl.bmp isystem/girl.bmp
 
+MAKE_FILE	VA:/isystem/ demo.wav
+WRITE_FILE	VA:/isystem/demo.wav isystem/demo.wav
+
 MAKE_DIR	VA:/isystem/ src
 MAKE_DIR	VA:/isystem/src/ kernelldr
 MAKE_FILE	VA:/isystem/src/kernelldr/ kernelldr.asm

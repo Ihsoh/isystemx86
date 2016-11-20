@@ -27,7 +27,7 @@ bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.
 bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
 bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj bin/timer.obj	\
-bin/gui.obj bin/ata.obj
+bin/gui.obj bin/ata.obj bin/sb16.obj
 
 BMPObjs=bmp/bin/bmp.obj
 
@@ -54,15 +54,17 @@ ELFObjs=elf/bin/helper.obj elf/bin/parser.obj
 
 PCIObjs=pci/bin/pci.obj
 
+WavObjs=wav/bin/wav.obj
+
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 Definition=-D_KERNEL_MODULE_ -D_KERNEL_DEBUG_
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin \
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin wav/bin \
 $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
-$(ELFObjs) $(PCIObjs)
+$(ELFObjs) $(PCIObjs) $(WavObjs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(PCIObjs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(PCIObjs) $(WavObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -101,6 +103,9 @@ elf/bin:
 
 pci/bin:
 	-mkdir pci/bin
+
+wav/bin:
+	-mkdir wav/bin
 
 bin/kernel.obj: kernel.c kernel.h
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include) $(Definition)
@@ -240,6 +245,9 @@ bin/gui.obj: gui.c gui.h
 bin/ata.obj: ata.c ata.h
 	$(CC) $(CFlags) -c ata.c -o bin/ata.obj $(Include) $(Definition)
 
+bin/sb16.obj: sb16.c sb16.h
+	$(CC) $(CFlags) -c sb16.c -o bin/sb16.obj $(Include) $(Definition)
+
 
 bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
 	$(CC) $(CFlags) -c bmp/bmp.c -o bmp/bin/bmp.obj $(Include) $(Definition) -std=c99
@@ -369,6 +377,10 @@ elf/bin/parser.obj: elf/parser.c
 
 pci/bin/pci.obj: pci/pci.c
 	$(CC) $(CFlags) -c pci/pci.c -o pci/bin/pci.obj $(Include) $(Definition)
+
+
+wav/bin/wav.obj: wav/wav.c
+	$(CC) $(CFlags) -c wav/wav.c -o wav/bin/wav.obj $(Include) $(Definition)
 
 
 .PHONY:clean

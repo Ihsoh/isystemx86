@@ -93,6 +93,22 @@ _KnlInitFpu(void);
 
 static
 void
+_KnlInitPeripheral0(void);
+
+static
+void
+_KnlInitPeripheral1(void);
+
+static
+void
+_KnlInitPeripheral2(void);
+
+static
+void
+_KnlInitPeripheral3(void);
+
+static
+void
 _KnlFreeSystemCallTSS(void);
 
 static
@@ -122,6 +138,22 @@ _KnlIde1Interrupt(void);
 static
 void
 _KnlFpuInterrupt(void);
+
+static
+void
+_KnlPeripheral0Interrupt(void);
+
+static
+void
+_KnlPeripheral1Interrupt(void);
+
+static
+void
+_KnlPeripheral2Interrupt(void);
+
+static
+void
+_KnlPeripheral3Interrupt(void);
 
 static
 void
