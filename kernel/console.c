@@ -29,6 +29,8 @@
 #include "windows/message.h"
 #include "windows/detail.h"
 
+#include "sb/sb16.h"
+
 #include <ilib/string.h>
 
 #include "386.h"
@@ -2414,10 +2416,54 @@ _ConExecuteCommand(	IN int8 * cmd,
 			#include "test.h"
 			RUN_UNIT_TEST(UtlSfstr);
 		}
-		else if (strcmp(name, "sb16") == 0)
+		else if (strcmp(name, "sb16init") == 0)
 		{
-			#include "sb16.h"
 			SB16Init();
+		}
+		else if (strcmp(name, "sb16start") == 0)
+		{
+			#include "wav/wav.h"
+			WavPtr wav = WavCreateFromFile("VS:/isystem/demo.wav");
+			printuihex(wav);
+			ScrPrintString("\n");
+			BOOL r = SB16Playback(
+				&(wav->data_first_byte),
+				wav->data_subchunk_size,
+				wav->sample_rate,
+				wav->bits_per_sample == 16,
+				wav->num_channels == 2,
+				FALSE);
+
+			ScrPrintString("len: ");
+			printn(wav->data_subchunk_size);
+			ScrPrintString("\n");
+			
+			ScrPrintString("frequency: ");
+			printuihex(wav->sample_rate);
+			ScrPrintString("\n");
+
+			ScrPrintString("bits16: ");
+			printuihex(wav->bits_per_sample == 16);
+			ScrPrintString("\n");
+
+			ScrPrintString("stereo: ");
+			printuihex(wav->num_channels == 2);
+			ScrPrintString("\n");
+
+			printuihex(r);
+			ScrPrintString("\n");
+		}
+		else if (strcmp(name, "sb16stop") == 0)
+		{
+			SB16Stop();
+		}
+		else if (strcmp(name, "sb16pause") == 0)
+		{
+			SB16Pause();
+		}
+		else if (strcmp(name, "sb16resume") == 0)
+		{
+			SB16Resume();
 		}
 		#endif
 		//Batch

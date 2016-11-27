@@ -5,10 +5,10 @@
 	@Description:
 */
 
-#ifndef	_SB16_H_
-#define	_SB16_H_
+#ifndef	_SB_SB16_H_
+#define	_SB_SB16_H_
 
-#include "types.h"
+#include "../types.h"
 
 extern
 void
@@ -19,12 +19,24 @@ SB16Interrupt(
 extern
 BOOL
 SB16Playback(
-	IN uint32 n,
 	IN uint8 * data,
 	IN uint32 len,
 	IN uint32 frequency,
 	IN BOOL bits16,
-	IN BOOL stereo);
+	IN BOOL stereo,
+	IN BOOL auto_init);
+
+extern
+BOOL
+SB16Stop(void);
+
+extern
+BOOL
+SB16Pause(void);
+
+extern
+BOOL
+SB16Resume(void);
 
 extern
 void

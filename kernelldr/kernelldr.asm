@@ -316,8 +316,8 @@ EndProc		Set8259A
 ;200000H~2FFFFFH: INT 21H 堆栈
 ;300000H~3FFFFFH: 未分配内存块描述表
 ;400000H~4FFFFFH: 已分配内存块描述表
-;500000H~50FFFFH: 保留给Sound Blaster 16驱动
-;510000H~FFFFFFH: 保留
+;500000H~51FFFFH: 保留给Sound Blaster 16驱动
+;520000H~FFFFFFH: 保留
 
 
 ;索引		说明

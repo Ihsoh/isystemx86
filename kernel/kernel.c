@@ -37,7 +37,6 @@
 #include "sse.h"
 #include "timer.h"
 #include "gui.h"
-#include "sb16.h"
 
 #include "syscall/fs.h"
 #include "syscall/keyboard.h"
@@ -48,6 +47,8 @@
 #include "fs/ifs1/fs.h"
 
 #include "pci/pci.h"
+
+#include "sb/sb16.h"
 
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
@@ -1593,13 +1594,7 @@ _KnlPeripheral0Interrupt(void)
 {
 	while (1)
 	{
-		// lock();
-		// if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-		// 	ApicStopTimer();
 		SB16Interrupt(0, 5);
-		// if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-		// 	ApicStartTimer();
-		// unlock_without_sti();
 		_KnlIrqAck(5);
 		asm volatile ("iret;");
 	}
@@ -1619,12 +1614,7 @@ _KnlPeripheral1Interrupt(void)
 {
 	while (1)
 	{
-		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-			ApicStopTimer();
 		SB16Interrupt(1, 9);
-		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-			ApicStartTimer();
-		unlock_without_sti();
 		_KnlIrqAck(9);
 		asm volatile ("iret;");
 	}
@@ -1644,12 +1634,7 @@ _KnlPeripheral2Interrupt(void)
 {
 	while (1)
 	{
-		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-			ApicStopTimer();
 		SB16Interrupt(2, 10);
-		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-			ApicStartTimer();
-		unlock_without_sti();
 		_KnlIrqAck(10);
 		asm volatile ("iret;");
 	}
@@ -1669,12 +1654,7 @@ _KnlPeripheral3Interrupt(void)
 {
 	while (1)
 	{
-		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-			ApicStopTimer();
 		SB16Interrupt(3, 11);
-		if(!use_rtc_for_task_scheduler && ApicIsEnabled())
-			ApicStartTimer();
-		unlock_without_sti();
 		_KnlIrqAck(11);
 		asm volatile ("iret;");
 	}

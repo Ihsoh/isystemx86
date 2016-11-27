@@ -175,7 +175,7 @@ UtlCopyMemory(	OUT void * dst,
 	uint32 ui;
 	for(ui = 0; ui < n; ui++)
 	{
-		if(ui > size)
+		if(ui >= size)
 			return SFSTR_R_TOO_LONG;
 		d[ui] = s[ui];
 	}
