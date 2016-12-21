@@ -4,9 +4,6 @@ ISystem x86 is a multitasking and x86 based operating system, in development sin
 
 This repository contains the kernel, system applications, user applications and some libraries. nasm and gcc are required to build ISystem x86 if building environment is ubuntu 32-bit. nasm, gcc, ia32-libs and libc-dev-i386 are required if building environment is ubuntu 64-bit.
 
-## Detail & Download ##
-<a href="http://www.ihsoh.com/" target="_blank">www.ihsoh.com</a>
-
 ## How to build? ##
 You can run the *build.sh* to build ISystem x86. if no error occurred, the system images were generated in the *bin/*.
 
