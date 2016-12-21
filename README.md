@@ -39,4 +39,4 @@ The libraries are used to develop the user application and the system applicatio
 |isys                |ISystem API.                             |
 
 ## Screenshot ##
-![Alt GUI](http://www.ihsoh.com/static/image/screenshot/ISystemx86.png "GUI")
+![Alt GUI](http://ihsoh.github.io/images/screenshot/screenshot_2016-12-21.jpg "GUI")
