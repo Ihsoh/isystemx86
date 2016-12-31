@@ -1531,9 +1531,8 @@ err:
 		name, CASCTEXT, IN
 			符号名。
 	@Return:
-		void *
-			ELF Shared Object的符号的地址。
-			该地址相对于用户内存空间。
+		BOOL
+			返回TRUE则成功，否则失败。
 */
 BOOL
 TaskmgrUnloadElfSharedObjectFile(	IN int32 tid,

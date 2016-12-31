@@ -37,6 +37,7 @@
 #include "sse.h"
 #include "timer.h"
 #include "gui.h"
+#include "so.h"
 
 #include "syscall/fs.h"
 #include "syscall/keyboard.h"
@@ -264,6 +265,7 @@ main(void)
 	}
 
 	Ifs1InitBlocks();
+	KnlInitElfSharedObject();
 
 	/*
 	uint32 vidtr_addr = (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_VIDTR);
