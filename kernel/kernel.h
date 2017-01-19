@@ -11,6 +11,10 @@
 #include "syscall/syscall.h"
 #include "lock.h"
 
+#define MAX_PERIPHERAL_COUNT	4
+
+typedef void (* PeripheralInterrupt)(uint32 peripheral, uint32 irq);
+
 extern
 BOOL
 KnlIsCurrentlyKernelTask(void);
@@ -65,6 +69,12 @@ void
 KnlResetIdeSignal(IN BOOL primary);
 
 #define RESET_ALL_IDE_SIGNAL() { KnlResetIdeSignal(TRUE); KnlResetIdeSignal(FALSE); }
+
+extern
+BOOL
+KnlSetPeripheralInterrupt(
+	IN uint32 index,
+	IN PeripheralInterrupt func);
 
 DEFINE_LOCK_EXTERN(kernel)
 

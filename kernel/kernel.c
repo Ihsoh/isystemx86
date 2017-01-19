@@ -1582,6 +1582,37 @@ _KnlFpuInterrupt(void)
 	}
 }
 
+static PeripheralInterrupt _peripheral_interrupts[4] = { NULL, NULL, NULL, NULL };
+
+/**
+	@Function:		KnlSetPeripheralInterrupt
+	@Access:		Public
+	@Description:
+		设置外设中断。
+	@Parameters:
+		index, uint32, IN
+			索引，0 ~ MAX_PERIPHERAL_COUNT - 1。
+		proc, PeripheralInterrupt, IN
+			外设中断处理过程。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+KnlSetPeripheralInterrupt(
+	IN uint32 index,
+	IN PeripheralInterrupt proc)
+{
+	if (index >= MAX_PERIPHERAL_COUNT
+		|| proc == NULL
+		|| _peripheral_interrupts[index] != NULL)
+	{
+		return FALSE;
+	}
+	_peripheral_interrupts[index] = proc;
+	return TRUE;
+}
+
 /**
 	@Function:		_KnlPeripheral0Interrupt
 	@Access:		Private
@@ -1596,7 +1627,10 @@ _KnlPeripheral0Interrupt(void)
 {
 	while (1)
 	{
-		SB16Interrupt(0, 5);
+		if (_peripheral_interrupts[0] != NULL)
+		{
+			_peripheral_interrupts[0](0, 5);
+		}
 		_KnlIrqAck(5);
 		asm volatile ("iret;");
 	}
@@ -1616,7 +1650,10 @@ _KnlPeripheral1Interrupt(void)
 {
 	while (1)
 	{
-		SB16Interrupt(1, 9);
+		if (_peripheral_interrupts[1] != NULL)
+		{
+			_peripheral_interrupts[1](1, 9);
+		}
 		_KnlIrqAck(9);
 		asm volatile ("iret;");
 	}
@@ -1636,7 +1673,10 @@ _KnlPeripheral2Interrupt(void)
 {
 	while (1)
 	{
-		SB16Interrupt(2, 10);
+		if (_peripheral_interrupts[2] != NULL)
+		{
+			_peripheral_interrupts[2](2, 10);
+		}
 		_KnlIrqAck(10);
 		asm volatile ("iret;");
 	}
@@ -1656,7 +1696,10 @@ _KnlPeripheral3Interrupt(void)
 {
 	while (1)
 	{
-		SB16Interrupt(3, 11);
+		if (_peripheral_interrupts[3] != NULL)
+		{
+			_peripheral_interrupts[3](3, 11);
+		}
 		_KnlIrqAck(11);
 		asm volatile ("iret;");
 	}

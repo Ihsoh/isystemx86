@@ -10,6 +10,7 @@
 #include "../386.h"
 
 #include "../screen.h"
+#include "../kernel.h"
 
 #define	_PORT_SB16_IO_BASE(n)		(0x220 + (n * 0x20))
 
@@ -760,5 +761,6 @@ SB16Resume(void)
 void
 SB16Init(void)
 {
+	KnlSetPeripheralInterrupt(0, SB16Interrupt);
 	SB16DetermineDevices();
 }
