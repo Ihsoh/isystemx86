@@ -2416,6 +2416,13 @@ _ConExecuteCommand(	IN int8 * cmd,
 			#include "test.h"
 			RUN_UNIT_TEST(UtlSfstr);
 		}
+		else if(strcmp(name, "pcnet") == 0)
+		{
+			#include "net/pcnet2.h"
+			PCNET2Init();
+			printn(PCNET2GetDeviceCount());
+			ScrPrintString("\n");
+		}
 		else if (strcmp(name, "sb16init") == 0)
 		{
 			SB16Init();

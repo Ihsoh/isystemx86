@@ -58,15 +58,17 @@ WavObjs=wav/bin/wav.obj
 
 SBObjs=sb/bin/sb16.obj
 
+NetObjs=net/bin/pcnet2.obj
+
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 Definition=-D_KERNEL_MODULE_ -D_KERNEL_DEBUG_
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin wav/bin sb/bin \
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin wav/bin sb/bin net/bin \
 $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
-$(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs)
+$(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs) $(NetObjs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
-$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs)	\
+$(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs) $(NetObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
 -L../libs/dslib/bin -ldslib 	\
 -L../libs/encryptionlib/bin -lencryptionlib	\
@@ -111,6 +113,9 @@ wav/bin:
 
 sb/bin:
 	-mkdir sb/bin
+
+net/bin:
+	-mkdir net/bin	
 
 bin/kernel.obj: kernel.c kernel.h
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include) $(Definition)
@@ -390,6 +395,10 @@ wav/bin/wav.obj: wav/wav.c
 
 sb/bin/sb16.obj: sb/sb16.c
 	$(CC) $(CFlags) -c sb/sb16.c -o sb/bin/sb16.obj $(Include) $(Definition)
+
+
+net/bin/pcnet2.obj: net/pcnet2.c
+	$(CC) $(CFlags) -c net/pcnet2.c -o net/bin/pcnet2.obj $(Include) $(Definition)
 
 
 .PHONY:clean

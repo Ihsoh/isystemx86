@@ -94,4 +94,17 @@ extern
 PCIDeviceInfoPtr
 PciGetDevice(IN uint32 index);
 
+extern
+uint32
+PciReadCfgRegValue(
+	IN uint32 index,
+	IN uint32 offset);
+
+extern
+void
+PciWriteCfgRegValue(
+	IN uint32 index,
+	IN uint32 offset,
+	IN uint32 data);
+
 #endif

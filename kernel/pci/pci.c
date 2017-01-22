@@ -151,3 +151,70 @@ PciGetDevice(IN uint32 index)
 		return NULL;
 	return &_devices[index];
 }
+
+/**
+	@Function:		PciReadCfgRegValue
+	@Access:		Public
+	@Description:
+		读取PCI配置空间寄存器的值。
+		每个寄存器为4字节，共16个寄存器。
+	@Parameters:
+		index, uint32, IN
+			PCI设备的索引。
+		offset, uint32, IN
+			寄存器偏移，必须4字节对齐，即：0x00、0x04、0x08 ... 0x3C等。
+	@Return:
+		uint32
+			寄存器的值。
+*/
+uint32
+PciReadCfgRegValue(
+	IN uint32 index,
+	IN uint32 offset)
+{
+	PCIDeviceInfoPtr device = PciGetDevice(index);
+	if (device == NULL)
+	{
+		return 0;
+	}
+	uint32 addr = 	0x80000000
+					+ device->bus * 0x10000
+					+ (device->slot * 8) * 0x100
+					+ offset;
+	KnlOutLong(PCI_CONFIG_ADDRESS, addr);
+	return KnlInLong(PCI_CONFIG_DATA);
+}
+
+/**
+	@Function:		PciWriteCfgRegValue
+	@Access:		Public
+	@Description:
+		写PCI配置空间寄存器的值。
+		每个寄存器为4字节，共16个寄存器。
+	@Parameters:
+		index, uint32, IN
+			PCI设备的索引。
+		offset, uint32, IN
+			寄存器偏移，必须4字节对齐，即：0x00、0x04、0x08 ... 0x3C等。
+		data, uint32, IN
+			寄存器的值。
+	@Return:
+*/
+void
+PciWriteCfgRegValue(
+	IN uint32 index,
+	IN uint32 offset,
+	IN uint32 data)
+{
+	PCIDeviceInfoPtr device = PciGetDevice(index);
+	if (device == NULL)
+	{
+		return;
+	}
+	uint32 addr = 	0x80000000
+					+ device->bus * 0x10000
+					+ (device->slot * 8) * 0x100
+					+ offset;
+	KnlOutLong(PCI_CONFIG_ADDRESS, addr);
+	KnlOutLong(PCI_CONFIG_DATA, data);
+}
