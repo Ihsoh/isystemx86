@@ -1607,7 +1607,7 @@ KnlSetPeripheralInterrupt(
 		|| proc == NULL
 		|| _peripheral_interrupts[index] != NULL)
 	{
-		return FALSE;
+		//return FALSE;
 	}
 	_peripheral_interrupts[index] = proc;
 	return TRUE;

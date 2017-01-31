@@ -10,6 +10,7 @@
 
 #include "../types.h"
 #include "../memory.h"
+#include "../kernel.h"
 
 #include "../pci/pci.h"
 
@@ -152,7 +153,7 @@ _PCNET2WriteCSR(
 	PCNet2DevicePtr device = _PCNET2GetDevice(index);
 	if (device == NULL)
 	{
-		return 0;
+		return;
 	}
 	_PCNET2WriteRAP(index, csr);
 	KnlOutLong(device->iobase + 0x10, value);
@@ -183,7 +184,7 @@ _PCNET2WriteBCR(
 	PCNet2DevicePtr device = _PCNET2GetDevice(index);
 	if (device == NULL)
 	{
-		return 0;
+		return;
 	}
 	_PCNET2WriteRAP(index, bcr);
 	KnlOutLong(device->iobase + 0x1c, value);
@@ -220,6 +221,21 @@ _PCNET2EncodeRTLen(uint32 count)
 	}
 }
 
+#include "../screen.h"
+
+static
+void
+_PCNET2Interrupt(
+	IN uint32 peripheral,
+	IN uint32 irq)
+{
+	ScrPrintString("#");
+	printn(peripheral);
+	ScrPrintString(",");
+	printn(irq);
+	ScrPrintString("\n");
+}
+
 void
 PCNET2Init(void)
 {
@@ -235,15 +251,16 @@ PCNET2Init(void)
 		if (dev != NULL
 			&& dev->header->cfg_hdr.id == _ID)
 		{
-			PCNet2DevicePtr device = &_devices[_count++];
+			uint32 devidx = _count++;
+			PCNet2DevicePtr device = &_devices[devidx];
 			device->index = i;
 			device->iobase = dev->header->cfg_hdr.bars[0] & 0xfffffffe;
 
 			// 开启IO端口以及Bus Mastering。
-			uint32 conf = PciReadCfgRegValue(i, 0x04);
+			uint32 conf = PciReadCfgRegValue(devidx, 0x04);
 			conf &= 0xffff0000;
 			conf |= 0x5;
-			PciWriteCfgRegValue(i, 0x04, conf);
+			PciWriteCfgRegValue(devidx, 0x04, conf);
 
 			// 获取MAC地址。
 			// 
@@ -261,15 +278,15 @@ PCNET2Init(void)
 			KnlOutLong(device->iobase + 0x10, 0);
 
 			// SWSTYLE。
-			uint32 csr58 = _PCNET2ReadCSR(i, 58);
+			uint32 csr58 = _PCNET2ReadCSR(devidx, 58);
 			csr58 &= 0xfff0;
 			csr58 |= 2;
-			_PCNET2WriteCSR(i, 58, csr58);
+			_PCNET2WriteCSR(devidx, 58, csr58);
 
 			// ASEL。
-			uint32 bcr2 = _PCNET2ReadBCR(i, 2);
+			uint32 bcr2 = _PCNET2ReadBCR(devidx, 2);
 			bcr2 |= 0x2;
-			_PCNET2WriteBCR(i, 2, bcr2);
+			_PCNET2WriteBCR(devidx, 2, bcr2);
 
 			int32 j;
 			uint16 bcnt = (uint16) -_BUFFER_SIZE;
@@ -297,7 +314,16 @@ PCNET2Init(void)
 				*(uint16 *) &device->tdes[j * _DE_SIZE + 4] = bcnt;
 			}
 
+			KnlSetPeripheralInterrupt(0, _PCNET2Interrupt);
+			KnlSetPeripheralInterrupt(1, _PCNET2Interrupt);
+			KnlSetPeripheralInterrupt(2, _PCNET2Interrupt);
+			KnlSetPeripheralInterrupt(3, _PCNET2Interrupt);
+
 			// 设置NIC。
+			uint32 csr3 = _PCNET2ReadCSR(devidx, 3);
+			csr3 &= 0xfffff8fb;
+			_PCNET2WriteCSR(devidx, 3, csr3);
+
 			PCNet2InitializationBlockPtr iniblk = &device->iniblk;
 			iniblk->mode = 0;
 			iniblk->rlen = _PCNET2EncodeRTLen(_RX_BUFFER_COUNT);
@@ -308,12 +334,24 @@ PCNET2Init(void)
 			iniblk->rdes = (uint32) device->rdes;
 			iniblk->tdes = (uint32) device->tdes;
 			uint32 iadr = (uint32) iniblk;
-			_PCNET2WriteCSR(i, 1, iadr & 0x0000ffff);
-			_PCNET2WriteCSR(i, 2, (iadr >> 16) & 0x0000ffff);
-			uint32 csr0 = _PCNET2ReadCSR(i, 0);
-			csr0 &= 0xfffffffa;
-			csr0 |= 0x00000002;
-			_PCNET2WriteCSR(i, 0, csr0);
+			_PCNET2WriteCSR(devidx, 1, iadr & 0x0000ffff);
+			_PCNET2WriteCSR(devidx, 2, (iadr >> 16) & 0x0000ffff);
+			uint32 csr0 = _PCNET2ReadCSR(devidx, 0);
+			csr0 &= 0xfffffff8;
+			csr0 |= 0x00000003;
+			_PCNET2WriteCSR(devidx, 0, csr0);
+
+
+			device->tdes[0 * _DE_SIZE + 7] |= 0x02;
+
+			device->tdes[0 * _DE_SIZE + 7] |= 0x01;
+			
+			bcnt = (uint16)-123;
+			bcnt &= 0x0fff;
+			bcnt |= 0xf000;
+			*(uint16 *) &device->tdes[0 * _DE_SIZE + 4] = bcnt;
+			
+			device->tdes[0 * _DE_SIZE + 7] |= 0x80;
 		}
 	}
 }
@@ -323,4 +361,3 @@ PCNET2GetDeviceCount(void)
 {
 	return _count;
 }
-
