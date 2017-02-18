@@ -252,7 +252,25 @@ typedef struct
 	NetARPFrame			fr_arp;
 } __attribute__((packed)) NetARPPacket, * NetARPPacketPtr;
 
+typedef struct
+{
+	uint8				type;
 
+	uint8				code;
+
+	uint16				checksum;
+
+	uint32				data;
+} __attribute__((packed)) NetICMPFrame, * NetICMPFramePtr;
+
+typedef struct
+{
+	NetEthernetFrame	fr_eth;
+
+	NetIPv4Frame		fr_ipv4;
+
+	NetICMPFrame		fr_icmp;
+} __attribute__((packed)) NetICMPPacket, * NetICMPPacketPtr;
 
 extern
 BOOL

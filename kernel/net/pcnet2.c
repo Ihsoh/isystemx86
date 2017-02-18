@@ -286,7 +286,7 @@ _PCNET2Interrupt(
 				NetDevicePtr netdev = dev->netdev;
 				if (netdev->ProcessPacket != NULL)
 				{
-					netdev->ProcessPacket(netdev, buffer, len);
+					netdev->ProcessPacket(netdev, buffer, len - 4);
 				}
 
 				dev->rdes[_DE_SIZE * dev->rx_buffer_idx + 7] = 0x80;
