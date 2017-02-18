@@ -76,6 +76,11 @@ KnlSetPeripheralInterrupt(
 	IN uint32 index,
 	IN PeripheralInterrupt func);
 
+extern
+uint32
+KnlConvertIrqToPeripheralIndex(
+	IN uint32 irq);
+
 DEFINE_LOCK_EXTERN(kernel)
 
 #endif

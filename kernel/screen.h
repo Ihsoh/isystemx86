@@ -190,6 +190,16 @@ extern
 void
 ScrSetTargetScreen(IN struct CommonImage * ts);
 
+extern
+void
+ScrPrintIP(
+	IN uint8 * ip);
+
+extern
+void
+ScrPrintMAC(
+	IN uint8 * mac);
+
 #define BUFFER_SIZE	100
 #define	printun(n) 	{\
 						int8 __buffer__[BUFFER_SIZE];\

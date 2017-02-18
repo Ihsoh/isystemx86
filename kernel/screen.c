@@ -871,6 +871,44 @@ ScrSetTargetScreen(IN struct CommonImage * ts)
 	target_screen = ts;
 }
 
+void
+ScrPrintIP(
+	IN uint8 * ip)
+{
+	if (ip == NULL)
+	{
+		return;
+	}
+	printn(ip[0]);
+	ScrPrintString(".");
+	printn(ip[1]);
+	ScrPrintString(".");
+	printn(ip[2]);
+	ScrPrintString(".");
+	printn(ip[3]);
+}
+
+void
+ScrPrintMAC(
+	IN uint8 * mac)
+{
+	if (mac == NULL)
+	{
+		return;
+	}
+	printuchex(mac[0]);
+	ScrPrintString(":");
+	printuchex(mac[1]);
+	ScrPrintString(":");
+	printuchex(mac[2]);
+	ScrPrintString(":");
+	printuchex(mac[3]);
+	ScrPrintString(":");
+	printuchex(mac[4]);
+	ScrPrintString(":");
+	printuchex(mac[5]);
+}
+
 /*
 	============================== 窗体 ==============================
 */

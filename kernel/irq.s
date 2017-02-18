@@ -103,21 +103,21 @@ _irq8:
 .globl  _irq9
 .type   _irq9, @function
 _irq9:
-	// ..........
+	lcall	$0x553, $0
 	clear_nt
 	iret
 
 .globl  _irq10
 .type   _irq10, @function
 _irq10:
-	// ..........
+	lcall	$0x563, $0
 	clear_nt
 	iret
 
 .globl  _irq11
 .type   _irq11, @function
 _irq11:
-	// ..........
+	lcall	$0x573, $0
 	clear_nt
 	iret
 

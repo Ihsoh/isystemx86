@@ -51,6 +51,8 @@
 
 #include "sb/sb16.h"
 
+#include "net/net.h"
+
 #include <dslib/dslib.h>
 #include <jsonlib/jsonlib.h>
 #include <pathlib/pathlib.h>
@@ -237,6 +239,9 @@ main(void)
 	_KnlInitKeyboard();
 	_KnlInitFpu();
 	_KnlInitPeripheral0();
+	_KnlInitPeripheral1();
+	_KnlInitPeripheral2();
+	_KnlInitPeripheral3();
 	TskmgrInit();
 	_KnlInitSystemCall();
 	
@@ -266,6 +271,7 @@ main(void)
 
 	Ifs1InitBlocks();
 	KnlInitElfSharedObject();
+	NetInit();
 
 	/*
 	uint32 vidtr_addr = (uint32)KNLLDR_HEADER_ITEM(KNLLDR_HEADER_VIDTR);
@@ -1030,6 +1036,144 @@ _KnlInitPeripheral0(void)
 }
 
 /**
+	@Function:		_KnlInitPeripheral1
+	@Access:		Private
+	@Description:
+		初始化外部设备1的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlInitPeripheral1(void)
+{
+	struct die_info info;
+	struct TSS * tss = &peripheral1_tss;
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_PERIPHERAL1, DI_INIT_PERIPHERAL1);
+		die(&info);
+	}
+	struct Desc tss_desc;
+	struct Gate task_gate;
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	KnlSetDescToGDT(169, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (169 << 3) | RPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
+
+	// IRQ9
+	//KnlSetGateToIDT(0x71, (uint8 *)&task_gate);
+	KnlSetDescToGDT(170, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x71, _irq9);
+	
+	_KnlFillTSS(tss, (uint32)_KnlPeripheral1Interrupt, (uint32)stack);
+}
+
+/**
+	@Function:		_KnlInitPeripheral2
+	@Access:		Private
+	@Description:
+		初始化外部设备2的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlInitPeripheral2(void)
+{
+	struct die_info info;
+	struct TSS * tss = &peripheral2_tss;
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_PERIPHERAL2, DI_INIT_PERIPHERAL2);
+		die(&info);
+	}
+	struct Desc tss_desc;
+	struct Gate task_gate;
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	KnlSetDescToGDT(171, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (171 << 3) | RPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
+
+	// IRQ10
+	//KnlSetGateToIDT(0x72, (uint8 *)&task_gate);
+	KnlSetDescToGDT(172, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x72, _irq10);
+	
+	_KnlFillTSS(tss, (uint32)_KnlPeripheral2Interrupt, (uint32)stack);
+}
+
+/**
+	@Function:		_KnlInitPeripheral3
+	@Access:		Private
+	@Description:
+		初始化外部设备3的中断程序。
+	@Parameters:
+	@Return:
+*/
+static
+void
+_KnlInitPeripheral3(void)
+{
+	struct die_info info;
+	struct TSS * tss = &peripheral3_tss;
+	uint8 * stack = (uint8 *)MemAlloc(INTERRUPT_PROCEDURE_STACK_SIZE);
+	if(tss == NULL)
+	{
+		fill_info(info, DC_INIT_PERIPHERAL3, DI_INIT_PERIPHERAL3);
+		die(&info);
+	}
+	struct Desc tss_desc;
+	struct Gate task_gate;
+
+	uint32 temp = (uint32)tss;
+	tss_desc.limitl = sizeof(struct TSS) - 1;
+	tss_desc.basel = (uint16)(temp & 0xFFFF);
+	tss_desc.basem = (uint8)((temp >> 16) & 0xFF);
+	tss_desc.baseh = (uint8)((temp >> 24) & 0xFF);
+	tss_desc.attr = AT386TSS + DPL0;
+	KnlSetDescToGDT(173, (uint8 *)&tss_desc);
+
+	task_gate.offsetl = 0;
+	task_gate.offseth = 0;
+	task_gate.dcount = 0;
+	task_gate.selector = (173 << 3) | RPL0;
+	//task_gate.attr = ATTASKGATE | DPL0;
+	task_gate.attr = ATTASKGATE | DPL3;
+
+	// IRQ11
+	//KnlSetGateToIDT(0x73, (uint8 *)&task_gate);
+	KnlSetDescToGDT(174, (uint8 *)&task_gate);
+	KnlSetInterruptGate(0x73, _irq11);
+	
+	_KnlFillTSS(tss, (uint32)_KnlPeripheral3Interrupt, (uint32)stack);
+}
+
+/**
 	@Function:		_KnlFreeSystemCallTSS
 	@Access:		Private
 	@Description:
@@ -1607,10 +1751,42 @@ KnlSetPeripheralInterrupt(
 		|| proc == NULL
 		|| _peripheral_interrupts[index] != NULL)
 	{
-		//return FALSE;
+		return FALSE;
 	}
 	_peripheral_interrupts[index] = proc;
 	return TRUE;
+}
+
+/**
+	@Function:		KnlConvertIrqToPeripheralIndex
+	@Access:		Public
+	@Description:
+		把中断号转换为外部设备的索引。
+	@Parameters:
+		irq, uint32, IN
+			中断号。
+	@Return:
+		uint32
+			如果成功则返回索引，0 ~ MAX_PERIPHERAL_COUNT - 1。
+			如果失败则返回0xffffffff。
+*/
+uint32
+KnlConvertIrqToPeripheralIndex(
+	IN uint32 irq)
+{
+	switch (irq)
+	{
+		case 5:
+			return 0;
+		case 9:
+			return 1;
+		case 10:
+			return 2;
+		case 11:
+			return 3;
+		default:
+			return 0xffffffff;
+	}
 }
 
 /**
@@ -1627,10 +1803,12 @@ _KnlPeripheral0Interrupt(void)
 {
 	while (1)
 	{
+		lock();
 		if (_peripheral_interrupts[0] != NULL)
 		{
 			_peripheral_interrupts[0](0, 5);
 		}
+		unlock_without_sti();
 		_KnlIrqAck(5);
 		asm volatile ("iret;");
 	}
@@ -1650,10 +1828,12 @@ _KnlPeripheral1Interrupt(void)
 {
 	while (1)
 	{
+		lock();
 		if (_peripheral_interrupts[1] != NULL)
 		{
 			_peripheral_interrupts[1](1, 9);
 		}
+		unlock_without_sti();
 		_KnlIrqAck(9);
 		asm volatile ("iret;");
 	}
@@ -1673,10 +1853,12 @@ _KnlPeripheral2Interrupt(void)
 {
 	while (1)
 	{
+		lock();
 		if (_peripheral_interrupts[2] != NULL)
 		{
 			_peripheral_interrupts[2](2, 10);
 		}
+		unlock_without_sti();
 		_KnlIrqAck(10);
 		asm volatile ("iret;");
 	}
@@ -1696,10 +1878,12 @@ _KnlPeripheral3Interrupt(void)
 {
 	while (1)
 	{
+		lock();
 		if (_peripheral_interrupts[3] != NULL)
 		{
 			_peripheral_interrupts[3](3, 11);
 		}
+		unlock_without_sti();
 		_KnlIrqAck(11);
 		asm volatile ("iret;");
 	}

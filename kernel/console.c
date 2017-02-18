@@ -39,6 +39,10 @@
 
 #include "mqueue.h"
 
+#include "net/net.h"
+#include "net/pcnet2.h"
+#include "net/endian.h"
+
 DEFINE_LOCK_IMPL(console)
 
 #define	FORMAT(message)	"Foramt:\n\t"message
@@ -2416,12 +2420,254 @@ _ConExecuteCommand(	IN int8 * cmd,
 			#include "test.h"
 			RUN_UNIT_TEST(UtlSfstr);
 		}
-		else if(strcmp(name, "pcnet") == 0)
+		else if (strcmp(name, "net") == 0)
 		{
-			#include "net/pcnet2.h"
-			PCNET2Init();
-			printn(PCNET2GetDeviceCount());
+			ScrPrintString("NetEthernetFrame: ");
+			printn(sizeof(NetEthernetFrame));
 			ScrPrintString("\n");
+
+			ScrPrintString("NetIPv4Frame: ");
+			printn(sizeof(NetIPv4Frame));
+			ScrPrintString("\n");
+			
+			ScrPrintString("NetUDPFrame: ");
+			printn(sizeof(NetUDPFrame));
+			ScrPrintString("\n");
+
+			ScrPrintString("NetUDPFrameWithIPv4PseudoHeader: ");
+			printn(sizeof(NetUDPFrameWithIPv4PseudoHeader));
+			ScrPrintString("\n");
+
+			ScrPrintString("IPv4UDPPacket: ");
+			printn(sizeof(NetIPv4UDPPacket));
+			ScrPrintString("\n");
+		}
+		else if (strcmp(name, "net-info") == 0)
+		{
+			uint32 count = NetGetCount();
+			uint32 i;
+			for (i = 0; i < count; i++)
+			{
+				NetDevicePtr netdev = NetGet(i);
+				if (netdev != NULL)
+				{
+					ScrPrintString("#");
+					printn(i);
+					ScrPrintString("\n");
+
+					ScrPrintString("    Name: ");
+					ScrPrintString(netdev->GetName(netdev));
+					ScrPrintString("\n");
+
+					ScrPrintString("    MAC: ");
+					uint8 * mac = netdev->GetMAC(netdev);
+					ScrPrintMAC(mac);
+					ScrPrintString("\n");
+
+					ScrPrintString("    IP: ");
+					uint8 * ip = netdev->GetIP(netdev);
+					ScrPrintIP(ip);
+					ScrPrintString("\n");
+				}
+			}
+		}
+		else if(strcmp(name, "net-set-ip") == 0)
+		{
+			ASCCHAR index[1024];
+			ASCCHAR ip0[1024];
+			ASCCHAR ip1[1024];
+			ASCCHAR ip2[1024];
+			ASCCHAR ip3[1024];
+			_PARSE_COMMAND(NULL, index, 1023);
+			_PARSE_COMMAND(NULL, ip0, 1023);
+			_PARSE_COMMAND(NULL, ip1, 1023);
+			_PARSE_COMMAND(NULL, ip2, 1023);
+			_PARSE_COMMAND(NULL, ip3, 1023);
+			uint32 idx = stoui(index);
+			uint8 ip[4];
+			ip[0] = (uint8)stoui(ip0);
+			ip[1] = (uint8)stoui(ip1);
+			ip[2] = (uint8)stoui(ip2);
+			ip[3] = (uint8)stoui(ip3);
+			NetDevicePtr netdev = NetGet(idx);
+			netdev->SetIP(netdev, ip);
+		}
+		else if(strcmp(name, "net-arp-info") == 0)
+		{
+			uint32 count = NetGetARPRecordCount();
+			uint32 i;
+			for (i = 0; i < count; i++)
+			{
+				NetARPRecordPtr record = NetGetARPRecord(i);
+				ScrPrintIP(record->ip);
+				ScrPrintString(" -> ");
+				ScrPrintMAC(record->mac);
+				ScrPrintString("\n");
+			}
+		}
+		else if(strcmp(name, "net-arp") == 0)
+		{
+			ASCCHAR index[1024];
+			ASCCHAR ip0[1024];
+			ASCCHAR ip1[1024];
+			ASCCHAR ip2[1024];
+			ASCCHAR ip3[1024];
+			_PARSE_COMMAND(NULL, index, 1023);
+			_PARSE_COMMAND(NULL, ip0, 1023);
+			_PARSE_COMMAND(NULL, ip1, 1023);
+			_PARSE_COMMAND(NULL, ip2, 1023);
+			_PARSE_COMMAND(NULL, ip3, 1023);
+			uint32 idx = stoui(index);
+			NetDevicePtr netdev = NetGet(idx);
+
+			uint8 mac_dst[6] = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+			uint8 ip_dst[4];
+			ip_dst[0] = (uint8)stoui(ip0);
+			ip_dst[1] = (uint8)stoui(ip1);
+			ip_dst[2] = (uint8)stoui(ip2);
+			ip_dst[3] = (uint8)stoui(ip3);
+
+			uint8 * mac_src = netdev->GetMAC(netdev);
+			uint8 * ip_src = netdev->GetIP(netdev);
+
+			NetARPPacket pk_arp;
+			MemClear(&pk_arp, 0x00, sizeof(pk_arp));
+
+			// 以太网帧。
+			MemCopy(mac_dst, pk_arp.fr_eth.mac_dst, 6);
+			MemCopy(mac_src, pk_arp.fr_eth.mac_src, 6);
+			pk_arp.fr_eth.type = NetToBigEndian16(0x0806);
+
+			// ARP帧。
+			pk_arp.fr_arp.htype = NetToBigEndian16(0x0001);
+			pk_arp.fr_arp.ptype = NetToBigEndian16(0x0800);
+			pk_arp.fr_arp.hlen = 6;
+			pk_arp.fr_arp.plen = 4;
+			pk_arp.fr_arp.oper = NetToBigEndian16(0x0001);
+			MemCopy(mac_src, pk_arp.fr_arp.sha, 6);
+			MemCopy(ip_src, pk_arp.fr_arp.spa, 4);
+			MemCopy(mac_dst, pk_arp.fr_arp.tha, 6);
+			MemCopy(ip_dst, pk_arp.fr_arp.tpa, 4);
+
+			netdev->SendPacket(netdev, &pk_arp, sizeof(pk_arp));
+		}
+		else if(strcmp(name, "net-send-msg") == 0)
+		{
+			int32 i;
+			ASCCHAR index[1024];
+			ASCCHAR port_src[1024];
+			ASCCHAR ip0[1024];
+			ASCCHAR ip1[1024];
+			ASCCHAR ip2[1024];
+			ASCCHAR ip3[1024];
+			ASCCHAR port_dst[1024];
+			ASCCHAR msg[128];
+			_PARSE_COMMAND(NULL, index, 1023);
+			_PARSE_COMMAND(NULL, port_src, 1023);
+			_PARSE_COMMAND(NULL, ip0, 1023);
+			_PARSE_COMMAND(NULL, ip1, 1023);
+			_PARSE_COMMAND(NULL, ip2, 1023);
+			_PARSE_COMMAND(NULL, ip3, 1023);
+			_PARSE_COMMAND(NULL, port_dst, 1023);
+			_PARSE_COMMAND(NULL, msg, 127);
+			uint32 idx = stoui(index);
+			NetDevicePtr netdev = NetGet(idx);
+
+			uint8 * mac_dst;
+			uint8 ip_dst[4];
+			ip_dst[0] = (uint8)stoui(ip0);
+			ip_dst[1] = (uint8)stoui(ip1);
+			ip_dst[2] = (uint8)stoui(ip2);
+			ip_dst[3] = (uint8)stoui(ip3);
+			NetARPRecordPtr record = NetFindARPRecord(ip_dst);
+			if (record == NULL)
+			{
+				ScrPrintString("ERROR: cannot find arp record.");
+			}
+			mac_dst = record->mac;
+
+			uint8 * mac_src = netdev->GetMAC(netdev);
+			uint8 * ip_src = netdev->GetIP(netdev);
+			
+			uint8 buffer[sizeof(NetIPv4UDPPacket) + 128];
+			MemClear(buffer, 0x00, sizeof(buffer));
+			NetIPv4UDPPacketPtr pk_udp = (NetIPv4UDPPacketPtr) buffer;
+
+			// 以太网帧。
+			MemCopy(mac_dst, pk_udp->fr_eth.mac_dst, 6);
+			MemCopy(mac_src, pk_udp->fr_eth.mac_src, 6);
+			pk_udp->fr_eth.type = NetToBigEndian16(0x0800);
+
+			// IPv4帧。
+			pk_udp->fr_ipv4.version = 4;
+			pk_udp->fr_ipv4.ihl = 5;
+			pk_udp->fr_ipv4.dscp = 0x08;
+			pk_udp->fr_ipv4.ecn = 0x00;
+			pk_udp->fr_ipv4.total_length = NetToBigEndian16(sizeof(buffer) - sizeof(NetEthernetFrame));
+			pk_udp->fr_ipv4.identification = 0;
+			pk_udp->fr_ipv4.flags = 0x02;
+			pk_udp->fr_ipv4.fragment_offset_l8 = 0;
+			pk_udp->fr_ipv4.fragment_offset_h5 = 0;
+			pk_udp->fr_ipv4.ttl = 50;
+			pk_udp->fr_ipv4.protocol = 17;
+			pk_udp->fr_ipv4.checksum = 0;
+			MemCopy(ip_src, pk_udp->fr_ipv4.ip_src, 4);
+			MemCopy(ip_dst, pk_udp->fr_ipv4.ip_dst, 4);
+
+			uint32 checksum = 0;
+			uint16 * w = (uint16 *)&pk_udp->fr_ipv4;
+			for (i = 0; i < sizeof(NetIPv4Frame) / 2; i++, w++)
+			{
+				checksum += *w;
+			}
+			while ((checksum & 0xffff0000) != 0)
+			{
+				checksum = (checksum & 0x0000ffff) + ((checksum >> 16) & 0x0000ffff);
+			}
+			checksum = ~checksum;
+			pk_udp->fr_ipv4.checksum = checksum;
+			
+			// UDP帧。
+			uint32 udp_length = sizeof(buffer) - sizeof(NetEthernetFrame) - sizeof(NetIPv4Frame);
+			uint32 udp_data_length = udp_length - sizeof(NetUDPFrame);
+			NetUDPFrameWithIPv4PseudoHeader udp_ph;
+			MemCopy(ip_src, udp_ph.ip_src, 4);
+			MemCopy(ip_dst, udp_ph.ip_dst, 4);
+			udp_ph.zeroes = 0;
+			udp_ph.protocol = 17;
+			udp_ph.udp_length = NetToBigEndian16(udp_length);
+			udp_ph.udp.port_src = NetToBigEndian16((uint16)stoui(port_src));
+			udp_ph.udp.port_dst = NetToBigEndian16((uint16)stoui(port_dst));
+			udp_ph.udp.length = NetToBigEndian16(udp_length);
+			udp_ph.udp.checksum = 0;
+
+			MemCopy(msg, buffer + sizeof(NetIPv4UDPPacket), strlen(msg));
+
+			checksum = 0;
+			w = (uint16 *)&udp_ph;
+			for (i = 0; i < sizeof(NetUDPFrameWithIPv4PseudoHeader) / 2; i++, w++)
+			{
+				checksum += *w;
+			}
+			for (i = 0; i < udp_data_length; i++)
+			{
+				uint32 data = buffer[sizeof(NetIPv4UDPPacket) + i];
+				if (i % 2 == 1)
+				{
+					data = data << 8;
+				}
+				checksum += data;
+			}
+			while ((checksum & 0xffff0000) != 0)
+			{
+				checksum = (checksum & 0x0000ffff) + ((checksum >> 16) & 0x0000ffff);
+			}
+			checksum = ~checksum;
+			udp_ph.udp.checksum = checksum;
+
+			MemCopy(&udp_ph.udp, &pk_udp->fr_udp, sizeof(NetUDPFrame));
+
+			netdev->SendPacket(netdev, buffer, sizeof(buffer));
 		}
 		else if (strcmp(name, "sb16init") == 0)
 		{
