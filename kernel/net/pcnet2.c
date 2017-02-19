@@ -552,6 +552,18 @@ PCNET2Init(void)
 			device->index = i;
 			device->iobase = dev->header->cfg_hdr.bars[0] & 0xfffffffe;
 
+			// 构造NetDevice对象。
+			NetDevicePtr netdev = NEW(NetDevice);
+			netdev->id = devidx;
+			netdev->SetIP = _NetSetIP;
+			netdev->GetIP = _NetGetIP;
+			netdev->SetMAC = _NetSetMAC;
+			netdev->GetMAC = _NetGetMAC;
+			netdev->GetName = _NetGetName;
+			netdev->SendPacket = _NetSendPacket;
+			NetAdd(netdev);
+			device->netdev = netdev;
+
 			// 开启IO端口以及Bus Mastering。
 			uint32 conf = PciReadCfgRegValue(devidx, 0x04);
 			conf &= 0xffff0000;
@@ -643,19 +655,6 @@ PCNET2Init(void)
 			csr0 &= 0xfffffff8;
 			csr0 |= 0x00000043;
 			_PCNET2WriteCSR(devidx, 0, csr0);
-
-			// 构造NetDevice对象。
-			NetDevicePtr netdev = NEW(NetDevice);
-			netdev->id = devidx;
-			netdev->SetIP = _NetSetIP;
-			netdev->GetIP = _NetGetIP;
-			netdev->SetMAC = _NetSetMAC;
-			netdev->GetMAC = _NetGetMAC;
-			netdev->GetName = _NetGetName;
-			netdev->SendPacket = _NetSendPacket;
-			netdev->ProcessPacket = NULL;
-			NetAdd(netdev);
-			device->netdev = netdev;
 		}
 	}
 }

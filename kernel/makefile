@@ -58,7 +58,7 @@ WavObjs=wav/bin/wav.obj
 
 SBObjs=sb/bin/sb16.obj
 
-NetObjs=net/bin/pcnet2.obj net/bin/endian.obj net/bin/net.obj
+NetObjs=net/bin/pcnet2.obj net/bin/endian.obj net/bin/net.obj net/bin/helper.obj
 
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
@@ -405,6 +405,9 @@ net/bin/endian.obj: net/endian.c
 
 net/bin/net.obj: net/net.c
 	$(CC) $(CFlags) -c net/net.c -o net/bin/net.obj $(Include) $(Definition)
+
+net/bin/helper.obj: net/helper.c
+	$(CC) $(CFlags) -c net/helper.c -o net/bin/helper.obj $(Include) $(Definition)
 
 
 .PHONY:clean

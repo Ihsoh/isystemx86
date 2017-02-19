@@ -13,6 +13,7 @@
 
 #define	MAX_NET_DEVICE	4
 #define	MAX_ARP_RECORD	64
+#define	MAX_UDP_PORT	65536
 
 typedef BOOL (* NetSetIP)(IN void * device, IN uint8 * ip);
 typedef uint8 * (* NetGetIP)(IN void * device);
@@ -21,6 +22,15 @@ typedef uint8 * (* NetGetMAC)(IN void * device);
 typedef CASCTEXT (* NetGetName)(IN void * device);
 typedef BOOL (* NetSendPacket)(IN void * device, IN void * packet, IN uint16 len);
 typedef void (* NetProcessPacket)(IN void * device, IN void * packet, IN uint16 len);
+
+typedef void (* NetProcessUDP)(
+	IN void * device,
+	IN uint8 * ip_src,
+	IN uint16 port_src,
+	IN uint8 * ip_dst,
+	IN uint16 port_dst,
+	IN uint8 * data,
+	IN uint16 len);
 
 typedef struct
 {
@@ -32,6 +42,8 @@ typedef struct
 	NetGetName			GetName;
 	NetSendPacket		SendPacket;
 	NetProcessPacket	ProcessPacket;
+
+	NetProcessUDP		ProcessUDP[MAX_UDP_PORT];
 } NetDevice, * NetDevicePtr;
 
 typedef struct

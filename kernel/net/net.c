@@ -9,6 +9,7 @@
 #include "net.h"
 #include "pcnet2.h"
 #include "endian.h"
+#include "helper.h"
 
 #include "../memory.h"
 
@@ -155,6 +156,40 @@ _NetProcessICMP(
 
 static
 void
+_NetProcessUDP(
+	IN NetDevicePtr netdev,
+	IN void * packet,
+	IN uint16 len)
+{
+	if (len < sizeof(NetIPv4UDPPacket))
+	{
+		return;
+	}
+
+	// 获取本机MAC地址和IP地址。
+	uint8 * mac = netdev->GetMAC(netdev);
+	uint8 * ip = netdev->GetIP(netdev);
+
+	NetIPv4UDPPacketPtr pk_udp = (NetIPv4UDPPacketPtr)packet;
+	if (NetCompareMAC(mac, pk_udp->fr_eth.mac_dst) && NetCompareIP(ip, pk_udp->fr_ipv4.ip_dst))
+	{
+		uint8 * data = (uint8 *)packet;
+		data += sizeof(NetIPv4UDPPacket);
+		uint16 data_len = len - sizeof(NetIPv4UDPPacket);
+		uint8 * ip_src = pk_udp->fr_ipv4.ip_src;
+		uint16 port_src = NetToLittleEndian16(pk_udp->fr_udp.port_src);
+		uint8 * ip_dst = pk_udp->fr_ipv4.ip_dst;
+		uint16 port_dst = NetToLittleEndian16(pk_udp->fr_udp.port_dst);
+		NetProcessUDP f = netdev->ProcessUDP[port_dst];
+		if (f != NULL)
+		{
+			f(netdev, ip_src, port_src, ip_dst, port_dst, data, data_len);
+		}
+	}
+}
+
+static
+void
 _NetProcessIPv4(
 	IN NetDevicePtr netdev,
 	IN void * packet,
@@ -189,7 +224,7 @@ _NetProcessIPv4(
 		// UDP
 		case 17:
 		{
-
+			_NetProcessUDP(netdev, packet, len);
 			break;
 		}
 		// OSPF
@@ -306,12 +341,17 @@ BOOL
 NetAdd(
 	IN NetDevicePtr device)
 {
+	uint32 i;
 	if (_count >= MAX_NET_DEVICE
 		|| device == NULL)
 	{
 		return;
 	}
 	device->ProcessPacket = _NetProcessPacket;
+	for (i = 0; i < MAX_UDP_PORT; i++)
+	{
+		device->ProcessUDP[i] = NULL;
+	}
 	_devices[_count++] = device;
 }
 

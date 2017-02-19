@@ -2420,6 +2420,49 @@ _ConExecuteCommand(	IN int8 * cmd,
 			#include "test.h"
 			RUN_UNIT_TEST(UtlSfstr);
 		}
+		else if(strcmp(name, "net-test") == 0)
+		{
+			#include "net/helper.h"
+
+			NetDevicePtr netdev = NetGet(0);
+			void _(
+				IN void * device,
+				IN uint8 * ip_src,
+				IN uint16 port_src,
+				IN uint8 * ip_dst,
+				IN uint16 port_dst,
+				IN uint8 * data,
+				IN uint16 len)
+			{
+				ScrPrintString("#UDP:\n");
+
+				ScrPrintString("Source IP: ");
+				ScrPrintIP(ip_src);
+				ScrPrintString("\n");
+
+				ScrPrintString("Source Port: ");
+				printn(port_src);
+				ScrPrintString("\n");
+
+				ScrPrintString("Dest IP: ");
+				ScrPrintIP(ip_dst);
+				ScrPrintString("\n");
+
+				ScrPrintString("Dest Port: ");
+				printn(port_dst);
+				ScrPrintString("\n");
+
+				ScrPrintString("Len: ");
+				printn(len);
+				ScrPrintString("\n");
+
+				ScrPrintString("Data: ");
+				ScrPrintString(data);
+				ScrPrintString("\n");
+			}
+			netdev->ProcessUDP[12345] = _;
+
+		}
 		else if (strcmp(name, "net") == 0)
 		{
 			ScrPrintString("NetEthernetFrame: ");
