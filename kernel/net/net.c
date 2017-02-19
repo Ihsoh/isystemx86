@@ -18,8 +18,9 @@ static uint32 _count = 0;
 static NetARPRecord _arp_records[MAX_ARP_RECORD];
 static uint32 _arp_record_count = 0;
 
+static
 void
-NetFillIPv4Packet(
+_NetFillIPv4Packet(
 	IN NetDevicePtr netdev,
 	IN OUT NetIPv4PacketPtr pk_ipv4,
 	IN uint32 buffer_len,
@@ -71,6 +72,118 @@ NetFillIPv4Packet(
 	pk_ipv4->fr_ipv4.checksum = checksum;
 }
 
+BOOL
+NetSendUDP(
+	IN NetDevicePtr netdev,
+	IN uint16 port_src,
+	IN uint8 * ip_dst,
+	IN uint16 port_dst,
+	IN uint8 * data,
+	IN uint16 len)
+{
+	uint32 i;
+
+	if (netdev == NULL
+		|| ip_dst == NULL
+		|| data == NULL
+		|| len > MAX_UDP_DATA_LEN)
+	{
+		goto err;
+	}
+
+	NetARPRecordPtr record = NetFindARPRecord(ip_dst);
+	if (record == NULL)
+	{
+		goto err;
+	}
+	uint8 * mac_dst = record->mac;
+
+	uint8 * mac_src = netdev->GetMAC(netdev);
+	uint8 * ip_src = netdev->GetIP(netdev);
+
+	uint8 buffer[MAX_NET_PACKET_LEN];
+	MemClear(buffer, 0x00, sizeof(buffer));
+	NetIPv4UDPPacketPtr pk_udp = (NetIPv4UDPPacketPtr)buffer;
+	uint32 pk_len = sizeof(NetIPv4UDPPacket) + len;
+
+	// 以太网帧。
+	MemCopy(mac_dst, pk_udp->fr_eth.mac_dst, 6);
+	MemCopy(mac_src, pk_udp->fr_eth.mac_src, 6);
+	pk_udp->fr_eth.type = NetToBigEndian16(0x0800);
+
+	// IPv4帧。
+	pk_udp->fr_ipv4.version = 4;
+	pk_udp->fr_ipv4.ihl = 5;
+	pk_udp->fr_ipv4.dscp = 0x08;
+	pk_udp->fr_ipv4.ecn = 0x00;
+	pk_udp->fr_ipv4.total_length = NetToBigEndian16(pk_len - sizeof(NetEthernetFrame));
+	pk_udp->fr_ipv4.identification = 0;
+	pk_udp->fr_ipv4.flags = 0x02;
+	pk_udp->fr_ipv4.fragment_offset_l8 = 0;
+	pk_udp->fr_ipv4.fragment_offset_h5 = 0;
+	pk_udp->fr_ipv4.ttl = 50;
+	pk_udp->fr_ipv4.protocol = 17;
+	pk_udp->fr_ipv4.checksum = 0;
+	MemCopy(ip_src, pk_udp->fr_ipv4.ip_src, 4);
+	MemCopy(ip_dst, pk_udp->fr_ipv4.ip_dst, 4);
+
+	uint32 checksum = 0;
+	uint16 * w = (uint16 *)&pk_udp->fr_ipv4;
+	for (i = 0; i < sizeof(NetIPv4Frame) / 2; i++, w++)
+	{
+		checksum += *w;
+	}
+	while ((checksum & 0xffff0000) != 0)
+	{
+		checksum = (checksum & 0x0000ffff) + ((checksum >> 16) & 0x0000ffff);
+	}
+	checksum = ~checksum;
+	pk_udp->fr_ipv4.checksum = checksum;
+
+	// UDP帧。
+	uint32 udp_length = sizeof(NetUDPFrame) + len;
+	NetUDPFrameWithIPv4PseudoHeader udp_ph;
+	MemCopy(ip_src, udp_ph.ip_src, 4);
+	MemCopy(ip_dst, udp_ph.ip_dst, 4);
+	udp_ph.zeroes = 0;
+	udp_ph.protocol = 17;
+	udp_ph.udp_length = NetToBigEndian16(udp_length);
+	udp_ph.udp.port_src = NetToBigEndian16(port_src);
+	udp_ph.udp.port_dst = NetToBigEndian16(port_dst);
+	udp_ph.udp.length = NetToBigEndian16(udp_length);
+	udp_ph.udp.checksum = 0;
+
+	MemCopy(data, buffer + sizeof(NetIPv4UDPPacket), len);
+
+	checksum = 0;
+	w = (uint16 *)&udp_ph;
+	for (i = 0; i < sizeof(NetUDPFrameWithIPv4PseudoHeader) / 2; i++, w++)
+	{
+		checksum += *w;
+	}
+	for (i = 0; i < len; i++)
+	{
+		uint32 data = buffer[sizeof(NetIPv4UDPPacket) + i];
+		if (i % 2 == 1)
+		{
+			data = data << 8;
+		}
+		checksum += data;
+	}
+	while ((checksum & 0xffff0000) != 0)
+	{
+		checksum = (checksum & 0x0000ffff) + ((checksum >> 16) & 0x0000ffff);
+	}
+	checksum = ~checksum;
+	udp_ph.udp.checksum = checksum;
+
+	MemCopy(&udp_ph.udp, &pk_udp->fr_udp, sizeof(NetUDPFrame));
+
+	return netdev->SendPacket(netdev, buffer, pk_len);
+err:
+	return FALSE;
+}
+
 static
 void
 _NetProcessPing(
@@ -78,7 +191,7 @@ _NetProcessPing(
 	IN void * packet,
 	IN uint16 len)
 {
-	uint8 buffer[1548];
+	uint8 buffer[MAX_NET_PACKET_LEN];
 	if (len < sizeof(NetICMPPacket)
 		&& len > sizeof(buffer))
 	{
@@ -87,7 +200,7 @@ _NetProcessPing(
 	NetICMPPacketPtr pk_icmp = (NetICMPPacketPtr)packet;
 	NetICMPFramePtr fr_icmp = (NetICMPFramePtr)&pk_icmp->fr_icmp;
 	NetICMPPacketPtr pk_pong = (NetICMPPacketPtr)buffer;
-	NetFillIPv4Packet(
+	_NetFillIPv4Packet(
 		netdev,
 		pk_pong,
 		len,

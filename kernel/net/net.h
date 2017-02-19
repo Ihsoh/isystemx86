@@ -11,9 +11,12 @@
 
 #include "../types.h"
 
-#define	MAX_NET_DEVICE	4
-#define	MAX_ARP_RECORD	64
-#define	MAX_UDP_PORT	65536
+#define	MAX_NET_PACKET_LEN	1024
+#define	MAX_UDP_DATA_LEN	(MAX_NET_PACKET_LEN - sizeof(NetIPv4UDPPacket))
+
+#define	MAX_NET_DEVICE		4
+#define	MAX_ARP_RECORD		64
+#define	MAX_UDP_PORT		65536
 
 typedef BOOL (* NetSetIP)(IN void * device, IN uint8 * ip);
 typedef uint8 * (* NetGetIP)(IN void * device);
@@ -283,6 +286,16 @@ typedef struct
 
 	NetICMPFrame		fr_icmp;
 } __attribute__((packed)) NetICMPPacket, * NetICMPPacketPtr;
+
+extern
+BOOL
+NetSendUDP(
+	IN NetDevicePtr netdev,
+	IN uint16 port_src,
+	IN uint8 * ip_dst,
+	IN uint16 port_dst,
+	IN uint8 * data,
+	IN uint16 len);
 
 extern
 BOOL

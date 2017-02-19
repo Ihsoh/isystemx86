@@ -2616,101 +2616,14 @@ _ConExecuteCommand(	IN int8 * cmd,
 			uint32 idx = stoui(index);
 			NetDevicePtr netdev = NetGet(idx);
 
-			uint8 * mac_dst;
 			uint8 ip_dst[4];
 			ip_dst[0] = (uint8)stoui(ip0);
 			ip_dst[1] = (uint8)stoui(ip1);
 			ip_dst[2] = (uint8)stoui(ip2);
 			ip_dst[3] = (uint8)stoui(ip3);
-			NetARPRecordPtr record = NetFindARPRecord(ip_dst);
-			if (record == NULL)
-			{
-				ScrPrintString("ERROR: cannot find arp record.");
-			}
-			mac_dst = record->mac;
-
-			uint8 * mac_src = netdev->GetMAC(netdev);
-			uint8 * ip_src = netdev->GetIP(netdev);
 			
-			uint8 buffer[sizeof(NetIPv4UDPPacket) + 128];
-			MemClear(buffer, 0x00, sizeof(buffer));
-			NetIPv4UDPPacketPtr pk_udp = (NetIPv4UDPPacketPtr) buffer;
 
-			// 以太网帧。
-			MemCopy(mac_dst, pk_udp->fr_eth.mac_dst, 6);
-			MemCopy(mac_src, pk_udp->fr_eth.mac_src, 6);
-			pk_udp->fr_eth.type = NetToBigEndian16(0x0800);
-
-			// IPv4帧。
-			pk_udp->fr_ipv4.version = 4;
-			pk_udp->fr_ipv4.ihl = 5;
-			pk_udp->fr_ipv4.dscp = 0x08;
-			pk_udp->fr_ipv4.ecn = 0x00;
-			pk_udp->fr_ipv4.total_length = NetToBigEndian16(sizeof(buffer) - sizeof(NetEthernetFrame));
-			pk_udp->fr_ipv4.identification = 0;
-			pk_udp->fr_ipv4.flags = 0x02;
-			pk_udp->fr_ipv4.fragment_offset_l8 = 0;
-			pk_udp->fr_ipv4.fragment_offset_h5 = 0;
-			pk_udp->fr_ipv4.ttl = 50;
-			pk_udp->fr_ipv4.protocol = 17;
-			pk_udp->fr_ipv4.checksum = 0;
-			MemCopy(ip_src, pk_udp->fr_ipv4.ip_src, 4);
-			MemCopy(ip_dst, pk_udp->fr_ipv4.ip_dst, 4);
-
-			uint32 checksum = 0;
-			uint16 * w = (uint16 *)&pk_udp->fr_ipv4;
-			for (i = 0; i < sizeof(NetIPv4Frame) / 2; i++, w++)
-			{
-				checksum += *w;
-			}
-			while ((checksum & 0xffff0000) != 0)
-			{
-				checksum = (checksum & 0x0000ffff) + ((checksum >> 16) & 0x0000ffff);
-			}
-			checksum = ~checksum;
-			pk_udp->fr_ipv4.checksum = checksum;
-			
-			// UDP帧。
-			uint32 udp_length = sizeof(buffer) - sizeof(NetEthernetFrame) - sizeof(NetIPv4Frame);
-			uint32 udp_data_length = udp_length - sizeof(NetUDPFrame);
-			NetUDPFrameWithIPv4PseudoHeader udp_ph;
-			MemCopy(ip_src, udp_ph.ip_src, 4);
-			MemCopy(ip_dst, udp_ph.ip_dst, 4);
-			udp_ph.zeroes = 0;
-			udp_ph.protocol = 17;
-			udp_ph.udp_length = NetToBigEndian16(udp_length);
-			udp_ph.udp.port_src = NetToBigEndian16((uint16)stoui(port_src));
-			udp_ph.udp.port_dst = NetToBigEndian16((uint16)stoui(port_dst));
-			udp_ph.udp.length = NetToBigEndian16(udp_length);
-			udp_ph.udp.checksum = 0;
-
-			MemCopy(msg, buffer + sizeof(NetIPv4UDPPacket), strlen(msg));
-
-			checksum = 0;
-			w = (uint16 *)&udp_ph;
-			for (i = 0; i < sizeof(NetUDPFrameWithIPv4PseudoHeader) / 2; i++, w++)
-			{
-				checksum += *w;
-			}
-			for (i = 0; i < udp_data_length; i++)
-			{
-				uint32 data = buffer[sizeof(NetIPv4UDPPacket) + i];
-				if (i % 2 == 1)
-				{
-					data = data << 8;
-				}
-				checksum += data;
-			}
-			while ((checksum & 0xffff0000) != 0)
-			{
-				checksum = (checksum & 0x0000ffff) + ((checksum >> 16) & 0x0000ffff);
-			}
-			checksum = ~checksum;
-			udp_ph.udp.checksum = checksum;
-
-			MemCopy(&udp_ph.udp, &pk_udp->fr_udp, sizeof(NetUDPFrame));
-
-			netdev->SendPacket(netdev, buffer, sizeof(buffer));
+			NetSendUDP(netdev, (uint16)stoui(port_src), ip_dst, (uint16)stoui(port_dst), msg, strlen(msg) + 1);
 		}
 		else if (strcmp(name, "sb16init") == 0)
 		{
