@@ -19,10 +19,10 @@ extern
 BOOL
 PCNET2SetMAC(
 	IN uint32 index,
-	IN uint8 * mac);
+	IN const uint8 * mac);
 
 extern
-uint8 *
+const uint8 *
 PCNET2GetMAC(
 	IN uint32 index);
 
@@ -30,10 +30,10 @@ extern
 BOOL
 PCNET2SetIP(
 	IN uint32 index,
-	IN uint8 * ip);
+	IN const uint8 * ip);
 
 extern
-uint8 *
+const uint8 *
 PCNET2GetIP(
 	IN uint32 index);
 
@@ -45,7 +45,7 @@ extern
 BOOL
 PCNET2SendPacket(
 	IN uint32 index,
-	IN void * packet,
+	IN const void * packet,
 	IN uint16 len);
 
 extern

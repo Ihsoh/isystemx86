@@ -18,6 +18,41 @@ static uint32 _count = 0;
 static NetARPRecord _arp_records[MAX_ARP_RECORD];
 static uint32 _arp_record_count = 0;
 
+/**
+	@Function:		_NetFillIPv4Packet
+	@Access:		Private
+	@Description:
+		填充IPv4数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		pk_ipv4, NetIPv4PacketPtr, IN OUT
+			指向数据包的指针。
+		buffer_len, uint32, IN
+			数据包的长度，单位：字节。
+		dscp, uint8, IN
+			Differentiated Services Code Point (DSCP)。
+		ecn, uint8, IN
+			Explicit Congestion Notification (ECN)。
+		ttl, uint8, IN
+			Time To Live (TTL)。
+		protocol, uint8, IN
+			IPv4数据包所承载的数据的类型。
+			协议字段值		协议名				缩写
+			=====================================
+			1			互联网控制消息协议		ICMP
+			2			互联网组管理协议		IGMP
+			6			传输控制协议			TCP
+			17			用户数据报协议		UDP
+			41			IPv6封装				-
+			89			开放式最短路径优先		OSPF
+			132			流控制传输协议		SCTP
+		mac_dst, const uint8 *, IN
+			目标MAC地址，长度为6字节。
+		ip_dst, const uint8 *, IN
+			目标IP地址，长度为4字节。
+	@Return:
+*/
 static
 void
 _NetFillIPv4Packet(
@@ -28,8 +63,8 @@ _NetFillIPv4Packet(
 	IN uint8 ecn,
 	IN uint8 ttl,
 	IN uint8 protocol,
-	IN uint8 * mac_dst,
-	IN uint8 * ip_dst)
+	IN const uint8 * mac_dst,
+	IN const uint8 * ip_dst)
 {
 	// 获取本机MAC地址和IP地址。
 	uint8 * mac_src = netdev->GetMAC(netdev);
@@ -72,13 +107,35 @@ _NetFillIPv4Packet(
 	pk_ipv4->fr_ipv4.checksum = checksum;
 }
 
+/**
+	@Function:		NetSendUDP
+	@Access:		Public
+	@Description:
+		发送UDP数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		port_src, uint16, IN
+			源端口。
+		ip_dst, const uint8 *, IN
+			目标IP地址，长度为4字节。
+		port_dst, uint16, IN
+			目标端口。
+		data, cosnt uint8 *, IN
+			UDP数据包承载的数据。
+		len, uint16, IN
+			数据的长度，单位：字节。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 NetSendUDP(
 	IN NetDevicePtr netdev,
 	IN uint16 port_src,
-	IN uint8 * ip_dst,
+	IN const uint8 * ip_dst,
 	IN uint16 port_dst,
-	IN uint8 * data,
+	IN const uint8 * data,
 	IN uint16 len)
 {
 	uint32 i;
@@ -184,11 +241,25 @@ err:
 	return FALSE;
 }
 
+/**
+	@Function:		_NetProcessPing
+	@Access:		Private
+	@Description:
+		处理Ping数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		packet, const void *, IN
+			指向数据包的指针。
+		len, uint16, IN
+			数据包的长度，单位：字节。
+	@Return:
+*/
 static
 void
 _NetProcessPing(
 	IN NetDevicePtr netdev,
-	IN void * packet,
+	IN const void * packet,
 	IN uint16 len)
 {
 	uint8 buffer[MAX_NET_PACKET_LEN];
@@ -239,11 +310,25 @@ _NetProcessPing(
 	netdev->SendPacket(netdev, buffer, len);
 }
 
+/**
+	@Function:		_NetProcessICMP
+	@Access:		Private
+	@Description:
+		处理ICMP数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		packet, const void *, IN
+			指向数据包的指针。
+		len, uint16, IN
+			数据包的长度，单位：字节。
+	@Return:
+*/
 static
 void
 _NetProcessICMP(
 	IN NetDevicePtr netdev,
-	IN void * packet,
+	IN const void * packet,
 	IN uint16 len)
 {
 	if (len < sizeof(NetICMPPacket))
@@ -267,11 +352,25 @@ _NetProcessICMP(
 	}
 }
 
+/**
+	@Function:		_NetProcessUDP
+	@Access:		Private
+	@Description:
+		处理UDP数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		packet, const void *, IN
+			指向数据包的指针。
+		len, uint16, IN
+			数据包的长度，单位：字节。
+	@Return:
+*/
 static
 void
 _NetProcessUDP(
 	IN NetDevicePtr netdev,
-	IN void * packet,
+	IN const void * packet,
 	IN uint16 len)
 {
 	if (len < sizeof(NetIPv4UDPPacket))
@@ -301,11 +400,25 @@ _NetProcessUDP(
 	}
 }
 
+/**
+	@Function:		_NetProcessIPv4
+	@Access:		Private
+	@Description:
+		处理IPv4数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		packet, const void *, IN
+			指向数据包的指针。
+		len, uint16, IN
+			数据包的长度，单位：字节。
+	@Return:
+*/
 static
 void
 _NetProcessIPv4(
 	IN NetDevicePtr netdev,
-	IN void * packet,
+	IN const void * packet,
 	IN uint16 len)
 {
 	if (len < sizeof(NetIPv4Packet))
@@ -360,11 +473,25 @@ _NetProcessIPv4(
 	}
 }
 
+/**
+	@Function:		_NetProcessARP
+	@Access:		Private
+	@Description:
+		处理ARP数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		packet, const void *, IN
+			指向数据包的指针。
+		len, uint16, IN
+			数据包的长度，单位：字节。
+	@Return:
+*/
 static
 void
 _NetProcessARP(
 	IN NetDevicePtr netdev,
-	IN void * packet,
+	IN const void * packet,
 	IN uint16 len)
 {
 	if (len < sizeof(NetARPPacket))
@@ -420,7 +547,21 @@ _NetProcessARP(
 	}
 }
 
-static void _NetProcessPacket(IN void * device, IN void * packet, IN uint16 len)
+/**
+	@Function:		_NetProcessPacket
+	@Access:		Private
+	@Description:
+		处理数据包。
+	@Parameters:
+		device, void *, IN
+			指向设备实例的指针。
+		packet, const void *, IN
+			指向数据包的指针。
+		len, uint16, IN
+			数据包的长度，单位：字节。
+	@Return:
+*/
+static void _NetProcessPacket(IN void * device, IN const void * packet, IN uint16 len)
 {
 	if (len < sizeof(NetEthernetFrame))
 	{
@@ -450,6 +591,18 @@ static void _NetProcessPacket(IN void * device, IN void * packet, IN uint16 len)
 	}
 }
 
+/**
+	@Function:		NetAdd
+	@Access:		Public
+	@Description:
+		添加一个设备。
+	@Parameters:
+		device, NetDevicePtr, IN
+			指向设备实例的指针。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
 BOOL
 NetAdd(
 	IN NetDevicePtr device)
@@ -468,12 +621,34 @@ NetAdd(
 	_devices[_count++] = device;
 }
 
+/**
+	@Function:		NetGetCount
+	@Access:		Public
+	@Description:
+		获取设备的数量。
+	@Parameters:
+	@Return:
+		uint32
+			设备的数量。
+*/
 uint32
 NetGetCount(void)
 {
 	return _count;
 }
 
+/**
+	@Function:		NetGet
+	@Access:		Public
+	@Description:
+		获取设备实例的指针。
+	@Parameters:
+		index, uint32, IN
+			设备索引，该索引必须小于NetGetCount()的返回值。
+	@Return:
+		NetDevicePtr
+			设备实例的指针。
+*/
 NetDevicePtr
 NetGet(
 	IN uint32 index)
@@ -485,12 +660,34 @@ NetGet(
 	return _devices[index];
 }
 
+/**
+	@Function:		NetGetARPRecordCount
+	@Access:		Public
+	@Description:
+		获取ARP记录的数量。
+	@Parameters:
+	@Return:
+		uint32
+			ARP记录的数量。
+*/
 uint32
 NetGetARPRecordCount(void)
 {
 	return _arp_record_count;
 }
 
+/**
+	@Function:		NetGetARPRecord
+	@Access:		Public
+	@Description:
+		获取ARP记录。
+	@Parameters:
+		index, uint32, IN
+			ARP记录索引，该索引必须小于NetGetARPRecordCount()的返回值。
+	@Return:
+		NetARPRecordPtr
+			指向ARP记录实例的指针。
+*/
 NetARPRecordPtr
 NetGetARPRecord(
 	IN uint32 index)
@@ -502,9 +699,21 @@ NetGetARPRecord(
 	return &_arp_records[index];
 }
 
+/**
+	@Function:		NetFindARPRecord
+	@Access:		Public
+	@Description:
+		通过IP地址查找ARP记录。
+	@Parameters:
+		ip, const uint8 *, IN
+			IP地址，长度为4字节。
+	@Return:
+		NetARPRecordPtr
+			指向ARP记录实例的指针。
+*/
 NetARPRecordPtr
 NetFindARPRecord(
-	IN uint8 * ip)
+	IN const uint8 * ip)
 {
 	if (ip == NULL)
 	{
@@ -521,6 +730,14 @@ NetFindARPRecord(
 	return NULL;
 }
 
+/**
+	@Function:		NetInit
+	@Access:		Public
+	@Description:
+		初始化网络功能。
+	@Parameters:
+	@Return:
+*/
 void
 NetInit(void)
 {

@@ -460,6 +460,8 @@ typedef struct
 
 	PCNet2InitializationBlock	iniblk;
 	NetDevicePtr				netdev;
+
+	BOOL		tx_lock;
 } PCNet2Device, * PCNet2DevicePtr;
 
 static PCNet2Device _devices[_MAX_COUNT];
@@ -481,6 +483,11 @@ void
 _PCNET2Free(
 	IN OUT PCNet2DevicePtr device)
 {
+	if (device == NULL)
+	{
+		return;
+	}
+
 	device->index = 0xffffffff;
 
 	if (device->rdes != NULL)
@@ -805,7 +812,7 @@ PCNET2GetDeviceCount(void)
 	@Parameters:
 		index, uint32, IN
 			设备索引。
-		mac, uint8 *, IN
+		mac, const uint8 *, IN
 			设备的MAC地址，长度为6字节。
 	@Return:
 		BOOL
@@ -814,7 +821,7 @@ PCNET2GetDeviceCount(void)
 BOOL
 PCNET2SetMAC(
 	IN uint32 index,
-	IN uint8 * mac)
+	IN const uint8 * mac)
 {
 	PCNet2DevicePtr device = _PCNET2GetDevice(index);
 	if (device == NULL)
@@ -822,6 +829,10 @@ PCNET2SetMAC(
 		goto err;
 	}
 
+	if (mac == NULL)
+	{
+		goto err;
+	}
 	MemCopy(mac, device->mac, sizeof(device->mac));
 
 	return TRUE;
@@ -838,10 +849,10 @@ err:
 		index, uint32, IN
 			设备索引。
 	@Return:
-		uint8 *
+		const uint8 *
 			设备的MAC地址，长度为6字节。
 */
-uint8 *
+const uint8 *
 PCNET2GetMAC(
 	IN uint32 index)
 {
@@ -864,7 +875,7 @@ err:
 	@Parameters:
 		index, uint32, IN
 			设备索引。
-		ip, uint8 *, IN
+		ip, const uint8 *, IN
 			设备的IP地址，长度为4字节。
 	@Return:
 		BOOL
@@ -873,7 +884,7 @@ err:
 BOOL
 PCNET2SetIP(
 	IN uint32 index,
-	IN uint8 * ip)
+	IN const uint8 * ip)
 {
 	PCNet2DevicePtr device = _PCNET2GetDevice(index);
 	if (device == NULL)
@@ -881,6 +892,10 @@ PCNET2SetIP(
 		goto err;
 	}
 
+	if (ip == NULL)
+	{
+		goto err;
+	}
 	MemCopy(ip, device->ip, sizeof(device->ip));
 
 	return TRUE;
@@ -897,10 +912,10 @@ err:
 		index, uint32, IN
 			设备索引。
 	@Return:
-		uint8 *
+		const uint8 *
 			设备的IP地址，长度为4字节。
 */
-uint8 *
+const uint8 *
 PCNET2GetIP(
 	IN uint32 index)
 {
@@ -939,7 +954,7 @@ PCNET2GetName(void)
 	@Parameters:
 		index, uint32, IN
 			设备索引。
-		packet, void *, IN
+		packet, const void *, IN
 			指向数据包的指针。
 		len, uint16, IN
 			要发送的数据包的长度，单位：字节。
@@ -950,7 +965,7 @@ PCNET2GetName(void)
 BOOL
 PCNET2SendPacket(
 	IN uint32 index,
-	IN void * packet,
+	IN const void * packet,
 	IN uint16 len)
 {
 	// 通过索引获取设备实例。
@@ -959,6 +974,13 @@ PCNET2SendPacket(
 	{
 		goto err;
 	}
+
+	// 检测设备的传输功能是否已被锁定。
+	if (device->tx_lock)
+	{
+		goto err;
+	}
+	device->tx_lock = TRUE;
 
 	// 获取一个可用的（own = 0）传输描述符（Transmit Descriptor）。
 	uint32 idx = device->tx_buffer_idx;
@@ -969,7 +991,8 @@ PCNET2SendPacket(
 	}
 
 	// 把需要传输的数据复制到传输缓冲区。
-	if (len > _BUFFER_SIZE)
+	if (packet == NULL
+		|| len > _BUFFER_SIZE)
 	{
 		goto err;
 	}
@@ -997,8 +1020,16 @@ PCNET2SendPacket(
 	}
 	device->tx_buffer_idx = idx;
 
+	// 解锁设备的传输功能。
+	device->tx_lock = FALSE;
+
 	return TRUE;
 err:
+	// 解锁设备的传输功能。
+	if (device != NULL)
+	{
+		device->tx_lock = FALSE;
+	}
 	return FALSE;
 }
 
@@ -1091,13 +1122,13 @@ PCNET2PrintStatus(
 	@Parameters:
 		device, void *, IN
 			实际类型为NetDevicePtr。
-		ip, uint8 *, IN
+		ip, const uint8 *, IN
 			见PCNET2SetIP。
 	@Return:
 		BOOL
 			见PCNET2SetIP。
 */
-static BOOL _NetSetIP(IN void * device, IN uint8 * ip)
+static BOOL _NetSetIP(IN void * device, IN const uint8 * ip)
 {
 	NetDevicePtr netdev = (NetDevicePtr)device;
 	return PCNET2SetIP(netdev->id, ip);
@@ -1112,10 +1143,10 @@ static BOOL _NetSetIP(IN void * device, IN uint8 * ip)
 		device, void *, IN
 			实际类型为NetDevicePtr。
 	@Return:
-		uint8 *
+		const uint8 *
 			见PCNET2GetIP。
 */
-static uint8 * _NetGetIP(IN void * device)
+static const uint8 * _NetGetIP(IN void * device)
 {
 	NetDevicePtr netdev = (NetDevicePtr)device;
 	return PCNET2GetIP(netdev->id);
@@ -1129,13 +1160,13 @@ static uint8 * _NetGetIP(IN void * device)
 	@Parameters:
 		device, void *, IN
 			实际类型为NetDevicePtr。
-		mac, uint8 *, IN
+		mac, const uint8 *, IN
 			见PCNET2SetMAC。
 	@Return:
 		BOOL
 			见PCNET2SetMAC。
 */
-static BOOL _NetSetMAC(IN void * device, IN uint8 * mac)
+static BOOL _NetSetMAC(IN void * device, IN const uint8 * mac)
 {
 	NetDevicePtr netdev = (NetDevicePtr)device;
 	return PCNET2SetMAC(netdev->id, mac);
@@ -1150,10 +1181,10 @@ static BOOL _NetSetMAC(IN void * device, IN uint8 * mac)
 		device, void *, IN
 			实际类型为NetDevicePtr。
 	@Return:
-		uint8 *
+		const uint8 *
 			见PCNET2GetMAC。
 */
-static uint8 * _NetGetMAC(IN void * device)
+static const uint8 * _NetGetMAC(IN void * device)
 {
 	NetDevicePtr netdev = (NetDevicePtr)device;
 	return PCNET2GetMAC(netdev->id);
@@ -1184,7 +1215,7 @@ static CASCTEXT _NetGetName(IN void * device)
 	@Parameters:
 		device, void *, IN
 			实际类型为NetDevicePtr。
-		packet, void *, IN
+		packet, const void *, IN
 			见PCNET2SendPacket。
 		len, uint16, IN
 			见PCNET2SendPacket。
@@ -1192,7 +1223,7 @@ static CASCTEXT _NetGetName(IN void * device)
 		BOOL
 			见PCNET2SendPacket。
 */
-static BOOL _NetSendPacket(IN void * device, IN void * packet, IN uint16 len)
+static BOOL _NetSendPacket(IN void * device, IN const void * packet, IN uint16 len)
 {
 	NetDevicePtr netdev = (NetDevicePtr)device;
 	return PCNET2SendPacket(netdev->id, packet, len);
@@ -1229,9 +1260,11 @@ PCNET2Init(void)
 			PCNet2DevicePtr device = &_devices[devidx];
 			device->index = i;
 			device->iobase = dev->header->cfg_hdr.bars[0] & 0xfffffffe;
+			device->tx_lock = FALSE;
 
 			// 构造NetDevice对象。
 			NetDevicePtr netdev = NEW(NetDevice);
+			MemClear(netdev, 0, sizeof(NetDevice));
 			netdev->id = devidx;
 			netdev->SetIP = _NetSetIP;
 			netdev->GetIP = _NetGetIP;

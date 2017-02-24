@@ -18,21 +18,21 @@
 #define	MAX_ARP_RECORD		64
 #define	MAX_UDP_PORT		65536
 
-typedef BOOL (* NetSetIP)(IN void * device, IN uint8 * ip);
-typedef uint8 * (* NetGetIP)(IN void * device);
-typedef BOOL (* NetSetMAC)(IN void * device, IN uint8 * mac);
-typedef uint8 * (* NetGetMAC)(IN void * device);
+typedef BOOL (* NetSetIP)(IN void * device, IN const uint8 * ip);
+typedef const uint8 * (* NetGetIP)(IN void * device);
+typedef BOOL (* NetSetMAC)(IN void * device, IN const uint8 * mac);
+typedef const uint8 * (* NetGetMAC)(IN void * device);
 typedef CASCTEXT (* NetGetName)(IN void * device);
-typedef BOOL (* NetSendPacket)(IN void * device, IN void * packet, IN uint16 len);
-typedef void (* NetProcessPacket)(IN void * device, IN void * packet, IN uint16 len);
+typedef BOOL (* NetSendPacket)(IN void * device, IN const void * packet, IN uint16 len);
+typedef void (* NetProcessPacket)(IN void * device, IN const void * packet, IN uint16 len);
 
 typedef void (* NetProcessUDP)(
 	IN void * device,
-	IN uint8 * ip_src,
+	IN const uint8 * ip_src,
 	IN uint16 port_src,
-	IN uint8 * ip_dst,
+	IN const uint8 * ip_dst,
 	IN uint16 port_dst,
-	IN uint8 * data,
+	IN const uint8 * data,
 	IN uint16 len);
 
 typedef struct
@@ -292,9 +292,9 @@ BOOL
 NetSendUDP(
 	IN NetDevicePtr netdev,
 	IN uint16 port_src,
-	IN uint8 * ip_dst,
+	IN const uint8 * ip_dst,
 	IN uint16 port_dst,
-	IN uint8 * data,
+	IN const uint8 * data,
 	IN uint16 len);
 
 extern
@@ -323,7 +323,7 @@ NetGetARPRecord(
 extern
 NetARPRecordPtr
 NetFindARPRecord(
-	IN uint8 * ip);
+	IN const uint8 * ip);
 
 extern
 void
