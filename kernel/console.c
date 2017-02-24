@@ -2463,6 +2463,10 @@ _ConExecuteCommand(	IN int8 * cmd,
 			netdev->ProcessUDP[12345] = _;
 
 		}
+		else if (strcmp(name, "pcnet2") == 0)
+		{
+			PCNET2PrintStatus(0);
+		}
 		else if (strcmp(name, "net") == 0)
 		{
 			ScrPrintString("NetEthernetFrame: ");
