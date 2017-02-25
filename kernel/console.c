@@ -2463,6 +2463,12 @@ _ConExecuteCommand(	IN int8 * cmd,
 			netdev->ProcessUDP[12345] = _;
 
 		}
+		else if (strcmp(name, "et") == 0)
+		{
+			#include "net/e1000.h"
+			
+			E1000Init();
+		}
 		else if (strcmp(name, "pcnet2") == 0)
 		{
 			PCNET2PrintStatus(0);
