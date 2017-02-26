@@ -1276,10 +1276,10 @@ PCNET2Init(void)
 			device->netdev = netdev;
 
 			// 开启IO端口以及Bus Mastering。
-			uint32 conf = PciReadCfgRegValue(devidx, 0x04);
+			uint32 conf = PciReadCfgRegValue(i, 0x04);
 			conf &= 0xffff0000;
 			conf |= 0x5;
-			PciWriteCfgRegValue(devidx, 0x04, conf);
+			PciWriteCfgRegValue(i, 0x04, conf);
 
 			// 获取MAC地址。
 			device->mac[5] = KnlInByte(device->iobase + 5);
