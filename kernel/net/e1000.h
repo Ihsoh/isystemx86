@@ -11,6 +11,12 @@
 
 #include "../types.h"
 
+extern
+BOOL
+E1000SendPacket(
+	IN uint32 index,
+	IN const void * packet,
+	IN uint16 len);
 
 extern
 void
