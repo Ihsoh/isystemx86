@@ -8,6 +8,7 @@
 
 #include "net.h"
 #include "pcnet2.h"
+#include "e1000.h"
 #include "endian.h"
 #include "helper.h"
 
@@ -748,4 +749,5 @@ NetInit(void)
 	}
 
 	PCNET2Init();
+	E1000Init();
 }

@@ -230,7 +230,7 @@ _E1000Interrupt(
 			uint32 status = _E1000ReadCommand(devidx, 0xc0);
 			if (status & 0x04)
 			{
-				ScrPrintString("\n<START LINK>\n");
+				
 			}
 			else if (status & 0x10)
 			{
@@ -238,10 +238,196 @@ _E1000Interrupt(
 			}
 			else if (status & ((1 << 6) | (1 << 7)))
 			{
+				do
+				{
+					dev->rx_buffer_idx = _E1000ReadCommand(devidx, _E1000_REG_RXDESCTAIL);
+					if (dev->rx_buffer_idx == (int32)_E1000ReadCommand(devidx, _E1000_REG_RXDESCHEAD))
+					{
+						break;
+					}
+					dev->rx_buffer_idx = (dev->rx_buffer_idx + 1) % _RX_BUFFER_COUNT;
+					E1000ReceiveDescriptorPtr rx_desc = &dev->rx_desc[dev->rx_buffer_idx];
+					if (rx_desc->status & 0x01)
+					{
+						uint8 * pbuf = (uint8 *)rx_desc->addr;
+						uint16 plen = rx_desc->length;
 
+						NetDevicePtr netdev = dev->netdev;
+						if (netdev->ProcessPacket != NULL)
+						{
+							netdev->ProcessPacket(netdev, pbuf, plen - 4);
+						}
+
+						rx_desc->status = 0;
+
+						_E1000WriteCommand(devidx, _E1000_REG_RXDESCTAIL, dev->rx_buffer_idx);
+					}
+					else
+					{
+						break;
+					}
+				} while (1);
 			}
 		}
 	}
+}
+
+/**
+	@Function:		E1000GetDeviceCount
+	@Access:		Public
+	@Description:
+		获取设备的数量。
+	@Parameters:
+	@Return:
+		uint32
+			设备的数量。
+*/
+uint32
+E1000GetDeviceCount(void)
+{
+	return _count;
+}
+
+/**
+	@Function:		E1000SetMAC
+	@Access:		Public
+	@Description:
+		设置设备的MAC地址。
+	@Parameters:
+		index, uint32, IN
+			设备索引。
+		mac, const uint8 *, IN
+			设备的MAC地址，长度为6字节。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+E1000SetMAC(
+	IN uint32 index,
+	IN const uint8 * mac)
+{
+	E1000DevicePtr device = _E1000GetDevice(index);
+	if (device == NULL)
+	{
+		goto err;
+	}
+
+	if (mac == NULL)
+	{
+		goto err;
+	}
+	MemCopy(mac, device->mac, sizeof(device->mac));
+
+	return TRUE;
+err:
+	return FALSE;
+}
+
+/**
+	@Function:		E1000GetMAC
+	@Access:		Public
+	@Description:
+		获取设备的MAC地址。
+	@Parameters:
+		index, uint32, IN
+			设备索引。
+	@Return:
+		const uint8 *
+			设备的MAC地址，长度为6字节。
+*/
+const uint8 *
+E1000GetMAC(
+	IN uint32 index)
+{
+	E1000DevicePtr device = _E1000GetDevice(index);
+	if (device == NULL)
+	{
+		goto err;
+	}
+
+	return device->mac;
+err:
+	return NULL;
+}
+
+/**
+	@Function:		E1000SetIP
+	@Access:		Public
+	@Description:
+		设置设备的IP地址。
+	@Parameters:
+		index, uint32, IN
+			设备索引。
+		ip, const uint8 *, IN
+			设备的IP地址，长度为4字节。
+	@Return:
+		BOOL
+			返回TRUE则成功，否则失败。
+*/
+BOOL
+E1000SetIP(
+	IN uint32 index,
+	IN const uint8 * ip)
+{
+	E1000DevicePtr device = _E1000GetDevice(index);
+	if (device == NULL)
+	{
+		goto err;
+	}
+
+	if (ip == NULL)
+	{
+		goto err;
+	}
+	MemCopy(ip, device->ip, sizeof(device->ip));
+
+	return TRUE;
+err:
+	return FALSE;
+}
+
+/**
+	@Function:		E1000GetIP
+	@Access:		Public
+	@Description:
+		获取设备的IP地址。
+	@Parameters:
+		index, uint32, IN
+			设备索引。
+	@Return:
+		const uint8 *
+			设备的IP地址，长度为4字节。
+*/
+const uint8 *
+E1000GetIP(
+	IN uint32 index)
+{
+	E1000DevicePtr device = _E1000GetDevice(index);
+	if (device == NULL)
+	{
+		goto err;
+	}
+
+	return device->ip;
+err:
+	return NULL;
+}
+
+/**
+	@Function:		E1000GetName
+	@Access:		Public
+	@Description:
+		获取设备的名称。
+	@Parameters:
+	@Return:
+		CASCTEXT
+			设备的名称。
+*/
+CASCTEXT
+E1000GetName(void)
+{
+	return _NAME;
 }
 
 BOOL
@@ -250,7 +436,141 @@ E1000SendPacket(
 	IN const void * packet,
 	IN uint16 len)
 {
+	E1000DevicePtr device = _E1000GetDevice(index);
+	if (device == NULL)
+	{
+		goto err;
+	}
 
+	device->tx_buffer_idx = _E1000ReadCommand(index, _E1000_REG_TXDESCTAIL);
+	E1000TransmitDescriptorPtr tx_desc = &device->tx_desc[device->tx_buffer_idx];
+	MemCopy(packet, tx_desc->addr, len);
+
+	tx_desc->length = len;
+	tx_desc->cmd = _CMD_EOP | _CMD_IFCS | _CMD_RS; //| _CMD_RPS;
+	tx_desc->status = 0;
+
+	device->tx_buffer_idx = (device->tx_buffer_idx + 1) % _TX_BUFFER_COUNT;
+	_E1000WriteCommand(index, _E1000_REG_TXDESCTAIL, device->tx_buffer_idx);
+
+	return TRUE;
+err:
+	return FALSE;
+}
+
+/**
+	@Function:		_NetSetIP
+	@Access:		Private
+	@Description:
+		E1000SetIP的包装函数。
+	@Parameters:
+		device, void *, IN
+			实际类型为NetDevicePtr。
+		ip, const uint8 *, IN
+			见E1000SetIP。
+	@Return:
+		BOOL
+			见E1000SetIP。
+*/
+static BOOL _NetSetIP(IN void * device, IN const uint8 * ip)
+{
+	NetDevicePtr netdev = (NetDevicePtr)device;
+	return E1000SetIP(netdev->id, ip);
+}
+
+/**
+	@Function:		_NetGetIP
+	@Access:		Private
+	@Description:
+		E1000GetIP的包装函数。
+	@Parameters:
+		device, void *, IN
+			实际类型为NetDevicePtr。
+	@Return:
+		const uint8 *
+			见E1000GetIP。
+*/
+static const uint8 * _NetGetIP(IN void * device)
+{
+	NetDevicePtr netdev = (NetDevicePtr)device;
+	return E1000GetIP(netdev->id);
+}
+
+/**
+	@Function:		_NetSetMAC
+	@Access:		Private
+	@Description:
+		E1000SetMAC的包装函数。
+	@Parameters:
+		device, void *, IN
+			实际类型为NetDevicePtr。
+		mac, const uint8 *, IN
+			见E1000SetMAC。
+	@Return:
+		BOOL
+			见E1000SetMAC。
+*/
+static BOOL _NetSetMAC(IN void * device, IN const uint8 * mac)
+{
+	NetDevicePtr netdev = (NetDevicePtr)device;
+	return E1000SetMAC(netdev->id, mac);
+}
+
+/**
+	@Function:		_NetGetMAC
+	@Access:		Private
+	@Description:
+		E1000GetMAC的包装函数。
+	@Parameters:
+		device, void *, IN
+			实际类型为NetDevicePtr。
+	@Return:
+		const uint8 *
+			见E1000GetMAC。
+*/
+static const uint8 * _NetGetMAC(IN void * device)
+{
+	NetDevicePtr netdev = (NetDevicePtr)device;
+	return E1000GetMAC(netdev->id);
+}
+
+/**
+	@Function:		_NetGetName
+	@Access:		Private
+	@Description:
+		E1000GetName的包装函数。
+	@Parameters:
+		device, void *, IN
+			实际类型为NetDevicePtr。
+	@Return:
+		CASCTEXT
+			见E1000GetName。
+*/
+static CASCTEXT _NetGetName(IN void * device)
+{
+	return E1000GetName();
+}
+
+/**
+	@Function:		_NetSendPacket
+	@Access:		Private
+	@Description:
+		E1000SendPacket的包装函数。
+	@Parameters:
+		device, void *, IN
+			实际类型为NetDevicePtr。
+		packet, const void *, IN
+			见E1000SendPacket。
+		len, uint16, IN
+			见E1000SendPacket。
+	@Return:
+		BOOL
+			见E1000SendPacket。
+*/
+static BOOL _NetSendPacket(IN void * device, IN const void * packet, IN uint16 len)
+{
+	NetDevicePtr netdev = (NetDevicePtr)device;
+	return E1000SendPacket(netdev->id, packet, len);
 }
 
 void
@@ -278,6 +598,19 @@ E1000Init(void)
 			device->index = i;
 			device->membase = dev->header->cfg_hdr.bars[0];
 			device->tx_lock = FALSE;
+
+			// 构造NetDevice对象。
+			NetDevicePtr netdev = NEW(NetDevice);
+			MemClear(netdev, 0, sizeof(NetDevice));
+			netdev->id = devidx;
+			netdev->SetIP = _NetSetIP;
+			netdev->GetIP = _NetGetIP;
+			netdev->SetMAC = _NetSetMAC;
+			netdev->GetMAC = _NetGetMAC;
+			netdev->GetName = _NetGetName;
+			netdev->SendPacket = _NetSendPacket;
+			NetAdd(netdev);
+			device->netdev = netdev;
 
 			device->rx_buffer = (uint8 *)MemAlloc(_BUFFER_SIZE * _RX_BUFFER_COUNT);
 			device->rx_desc = (E1000ReceiveDescriptorPtr)MemAlloc(sizeof(E1000ReceiveDescriptor) * _RX_BUFFER_COUNT);
@@ -408,23 +741,6 @@ E1000Init(void)
 			_E1000WriteCommand(devidx, 0x00D0, (1 << 2) | (1 << 6) | (1 << 7) | (1 << 1) | (1 << 0));
 
 			int32 link_is_up = _E1000ReadCommand(devidx, _E1000_REG_STATUS) & (1 << 1);
-
-			ScrPrintString("LINK IS UP: ");
-			printn(link_is_up);
-			ScrPrintString("\n");
-
-			ScrPrintString("IRQ: ");
-			printn(irq);
-			ScrPrintString("\n");
-
-			ScrPrintString("EEPROM: ");
-			printn(device->has_eeprom);
-			ScrPrintString("\n");
-
-			ScrPrintString("MAC: ");
-			ScrPrintMAC(device->mac);
-			ScrPrintString("\n");
-
 
 		}
 	}

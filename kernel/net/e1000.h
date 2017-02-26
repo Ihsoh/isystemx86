@@ -12,6 +12,36 @@
 #include "../types.h"
 
 extern
+uint32
+E1000GetDeviceCount(void);
+
+extern
+BOOL
+E1000SetMAC(
+	IN uint32 index,
+	IN const uint8 * mac);
+
+extern
+const uint8 *
+E1000GetMAC(
+	IN uint32 index);
+
+extern
+BOOL
+E1000SetIP(
+	IN uint32 index,
+	IN const uint8 * ip);
+
+extern
+const uint8 *
+E1000GetIP(
+	IN uint32 index);
+
+extern
+CASCTEXT
+E1000GetName(void);
+
+extern
 BOOL
 E1000SendPacket(
 	IN uint32 index,
