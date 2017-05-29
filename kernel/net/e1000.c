@@ -144,6 +144,18 @@ static E1000Device _devices[_MAX_COUNT];
 static uint32 _count = 0;
 static uint32 _pidx2didx[MAX_PERIPHERAL_COUNT];
 
+/**
+	@Function:		_E1000GetDevice
+	@Access:		Private
+	@Description:
+		获取设备实例。
+	@Parameters:
+		index, uint32, IN
+			设备索引。
+	@Return:
+		E1000DevicePtr
+			指向设备实例的指针，返回NULL则设备不存在。
+*/
 static
 E1000DevicePtr
 _E1000GetDevice(

@@ -2415,6 +2415,36 @@ _ConExecuteCommand(	IN int8 * cmd,
 		}
 		#ifdef _KERNEL_DEBUG_
 		// Kernel Unit Test
+		else if(strcmp(name, "t") == 0)
+		{
+			#include "time.h"
+			int32 ts = 1401007138;
+			DateTime dt;
+			KnlGetDateTimeByUnixTimestamp(&dt, ts, 8 * 60 * 60);
+			ScrPrintString("Year: ");
+			printn(dt.d.year);
+			ScrPrintString("\n");
+			ScrPrintString("Month: ");
+			printn(dt.d.month);
+			ScrPrintString("\n");
+			ScrPrintString("Day: ");
+			printn(dt.d.day);
+			ScrPrintString("\n");
+			ScrPrintString("Week: ");
+			printn(dt.d.week);
+			ScrPrintString("\n");
+
+
+			ScrPrintString("Hour: ");
+			printn(dt.t.hour);
+			ScrPrintString("\n");
+			ScrPrintString("Minute: ");
+			printn(dt.t.minute);
+			ScrPrintString("\n");
+			ScrPrintString("Second: ");
+			printn(dt.t.second);
+			ScrPrintString("\n");
+		}
 		else if(strcmp(name, "kernel-unit-test") == 0)
 		{
 			#include "test.h"

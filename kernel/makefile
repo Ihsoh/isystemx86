@@ -27,7 +27,7 @@ bin/paging.obj bin/lock.obj bin/window.obj bin/klib.obj bin/kstring.obj bin/log.
 bin/acpi.obj bin/rsdt.obj bin/fadt.obj bin/atapi.obj bin/serial.obj bin/mqueue.obj	\
 bin/pci.obj bin/apic.obj bin/madt.obj bin/pic.obj bin/interrupts.obj bin/config.obj 	\
 bin/ahci.obj bin/dma.obj bin/mouse.obj bin/kmpool.obj bin/knlldr.obj bin/irq.obj bin/timer.obj	\
-bin/gui.obj bin/ata.obj bin/so.obj
+bin/gui.obj bin/ata.obj bin/so.obj bin/time.obj
 
 BMPObjs=bmp/bin/bmp.obj
 
@@ -257,6 +257,9 @@ bin/ata.obj: ata.c ata.h
 
 bin/so.obj: so.c so.h
 	$(CC) $(CFlags) -c so.c -o bin/so.obj $(Include) $(Definition)
+
+bin/time.obj: time.c time.h
+	$(CC) $(CFlags) -c time.c -o bin/time.obj $(Include) $(Definition)
 
 
 bmp/bin/bmp.obj: bmp/bmp.c bmp/bmp.h
