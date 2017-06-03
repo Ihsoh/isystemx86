@@ -11,6 +11,27 @@
 
 #include "types.h"
 
+#define	WEEK_SUNDAY			0
+#define	WEEK_MONDAY			1
+#define	WEEK_TUESDAY		2
+#define	WEEK_WEDNESDAY		3
+#define	WEEK_THURSDAY		4
+#define	WEEK_FRIDAY			5
+#define	WEEK_SATURDAY		6
+
+#define	MONTH_JANUARY		1
+#define	MONTH_FEBRUARY		2
+#define	MONTH_MARCH			3
+#define	MONTH_APRIL			4
+#define	MONTH_MAY			5
+#define	MONTH_JUNE			6
+#define	MONTH_JULY			7
+#define	MONTH_AUGUEST		8
+#define	MONTH_SEPTEMBER		9
+#define	MONTH_OCTOBER		10
+#define	MONTH_NOVEMBER		11
+#define	MONTH_DECEMBER		12
+
 typedef struct
 {
 	uint16		year;
@@ -43,8 +64,15 @@ KnlGetDateTimeByUnixTimestamp(
 	IN int32 offset);
 
 extern
-int32
-KnlGetUnixTimestampByDateTime(
-	IN DateTimePtr dt);
+BOOL
+KnlGetDateTime(
+	OUT DateTimePtr dt,
+	IN int32 offset,
+	IN int32 year,
+	IN int32 month,
+	IN int32 day,
+	IN int32 hour,
+	IN int32 minute,
+	IN int32 second);
 
 #endif

@@ -2418,9 +2418,19 @@ _ConExecuteCommand(	IN int8 * cmd,
 		else if(strcmp(name, "t") == 0)
 		{
 			#include "time.h"
-			int32 ts = 1401007138;
+			#include "sys.h"
+
 			DateTime dt;
-			KnlGetDateTimeByUnixTimestamp(&dt, ts, 8 * 60 * 60);
+			KnlGetCurrentDateTime(&dt);
+
+			ScrPrintString("Timestamp: ");
+			printn(dt.timestamp);
+			ScrPrintString("\n");
+
+			ScrPrintString("Leap: ");
+			printn(dt.d.leap);
+			ScrPrintString("\n");
+
 			ScrPrintString("Year: ");
 			printn(dt.d.year);
 			ScrPrintString("\n");
