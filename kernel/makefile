@@ -60,13 +60,15 @@ SBObjs=sb/bin/sb16.obj
 
 NetObjs=net/bin/pcnet2.obj net/bin/endian.obj net/bin/net.obj net/bin/helper.obj net/bin/e1000.obj
 
+FS_EXT2Objs=fs/ext2/bin/ext2.obj
+
 Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 Definition=-D_KERNEL_MODULE_ -D_KERNEL_DEBUG_
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin wav/bin sb/bin net/bin \
+$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin wav/bin sb/bin net/bin fs/ext2/bin \
 $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
-$(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs) $(NetObjs)
+$(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs) $(NetObjs) $(FS_EXT2Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
 $(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs) $(NetObjs)	\
 -L../libs/jsonlib/bin -ljsonlib 	\
@@ -115,7 +117,10 @@ sb/bin:
 	-mkdir sb/bin
 
 net/bin:
-	-mkdir net/bin	
+	-mkdir net/bin
+
+fs/ext2/bin:
+	-mkdir fs/ext2/bin
 
 bin/kernel.obj: kernel.c kernel.h
 	$(CC) $(CFlags) -c kernel.c -o bin/kernel.obj $(Include) $(Definition)
@@ -417,6 +422,10 @@ net/bin/helper.obj: net/helper.c
 
 net/bin/e1000.obj: net/e1000.c
 	$(CC) $(CFlags) -c net/e1000.c -o net/bin/e1000.obj $(Include) $(Definition)
+
+
+fs/ext2/bin/ext2.obj: fs/ext2/ext2.c
+	$(CC) $(CFlags) -c fs/ext2/ext2.c -o fs/ext2/bin/ext2.obj $(Include) $(Definition)
 
 
 .PHONY:clean

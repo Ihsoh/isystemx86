@@ -2417,42 +2417,9 @@ _ConExecuteCommand(	IN int8 * cmd,
 		// Kernel Unit Test
 		else if(strcmp(name, "t") == 0)
 		{
-			#include "time.h"
-			#include "sys.h"
+			#include "fs/ext2/ext2.h"
 
-			DateTime dt;
-			KnlGetCurrentDateTime(&dt);
-
-			ScrPrintString("Timestamp: ");
-			printn(dt.timestamp);
-			ScrPrintString("\n");
-
-			ScrPrintString("Leap: ");
-			printn(dt.d.leap);
-			ScrPrintString("\n");
-
-			ScrPrintString("Year: ");
-			printn(dt.d.year);
-			ScrPrintString("\n");
-			ScrPrintString("Month: ");
-			printn(dt.d.month);
-			ScrPrintString("\n");
-			ScrPrintString("Day: ");
-			printn(dt.d.day);
-			ScrPrintString("\n");
-			ScrPrintString("Week: ");
-			printn(dt.d.week);
-			ScrPrintString("\n");
-
-
-			ScrPrintString("Hour: ");
-			printn(dt.t.hour);
-			ScrPrintString("\n");
-			ScrPrintString("Minute: ");
-			printn(dt.t.minute);
-			ScrPrintString("\n");
-			ScrPrintString("Second: ");
-			printn(dt.t.second);
+			printn(sizeof(Ext2SuperBlock));
 			ScrPrintString("\n");
 		}
 		else if(strcmp(name, "kernel-unit-test") == 0)
