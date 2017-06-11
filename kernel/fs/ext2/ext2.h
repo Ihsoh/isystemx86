@@ -11,6 +11,58 @@
 
 #include "../../types.h"
 
+#define	EXT2_VALID_FS	1	// Unmounted cleanly
+#define	EXT2_ERROR_FS	2	// Errors detected
+
+#define	EXT2_ERRORS_CONTINUE	1	// continue as if nothing happened
+#define	EXT2_ERRORS_RO			2	// remount read-only
+#define	EXT2_ERRORS_PANIC		3	// cause a kernel panic
+
+#define	EXT2_OS_LINUX		0	// Linux
+#define	EXT2_OS_HURD		1	// GNU HURD
+#define	EXT2_OS_MASIX		2	// MASIX
+#define	EXT2_OS_FREEBSD		3	// FreeBSD
+#define	EXT2_OS_LITES		4	// Lites
+
+#define	EXT2_GOOD_OLD_REV	0	// Revision 0
+#define	EXT2_DYNAMIC_REV	1	// Revision 1 with variable inode sizes, extended attributes, etc.
+
+#define	EXT2_DEF_RESUID		0
+
+#define	EXT2_DEF_RESGID		0
+
+#define	EXT2_GOOD_OLD_FIRST_INO		11
+
+#define	EXT2_GOOD_OLD_INODE_SIZE	128
+
+#define	EXT2_FEATURE_COMPAT_DIR_PREALLOC		0x0001	// Block pre-allocation for new directories
+#define	EXT2_FEATURE_COMPAT_IMAGIC_INODES		0x0002
+#define	EXT3_FEATURE_COMPAT_HAS_JOURNAL			0x0004	// An Ext3 journal exists
+#define	EXT2_FEATURE_COMPAT_EXT_ATTR			0x0008	// Extended inode attributes are present
+#define	EXT2_FEATURE_COMPAT_RESIZE_INO			0x0010	// Non-standard inode size used
+#define	EXT2_FEATURE_COMPAT_DIR_INDEX			0x0020	// Directory indexing (HTree)
+
+#define	EXT2_FEATURE_INCOMPAT_COMPRESSION		0x0001	// Disk/File compression is used
+#define	EXT2_FEATURE_INCOMPAT_FILETYPE			0x0002
+#define	EXT3_FEATURE_INCOMPAT_RECOVER			0x0004
+#define	EXT3_FEATURE_INCOMPAT_JOURNAL_DEV		0x0008
+#define	EXT2_FEATURE_INCOMPAT_META_BG			0x0010
+
+#define	EXT2_FEATURE_RO_COMPAT_SPARSE_SUPER		0x0001	// Sparse Superblock
+#define	EXT2_FEATURE_RO_COMPAT_LARGE_FILE		0x0002	// Large file support, 64-bit file size
+#define	EXT2_FEATURE_RO_COMPAT_BTREE_DIR		0x0004	// Binary tree sorted directory files
+
+#define	EXT2_LZV1_ALG		0x00000001
+#define	EXT2_LZRW3A_ALG		0x00000002
+#define	EXT2_GZIP_ALG		0x00000004
+#define	EXT2_BZIP2_ALG		0x00000008
+#define	EXT2_LZO_ALG		0x00000010
+
+
+
+
+
+
 typedef struct
 {
 	/*
@@ -409,6 +461,53 @@ typedef struct
 	uint8		_unused[760];
 
 } __attribute__((packed)) Ext2SuperBlock, * Ext2SuperBlockPtr;
+
+typedef struct
+{
+	/*
+		32bit block id of the first block of the “block bitmap” for the group represented.
+
+		The actual block bitmap is located within its own allocated blocks starting at the block ID specified by
+		this value.
+	*/
+	uint32		bg_block_bitmap;
+
+	/*
+		32bit block id of the first block of the “inode bitmap” for the group represented.
+	*/
+	uint32		bg_inode_bitmap;
+
+	/*
+		32bit block id of the first block of the “inode table” for the group represented.
+	*/
+	uint32		bg_inode_table;
+
+	/*
+		16bit value indicating the total number of free blocks for the represented group.
+	*/
+	uint16		bg_free_blocks_count;
+
+	/*
+		16bit value indicating the total number of free inodes for the represented group.
+	*/
+	uint16		bg_free_inodes_count;
+
+	/*
+		16bit value indicating the number of inodes allocated to directories for the represented group.
+	*/
+	uint16		bg_used_dirs_count;
+
+	/*
+		16bit value used for padding the structure on a 32bit boundary.
+	*/
+	uint16		bg_pad;
+
+	/*
+		12 bytes of reserved space for future revisions.
+	*/
+	uint8		bg_reserved[12];
+} __attribute__((packed)) BlockGroupDescriptor, * BlockGroupDescriptorPtr;
+
 
 
 
