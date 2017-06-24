@@ -506,8 +506,289 @@ typedef struct
 		12 bytes of reserved space for future revisions.
 	*/
 	uint8		bg_reserved[12];
-} __attribute__((packed)) BlockGroupDescriptor, * BlockGroupDescriptorPtr;
+} __attribute__((packed)) Ext2BlockGroupDescriptor, * Ext2BlockGroupDescriptorPtr;
 
+typedef struct
+{
+	/*
+		16bit value used to indicate the format of the described file and the access rights. Here are the possible
+		values, which can be combined in various ways:
+
+		Defined i_mode Values
+		Constant Name							Value		Description
+		---------------------------------------------------------------------
+		-- file format --
+		EXT2_S_IFSOCK							0xC000		socket
+		EXT2_S_IFLNK							0xA000		symbolic link
+		EXT2_S_IFREG							0x8000		regular file
+		EXT2_S_IFBLK							0x6000		block device
+		EXT2_S_IFDIR							0x4000		directory
+		EXT2_S_IFCHR							0x2000		character device
+		EXT2_S_IFIFO							0x1000		fifo
+		-- process execution user/group override --
+		EXT2_S_ISUID							0x0800		Set process User ID
+		EXT2_S_ISGID							0x0400		Set process Group ID
+		EXT2_S_ISVTX							0x0200		sticky bit
+		-- access rights --
+		EXT2_S_IRUSR							0x0100		user read
+		EXT2_S_IWUSR							0x0080		user write
+		EXT2_S_IXUSR							0x0040		user execute
+		EXT2_S_IRGRP							0x0020		group read
+		EXT2_S_IWGRP							0x0010		group write
+		EXT2_S_IXGRP							0x0008		group execute
+		EXT2_S_IROTH							0x0004		others read
+		EXT2_S_IWOTH							0x0002		others write
+		EXT2_S_IXOTH							0x0001		others execute
+	*/
+	uint16		i_mode;
+
+	/*
+		16bit user id associated with the file.
+	*/
+	uint16		i_uid;
+
+	/*
+		In revision 0, (signed) 32bit value indicating the size of the file in bytes. In revision 1 and later revisions,
+		and only for regular files, this represents the lower 32-bit of the file size; the upper 32-bit is located in the
+		i_dir_acl.
+	*/
+	uint32		i_size;
+
+	/*
+		32bit value representing the number of seconds since january 1st 1970 of the last time this inode was
+		accessed.
+	*/
+	uint32		i_atime;
+
+	/*
+		32bit value representing the number of seconds since january 1st 1970, of when the inode was created.
+	*/
+	uint32		i_ctime;
+
+	/*
+		32bit value representing the number of seconds since january 1st 1970, of the last time this inode was
+		modified.
+	*/
+	uint32		i_mtime;
+
+	/*
+		32bit value representing the number of seconds since january 1st 1970, of when the inode was deleted.
+	*/
+	uint32		i_dtime;
+
+	/*
+		16bit value of the POSIX group having access to this file.
+	*/
+	uint16		i_gid;
+
+	/*
+		16bit value indicating how many times this particular inode is linked (referred to). Most files will have a
+		link count of 1. Files with hard links pointing to them will have an additional count for each hard link.
+	
+		Symbolic links do not affect the link count of an inode. When the link count reaches 0 the inode and all
+		its associated blocks are freed.
+	*/
+	uint16		i_links_count;
+
+	/*
+		32-bit value representing the total number of 512-bytes blocks reserved to contain the data of this inode,
+		regardless if these blocks are used or not. The block numbers of these reserved blocks are contained in
+		the i_block array.
+
+		Since this value represents 512-byte blocks and not file system blocks, this value should not be directly
+		used as an index to the i_block array. Rather, the maximum index of the i_block array should be
+		computed from i_blocks / ((1024<<s_log_block_size)/512), or once simplified,
+		i_blocks/(2<<s_log_block_size).
+	*/
+	uint32		i_blocks;
+
+	/*
+		32bit value indicating how the ext2 implementation should behave when accessing the data for this inode.
+
+		Defined i_flags Values
+		Constant Name							Value		Description
+		---------------------------------------------------------------------
+		EXT2_SECRM_FL							0x00000001	secure deletion
+		EXT2_UNRM_FL							0x00000002	record for undelete
+		EXT2_COMPR_FL							0x00000004	compressed file
+		EXT2_SYNC_FL							0x00000008	synchronous updates
+		EXT2_IMMUTABLE_FL						0x00000010	immutable file
+		EXT2_APPEND_FL							0x00000020	append only
+		EXT2_NODUMP_FL							0x00000040	do not dump/delete file
+		EXT2_NOATIME_FL							0x00000080	do not update .i_atime
+		-- Reserved for compression usage --
+		EXT2_DIRTY_FL							0x00000100	Dirty (modified)
+		EXT2_COMPRBLK_FL						0x00000200	compressed blocks
+		EXT2_NOCOMPR_FL							0x00000400	access raw compressed data
+		EXT2_ECOMPR_FL							0x00000800	compression error
+		-- End of compression flags --
+		EXT2_BTREE_FL							0x00001000	b-tree format directory
+		EXT2_INDEX_FL							0x00001000	hash indexed directory
+		EXT2_IMAGIC_FL							0x00002000	AFS directory
+		EXT3_JOURNAL_DATA_FL					0x00004000	journal file data
+		EXT2_RESERVED_FL						0x80000000	reserved for ext2 library
+	*/
+	uint32		i_flags;
+
+	/*
+		32bit OS dependant value.
+
+		Hurd: 32bit value labeled as “translator”.
+		Linux: 32bit value currently reserved.
+		Masix: 32bit value currently reserved.
+	*/
+	uint32		i_osd1;
+
+	/*
+		15 x 32bit block numbers pointing to the blocks containing the data for this inode. The first 12 blocks are
+		direct blocks. The 13th entry in this array is the block number of the first indirect block; which is a block
+		containing an array of block ID containing the data. Therefore, the 13th block of the file will be the first
+		block ID contained in the indirect block. With a 1KiB block size, blocks 13 to 268 of the file data are
+		contained in this indirect block.
+
+		The 14th entry in this array is the block number of the first doubly-indirect block; which is a block
+		containing an array of indirect block IDs, with each of those indirect blocks containing an array of blocks
+		containing the data. In a 1KiB block size, there would be 256 indirect blocks per doubly-indirect block,
+		with 256 direct blocks per indirect block for a total of 65536 blocks per doubly-indirect block.
+	
+		The 15th entry in this array is the block number of the triply-indirect block; which is a block containing
+		an array of doubly-indrect block IDs, with each of those doubly-indrect block containing an array of
+		indrect block, and each of those indirect block containing an array of direct block. In a 1KiB file system,
+		this would be a total of 16777216 blocks per triply-indirect block.
+
+		A value of 0 in this array effectively terminates it with no further block being defined. All the remaining
+		entries of the array should still be set to 0.
+	*/
+	uint32		i_block[15];
+
+	/*
+		32bit value used to indicate the file version (used by NFS).
+	*/
+	uint32		i_generation;
+
+	/*
+		32bit value indicating the block number containing the extended attributes. In revision 0 this value is
+		always 0.
+
+			Note: Patches and implementation status of ACL under Linux can generally be found at
+			http://acl.bestbits.at/
+	*/
+	uint32		i_file_acl;
+
+	/*
+		In revision 0 this 32bit value is always 0. In revision 1, for regular files this 32bit value contains the high
+		32 bits of the 64bit file size.
+
+			Note: Linux sets this value to 0 if the file is not a regular file (i.e. block devices, directories, etc). In
+			theory, this value could be set to point to a block containing extended attributes of the directory or
+			special file.
+	*/
+	uint32		i_dir_acl;
+
+	/*
+		32bit value indicating the location of the file fragment.
+
+			Note: In Linux and GNU HURD, since fragments are unsupported this value is always 0. In Ext4 this
+			value is now marked as obsolete.
+
+			In theory, this should contain the block number which hosts the actual fragment. The fragment
+			number and its size would be contained in the i_osd2 structure.
+	*/
+	uint32		i_faddr;
+
+	/*
+		96bit OS dependant structure.
+	*/
+	uint8		i_osd2[12];
+} __attribute__((packed)) Ext2Inode, * Ext2InodePtr;
+
+typedef struct
+{
+	/*
+		8bit fragment number. Always 0 GNU HURD since fragments are not supported. Obsolete with Ext4
+	*/
+	uint8		h_i_frag;
+
+	/*
+		8bit fragment size. Always 0 in GNU HURD since fragments are not supported. Obsolete with Ext4.
+	*/
+	uint8		h_i_fsize;
+
+	/*
+		High 16bit of the 32bit mode.
+	*/
+	uint16		h_i_mode_high;
+
+	/*
+		High 16bit of user id.
+	*/
+	uint16		h_i_uid_high;
+
+	/*
+		High 16bit of group id.
+	*/
+	uint16		h_i_gid_high;
+
+	/*
+		32bit user id of the assigned file author. If this value is set to -1, the POSIX user id will be used.
+	*/
+	uint32		h_i_author;
+} __attribute__((packed)) Ext2HurdOsd2, * Ext2HurdOsd2Ptr;
+
+typedef struct
+{
+	/*
+		8bit fragment number.
+
+			Note: Always 0 in Linux since fragments are not supported.
+
+			Important: A new implementation of Ext2 should completely disregard this field if the i_faddr value is
+			0; in Ext4 this field is combined with l_i_fsize to become the high 16bit of the 48bit blocks count for
+			the inode data.
+	*/
+	uint8		l_i_frag;
+
+	/*
+		8bit fragment size.
+
+			Note: Always 0 in Linux since fragments are not supported.
+
+			Important: A new implementation of Ext2 should completely disregard this field if the i_faddr value is
+			0; in Ext4 this field is combined with l_i_frag to become the high 16bit of the 48bit blocks count for the
+			inode data.
+	*/
+	uint8		l_i_fsize;
+
+	uint16		reserved1;
+
+	/*
+		High 16bit of user id.
+	*/
+	uint16		l_i_uid_high;
+
+	/*
+		High 16bit of group id.
+	*/
+	uint16		l_i_gid_high;
+
+
+	uint32		reserved2;
+} __attribute__((packed)) Ext2LinuxOsd2, * Ext2LinuxOsd2Ptr;
+
+typedef struct
+{
+	/*
+		8bit fragment number. Always 0 in Masix as framgents are not supported. Obsolete with Ext4
+	*/
+	uint8		m_i_frag;
+
+	/*
+		8bit fragment size. Always 0 in Masix as fragments are not supported. Obsolete with Ext4
+	*/
+	uint8		m_i_fsize;
+
+	uint8		reserved[10];
+} __attribute__((packed)) Ext2MasixOsd2, * Ext2MasixOsd2Ptr;
 
 
 
