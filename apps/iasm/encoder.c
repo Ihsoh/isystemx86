@@ -3947,3 +3947,35 @@ void EncodeLOOPNZ_SHORT(uchar Offset)
 	ToBuffer(Offset);
 	InstructionEnd();
 }
+
+
+
+
+/*
+	F2XM1
+*/
+void EncodeF2XM1(void)
+{
+	InstructionBegin();
+	ToBuffer((uchar)(OPCODE_F2XM1 >> 8));
+	ToBuffer((uchar)OPCODE_F2XM1);
+	InstructionEnd();
+}
+
+/*
+	FABS
+*/
+void EncodeFABS(void)
+{
+	InstructionBegin();
+	ToBuffer((uchar)(OPCODE_FABS >> 8));
+	ToBuffer((uchar)OPCODE_FABS);
+	InstructionEnd();
+}
+
+DefineEncodeFOpt(ADD)
+	
+
+
+
+

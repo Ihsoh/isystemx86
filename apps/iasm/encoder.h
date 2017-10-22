@@ -95,6 +95,88 @@ extern void EncodeOpt_Mem32_Imm32(	uint OptOpcode,
 									uint Off,
 									uint Imm32);
 
+#define	DeclareEncodeFOpt(Opt)	\
+	extern void EncodeF##Opt##_Mem32(	uchar Reg1,	\
+										uchar Reg2,	\
+										uint OffType,	\
+										uint Off);	\
+	extern void EncodeF##Opt##_Mem64(	uchar Reg1,	\
+										uchar Reg2,	\
+										uint OffType,	\
+										uint Off);	\
+	extern void EncodeF##Opt##_ST0_STi(uchar STi);	\
+	extern void EncodeF##Opt##_STi_ST0(uchar STi);	\
+	extern void EncodeF##Opt##P_STi_ST0(uchar STi);	\
+	extern void EncodeFI##Opt##_Mem32(	uchar Reg1,	\
+										uchar Reg2,	\
+										uint OffType,	\
+										uint Off);	\
+	extern void EncodeFI##Opt##_Mem16(	uchar Reg1,	\
+								uchar Reg2,	\
+								uint OffType,	\
+								uint Off);
+
+#define	DefineEncodeFOpt(Opt)	\
+	void EncodeF##Opt##_Mem32(	uchar Reg1,	\
+								uchar Reg2,	\
+								uint OffType,	\
+								uint Off)	\
+	{	\
+		InstructionBegin();	\
+		OpcodeW_Mem_X(OPCODE_F##Opt##_MEM32, Reg1, Reg2, OffType, Off, 0, 0);	\
+		InstructionEnd();	\
+	}	\
+	void EncodeF##Opt##_Mem64(	uchar Reg1,	\
+								uchar Reg2,	\
+								uint OffType,	\
+								uint Off)	\
+	{	\
+		InstructionBegin();	\
+		OpcodeW_Mem_X(OPCODE_F##Opt##_MEM64, Reg1, Reg2, OffType, Off, 0, 0);	\
+		InstructionEnd();	\
+	}	\
+	void EncodeF##Opt##_ST0_STi(uchar STi)	\
+	{	\
+		InstructionBegin();	\
+		ToBuffer((uchar)(OPCODE_F##Opt##_ST0_STi >> 8));	\
+		ToBuffer((uchar)OPCODE_F##Opt##_ST0_STi + STi);	\
+		InstructionEnd();	\
+	}	\
+	void EncodeF##Opt##_STi_ST0(uchar STi)	\
+	{	\
+		InstructionBegin();	\
+		ToBuffer((uchar)(OPCODE_F##Opt##_STi_ST0 >> 8));	\
+		ToBuffer((uchar)OPCODE_F##Opt##_STi_ST0 + STi);	\
+		InstructionEnd();	\
+	}	\
+	void EncodeF##Opt##P_STi_ST0(uchar STi)	\
+	{	\
+		InstructionBegin();	\
+		ToBuffer((uchar)(OPCODE_F##Opt##P_STi_ST0 >> 8));	\
+		ToBuffer((uchar)OPCODE_F##Opt##P_STi_ST0 + STi);	\
+		InstructionEnd();	\
+	}	\
+	void EncodeFI##Opt##_Mem32(	uchar Reg1,	\
+								uchar Reg2,	\
+								uint OffType,	\
+								uint Off)	\
+	{	\
+		InstructionBegin();	\
+		OpcodeW_Mem_X(OPCODE_FI##Opt##_MEM32, Reg1, Reg2, OffType, Off, 0, 0);	\
+		InstructionEnd();	\
+	}	\
+	void EncodeFI##Opt##_Mem16(	uchar Reg1,	\
+								uchar Reg2,	\
+								uint OffType,	\
+								uint Off)	\
+	{	\
+		InstructionBegin();	\
+		OpcodeW_Mem_X(OPCODE_FI##Opt##_MEM16, Reg1, Reg2, OffType, Off, 0, 0);	\
+		InstructionEnd();	\
+	}
+	
+
+
 #define DeclareEncodeOpt_X_X(Opt)	\
 	extern void Encode##Opt##_Reg8_Reg8(uchar DstReg, uchar SrcReg);	\
 	extern void Encode##Opt##_Reg16_Reg16(uchar DstReg, uchar SrcReg);	\
@@ -1565,6 +1647,20 @@ extern void EncodeLOOPZ_SHORT(uchar Offset);
 	LOOPNZ
 */
 extern void EncodeLOOPNZ_SHORT(uchar Offset);
-		
+
+
+
+/*
+	F2XM1
+*/
+extern void EncodeF2XM1(void);
+
+/*
+	FABS
+*/
+extern void EncodeFABS(void);
+
+DeclareEncodeFOpt(ADD)
+
 		
 #endif

@@ -66,6 +66,15 @@
 #define	REGS_TR6	"TR6"
 #define	REGS_TR7	"TR7"
 
+#define	REGS_ST0	"ST0"
+#define	REGS_ST1	"ST1"
+#define	REGS_ST2	"ST2"
+#define	REGS_ST3	"ST3"
+#define	REGS_ST4	"ST4"
+#define	REGS_ST5	"ST5"
+#define	REGS_ST6	"ST6"
+#define	REGS_ST7	"ST7"
+
 #define	REGS_ES		"ES"
 #define	REGS_CS		"CS"
 #define	REGS_SS		"SS"
@@ -76,6 +85,7 @@
 #define	INS_BYTE	"B"
 #define	INS_WORD	"W"
 #define	INS_DWORD	"D"
+#define	INS_QWORD	"Q"
 
 #define	INS_SHORT	"S"
 #define	INS_NEAR	"N"
@@ -312,6 +322,114 @@
 #define	INS_GS		"GS"
 
 
+#define INS_F2XM1		"F2XM1"
+#define INS_FABS		"FABS"
+
+#define	INS_FADD		"FADD"
+#define	INS_FADDP		"FADDP"
+#define	INS_FIADD		"FIADD"
+
+
+#define	FOPT(x)		else if(StringCmp(Token, INS_F##x INS_DWORD))	\
+					{	\
+						char OPRD1[OPRD_SIZE];	\
+						GET_TOKEN(OPRD1);	\
+						if(IsMem(OPRD1))	\
+						{	\
+							uchar Reg1, Reg2;	\
+							uint Offset;	\
+							GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+							EncodeF##x##_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);	\
+						}	\
+						else	\
+						{	\
+							InvalidInstruction();	\
+						}	\
+					}	\
+					else if(StringCmp(Token, INS_F##x INS_QWORD))	\
+					{	\
+						char OPRD1[OPRD_SIZE];	\
+						GET_TOKEN(OPRD1);	\
+						if(IsMem(OPRD1))	\
+						{	\
+							uchar Reg1, Reg2;	\
+							uint Offset;	\
+							GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+							EncodeF##x##_Mem64(Reg1, Reg2, GetOffType(Offset), Offset);	\
+						}	\
+						else	\
+						{	\
+							InvalidInstruction();	\
+						}	\
+					}	\
+					else if(StringCmp(Token, INS_F##x))	\
+					{	\
+						char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];	\
+						GET_TOKEN(OPRD1);	\
+						GET_TOKEN(OPRD2);	\
+						ExpectComma(OPRD2);	\
+						GET_TOKEN(OPRD2);	\
+						if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsX87DataReg0(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2))	\
+						{	\
+							EncodeF##x##_ST0_STi(GetReg(OPRD2));\
+						}	\
+						else if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2)  && IsX87DataReg0(OPRD2))	\
+						{	\
+							EncodeF##x##_STi_ST0(GetReg(OPRD1));	\
+						}	\
+						else	\
+						{	\
+							InvalidInstruction();	\
+						}	\
+					}	\
+					else if(StringCmp(Token, INS_F##x##P))	\
+					{	\
+						char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];	\
+						GET_TOKEN(OPRD1);	\
+						GET_TOKEN(OPRD2);	\
+						ExpectComma(OPRD2);	\
+						GET_TOKEN(OPRD2);	\
+						if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2)  && IsX87DataReg0(OPRD2))	\
+						{	\
+							EncodeF##x##P_STi_ST0(GetReg(OPRD1));	\
+						}	\
+						else	\
+						{	\
+							InvalidInstruction();	\
+						}	\
+					}	\
+					else if(StringCmp(Token, INS_FI##x INS_DWORD))	\
+					{	\
+						char OPRD1[OPRD_SIZE];	\
+						GET_TOKEN(OPRD1);	\
+						if(IsMem(OPRD1))	\
+						{	\
+							uchar Reg1, Reg2;	\
+							uint Offset;	\
+							GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+							EncodeFI##x##_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);	\
+						}	\
+						else	\
+						{	\
+							InvalidInstruction();	\
+						}	\
+					}	\
+					else if(StringCmp(Token, INS_FI##x INS_WORD))	\
+					{	\
+						char OPRD1[OPRD_SIZE];	\
+						GET_TOKEN(OPRD1);	\
+						if(IsMem(OPRD1))	\
+						{	\
+							uchar Reg1, Reg2;	\
+							uint Offset;	\
+							GetMem(OPRD1, &Reg1, &Reg2, &Offset);	\
+							EncodeFI##x##_Mem16(Reg1, Reg2, GetOffType(Offset), Offset);	\
+						}	\
+						else	\
+						{	\
+							InvalidInstruction();	\
+						}	\
+					}
 
 #define	OPT(x)		else if(StringCmp(Token, INS_##x INS_BYTE))	\
 					{	\

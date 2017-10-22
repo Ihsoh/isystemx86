@@ -721,4 +721,23 @@
 #define	CCCC_G		0xF
 #define	CCCC_NLE	0xF
 
+
+
+
+#define	OPCODE_F2XM1		0xD9F0
+#define	OPCODE_FABS			0xD9E1
+
+#define	OPCODE_FADD_MEM32		0xD800
+#define OPCODE_FADD_MEM64		0xDC00
+#define	OPCODE_FADD_ST0_STi		0xD8C0
+#define	OPCODE_FADD_STi_ST0		0xDCC0
+#define	OPCODE_FADDP_STi_ST0	0xDEC0
+#define	OPCODE_FIADD_MEM32		0xDA00
+#define	OPCODE_FIADD_MEM16		0xDE00		
+
+
+
+
+
+
 #endif

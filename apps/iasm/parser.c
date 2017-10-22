@@ -297,6 +297,27 @@ static int IsTestReg(char * Token)
 			StringCmp(Token, INS_REG_PREFIX REGS_TR7);
 }
 
+static int IsX87DataReg(char * Token)
+{
+	assert(Token != NULL);
+
+	return	StringCmp(Token, INS_REG_PREFIX REGS_ST0)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_ST1)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_ST2)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_ST3)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_ST4)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_ST5)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_ST6)	||
+			StringCmp(Token, INS_REG_PREFIX REGS_ST7);
+}
+
+static int IsX87DataReg0(char * Token)
+{
+	assert(Token != NULL);
+
+	return StringCmp(Token, INS_REG_PREFIX REGS_ST0);
+}
+
 static uint Number(const char * S)
 {
 	assert(S != NULL);
@@ -632,6 +653,39 @@ static uchar GetReg(char * RegName)
 		Reg = REG_TR7;
 	}
 
+	// x87 FPU 数据寄存器。
+	else if(StringCmp(Name, REGS_ST0))
+	{
+		Reg = REG_ST0;
+	}
+	else if(StringCmp(Name, REGS_ST1))
+	{
+		Reg = REG_ST1;
+	}
+	else if(StringCmp(Name, REGS_ST2))
+	{
+		Reg = REG_ST2;
+	}
+	else if(StringCmp(Name, REGS_ST3))
+	{
+		Reg = REG_ST3;
+	}
+	else if(StringCmp(Name, REGS_ST4))
+	{
+		Reg = REG_ST4;
+	}
+	else if(StringCmp(Name, REGS_ST5))
+	{
+		Reg = REG_ST5;
+	}
+	else if(StringCmp(Name, REGS_ST6))
+	{
+		Reg = REG_ST6;
+	}
+	else if(StringCmp(Name, REGS_ST7))
+	{
+		Reg = REG_ST7;
+	}
 
 	// 段寄存器。
 	else if(StringCmp(Name, REGS_CS))
@@ -3774,6 +3828,22 @@ static void _Parse(void)
 		{
 			EncodePrefixGS();
 		}
+
+
+		/* F2XM1 */
+		else if(StringCmp(Token, INS_F2XM1))
+		{
+			EncodeF2XM1();
+		}
+		/* FABS */
+		else if(StringCmp(Token, INS_FABS))
+		{
+			EncodeFABS();
+		}
+		/* FADD */
+		FOPT(ADD)
+
+
 		/* 违法的指令 */
 		else 
 		{
