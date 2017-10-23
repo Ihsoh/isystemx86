@@ -1660,7 +1660,18 @@ extern void EncodeF2XM1(void);
 */
 extern void EncodeFABS(void);
 
+/*
+	FADD
+*/
 DeclareEncodeFOpt(ADD)
 
+/*
+	FBLD
+*/
+extern void EncodeFBLD_Mem80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
 		
 #endif

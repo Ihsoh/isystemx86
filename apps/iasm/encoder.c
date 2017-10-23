@@ -3974,8 +3974,20 @@ void EncodeFABS(void)
 }
 
 DefineEncodeFOpt(ADD)
-	
 
+/*
+	FBLD
+*/
+void EncodeFBLD_Mem80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FBLD_MEM80, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
 
 
 

@@ -329,6 +329,8 @@
 #define	INS_FADDP		"FADDP"
 #define	INS_FIADD		"FIADD"
 
+#define	INS_FBLD		"FBLD"
+
 
 #define	FOPT(x)		else if(StringCmp(Token, INS_F##x INS_DWORD))	\
 					{	\

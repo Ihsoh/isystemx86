@@ -3842,7 +3842,23 @@ static void _Parse(void)
 		}
 		/* FADD */
 		FOPT(ADD)
-
+		/* FBLD */
+		else if(StringCmp(Token, INS_FBLD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFBLD_Mem80(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
 
 		/* 违法的指令 */
 		else 
