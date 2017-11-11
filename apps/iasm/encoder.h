@@ -1673,5 +1673,360 @@ extern void EncodeFBLD_Mem80(
 	uchar Reg2,
 	uint OffType,
 	uint Off);
+
+/*
+	FBSTP
+*/
+extern void EncodeFBSTP_Mem80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+/*
+	FCHS
+*/
+extern void EncodeFCHS(void);
+
+/*
+	FCLEX
+*/
+extern void EncodeFCLEX(void);
+
+/*
+	FNCLEX
+*/
+extern void EncodeFNCLEX(void);
+
+
+#define	DeclareEncodeFCMOVcc(x)	\
+	extern void Encode##x##_ST0_STi(uchar STi);
+
+#define	DefineEncodeFCMOVcc(x)	\
+	void Encode##x##_ST0_STi(uchar STi)	\
+	{	\
+		InstructionBegin();	\
+		ToBufferW(OPCODE_##x##_ST0_STi | STi);	\
+		InstructionEnd();	\
+	}
+
+DeclareEncodeFCMOVcc(FCMOVB)
+DeclareEncodeFCMOVcc(FCMOVE)
+DeclareEncodeFCMOVcc(FCMOVBE)
+DeclareEncodeFCMOVcc(FCMOVU)
+DeclareEncodeFCMOVcc(FCMOVNB)
+DeclareEncodeFCMOVcc(FCMOVNE)
+DeclareEncodeFCMOVcc(FCMOVNBE)
+DeclareEncodeFCMOVcc(FCMOVNU)
+
+extern void EncodeFCOM_ST0_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFCOM_ST0_Mem64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFCOM_ST0_STi(uchar STi);
+
+extern void EncodeFCOMP_ST0_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFCOMP_ST0_Mem64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFCOMP_ST0_STi(uchar STi);
+
+extern void EncodeFCOMPP_ST0_ST1(void);
+
+extern void EncodeFCOMI_ST0_STi(uchar STi);
+extern void EncodeFCOMIP_ST0_STi(uchar STi);
+extern void EncodeFUCOMI_ST0_STi(uchar STi);
+extern void EncodeFUCOMIP_ST0_STi(uchar STi);
+
+extern void EncodeFCOS(void);
+
+extern void EncodeFDECSTP(void);
+
+DeclareEncodeFOpt(DIV)
+
+DeclareEncodeFOpt(DIVR)
+
+extern void EncodeFFREE_STi(uchar STi);
+
+extern void EncodeFICOM_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFICOM_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFICOMP_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFICOMP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFILD_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFILD_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFILD_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFINCSTP(void);
+
+extern void EncodeFINIT(void);
+extern void EncodeFNINIT(void);
+
+extern void EncodeFIST_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFIST_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFISTP_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFISTP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFISTP_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFISTTP_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFISTTP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFISTTP_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFLD_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFLD_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFLD_MEM80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFLD_STi(uchar STi);
+
+extern void EncodeFLD1(void);
+extern void EncodeFLDL2T(void);
+extern void EncodeFLDL2E(void);
+extern void EncodeFLDPI(void);
+extern void EncodeFLDLG2(void);
+extern void EncodeFLDLN2(void);
+extern void EncodeFLDZ(void);
+
+extern void EncodeFLDCW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFLDENV_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+DeclareEncodeFOpt(MUL)
+
+extern void EncodeFNOP(void);
+
+extern void EncodeFPATAN(void);
+
+extern void EncodeFPREM(void);
+
+extern void EncodeFPREM1(void);
+
+extern void EncodeFPTAN(void);
+
+extern void EncodeFRNDINT(void);
+
+extern void EncodeFRSTOR_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFSAVE_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFNSAVE_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFSCALE(void);
+
+extern void EncodeFSIN(void);
+
+extern void EncodeFSINCOS(void);
+
+extern void EncodeFSQRT(void);
+
+extern void EncodeFST_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFST_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFST_STi(uchar STi);
+extern void EncodeFSTP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFSTP_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFSTP_MEM80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFSTP_STi(uchar STi);
+
+extern void EncodeFSTCW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFNSTCW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFSTENV_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFNSTENV_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFSTSW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFSTSW_AX(void);
+extern void EncodeFNSTSW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+extern void EncodeFNSTSW_AX(void);
+
+DeclareEncodeFOpt(SUB)
+
+DeclareEncodeFOpt(SUBR)
+
+extern void EncodeFTST(void);
+
+extern void EncodeFUCOM_STi(uchar STi);
+extern void EncodeFUCOMP_STi(uchar STi);
+extern void EncodeFUCOMPP(void);
+
+extern void EncodeFXAM(void);
+
+extern void EncodeFXCH_STi(uchar STi);
+
+extern void EncodeFXRSTOR_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFXSAVE_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off);
+
+extern void EncodeFXTRACT(void);
+
+extern void EncodeFYL2X(void);
+
+extern void EncodeFYL2XP1(void);
+
+
+
+
+
+
+
+
+
+
 		
 #endif

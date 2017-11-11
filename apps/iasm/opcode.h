@@ -1,6 +1,11 @@
 #ifndef	OPCODE_H_
 #define	OPCODE_H_
 
+#define	MOD_RM(mod, reg_opcode, rm) ((((mod) & 0x03) << 6) | (((reg_opcode) & 0x07) << 3) | ((rm) & 0x07))
+#define	OPCODE_1B(a, mod, reg_opcode, rm) ((((a) & 0xff) << 8) | MOD_RM((mod), (reg_opcode), (rm)))
+#define	OPCODE_2B(a, b, mod, reg_opcode, rm) ((((a) & 0xff) << 16) | (((b) & 0xff) << 8) | MOD_RM((mod), (reg_opcode), (rm)))
+#define	OPCODE_3B(a, b, c, mod, reg_opcode, rm)) ((((a) & 0xff) << 24) | (((b) & 0xff) << 16) | (((c) & 0xff) << 8) | MOD_RM((mod), (reg_opcode), (rm)))
+
 #define	OPCODE_AAA		0x37
 
 #define	OPCODE_AAD		0xD50A
@@ -736,6 +741,186 @@
 #define	OPCODE_FIADD_MEM16		0xDE00		
 
 #define	OPCODE_FBLD_MEM80		0xDF20
+
+#define	OPCODE_FBSTP_MEM80		OPCODE_1B(0xDF, 0, 6, 0)	// DF /6
+
+#define	OPCODE_FCHS				0xD9E0	// D9 E0
+
+#define	OPCODE_FCLEX			0x9BDBE2	// 9B DB E2
+#define	OPCODE_FNCLEX			0xDBE2		// DB E2
+
+#define	OPCODE_FCMOVB_ST0_STi			0xDAC0		// DA C0
+#define	OPCODE_FCMOVE_ST0_STi			0xDAC8		// DA C8
+#define	OPCODE_FCMOVBE_ST0_STi			0xDAD0		// DA D0
+#define	OPCODE_FCMOVU_ST0_STi			0xDAD8		// DA D8
+#define	OPCODE_FCMOVNB_ST0_STi			0xDBC0		// DB C0
+#define	OPCODE_FCMOVNE_ST0_STi			0xDBC8		// DB C8
+#define	OPCODE_FCMOVNBE_ST0_STi			0xDBD0		// DB D0
+#define	OPCODE_FCMOVNU_ST0_STi			0xDBD8		// DB D8
+
+#define	OPCODE_FCOM_ST0_MEM32				OPCODE_1B(0xD8, 0, 2, 0)	// D8 /2
+#define	OPCODE_FCOM_ST0_MEM64				OPCODE_1B(0xDC, 0, 2, 0)	// DC /2
+#define	OPCODE_FCOM_ST0_STi					0xD8D0						// D8 D0+i
+#define	OPCODE_FCOMP_ST0_MEM32				OPCODE_1B(0xD8, 0, 3, 0)	// D8 /3
+#define	OPCODE_FCOMP_ST0_MEM64				OPCODE_1B(0xDC, 0, 3, 0)	// DC /3
+#define	OPCODE_FCOMP_ST0_STi				0xD8D8						// D8 D8+i
+#define	OPCODE_FCOMPP_ST0_ST1				0xDED9						// DE D9
+
+#define	OPCODE_FCOMI_ST0_STi				0xDBF0		// DB F0+i
+#define	OPCODE_FCOMIP_ST0_STi				0xDFF0		// DF F0+i
+#define	OPCODE_FUCOMI_ST0_STi				0xDBE8		// DB E8+i
+#define	OPCODE_FUCOMIP_ST0_STi				0xDFE8		// DF E8+i
+
+#define	OPCODE_FCOS							0xD9FF		// D9 FF
+
+#define	OPCODE_FDECSTP						0xD9F6		// D9 F6
+
+#define	OPCODE_FDIV_MEM32		OPCODE_1B(0xD8, 0, 6, 0)	// D8 /6
+#define OPCODE_FDIV_MEM64		OPCODE_1B(0xDC, 0, 6, 0)	// DC /6
+#define	OPCODE_FDIV_ST0_STi		0xD8F0						// D8 F0+i
+#define	OPCODE_FDIV_STi_ST0		0xDCF8						// DC F8+i
+#define	OPCODE_FDIVP_STi_ST0	0xDEF8						// DE F8+i
+#define	OPCODE_FIDIV_MEM32		OPCODE_1B(0xDA, 0, 6, 0)	// DA /6
+#define	OPCODE_FIDIV_MEM16		OPCODE_1B(0xDE, 0, 6, 0)	// DE /6
+
+#define	OPCODE_FDIVR_MEM32		OPCODE_1B(0xD8, 0, 7, 0)	// D8 /7
+#define OPCODE_FDIVR_MEM64		OPCODE_1B(0xDC, 0, 7, 0)	// DC /7
+#define	OPCODE_FDIVR_ST0_STi	0xD8F8						// D8 F8+i
+#define	OPCODE_FDIVR_STi_ST0	0xDCF0						// DC F0+i
+#define	OPCODE_FDIVRP_STi_ST0	0xDEF0						// DE F0+i
+#define	OPCODE_FIDIVR_MEM32		OPCODE_1B(0xDA, 0, 7, 0)	// DA /7
+#define	OPCODE_FIDIVR_MEM16		OPCODE_1B(0xDE, 0, 7, 0)	// DE /7
+
+#define	OPCODE_FFREE_STi		0xDDC0						// DD C0+i
+
+#define	OPCODE_FICOM_MEM16		OPCODE_1B(0xDE, 0, 2, 0)	// DE /2
+#define	OPCODE_FICOM_MEM32		OPCODE_1B(0xDA, 0, 2, 0)	// DA /2
+#define	OPCODE_FICOMP_MEM16		OPCODE_1B(0xDE, 0, 3, 0)	// DE /3
+#define	OPCODE_FICOMP_MEM32		OPCODE_1B(0xDA, 0, 3, 0)	// DA /3
+
+#define	OPCODE_FILD_MEM16		OPCODE_1B(0xDF, 0, 0, 0)	// DF /0
+#define	OPCODE_FILD_MEM32		OPCODE_1B(0xDB, 0, 0, 0)	// DB /0
+#define	OPCODE_FILD_MEM64		OPCODE_1B(0xDF, 0, 5, 0)	// DF /5
+
+#define	OPCODE_FINCSTP			0xD9F7						// D9 F7
+
+#define	OPCODE_FINIT			0x9BDBE3					// 9B DB E3
+#define	OPCODE_FNINIT			0xDBE3						// DB E3
+
+#define	OPCODE_FIST_MEM16		OPCODE_1B(0xDF, 0, 2, 0)	// DF /2
+#define	OPCODE_FIST_MEM32		OPCODE_1B(0xDB, 0, 2, 0)	// DB /2
+#define	OPCODE_FISTP_MEM16		OPCODE_1B(0xDF, 0, 3, 0)	// DF /3
+#define	OPCODE_FISTP_MEM32		OPCODE_1B(0xDB, 0, 3, 0)	// DB /3
+#define	OPCODE_FISTP_MEM64		OPCODE_1B(0xDF, 0, 7, 0)	// DF /7
+
+#define	OPCODE_FISTTP_MEM16		OPCODE_1B(0xDF, 0, 1, 0)	// DF /1
+#define	OPCODE_FISTTP_MEM32		OPCODE_1B(0xDB, 0, 1, 0)	// DB /1
+#define	OPCODE_FISTTP_MEM64		OPCODE_1B(0xDD, 0, 1, 0)	// DD /1
+
+#define	OPCODE_FLD_MEM32		OPCODE_1B(0xD9, 0, 0, 0)	// D9 /0
+#define	OPCODE_FLD_MEM64		OPCODE_1B(0xDD, 0, 0, 0)	// DD /0
+#define	OPCODE_FLD_MEM80		OPCODE_1B(0xDB, 0, 5, 0)	// DB /5
+#define	OPCODE_FLD_STi			0xD9C0						// D9 C0+i
+
+#define	OPCODE_FLD1				0xD9E8						// D9 E8
+#define	OPCODE_FLDL2T			0xD9E9						// D9 E9
+#define	OPCODE_FLDL2E			0xD9EA						// D9 EA
+#define	OPCODE_FLDPI			0xD9EB						// D9 EB
+#define	OPCODE_FLDLG2			0xD9EC						// D9 EC
+#define	OPCODE_FLDLN2			0xD9ED						// D9 ED
+#define	OPCODE_FLDZ				0xD9EE						// D9 EE
+
+#define	OPCODE_FLDCW_MEM		OPCODE_1B(0xD9, 0, 5, 0)	// D9 /5
+
+#define	OPCODE_FLDENV_MEM		OPCODE_1B(0xD9, 0, 4, 0)	// D9 /4
+
+#define	OPCODE_FMUL_MEM32		OPCODE_1B(0xD8, 0, 1, 0)	// D8 /1
+#define OPCODE_FMUL_MEM64		OPCODE_1B(0xDC, 0, 1, 0)	// DC /1
+#define	OPCODE_FMUL_ST0_STi		0xD8C8						// D8 C8+i
+#define	OPCODE_FMUL_STi_ST0		0xDCC8						// DC C8+i
+#define	OPCODE_FMULP_STi_ST0	0xDEC8						// DE C8+i
+#define	OPCODE_FIMUL_MEM32		OPCODE_1B(0xDA, 0, 1, 0)	// DA /1
+#define	OPCODE_FIMUL_MEM16		OPCODE_1B(0xDE, 0, 1, 0)	// DE /1
+
+#define	OPCODE_FNOP				0xD9D0						// D9 D0
+
+#define	OPCODE_FPATAN			0xD9F3						// D9 F3
+
+#define	OPCODE_FPREM			0xD9F8						// D9 F8
+
+#define	OPCODE_FPREM1			0xD9F5						// D9 F5
+
+#define	OPCODE_FPTAN			0xD9F2						// D9 F2
+
+#define	OPCODE_FRNDINT			0xD9FC						// D9 FC
+
+#define	OPCODE_FRSTOR_MEM		OPCODE_1B(0xDD, 0, 4, 0)	// DD /4
+
+#define	OPCODE_FSAVE_MEM		OPCODE_2B(0x9B, 0xDD, 0, 6, 0)	// 9B DD /6
+#define	OPCODE_FNSAVE_MEM		OPCODE_1B(0xDD, 0, 6, 0)		// DD /6
+
+#define	OPCODE_FSCALE			0xD9FD						// D9 FD
+
+#define	OPCODE_FSIN				0xD9FE						// D9 FE
+
+#define	OPCODE_FSINCOS			0xD9FB						// D9 FB
+
+#define	OPCODE_FSQRT			0xD9FA						// D9 FA
+
+#define	OPCODE_FST_MEM32		OPCODE_1B(0xD9, 0, 2, 0)	// D9 /2
+#define	OPCODE_FST_MEM64		OPCODE_1B(0xDD, 0, 2, 0)	// DD /2
+#define	OPCODE_FST_STi			0xDDD0						// DD D0+i
+#define	OPCODE_FSTP_MEM32		OPCODE_1B(0xD9, 0, 3, 0)	// D9 /3
+#define	OPCODE_FSTP_MEM64		OPCODE_1B(0xDD, 0, 3, 0)	// DD /3
+#define	OPCODE_FSTP_MEM80		OPCODE_1B(0xDB, 0, 7, 0)	// DB /7
+#define	OPCODE_FSTP_STi			0xDDD8						// DD D8+i
+
+#define	OPCODE_FSTCW_MEM		OPCODE_2B(0x9B, 0xD9, 0, 7, 0)	// 9B D9 /7
+#define	OPCODE_FNSTCW_MEM		OPCODE_1B(0xD9, 0, 7, 0)		// D9 /7
+
+#define	OPCODE_FSTENV_MEM		OPCODE_2B(0x9B, 0xD9, 0, 6, 0)	// 9B D9 /6
+#define	OPCODE_FNSTENV_MEM		OPCODE_1B(0xD9, 0, 6, 0)		// D9 /6
+
+#define	OPCODE_FSTSW_MEM		OPCODE_2B(0x9B, 0xDD, 0, 7, 0)	// 9B DD /7
+#define	OPCODE_FSTSW_AX			0x9BDFE0						// 9B DF E0
+#define	OPCODE_FNSTSW_MEM		OPCODE_1B(0xDD, 0, 7, 0)		// DD /7
+#define	OPCODE_FNSTSW_AX		0xDFE0							// DF E0
+
+#define	OPCODE_FSUB_MEM32		OPCODE_1B(0xD8, 0, 4, 0)	// D8 /4
+#define OPCODE_FSUB_MEM64		OPCODE_1B(0xDC, 0, 4, 0)	// DC /4
+#define	OPCODE_FSUB_ST0_STi		0xD8E0						// D8 E0+i
+#define	OPCODE_FSUB_STi_ST0		0xDCE8						// DC E8+i
+#define	OPCODE_FSUBP_STi_ST0	0xDEE8						// DE E8+i
+#define	OPCODE_FISUB_MEM32		OPCODE_1B(0xDA, 0, 4, 0)	// DA /4
+#define	OPCODE_FISUB_MEM16		OPCODE_1B(0xDE, 0, 4, 0)	// DE /4
+
+#define	OPCODE_FSUBR_MEM32		OPCODE_1B(0xD8, 0, 5, 0)	// D8 /5
+#define OPCODE_FSUBR_MEM64		OPCODE_1B(0xDC, 0, 5, 0)	// DC /5
+#define	OPCODE_FSUBR_ST0_STi	0xD8E8						// D8 E8+i
+#define	OPCODE_FSUBR_STi_ST0	0xDCE0						// DC E0+i
+#define	OPCODE_FSUBRP_STi_ST0	0xDEE0						// DE E0+i
+#define	OPCODE_FISUBR_MEM32		OPCODE_1B(0xDA, 0, 5, 0)	// DA /5
+#define	OPCODE_FISUBR_MEM16		OPCODE_1B(0xDE, 0, 5, 0)	// DE /5
+
+#define	OPCODE_FTST				0xD9E4						// D9 E4
+
+#define	OPCODE_FUCOM_STi		0xDDE0		// DD E0+i
+#define	OPCODE_FUCOMP_STi		0xDDE8		// DD E8+i
+#define	OPCODE_FUCOMPP			0xDAE9		// DA E9
+	
+#define	OPCODE_FXAM				0xD9E5		// D9 E5
+
+#define	OPCODE_FXCH_STi			0xD9C8		// D9 C8+i
+
+#define	OPCODE_FXRSTOR_MEM		OPCODE_2B(0x0F, 0xAE, 0, 1, 0)		// 0F AE /1
+
+#define	OPCODE_FXSAVE_MEM		OPCODE_2B(0x0F, 0xAE, 0, 1, 0)		// 0F AE /0
+
+#define	OPCODE_FXTRACT			0xD9F4		// D9 F4
+
+#define	OPCODE_FYL2X			0xD9F1		// D9 F1
+
+#define	OPCODE_FYL2XP1			0xD9F9		// D9 F9
 
 
 

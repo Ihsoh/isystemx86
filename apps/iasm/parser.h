@@ -87,6 +87,10 @@
 #define	INS_DWORD	"D"
 #define	INS_QWORD	"Q"
 
+#define	INS_REAL4	"R4"
+#define	INS_REAL8	"R8"
+#define	INS_REAL10	"R10"
+
 #define	INS_SHORT	"S"
 #define	INS_NEAR	"N"
 #define	INS_FAR		"F"
@@ -331,8 +335,165 @@
 
 #define	INS_FBLD		"FBLD"
 
+#define	INS_FBSTP		"FBSTP"
 
-#define	FOPT(x)		else if(StringCmp(Token, INS_F##x INS_DWORD))	\
+#define	INS_FCHS		"FCHS"
+
+#define	INS_FCLEX		"FCLEX"
+#define	INS_FNCLEX		"FNCLEX"
+
+#define	INS_FCMOVB		"FCMOVB"
+#define	INS_FCMOVE		"FCMOVE"
+#define	INS_FCMOVBE		"FCMOVBE"
+#define	INS_FCMOVU		"FCMOVU"
+#define	INS_FCMOVNB		"FCMOVNB"
+#define	INS_FCMOVNE		"FCMOVNE"
+#define	INS_FCMOVNBE	"FCMOVNBE"
+#define	INS_FCMOVNU		"FCMOVNU"
+
+#define	INS_FCOM		"FCOM"
+#define	INS_FCOMP		"FCOMP"
+#define	INS_FCOMPP		"FCOMPP"
+
+#define	INS_FCOMI		"FCOMI"
+#define	INS_FCOMIP		"FCOMIP"
+#define	INS_FUCOMI		"FUCOMI"
+#define	INS_FUCOMIP		"FUCOMIP"
+
+#define	INS_FCOS		"FCOS"
+
+#define	INS_FDECSTP		"FDECSTP"
+
+#define	INS_FDIV		"FDIV"
+#define	INS_FDIVP		"FDIVP"
+#define	INS_FIDIV		"FIDIV"
+
+#define	INS_FDIVR		"FDIVR"
+#define	INS_FDIVRP		"FDIVRP"
+#define	INS_FIDIVR		"FIDIVR"
+
+#define	INS_FFREE		"FFREE"
+
+#define	INS_FICOM		"FICOM"
+#define	INS_FICOMP		"FICOMP"
+
+#define	INS_FILD		"FILD"
+
+#define	INS_FINCSTP		"FINCSTP"
+
+#define	INS_FINIT		"FINIT"
+#define	INS_FNINIT		"FNINIT"
+
+#define	INS_FIST		"FIST"
+#define	INS_FISTP		"FISTP"
+
+#define	INS_FISTTP		"FISTTP"
+
+#define	INS_FLD			"FLD"
+
+#define	INS_FLD1		"FLD1"
+#define	INS_FLDL2T		"FLDL2T"
+#define	INS_FLDL2E		"FLDL2E"
+#define	INS_FLDPI		"FLDPI"
+#define	INS_FLDLG2		"FLDLG2"
+#define	INS_FLDLN2		"FLDLN2"
+#define	INS_FLDZ		"FLDZ"
+
+#define	INS_FLDCW		"FLDCW"
+
+#define	INS_FLDENV		"FLDENV"
+
+#define	INS_FMUL		"FMUL"
+#define	INS_FMULP		"FMULP"
+#define	INS_FIMUL		"FIMUL"
+
+#define	INS_FNOP		"FNOP"
+
+#define	INS_FPATAN		"FPATAN"
+
+#define	INS_FPREM		"FPREM"
+
+#define	INS_FPREM1		"FPREM1"
+
+#define	INS_FPTAN		"FPTAN"
+
+#define	INS_FRNDINT		"FRNDINT"
+
+#define	INS_FRSTOR		"FRSTOR"
+
+#define	INS_FSAVE		"FSAVE"
+#define	INS_FNSAVE		"FNSAVE"
+
+#define	INS_FSCALE		"FSCALE"
+
+#define	INS_FSIN		"FSIN"
+
+#define	INS_FSINCOS		"FSINCOS"
+
+#define	INS_FSQRT		"FSQRT"
+
+#define	INS_FST			"FST"
+#define	INS_FSTP		"FSTP"
+
+#define	INS_FSTCW		"FSTCW"
+#define	INS_FNSTCW		"FNSTCW"
+
+#define	INS_FSTENV		"FSTENV"
+#define	INS_FNSTENV		"FNSTENV"
+
+#define	INS_FSTSW		"FSTSW"
+#define	INS_FNSTSW		"FNSTSW"
+
+#define	INS_FSUB		"FSUB"
+#define	INS_FSUBP		"FSUBP"
+#define	INS_FISUB		"FISUB"
+
+#define	INS_FSUBR		"FSUBR"
+#define	INS_FSUBRP		"FSUBRP"
+#define	INS_FISUBR		"FISUBR"
+
+#define	INS_FTST		"FTST"
+
+#define	INS_FUCOM		"FUCOM"
+#define	INS_FUCOMP		"FUCOMP"
+#define	INS_FUCOMPP		"FUCOMPP"
+
+#define	INS_FXAM		"FXAM"
+
+#define	INS_FXCH		"FXCH"
+
+#define	INS_FXRSTOR		"FXRSTOR"
+
+#define	INS_FXSAVE		"FXSAVE"
+
+#define	INS_FXTRACT		"FXTRACT"
+
+#define	INS_FYL2X		"FYL2X"
+
+#define	INS_FYL2XP1		"FYL2XP1"
+
+
+
+
+#define	FCMOVcc(x)	\
+	else if(StringCmp(Token, INS_##x))	\
+	{	\
+		char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];	\
+		GET_TOKEN(OPRD1);	\
+		GET_TOKEN(OPRD2);	\
+		ExpectComma(OPRD2);	\
+		GET_TOKEN(OPRD2);	\
+		if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsX87DataReg0(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2))	\
+		{	\
+			Encode##x##_ST0_STi(GetReg(OPRD2));	\
+		}	\
+		else	\
+		{	\
+			InvalidInstruction();	\
+		}	\
+	}	
+
+#define	FOPT(x)		else if(StringCmp(Token, INS_F##x INS_REAL4))	\
 					{	\
 						char OPRD1[OPRD_SIZE];	\
 						GET_TOKEN(OPRD1);	\
@@ -348,7 +509,7 @@
 							InvalidInstruction();	\
 						}	\
 					}	\
-					else if(StringCmp(Token, INS_F##x INS_QWORD))	\
+					else if(StringCmp(Token, INS_F##x INS_REAL8))	\
 					{	\
 						char OPRD1[OPRD_SIZE];	\
 						GET_TOKEN(OPRD1);	\

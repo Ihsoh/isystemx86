@@ -169,18 +169,25 @@ static void ToBuffer(uchar InsByte)
 	}
 }
 
-static void ToBufferW(uint W)
+static void ToBufferW(uint Data)
 {
-	ToBuffer((uchar)W);
-	ToBuffer((uchar)(W >> 8));
+	ToBuffer((uchar)Data);
+	ToBuffer((uchar)(Data >> 8));
 }
 
-static void ToBufferD(uint D)
+static void ToBuffer3B(uint Data)
 {
-	ToBuffer((uchar)D);
-	ToBuffer((uchar)(D >> 8));
-	ToBuffer((uchar)(D >> 16));
-	ToBuffer((uchar)(D >> 24));
+	ToBuffer((uchar)Data);
+	ToBuffer((uchar)(Data >> 8));
+	ToBuffer((uchar)(Data >> 16));
+}
+
+static void ToBufferD(uint Data)
+{
+	ToBuffer((uchar)Data);
+	ToBuffer((uchar)(Data >> 8));
+	ToBuffer((uchar)(Data >> 16));
+	ToBuffer((uchar)(Data >> 24));
 }
 
 static void InstructionBegin(void)
@@ -3988,6 +3995,960 @@ void EncodeFBLD_Mem80(
 	OpcodeW_Mem_X(OPCODE_FBLD_MEM80, Reg1, Reg2, OffType, Off, 0, 0);
 	InstructionEnd();
 }
+
+/*
+	FBSTP
+*/
+void EncodeFBSTP_Mem80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FBSTP_MEM80, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+/*
+	FCHS
+*/
+void EncodeFCHS(void)
+{
+	InstructionBegin();
+	ToBuffer((uchar)(OPCODE_FCHS >> 8));
+	ToBuffer((uchar)OPCODE_FCHS);
+	InstructionEnd();
+}
+
+/*
+	FCLEX
+*/
+void EncodeFCLEX(void)
+{
+	InstructionBegin();
+	ToBuffer((uchar)(OPCODE_FCLEX >> 16));
+	ToBuffer((uchar)(OPCODE_FCLEX >> 8));
+	ToBuffer((uchar)OPCODE_FCLEX);
+	InstructionEnd();
+}
+
+/*
+	FNCLEX
+*/
+void EncodeFNCLEX(void)
+{
+	InstructionBegin();
+	ToBuffer((uchar)(OPCODE_FNCLEX >> 8));
+	ToBuffer((uchar)OPCODE_FNCLEX);
+	InstructionEnd();
+}
+
+DefineEncodeFCMOVcc(FCMOVB)
+DefineEncodeFCMOVcc(FCMOVE)
+DefineEncodeFCMOVcc(FCMOVBE)
+DefineEncodeFCMOVcc(FCMOVU)
+DefineEncodeFCMOVcc(FCMOVNB)
+DefineEncodeFCMOVcc(FCMOVNE)
+DefineEncodeFCMOVcc(FCMOVNBE)
+DefineEncodeFCMOVcc(FCMOVNU)
+
+void EncodeFCOM_ST0_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FCOM_ST0_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFCOM_ST0_Mem64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FCOM_ST0_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFCOM_ST0_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FCOM_ST0_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFCOMP_ST0_Mem32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FCOMP_ST0_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFCOMP_ST0_Mem64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FCOMP_ST0_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFCOMP_ST0_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FCOMP_ST0_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFCOMPP_ST0_ST1(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FCOMPP_ST0_ST1);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFCOMI_ST0_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FCOMI_ST0_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFCOMIP_ST0_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FCOMIP_ST0_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFUCOMI_ST0_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FUCOMI_ST0_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFUCOMIP_ST0_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FUCOMIP_ST0_STi | STi);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFCOS(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FCOS);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFDECSTP(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FDECSTP);
+	InstructionEnd();
+}
+
+
+
+
+DefineEncodeFOpt(DIV)
+
+
+
+
+DefineEncodeFOpt(DIVR)
+
+
+
+
+void EncodeFFREE_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FFREE_STi | STi);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFICOM_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FICOM_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFICOM_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FICOM_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFICOMP_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FICOMP_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFICOMP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FICOMP_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFILD_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FILD_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFILD_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FILD_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFILD_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FILD_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFINCSTP(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FINCSTP);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFINIT(void)
+{
+	InstructionBegin();
+	ToBuffer3B(OPCODE_FINIT);
+	InstructionEnd();
+}
+
+void EncodeFNINIT(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FNINIT);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFIST_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FIST_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFIST_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FIST_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFISTP_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FISTP_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFISTP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FISTP_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFISTP_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FISTP_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFISTTP_MEM16(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FISTTP_MEM16, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFISTTP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FISTTP_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFISTTP_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FISTTP_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFLD_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FLD_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFLD_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FLD_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFLD_MEM80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FLD_MEM80, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFLD_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLD_STi | STi);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFLD1(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLD1);
+	InstructionEnd();
+}
+
+void EncodeFLDL2T(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLDL2T);
+	InstructionEnd();
+}
+
+void EncodeFLDL2E(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLDL2E);
+	InstructionEnd();
+}
+
+void EncodeFLDPI(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLDPI);
+	InstructionEnd();
+}
+
+void EncodeFLDLG2(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLDLG2);
+	InstructionEnd();
+}
+
+void EncodeFLDLN2(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLDLN2);
+	InstructionEnd();
+}
+
+void EncodeFLDZ(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FLDZ);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFLDCW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FLDCW_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFLDENV_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FLDENV_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+DefineEncodeFOpt(MUL)
+
+
+
+
+void EncodeFNOP(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FNOP);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFPATAN(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FPATAN);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFPREM(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FPREM);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFPREM1(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FPREM1);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFPTAN(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FPTAN);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFRNDINT(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FRNDINT);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFRSTOR_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FRSTOR_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSAVE_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	Opcode3B_Mem_X(OPCODE_FSAVE_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFNSAVE_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FNSAVE_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSCALE(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FSCALE);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSIN(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FSIN);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSINCOS(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FSINCOS);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSQRT(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FSQRT);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFST_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FST_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFST_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FST_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFST_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FST_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFSTP_MEM32(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FSTP_MEM32, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFSTP_MEM64(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FSTP_MEM64, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFSTP_MEM80(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FSTP_MEM80, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFSTP_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FSTP_STi | STi);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSTCW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	Opcode3B_Mem_X(OPCODE_FSTCW_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFNSTCW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FNSTCW_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSTENV_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	Opcode3B_Mem_X(OPCODE_FSTENV_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFNSTENV_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FNSTENV_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFSTSW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	Opcode3B_Mem_X(OPCODE_FSTSW_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFSTSW_AX(void)
+{
+	InstructionBegin();
+	ToBuffer3B(OPCODE_FSTSW_AX);
+	InstructionEnd();
+}
+
+void EncodeFNSTSW_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	OpcodeW_Mem_X(OPCODE_FNSTSW_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+void EncodeFNSTSW_AX(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FNSTSW_AX);
+	InstructionEnd();
+}
+
+
+
+
+DefineEncodeFOpt(SUB)
+
+
+
+
+DefineEncodeFOpt(SUBR)
+
+
+
+
+void EncodeFTST(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FTST);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFUCOM_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FUCOM_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFUCOMP_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FUCOMP_STi | STi);
+	InstructionEnd();
+}
+
+void EncodeFUCOMPP(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FUCOMPP);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFXAM(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FXAM);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFXCH_STi(uchar STi)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FXCH_STi | STi);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFXRSTOR_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	Opcode3B_Mem_X(OPCODE_FXRSTOR_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFXSAVE_MEM(
+	uchar Reg1,
+	uchar Reg2,
+	uint OffType,
+	uint Off)
+{
+	InstructionBegin();
+	Opcode3B_Mem_X(OPCODE_FXSAVE_MEM, Reg1, Reg2, OffType, Off, 0, 0);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFXTRACT(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FXTRACT);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFYL2X(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FYL2X);
+	InstructionEnd();
+}
+
+
+
+
+void EncodeFYL2XP1(void)
+{
+	InstructionBegin();
+	ToBufferW(OPCODE_FYL2XP1);
+	InstructionEnd();
+}
+
+
+
+
+
+
+
 
 
 

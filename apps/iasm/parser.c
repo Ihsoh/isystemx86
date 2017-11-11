@@ -229,6 +229,13 @@ static int IsReg16(char * Token)
 			StringCmp(Token, INS_REG_PREFIX REGS_SP);
 }
 
+static int IsRegAX(char * Token)
+{
+	assert(Token != NULL);
+
+	return StringCmp(Token, INS_REG_PREFIX REGS_AX);
+}
+
 static int IsReg32(char * Token)
 {
 	assert(Token != NULL);
@@ -316,6 +323,13 @@ static int IsX87DataReg0(char * Token)
 	assert(Token != NULL);
 
 	return StringCmp(Token, INS_REG_PREFIX REGS_ST0);
+}
+
+static int IsX87DataReg1(char * Token)
+{
+	assert(Token != NULL);
+
+	return StringCmp(Token, INS_REG_PREFIX REGS_ST1);
 }
 
 static uint Number(const char * S)
@@ -3859,6 +3873,1044 @@ static void _Parse(void)
 				InvalidInstruction();
 			}
 		}
+		/* FBLD */
+		else if(StringCmp(Token, INS_FBSTP))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFBSTP_Mem80(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		/* FCHS */
+		else if(StringCmp(Token, INS_FCHS))
+		{
+			EncodeFCHS();
+		}
+		/* FCLEX */
+		else if(StringCmp(Token, INS_FCLEX))
+		{
+			EncodeFCLEX();
+		}
+		/* FNCLEX */
+		else if(StringCmp(Token, INS_FNCLEX))
+		{
+			EncodeFNCLEX();
+		}
+		FCMOVcc(FCMOVB)
+		FCMOVcc(FCMOVE)
+		FCMOVcc(FCMOVBE)
+		FCMOVcc(FCMOVU)
+		FCMOVcc(FCMOVNB)
+		FCMOVcc(FCMOVNE)
+		FCMOVcc(FCMOVNBE)
+		FCMOVcc(FCMOVNU)
+		else if(StringCmp(Token, INS_FCOM INS_REAL4))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFCOM_ST0_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FCOM INS_REAL8))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFCOM_ST0_Mem64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FCOM))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFCOM_ST0_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FCOMP INS_REAL4))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFCOMP_ST0_Mem32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FCOMP INS_REAL8))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFCOMP_ST0_Mem64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FCOMP))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFCOMP_ST0_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FCOMPP))
+		{
+			EncodeFCOMPP_ST0_ST1();
+		}
+
+		else if(StringCmp(Token, INS_FCOMI))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsX87DataReg0(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2))
+			{
+				EncodeFCOMI_ST0_STi(GetReg(OPRD2));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FCOMIP))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsX87DataReg0(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2))
+			{
+				EncodeFCOMIP_ST0_STi(GetReg(OPRD2));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FUCOMI))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsX87DataReg0(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2))
+			{
+				EncodeFUCOMI_ST0_STi(GetReg(OPRD2));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FUCOMIP))
+		{
+			char OPRD1[OPRD_SIZE], OPRD2[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			GET_TOKEN(OPRD2);
+			ExpectComma(OPRD2);
+			GET_TOKEN(OPRD2);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1) && IsX87DataReg0(OPRD1) && IsReg(OPRD2) && IsX87DataReg(OPRD2))
+			{
+				EncodeFUCOMIP_ST0_STi(GetReg(OPRD2));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		
+		else if(StringCmp(Token, INS_FCOS))
+		{
+			EncodeFCOS();
+		}
+
+		else if(StringCmp(Token, INS_FDECSTP))
+		{
+			EncodeFDECSTP();
+		}
+
+		FOPT(DIV)
+
+		FOPT(DIVR)
+
+		else if(StringCmp(Token, INS_FFREE))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFFREE_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FICOM INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFICOM_MEM16(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FICOM INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFICOM_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FICOMP INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFICOMP_MEM16(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FICOMP INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFICOMP_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FILD INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFILD_MEM16(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FILD INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFILD_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FILD INS_QWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFILD_MEM64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FINCSTP))
+		{
+			EncodeFINCSTP();
+		}
+
+		else if(StringCmp(Token, INS_FINIT))
+		{
+			EncodeFINIT();
+		}
+		else if(StringCmp(Token, INS_FNINIT))
+		{
+			EncodeFNINIT();
+		}
+
+		else if(StringCmp(Token, INS_FIST INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFIST_MEM16(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FIST INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFIST_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FISTP INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFISTP_MEM16(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FISTP INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFISTP_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FISTP INS_QWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFISTP_MEM64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FISTTP INS_WORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFISTTP_MEM16(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FISTTP INS_DWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFISTTP_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FISTTP INS_QWORD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFISTTP_MEM64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FLD INS_REAL4))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFLD_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FLD INS_REAL8))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFLD_MEM64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FLD INS_REAL10))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFLD_MEM80(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FLD))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFLD_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FLD1))
+		{
+			EncodeFLD1();
+		}
+		else if(StringCmp(Token, INS_FLDL2T))
+		{
+			EncodeFLDL2T();
+		}
+		else if(StringCmp(Token, INS_FLDL2E))
+		{
+			EncodeFLDL2E();
+		}
+		else if(StringCmp(Token, INS_FLDPI))
+		{
+			EncodeFLDPI();
+		}
+		else if(StringCmp(Token, INS_FLDLG2))
+		{
+			EncodeFLDLG2();
+		}
+		else if(StringCmp(Token, INS_FLDLN2))
+		{
+			EncodeFLDLN2();
+		}
+		else if(StringCmp(Token, INS_FLDZ))
+		{
+			EncodeFLDZ();
+		}
+
+		else if(StringCmp(Token, INS_FLDCW))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFLDCW_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FLDENV))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFLDENV_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		FOPT(MUL)
+
+		else if(StringCmp(Token, INS_FNOP))
+		{
+			EncodeFNOP();
+		}
+
+		else if(StringCmp(Token, INS_FPATAN))
+		{
+			EncodeFPATAN();
+		}
+
+		else if(StringCmp(Token, INS_FPREM))
+		{
+			EncodeFPREM();
+		}
+
+		else if(StringCmp(Token, INS_FPREM1))
+		{
+			EncodeFPREM1();
+		}
+
+		else if(StringCmp(Token, INS_FPTAN))
+		{
+			EncodeFPTAN();
+		}
+
+		else if(StringCmp(Token, INS_FRNDINT))
+		{
+			EncodeFRNDINT();
+		}
+
+		else if(StringCmp(Token, INS_FRSTOR))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFRSTOR_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FSAVE))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFSAVE_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FNSAVE))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFNSAVE_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FSCALE))
+		{
+			EncodeFSCALE();
+		}
+
+		else if(StringCmp(Token, INS_FSIN))
+		{
+			EncodeFSIN();
+		}
+
+		else if(StringCmp(Token, INS_FSINCOS))
+		{
+			EncodeFSINCOS();
+		}
+
+		else if(StringCmp(Token, INS_FSQRT))
+		{
+			EncodeFSQRT();
+		}
+
+		else if(StringCmp(Token, INS_FST INS_REAL4))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFST_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FST INS_REAL8))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFST_MEM64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FST))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFST_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FSTP INS_REAL4))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFSTP_MEM32(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FSTP INS_REAL8))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFSTP_MEM64(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FSTP INS_REAL10))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFSTP_MEM80(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FSTP))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFSTP_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FSTCW))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFSTCW_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FNSTCW))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFNSTCW_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FSTENV))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFSTENV_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FNSTENV))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFNSTENV_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FSTSW))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFSTSW_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else if(IsReg(OPRD1) && IsRegAX(OPRD1))
+			{
+				EncodeFSTSW_AX();
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FNSTSW))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFNSTSW_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else if(IsReg(OPRD1) && IsRegAX(OPRD1))
+			{
+				EncodeFNSTSW_AX();
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		FOPT(SUB)
+
+		FOPT(SUBR)
+
+		else if(StringCmp(Token, INS_FTST))
+		{
+			EncodeFTST();
+		}
+
+		else if(StringCmp(Token, INS_FUCOM))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFUCOM_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FUCOMP))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFUCOMP_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+		else if(StringCmp(Token, INS_FUCOMPP))
+		{
+			EncodeFUCOMPP();
+		}
+
+		else if(StringCmp(Token, INS_FXAM))
+		{
+			EncodeFXAM();
+		}
+
+		else if(StringCmp(Token, INS_FXCH))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsReg(OPRD1) && IsX87DataReg(OPRD1))
+			{
+				EncodeFXCH_STi(GetReg(OPRD1));
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FXRSTOR))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFXRSTOR_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FXSAVE))
+		{
+			char OPRD1[OPRD_SIZE];
+			GET_TOKEN(OPRD1);
+			if(IsMem(OPRD1))
+			{
+				uchar Reg1, Reg2;
+				uint Offset;
+				GetMem(OPRD1, &Reg1, &Reg2, &Offset);
+				EncodeFXSAVE_MEM(Reg1, Reg2, GetOffType(Offset), Offset);
+			}
+			else
+			{
+				InvalidInstruction();
+			}
+		}
+
+		else if(StringCmp(Token, INS_FXTRACT))
+		{
+			EncodeFXTRACT();
+		}
+
+		else if(StringCmp(Token, INS_FYL2X))
+		{
+			EncodeFYL2X();
+		}
+
+		else if(StringCmp(Token, INS_FYL2XP1))
+		{
+			EncodeFYL2XP1();
+		}
+
+
+
+
 
 		/* 违法的指令 */
 		else 
