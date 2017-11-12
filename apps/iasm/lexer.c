@@ -172,7 +172,12 @@ static uint _GetToken(char * Token, uint BufferSize, int Peek)
 						while (1)
 						{
 							Char = Source[Pos++];
-							if (Char == '\n' || Pos == SourceLength)
+							if (Char == '\n')
+							{
+								Pos--;
+								break;
+							}
+							else if(Pos == SourceLength)
 							{
 								break;
 							}

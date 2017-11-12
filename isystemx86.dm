@@ -252,3 +252,8 @@ MAKE_DIR	VA:/isystem/ src
 MAKE_DIR	VA:/isystem/src/ kernelldr
 MAKE_FILE	VA:/isystem/src/kernelldr/ kernelldr.asm
 WRITE_FILE	VA:/isystem/src/kernelldr/kernelldr.asm isystem/src/kernelldr/kernelldr.asm
+
+MAKE_DIR	VA:/isystem/src/ iasm
+MAKE_FILE	VA:/isystem/src/iasm/ test.asm
+WRITE_FILE	VA:/isystem/src/iasm/test.asm isystem/src/iasm/test.asm
+
