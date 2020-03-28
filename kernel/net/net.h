@@ -240,6 +240,11 @@ typedef struct
 
 typedef struct
 {
+	
+} __attribute__((packed)) NetTCPFrame, * NetTCPFramePtr;
+
+typedef struct
+{
 	uint16			htype;
 
 	uint16			ptype;

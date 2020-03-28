@@ -402,6 +402,30 @@ _NetProcessUDP(
 }
 
 /**
+	@Function:		_NetProcessTCP
+	@Access:		Private
+	@Description:
+		处理TCP数据包。
+	@Parameters:
+		netdev, NetDevicePtr, IN
+			指向设备实例的指针。
+		packet, const void *, IN
+			指向数据包的指针。
+		len, uint16, IN
+			数据包的长度，单位：字节。
+	@Return:
+*/
+static
+void
+_NetProcessTCP(
+	IN NetDevicePtr netdev,
+	IN const void * packet,
+	IN uint16 len)
+{
+	
+}
+
+/**
 	@Function:		_NetProcessIPv4
 	@Access:		Private
 	@Description:
@@ -445,7 +469,7 @@ _NetProcessIPv4(
 		// TCP
 		case 6:
 		{
-
+			_NetProcessTCP(netdev, packet, len);
 			break;
 		}
 		// UDP
