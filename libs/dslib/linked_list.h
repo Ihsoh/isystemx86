@@ -37,6 +37,16 @@ EXTERN_DSL_LNKLST_NEW_XXX_NODE(object)
 EXTERN_DSL_LNKLST_NEW_XXX_NODE(bool)
 
 
+
+
+extern
+void
+dsl_lnklst_init(DSLLinkedListPtr list);
+
+extern
+BOOL
+dsl_lnklst_release(DSLLinkedListPtr list);
+
 extern
 DSLLinkedList *
 dsl_lnklst_new(void);

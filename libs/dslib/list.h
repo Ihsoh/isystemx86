@@ -14,12 +14,26 @@ typedef struct _DSLList
 } DSLList, * DSLListPtr;
 
 extern
+bool
+dsl_lst_init_with_size(
+	OUT DSLListPtr list,
+	IN int32 size);
+
+extern
+bool
+dsl_lst_init(OUT DSLListPtr list);
+
+extern
 DSLListPtr
 dsl_lst_new_with_size(IN int32 size);
 
 extern
 DSLListPtr
 dsl_lst_new(void);
+
+extern
+BOOL
+dsl_lst_release(IN DSLListPtr list);
 
 extern
 BOOL

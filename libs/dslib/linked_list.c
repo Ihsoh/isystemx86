@@ -30,15 +30,31 @@ DSL_LNKLST_NEW_XXX_NODE(double, DOUBLE)
 DSL_LNKLST_NEW_XXX_NODE(object, OBJECT)
 DSL_LNKLST_NEW_XXX_NODE(bool, BOOL)
 
+void
+dsl_lnklst_init(DSLLinkedListPtr list)
+{
+	if (list == NULL)
+		return NULL;
+	list->head = NULL;
+	list->foot = NULL;
+	list->count = 0;
+}
+
+BOOL
+dsl_lnklst_release(DSLLinkedListPtr list)
+{
+	if(list == NULL)
+		return FALSE;
+	return TRUE;
+}
+
 DSLLinkedList *
 dsl_lnklst_new(void)
 {
 	DSLLinkedList * list = dsl_malloc(sizeof(DSLLinkedList));
 	if(list == NULL)
 		return NULL;
-	list->head = NULL;
-	list->foot = NULL;
-	list->count = 0;
+	dsl_lnklst_init(list);
 	return list;
 }
 
@@ -47,7 +63,7 @@ dsl_lnklst_free(DSLLinkedListPtr list)
 {
 	if(list == NULL)
 		return FALSE;
-	dsl_free(list);
+	dsl_lnklst_release(list);
 	return TRUE;
 }
 

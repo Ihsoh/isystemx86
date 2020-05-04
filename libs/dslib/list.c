@@ -3,6 +3,27 @@
 #include "dslib.h"
 #include "lib.h"
 
+bool
+dsl_lst_init_with_size(
+	OUT DSLListPtr list,
+	IN int32 size)
+{
+	if(list == NULL || size <= 0)
+		return FALSE;
+	list->values = (DSLValuePtr *)dsl_malloc(sizeof(DSLValuePtr) * size);
+	if(list->values == NULL)
+		return FALSE;
+	list->size = size;
+	list->count = 0;
+	return TRUE;
+}
+
+bool
+dsl_lst_init(OUT DSLListPtr list)
+{
+	return dsl_lst_init_with_size(list, DSL_LIST_DEFAULT_SIZE);
+}
+
 DSLListPtr
 dsl_lst_new_with_size(IN int32 size)
 {
@@ -11,14 +32,11 @@ dsl_lst_new_with_size(IN int32 size)
 	DSLListPtr list = (DSLListPtr)dsl_malloc(sizeof(DSLList));
 	if(list == NULL)
 		return NULL;
-	list->values = (DSLValuePtr *)dsl_malloc(sizeof(DSLValuePtr) * size);
-	if(list->values == NULL)
+	if(!dsl_lst_init_with_size(list, size))
 	{
 		dsl_free(list);
 		return NULL;
 	}
-	list->size = size;
-	list->count = 0;
 	return list;
 }
 
@@ -29,12 +47,21 @@ dsl_lst_new(void)
 }
 
 BOOL
-dsl_lst_free(IN DSLListPtr list)
+dsl_lst_release(IN DSLListPtr list)
 {
 	if(list == NULL)
 		return FALSE;
 	if(list->values != NULL)
 		dsl_free(list->values);
+	return TRUE;
+}
+
+BOOL
+dsl_lst_free(IN DSLListPtr list)
+{
+	if(list == NULL)
+		return FALSE;
+	dsl_lst_release(list);
 	dsl_free(list);
 	return TRUE;
 }

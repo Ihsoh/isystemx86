@@ -36,7 +36,8 @@ UtilsObjs=utils/bin/img.obj utils/bin/sfstr.obj
 DumpObjs=dump/bin/dump.obj dump/bin/msg.obj
 
 WindowObjs=window/bin/control.obj window/bin/button.obj window/bin/label.obj window/bin/list.obj 	\
-window/bin/progress.obj window/bin/scroll.obj window/bin/edit.obj window/bin/driver_list.obj
+window/bin/progress.obj window/bin/scroll.obj window/bin/edit.obj window/bin/driver_list.obj	\
+window/bin/file_list.obj
 
 WindowsObjs=windows/bin/clock.obj windows/bin/console.obj windows/bin/sfunc.obj windows/bin/message.obj 	\
 windows/bin/detail.obj windows/bin/explorer.obj windows/bin/taskbar.obj windows/bin/start.obj 	\
@@ -45,6 +46,8 @@ windows/bin/task.obj
 
 SyscallObjs=syscall/bin/fs.obj syscall/bin/keyboard.obj syscall/bin/mouse.obj syscall/bin/screen.obj 	\
 syscall/bin/system.obj syscall/bin/gui.obj
+
+FSObjs=fs/bin/fs.obj
 
 FS_IFS1Objs=fs/ifs1/bin/blocks.obj fs/ifs1/bin/fs.obj
 
@@ -66,8 +69,8 @@ Linker=ld -m elf_i386
 Include=-I../libs -I../sys
 Definition=-D_KERNEL_MODULE_ -D_KERNEL_DEBUG_
 
-$(Target): bin bmp/bin dump/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin wav/bin sb/bin net/bin fs/ext2/bin \
-$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
+$(Target): bin bmp/bin dump/bin fs/bin fs/ifs1/bin syscall/bin utils/bin window/bin windows/bin cppcrt/bin elf/bin pci/bin wav/bin sb/bin net/bin fs/ext2/bin \
+$(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FSObjs) $(FS_IFS1Objs) $(CppCRTObjs)	\
 $(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs) $(NetObjs) $(FS_EXT2Objs)
 	$(Linker) -Tkernel.lds -e main --oformat binary -o $(Target) $(Objs)	\
 $(StringObj) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs) $(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(PCIObjs) $(WavObjs) $(SBObjs) $(NetObjs)	\
@@ -85,6 +88,9 @@ bmp/bin:
 
 dump/bin:
 	-mkdir dump/bin
+
+fs/bin:
+	-mkdir fs/bin
 
 fs/ifs1/bin:
 	-mkdir fs/ifs1/bin
@@ -312,6 +318,9 @@ window/bin/edit.obj: window/edit.c window/edit.h
 window/bin/driver_list.obj: window/driver_list.c window/driver_list.h
 	$(CC) $(CFlags) -c window/driver_list.c -o window/bin/driver_list.obj $(Include) $(Definition)
 
+window/bin/file_list.obj: window/file_list.c window/file_list.h
+	$(CC) $(CFlags) -c window/file_list.c -o window/bin/file_list.obj $(Include) $(Definition)
+
 
 windows/bin/clock.obj: windows/clock.c windows/clock.h
 	$(CC) $(CFlags) -c windows/clock.c -o windows/bin/clock.obj $(Include) $(Definition)
@@ -375,6 +384,10 @@ syscall/bin/gui.obj: syscall/gui.c syscall/gui.h
 	$(CC) $(CFlags) -c syscall/gui.c -o syscall/bin/gui.obj $(Include) $(Definition)
 
 
+fs/bin/fs.obj: fs/fs.c fs/fs.h
+	$(CC) $(CFlags) -c fs/fs.c -o fs/bin/fs.obj $(Include) $(Definition)
+
+
 fs/ifs1/bin/blocks.obj: fs/ifs1/blocks.c fs/ifs1/blocks.h
 	$(CC) $(CFlags) -c fs/ifs1/blocks.c -o fs/ifs1/bin/blocks.obj $(Include) $(Definition)
 
@@ -435,4 +448,4 @@ fs/ext2/bin/ext2.obj: fs/ext2/ext2.c
 
 clean:
 	-rm -f $(Objs) $(BMPObjs) $(UtilsObjs) $(DumpObjs) $(WindowObjs)	\
-$(WindowsObjs) $(SyscallObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(Target)
+$(WindowsObjs) $(SyscallObjs) $(FSObjs) $(FS_IFS1Objs) $(CppCRTObjs) $(ELFObjs) $(Target)
