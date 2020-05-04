@@ -47,15 +47,24 @@ _Event(	IN uint32 id,
 {
 	if(!IS_CONTROL_ID(id))
 	{
-
-
+		ListPtr list = (ListPtr)id;
+		FileListPtr file_list = (FileListPtr)list->vpext;
+		if(file_list == NULL)
+			return;
+		ControlEvent event = file_list->event;
+		if(event == NULL)
+			return;
+		uint32 list_item_index = *(uint32*)param;
+		uint32 index = file_list->top + list_item_index;
+		if(index >= file_list->count)
+			return;
+		event((uint32)file_list, type, file_list->items + index);
 	}
 }
 
 BOOL
 CtrlFileListInit(	OUT FileListPtr file_list,
 					IN uint32 id,
-					IN int8 * path,
 					IN uint32 max_count,
 					IN uint32 x,
 					IN uint32 y,
@@ -65,8 +74,7 @@ CtrlFileListInit(	OUT FileListPtr file_list,
 					IN uint32 bgcolorh,
 					IN ControlEvent event)
 {
-	if(file_list == NULL
-		|| path == NULL)
+	if(file_list == NULL)
 		return FALSE;
 	if(id == 0)
 		file_list->id = (uint32)file_list;
@@ -77,9 +85,16 @@ CtrlFileListInit(	OUT FileListPtr file_list,
 	file_list->uwcid = -1;
 	file_list->x = x;
 	file_list->y = y;
-	file_list->event = event;
 	file_list->max_count = max_count;
-	UtlCopyString(file_list->path, sizeof(file_list->path), path);
+	UtlCopyString(
+		file_list->path,
+		sizeof(file_list->path),
+		""
+	);
+	file_list->items = NULL;
+	file_list->count = 0;
+	file_list->top = 0;
+	file_list->event = event;
 
 	CtrlListInit(
 		&(file_list->list),
@@ -93,16 +108,62 @@ CtrlFileListInit(	OUT FileListPtr file_list,
 	);
 
 	file_list->list.vpext = file_list;
+}
 
-	dsl_lst_init(&(file_list->items));
+BOOL
+CtrlFileListRelease(IN OUT FileListPtr file_list)
+{
+	if(file_list == NULL)
+		return FALSE;
+	if(file_list->items != NULL)
+	{
+		MemFree(file_list->items);
+		file_list->items = NULL;
+	}
+	return TRUE;
+}
+
+BOOL
+CtrlFileListUpdate(	IN OUT FileListPtr file_list,
+					OUT ImagePtr image,
+					IN WindowEventParamsPtr params,
+					BOOL top)
+{
+	if(file_list == NULL || image == NULL || params == NULL)
+		return FALSE;
+	if(!top)
+		return TRUE;
+	return LIST(&(file_list->list), image, params, top);
+}
+
+BOOL
+CtrlFileListSetPath(
+	IN OUT FileListPtr file_list,
+	IN int8 * path)
+{
+	if(file_list == NULL
+		|| path == NULL)
+		return FALSE;
 
 	DSLLinkedList lnklst;
 	dsl_lnklst_init(&lnklst);
 	int32 item_count = Ifs1GetItemList(path, &lnklst);
-	file_list->count = item_count;
 	if(item_count == -1)
 		return FALSE;
+	file_list->count = item_count;
 
+	file_list->top = 0;
+	UtlCopyString(
+		file_list->path,
+		sizeof(file_list->path),
+		path
+	);
+
+	if(file_list->items != NULL)
+	{
+		MemFree(file_list->items);
+		file_list->items = NULL;
+	}
 	file_list->items = (FileListItemPtr)MemAlloc(item_count * sizeof(FileListItem));
 
 	DSLLinkedListNodePtr item = lnklst.head;
@@ -157,38 +218,62 @@ CtrlFileListInit(	OUT FileListPtr file_list,
 
 	dsl_lnklst_delete_all_object_node(&lnklst);
 	dsl_lnklst_release(&lnklst);
-
-
 }
 
 BOOL
-CtrlFileListRelease(IN FileListPtr file_list)
-{
-	if(file_list == NULL)
-		return FALSE;
-	MemFree(file_list->items);
-	return TRUE;
-}
-
-BOOL
-CtrlFileListUpdate(	IN OUT FileListPtr file_list,
-					OUT ImagePtr image,
-					IN WindowEventParamsPtr params,
-					BOOL top)
-{
-	if(file_list == NULL || image == NULL || params == NULL)
-		return FALSE;
-	if(!top)
-		return TRUE;
-	return LIST(&(file_list->list), image, params, top);
-}
-
-BOOL
-CtrlFileListSetPath(
+CtrlFileListSetTop(
 	IN OUT FileListPtr file_list,
-	IN int8 * path)
+	IN uint32 top)
 {
 	if(file_list == NULL
-		|| path == NULL)
+		|| top >= file_list->count)
 		return FALSE;
+
+	file_list->top = top;
+
+	uint32 i;
+	for (i = 0; i < file_list->max_count; i++)
+	{
+		uint32 index = file_list->top + i;
+		if (index < file_list->count)
+		{
+			int8 line[256];
+
+			FileListItemPtr file_list_item = file_list->items + index;
+			switch (file_list_item->type)
+			{
+				case FILE_LIST_ITEM_TYPE_FILE:
+				{
+					UtlCopyString(line, sizeof(line), "<FILE> ");
+					break;
+				}
+				case FILE_LIST_ITEM_TYPE_DIR:
+				{
+					UtlCopyString(line, sizeof(line), "<DIR> ");
+					break;
+				}
+				case FILE_LIST_ITEM_TYPE_SLINK:
+				{
+					UtlCopyString(line, sizeof(line), "<SLINK> ");
+					break;
+				}
+				default:
+				{
+					UtlCopyString(line, sizeof(line), "<????> ");
+					break;
+				}
+			}
+
+			UtlConcatString(line, sizeof(line), file_list_item->name);
+
+			CtrlListSetText(&(file_list->list), i, line);
+			CtrlListEnableItem(&(file_list->list), i);
+		}
+		else
+		{
+			CtrlListSetText(&(file_list->list), i, "");
+			CtrlListDisableItem(&(file_list->list), i);
+		}
+		
+	}
 }

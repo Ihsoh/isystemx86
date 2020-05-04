@@ -48,8 +48,46 @@ typedef	struct
 	FileListItemPtr		items;
 	uint32				count;
 
+	uint32				top;
+
 	ControlEvent		event;
 } FileList, * FileListPtr;
+
+extern
+BOOL
+CtrlFileListInit(	OUT FileListPtr file_list,
+					IN uint32 id,
+					IN uint32 max_count,
+					IN uint32 x,
+					IN uint32 y,
+					IN uint32 color,
+					IN uint32 bgcolor,
+					IN uint32 colorh,
+					IN uint32 bgcolorh,
+					IN ControlEvent event);
+
+extern
+BOOL
+CtrlFileListRelease(IN OUT FileListPtr file_list);
+
+extern
+BOOL
+CtrlFileListUpdate(	IN OUT FileListPtr file_list,
+					OUT ImagePtr image,
+					IN WindowEventParamsPtr params,
+					BOOL top);
+
+extern
+BOOL
+CtrlFileListSetPath(
+	IN OUT FileListPtr file_list,
+	IN int8 * path);
+
+extern
+BOOL
+CtrlFileListSetTop(
+	IN OUT FileListPtr file_list,
+	IN uint32 top);
 
 
 
