@@ -14,16 +14,19 @@
 #include "../klib.h"
 #include "../memory.h"
 
+#include "../utils/sfstr.h"
+
 #include "../window/button.h"
 #include "../window/label.h"
 #include "../window/list.h"
 #include "../window/progress.h"
 #include "../window/scroll.h"
+#include "../window/driver_list.h"
 
 #include <ilib/string.h>
 
 #define	_WIDTH	640
-#define	_HEIGHT	480
+#define	_HEIGHT	640
 
 static struct Window * _window = NULL;
 
@@ -33,6 +36,7 @@ LabelPtr lbl1 = NULL;
 ListPtr lst1 = NULL;
 ProgressPtr prgr1 = NULL;
 ScrollPtr scrl1 = NULL;
+DriverListPtr drvlst1 = NULL;
 
 static
 void
@@ -71,6 +75,15 @@ _F(uint32 id, uint32 type, void * param)
 			SET_LABEL_TEXT(lbl1, uitos(buffer, scrl1->value));
 		}
 	}
+	else if(id == drvlst1->id)
+	{
+		if(type == BUTTON_LBUP)
+		{
+			ASCCHAR buffer[1024];
+			UtlCopyString(buffer, sizeof(buffer), param);
+			SET_LABEL_TEXT(lbl1, buffer);
+		}
+	}
 }
 
 static
@@ -87,6 +100,7 @@ _WinExplEvent(	IN struct Window * window,
 		LIST(lst1, &window->workspace, params, top);
 		PROGRESS(prgr1, &window->workspace, params, top);
 		SCROLL(scrl1, &window->workspace, params, top);
+		DRIVER_LIST(drvlst1, &window->workspace, params, top);
 	}
 }
 
@@ -108,6 +122,7 @@ WinExplInit(void)
 	lst1 = NEW(List);
 	prgr1 = NEW(Progress);
 	scrl1 = NEW(Scroll);
+	drvlst1 = NEW(DriverList);
 	INIT_BUTTON(btn1, 10, 10, "Test1", _F);
 	INIT_BUTTON(btn2, 100, 10, "Test2", _F);
 	INIT_LABEL(lbl1, 10, 100, "This\nis\nTest Label!", _F);
@@ -118,6 +133,7 @@ WinExplInit(void)
 				_F);
 	INIT_PROGRESS(prgr1, 10, 350, 300, 40, 50, _F);
 	INIT_SCROLL(scrl1, 10, 400, 300, 30, 10, 0, 100, _F);
+	INIT_DRIVER_LIST(drvlst1, 10, 450, _F);
 	return TRUE;
 }
 

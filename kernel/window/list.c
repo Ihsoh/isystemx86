@@ -61,7 +61,7 @@ _CtrlListEvent(	IN uint32 id,
 	@Function:		CtrlListInit
 	@Access:		Public
 	@Description:
-		List的事件函数。
+		List的初始化函数。
 	@Parameters:
 		list, ListPtr, OUT
 			指向List对象的指针。

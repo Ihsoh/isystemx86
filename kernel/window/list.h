@@ -16,7 +16,7 @@
 #include "../image.h"
 #include "../window.h"
 
-#define	MAX_LIST_ITEM_COUNT		256
+#define	MAX_LIST_ITEM_COUNT		1024
 
 typedef	struct
 {
@@ -28,6 +28,9 @@ typedef	struct
 	uint32				y;
 	Button 				buttons[MAX_LIST_ITEM_COUNT];
 	uint32				count;
+
+	void *				vpext;
+
 	ControlEvent		event;
 } List, * ListPtr;
 
