@@ -1,13 +1,13 @@
 /**
-	@File:			scroll.c
+	@File:			vscroll.c
 	@Author:		Ihsoh
-	@Date:			2015-09-12
+	@Date:			2020-05-05
 	@Description:
-		窗体控件 - Horizontal Scroll。
-		水平滚动条。
+		窗体控件 - Vertical Scroll。
+		垂直滚动条。
 */
 
-#include "scroll.h"
+#include "vscroll.h"
 #include "control.h"
 #include "../types.h"
 #include "../image.h"
@@ -20,13 +20,13 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		CtrlScrlInit
+	@Function:		CtrlVScrlInit
 	@Access:		Public
 	@Description:
-		初始化Scroll。
+		初始化VScroll。
 	@Parameters:
-		scroll, ScrollPtr, OUT
-			指向Scroll的指针。
+		scroll, VScrollPtr, OUT
+			指向VScroll的指针。
 		id, uint32, IN
 			控件的ID。
 		value, uint32, IN
@@ -54,7 +54,7 @@
 			返回TRUE则成功，否则失败。
 */
 BOOL
-CtrlScrlInit(	OUT ScrollPtr scroll,
+CtrlVScrlInit(	OUT VScrollPtr scroll,
 				IN uint32 id,
 				IN uint32 value,
 				IN uint32 min,
@@ -76,7 +76,7 @@ CtrlScrlInit(	OUT ScrollPtr scroll,
 		scroll->id = (uint32)scroll;
 	else
 		scroll->id = id;
-	scroll->type = CONTROL_SCROLL;
+	scroll->type = CONTROL_VSCROLL;
 	scroll->uwid = -1;
 	scroll->uwcid = -1;
 	scroll->value = value;
@@ -101,13 +101,13 @@ CtrlScrlInit(	OUT ScrollPtr scroll,
 }
 
 /**
-	@Function:		CtrlScrlUpdate
+	@Function:		CtrlVScrlUpdate
 	@Access:		Public
 	@Description:
 		Scroll的渲染、事件处理函数。
 	@Parameters:
-		scroll, ScrollPtr, IN OUT
-			指向Scroll对象的指针。
+		scroll, VScrollPtr, IN OUT
+			指向VScroll对象的指针。
 		image, ImagePtr, OUT
 			指向目标图片对象的指针。
 		params, WindowEventParamsPtr, IN
@@ -119,7 +119,7 @@ CtrlScrlInit(	OUT ScrollPtr scroll,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-CtrlScrlUpdate(	IN OUT ScrollPtr scroll,
+CtrlVScrlUpdate(IN OUT VScrollPtr scroll,
 				OUT ImagePtr image,
 				IN WindowEventParamsPtr params,
 				IN BOOL top)
@@ -130,36 +130,36 @@ CtrlScrlUpdate(	IN OUT ScrollPtr scroll,
 		return TRUE;
 	if(scroll->enabled)
 		if(	point_in_rect(	params->mouse_x, params->mouse_y,
-							scroll->x + SCROLL_BORDER_WIDTH,
-							scroll->y + SCROLL_BORDER_WIDTH,
-							scroll->width - SCROLL_BORDER_WIDTH2X,
-							scroll->height - SCROLL_BORDER_WIDTH2X)
+							scroll->x + VSCROLL_BORDER_WIDTH,
+							scroll->y + VSCROLL_BORDER_WIDTH,
+							scroll->width - VSCROLL_BORDER_WIDTH2X,
+							scroll->height - VSCROLL_BORDER_WIDTH2X)
 			&& (params->mouse_button & MOUSE_BUTTON_LEFT))
 		{
-			uint32 p = params->mouse_x - scroll->x;
-			double sp = (double)p / (double)(scroll->width - SCROLL_BORDER_WIDTH2X);
+			uint32 p = params->mouse_y - scroll->y;
+			double sp = (double)p / (double)(scroll->height - VSCROLL_BORDER_WIDTH2X);
 			scroll->value = scroll->min + (uint32)(sp * (scroll->max - scroll->min));
 			if(scroll->event != NULL)
-				scroll->event(scroll->id, SCROLL_CHANGED, NULL);
+				scroll->event(scroll->id, VSCROLL_CHANGED, NULL);
 			scroll->updated = FALSE;
 		}
 	if(!scroll->updated)
 	{
 		rect_common_image(	image,
-							scroll->x + SCROLL_BORDER_WIDTH,
-							scroll->y + SCROLL_BORDER_WIDTH,
-							scroll->width - SCROLL_BORDER_WIDTH2X,
-							scroll->height - SCROLL_BORDER_WIDTH2X,
+							scroll->x + VSCROLL_BORDER_WIDTH,
+							scroll->y + VSCROLL_BORDER_WIDTH,
+							scroll->width - VSCROLL_BORDER_WIDTH2X,
+							scroll->height - VSCROLL_BORDER_WIDTH2X,
 							scroll->bgcolor);
 		double sp = (double)scroll->value / (double)(scroll->max - scroll->min);	// 方块在滚动条上的比值。
-		double sw = 1.0 / (double)(scroll->max - scroll->min);						// 方块的宽度的比值。
-		double p = sp * (double)(scroll->width - SCROLL_BORDER_WIDTH2X);
-		double w = sw * (double)(scroll->width - SCROLL_BORDER_WIDTH2X);
+		double sh = 1.0 / (double)(scroll->max - scroll->min);						// 方块的高度的比值。
+		double p = sp * (double)(scroll->height - VSCROLL_BORDER_WIDTH2X);
+		double h = sh * (double)(scroll->height - VSCROLL_BORDER_WIDTH2X);
 		// 画方块。
 		rect_common_image(	image,
-							scroll->x + SCROLL_BORDER_WIDTH + (uint32)p,
-							scroll->y + SCROLL_BORDER_WIDTH,
-							(uint32)w, scroll->height - SCROLL_BORDER_WIDTH2X,
+							scroll->x + VSCROLL_BORDER_WIDTH,
+							scroll->y + VSCROLL_BORDER_WIDTH + (uint32)p,
+							scroll->width - VSCROLL_BORDER_WIDTH2X, (uint32)h,
 							scroll->color);
 
 		// 画四条边。
@@ -170,18 +170,18 @@ CtrlScrlUpdate(	IN OUT ScrollPtr scroll,
 							WINDOW_BORDERCOLOR);
 		hline_common_image(	image,
 							scroll->x,
-							scroll->y + scroll->height - SCROLL_BORDER_WIDTH,
+							scroll->y + scroll->height - VSCROLL_BORDER_WIDTH,
 							scroll->width,
 							WINDOW_BORDERCOLOR);
 		vline_common_image(	image,
 							scroll->x,
-							scroll->y + SCROLL_BORDER_WIDTH,
-							scroll->height - SCROLL_BORDER_WIDTH2X,
+							scroll->y + VSCROLL_BORDER_WIDTH,
+							scroll->height - VSCROLL_BORDER_WIDTH2X,
 							WINDOW_BORDERCOLOR);
 		vline_common_image(	image,
-							scroll->x + scroll->width - SCROLL_BORDER_WIDTH,
-							scroll->y + SCROLL_BORDER_WIDTH,
-							scroll->height - SCROLL_BORDER_WIDTH2X,
+							scroll->x + scroll->width - VSCROLL_BORDER_WIDTH,
+							scroll->y + VSCROLL_BORDER_WIDTH,
+							scroll->height - VSCROLL_BORDER_WIDTH2X,
 							WINDOW_BORDERCOLOR);
 
 		scroll->updated = TRUE;
@@ -189,13 +189,13 @@ CtrlScrlUpdate(	IN OUT ScrollPtr scroll,
 }
 
 /**
-	@Function:		CtrlScrlSetValue
+	@Function:		CtrlVScrlSetValue
 	@Access:		Public
 	@Description:
 		设置Scroll的值。
 	@Parameters:
-		scroll, ScrollPtr, IN OUT
-			指向Scroll的对象的指针。
+		scroll, VScrollPtr, IN OUT
+			指向VScroll的对象的指针。
 		value, uint32, IN
 			该值应该大于等于min并且小于等于max。
 	@Return:
@@ -203,7 +203,7 @@ CtrlScrlUpdate(	IN OUT ScrollPtr scroll,
 			返回TRUE则成功，否则失败。
 */
 BOOL
-CtrlScrlSetValue(	IN OUT ScrollPtr scroll,
+CtrlVScrlSetValue(	IN OUT VScrollPtr scroll,
 					IN uint32 value)
 {
 	if(	scroll == NULL

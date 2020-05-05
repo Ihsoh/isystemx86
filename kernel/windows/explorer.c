@@ -23,6 +23,7 @@
 #include "../window/scroll.h"
 #include "../window/driver_list.h"
 #include "../window/file_list.h"
+#include "../window/vscroll.h"
 
 #include <ilib/string.h>
 
@@ -39,6 +40,7 @@ ProgressPtr prgr1 = NULL;
 ScrollPtr scrl1 = NULL;
 DriverListPtr drvlst1 = NULL;
 FileListPtr filelst1 = NULL;
+VScrollPtr vscrl1 = NULL;
 
 static
 void
@@ -108,6 +110,15 @@ _F(uint32 id, uint32 type, void * param)
 			SET_LABEL_TEXT(lbl1, file_list_item->name);
 		}
 	}
+	else if(id == vscrl1->id)
+	{
+		ASCCHAR buffer[1024];
+		if(type == VSCROLL_CHANGED)
+		{
+			SET_PROGRESS_PERCENT(prgr1, vscrl1->value);
+			SET_LABEL_TEXT(lbl1, uitos(buffer, vscrl1->value));
+		}
+	}
 }
 
 static
@@ -125,6 +136,7 @@ _WinExplEvent(	IN struct Window * window,
 		PROGRESS(prgr1, &window->workspace, params, top);
 		SCROLL(scrl1, &window->workspace, params, top);
 		DRIVER_LIST(drvlst1, &window->workspace, params, top);
+		VSCROLL(vscrl1, &window->workspace, params, top);
 
 		CtrlFileListUpdate(filelst1, &window->workspace, params, top);
 	}
@@ -150,6 +162,7 @@ WinExplInit(void)
 	scrl1 = NEW(Scroll);
 	drvlst1 = NEW(DriverList);
 	filelst1 = NEW(FileList);
+	vscrl1 = NEW(VScroll);
 	INIT_BUTTON(btn1, 10, 10, "Test1", _F);
 	INIT_BUTTON(btn2, 100, 10, "Test2", _F);
 	INIT_LABEL(lbl1, 10, 100, "This\nis\nTest Label!", _F);
@@ -165,13 +178,15 @@ WinExplInit(void)
 	CtrlFileListInit(
 		filelst1,
 		0,
-		5,
+		8,
 		200, 450,
 		0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb,
 		_F
 	);
 	CtrlFileListSetPath(filelst1, "SA:/isystem/");
 	CtrlFileListSetTop(filelst1, 0);
+	
+	INIT_VSCROLL(vscrl1, 400, 450, 20, 150, 50, 0, 100, _F);
 
 	return TRUE;
 }

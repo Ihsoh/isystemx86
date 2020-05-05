@@ -33,4 +33,6 @@
 
 #define	EDIT_INPUT		1
 
+#define	VSCROLL_CHANGED	1
+
 #endif
