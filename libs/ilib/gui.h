@@ -279,4 +279,14 @@ ILGNewEdit(	IN int32 wid,
 			IN uint32 style,
 			OUT int32 * cid);
 
+extern
+BOOL
+ILGNewFileList(	IN int32 wid,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 width,
+				IN uint32 height,
+				IN uint32 vscroll_width,
+				OUT int32 * cid);
+
 #endif

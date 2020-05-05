@@ -88,6 +88,8 @@
 
 #define	SCALL_GUI_NEW_EDIT				((CONTROL_EDIT << 8) | 0x00000001)
 
+#define	SCALL_GUI_NEW_FILE_LIST			((CONTROL_FILE_LIST << 8) | 0x00000001)
+
 // ============================== Keyboard ==============================
 #define	SCALL_GET_CHAR			0
 #define	SCALL_GET_STR_N			1

@@ -12,14 +12,14 @@
 #include "control.h"
 #include "list.h"
 #include "button.h"
+#include "vscroll.h"
+#include "label.h"
 
 #include "../types.h"
 #include "../image.h"
 #include "../window.h"
 
 #include "../fs/ifs1/fs.h"
-
-#define	MAX_FILE_LIST_ITEM_COUNT		16
 
 #define	FILE_LIST_ITEM_TYPE_UNKNOWN		0
 #define	FILE_LIST_ITEM_TYPE_FILE		1
@@ -40,8 +40,11 @@ typedef	struct
 	int32				uwcid;							// User Window Control ID。
 	uint32				x;
 	uint32				y;
-	List				list;
+	uint32				width;
+	uint32				height;
+	uint32				vscroll_width;
 	uint32				max_count;
+
 
 	int8				path[MAX_PATH_BUFFER_LEN];
 	
@@ -50,6 +53,16 @@ typedef	struct
 
 	uint32				top;
 
+	VScroll				vscroll;
+	List				list;
+	Button				button_back;
+	Label				label_path;
+
+	uint32				list_x;
+	uint32				list_y;
+	uint32				list_width;
+	uint32				list_height;
+
 	ControlEvent		event;
 } FileList, * FileListPtr;
 
@@ -57,9 +70,11 @@ extern
 BOOL
 CtrlFileListInit(	OUT FileListPtr file_list,
 					IN uint32 id,
-					IN uint32 max_count,
 					IN uint32 x,
 					IN uint32 y,
+					IN uint32 width,
+					IN uint32 height,
+					IN uint32 vscroll_width,
 					IN uint32 color,
 					IN uint32 bgcolor,
 					IN uint32 colorh,

@@ -63,6 +63,10 @@ WRITE_FILE	VA:/isystem/wbins/wedit wapps/wedit/bin/wedit.bin
 MAKE_FILE	VA:/isystem/wbins/ tictactoe
 WRITE_FILE	VA:/isystem/wbins/tictactoe wapps/tictactoe/bin/tictactoe.bin
 
+#Window application 'explorer'
+MAKE_FILE	VA:/isystem/wbins/ explorer
+WRITE_FILE	VA:/isystem/wbins/explorer wapps/explorer/bin/explorer.bin
+
 
 #System commands directory
 MAKE_DIR	VA:/isystem/ bins

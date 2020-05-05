@@ -43,6 +43,7 @@ typedef	struct
 	uint32				old_max_col;
 	BOOL				enabled;
 	uint32				style;
+	void *				vpext;
 } Label, * LabelPtr;
 
 #define	LABEL_LPADDING	6

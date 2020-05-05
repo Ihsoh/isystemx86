@@ -458,8 +458,43 @@ _ScGuiProcess(	IN uint32 func,
 			break;
 		}
 
+		// ============================== VScroll ==============================
+
+
 		// ============================== Driver List ==============================
-		
+
+
+		// ============================== File List ==============================
+		case SCALL_GUI_NEW_FILE_LIST:
+		{
+			int32 wid = INT32_SPARAM(sparams->param0);
+			uint32 x = UINT32_SPARAM(sparams->param1);
+			uint32 y = UINT32_SPARAM(sparams->param2);
+			uint32 width = UINT32_SPARAM(sparams->param3);
+			uint32 height = UINT32_SPARAM(sparams->param4);
+			uint32 vscroll_width = UINT32_SPARAM(sparams->param5);
+			uint32 color = 0xff000000;
+			uint32 bgcolor = 0xff999999;
+			uint32 colorh = 0xff000000;
+			uint32 bgcolorh = 0xffbbbbbb;
+			void * vptr = NULL;
+			vptr = VOID_PTR_SPARAM(sparams->param6);
+			int32 * cid = (int32 *)TaskmgrConvertLAddrToPAddr(tid, vptr);
+
+			BOOL r = GuiNewFileList(
+				tid,
+				wid,
+				x, y,
+				width, height,
+				vscroll_width,
+				color, bgcolor,
+				colorh, bgcolorh,
+				cid
+			);
+
+			sparams->param0 = SPARAM(r);
+			break;
+		}
 
 	}
 }

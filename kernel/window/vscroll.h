@@ -38,6 +38,7 @@ typedef struct
 	BOOL				updated;
 	BOOL				enabled;
 
+	void *				vpext;
 } VScroll, * VScrollPtr;
 
 #define	INIT_VSCROLL(_scroll, _x, _y, _width, _height, _value, _min, _max, _event)	\

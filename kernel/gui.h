@@ -332,6 +332,21 @@ GuiNewEdit(	IN int32 tid,
 			IN uint32 style,
 			OUT int32 * cid);
 
+extern
+BOOL
+GuiNewFileList(	IN int32 tid,
+				IN int32 wid,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 width,
+				IN uint32 height,
+				IN uint32 vscroll_width,
+				IN uint32 color,
+				IN uint32 bgcolor,
+				IN uint32 colorh,
+				IN uint32 bgcolorh,
+				OUT int32 * cid);
+
 DEFINE_LOCK_EXTERN(gui)
 
 #endif

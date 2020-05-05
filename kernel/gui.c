@@ -24,6 +24,10 @@
 #include "window/label.h"
 #include "window/list.h"
 #include "window/edit.h"
+#include "window/scroll.h"
+#include "window/vscroll.h"
+#include "window/driver_list.h"
+#include "window/file_list.h"
 
 #include <dslib/list.h>
 #include <dslib/linked_list.h>
@@ -133,6 +137,26 @@ _GuiWindowEvent(IN struct Window * window,
 						case CONTROL_EDIT:
 						{
 							NMLEDIT(control, &window->workspace, params, top);
+							break;
+						}
+						case CONTROL_SCROLL:
+						{
+							SCROLL(control, &window->workspace, params, top);
+							break;
+						}
+						case CONTROL_VSCROLL:
+						{
+							VSCROLL(control, &window->workspace, params, top);
+							break;
+						}
+						case CONTROL_DRIVER_LIST:
+						{
+							DRIVER_LIST(control, &window->workspace, params, top);
+							break;
+						}
+						case CONTROL_FILE_LIST:
+						{
+							CtrlFileListUpdate(control, &window->workspace, params, top);
 							break;
 						}
 					}
@@ -1918,6 +1942,72 @@ GuiNewEdit(	IN int32 tid,
 err:
 	if(edit != NULL)
 		DELETE(edit);
+	if(val != NULL)
+		DELETE(val);
+	unlock();
+	return FALSE;
+}
+
+BOOL
+GuiNewFileList(	IN int32 tid,
+				IN int32 wid,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 width,
+				IN uint32 height,
+				IN uint32 vscroll_width,
+				IN uint32 color,
+				IN uint32 bgcolor,
+				IN uint32 colorh,
+				IN uint32 bgcolorh,
+				OUT int32 * cid)
+{
+	_WINSTANCE_FALSE
+	lock();
+	FileListPtr file_list = NULL;
+	DSLValuePtr val = NULL;
+	if(cid == NULL)
+		goto err;
+	file_list = NEW(FileList);
+	if(file_list == NULL)
+		goto err;
+	CtrlFileListInit(
+		file_list,
+		0,
+		x, y,
+		width, height,
+		vscroll_width,
+		color, bgcolor,
+		colorh, bgcolorh,
+		_GuiNoDataEvent
+	);
+
+
+	// TODO: 临时代码
+	CtrlFileListSetPath(file_list, "SA:/");
+	CtrlFileListSetTop(file_list, 0);
+
+
+	file_list->uwid = wid;
+	val = dsl_val_object(file_list);
+	if(val == NULL)
+		goto err;
+	int32 _cid = dsl_lst_find_value(winstance->controls, NULL);
+	if(_cid == -1)
+	{
+		if(!dsl_lst_add_value(winstance->controls, val))
+			goto err;
+		_cid = dsl_lst_find_value(winstance->controls, val);
+	}
+	else
+		dsl_lst_set(winstance->controls, _cid, val);
+	file_list->uwcid = _cid;
+	*cid = _cid;	
+	unlock();
+	return TRUE;
+err:
+	if(file_list != NULL)
+		DELETE(file_list);
 	if(val != NULL)
 		DELETE(val);
 	unlock();

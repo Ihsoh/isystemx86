@@ -27,7 +27,7 @@
 
 #include <ilib/string.h>
 
-#define	_WIDTH	640
+#define	_WIDTH	800
 #define	_HEIGHT	640
 
 static struct Window * _window = NULL;
@@ -164,7 +164,10 @@ WinExplInit(void)
 	filelst1 = NEW(FileList);
 	vscrl1 = NEW(VScroll);
 	INIT_BUTTON(btn1, 10, 10, "Test1", _F);
+	
 	INIT_BUTTON(btn2, 100, 10, "Test2", _F);
+	btn2->width = 100;
+
 	INIT_LABEL(lbl1, 10, 100, "This\nis\nTest Label!", _F);
 	INIT_LIST(	lst1,
 				5,
@@ -178,8 +181,9 @@ WinExplInit(void)
 	CtrlFileListInit(
 		filelst1,
 		0,
-		8,
-		200, 450,
+		250, 10,
+		300, 200,
+		20,
 		0xff000000, 0xff999999, 0xff000000, 0xffbbbbbb,
 		_F
 	);

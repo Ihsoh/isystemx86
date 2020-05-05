@@ -9,6 +9,8 @@
 #include "file_list.h"
 #include "control.h"
 #include "list.h"
+#include "button.h"
+#include "label.h"
 #include "../types.h"
 #include "../image.h"
 #include "../enfont.h"
@@ -26,7 +28,7 @@
 #include <ilib/string.h>
 
 /**
-	@Function:		_Event
+	@Function:		_ListEvent
 	@Access:		Private
 	@Description:
 		List的事件函数。
@@ -41,9 +43,9 @@
 */
 static
 void
-_Event(	IN uint32 id,
-		IN uint32 type,
-		IN void * param)
+_ListEvent(	IN uint32 id,
+			IN uint32 type,
+			IN void * param)
 {
 	if(!IS_CONTROL_ID(id))
 	{
@@ -52,22 +54,102 @@ _Event(	IN uint32 id,
 		if(file_list == NULL)
 			return;
 		ControlEvent event = file_list->event;
-		if(event == NULL)
+
+		if(type == BUTTON_LBUP)
+		{
+			uint32 list_item_index = *(uint32*)param;
+			uint32 index = file_list->top + list_item_index;
+			if(index >= file_list->count)
+				return;
+			FileListItemPtr file_list_item = file_list->items + index;
+
+			// 如果是目录，则进入目录。
+			if(file_list_item->type == FILE_LIST_ITEM_TYPE_DIR)
+			{
+				int8 path[MAX_PATH_BUFFER_LEN];
+
+				UtlCopyString(path, sizeof(path), file_list->path);
+				UtlConcatString(path, sizeof(path), file_list_item->name);
+				UtlConcatString(path, sizeof(path), "/");
+
+				CtrlFileListSetPath(file_list, path);
+				CtrlFileListSetTop(file_list, 0);
+			}
+
+			if(event == NULL)
+				return;
+			event((uint32)file_list, type, file_list_item);
+		}
+	}
+}
+
+static
+void
+_VScrollEvent(	IN uint32 id,
+				IN uint32 type,
+				IN void * param)
+{
+	if(!IS_CONTROL_ID(id))
+	{
+		VScrollPtr scroll = (VScrollPtr)id;
+		FileListPtr file_list = (FileListPtr)scroll->vpext;
+		if(file_list == NULL)
 			return;
-		uint32 list_item_index = *(uint32*)param;
-		uint32 index = file_list->top + list_item_index;
-		if(index >= file_list->count)
+		CtrlFileListSetTop(file_list, scroll->value);
+	}
+}
+
+static
+void
+_ButtonBackEvent(	IN uint32 id,
+					IN uint32 type,
+					IN void * param)
+{
+	if(!IS_CONTROL_ID(id))
+	{
+		ButtonPtr button = (ButtonPtr)id;
+		FileListPtr file_list = (FileListPtr)button->vpext;
+		if(file_list == NULL)
 			return;
-		event((uint32)file_list, type, file_list->items + index);
+		ControlEvent event = file_list->event;
+
+		if(type == BUTTON_LBUP)
+		{
+			int8 path[MAX_PATH_BUFFER_LEN];
+
+			if(!Ifs1GetAbsolutePath("..", file_list->path, path))
+				return;
+
+			CtrlFileListSetPath(file_list, path);
+			CtrlFileListSetTop(file_list, 0);
+
+			if(event == NULL)
+				return;
+			event((uint32)file_list, type, NULL);
+		}
+	}
+}
+
+static
+void
+_LabelPathEvent(IN uint32 id,
+				IN uint32 type,
+				IN void * param)
+{
+	if(!IS_CONTROL_ID(id))
+	{
+		
 	}
 }
 
 BOOL
 CtrlFileListInit(	OUT FileListPtr file_list,
 					IN uint32 id,
-					IN uint32 max_count,
 					IN uint32 x,
 					IN uint32 y,
+					IN uint32 width,
+					IN uint32 height,
+					IN uint32 vscroll_width,
 					IN uint32 color,
 					IN uint32 bgcolor,
 					IN uint32 colorh,
@@ -80,12 +162,21 @@ CtrlFileListInit(	OUT FileListPtr file_list,
 		file_list->id = (uint32)file_list;
 	else
 		file_list->id = id;
+
+	file_list->list_x = x;
+	file_list->list_y = y + BUTTON_HEIGHT + 10;
+	file_list->list_width = width;
+	file_list->list_height = height - BUTTON_HEIGHT - 10;
+
 	file_list->type = CONTROL_FILE_LIST;
 	file_list->uwid = -1;
 	file_list->uwcid = -1;
 	file_list->x = x;
 	file_list->y = y;
-	file_list->max_count = max_count;
+	file_list->width = width;
+	file_list->height = height;
+	file_list->vscroll_width = vscroll_width;
+	file_list->max_count = file_list->list_height / BUTTON_HEIGHT + 1;
 	UtlCopyString(
 		file_list->path,
 		sizeof(file_list->path),
@@ -99,15 +190,40 @@ CtrlFileListInit(	OUT FileListPtr file_list,
 	CtrlListInit(
 		&(file_list->list),
 		&(file_list->list),
-		max_count,
-		x, y,
+		file_list->max_count,
+		file_list->list_x, file_list->list_y,
 		"###",
 		color, bgcolor,
 		colorh, bgcolorh,
-		_Event
+		_ListEvent
 	);
-
 	file_list->list.vpext = file_list;
+
+	INIT_VSCROLL(
+		&(file_list->vscroll),
+		file_list->list_x + file_list->width, file_list->list_y,
+		file_list->vscroll_width, file_list->list_height,
+		0,
+		0, 0,
+		_VScrollEvent
+	);
+	file_list->vscroll.vpext = file_list;
+
+	INIT_BUTTON(
+		&(file_list->button_back),
+		x, y,
+		"Back",
+		_ButtonBackEvent
+	);
+	file_list->button_back.vpext = file_list;
+
+	INIT_LABEL(
+		&(file_list->label_path),
+		x + GET_BUTTON_WIDTH(&(file_list->button_back)) + 10, y,
+		"",
+		_LabelPathEvent
+	);
+	file_list->label_path.vpext = file_list;
 }
 
 BOOL
@@ -133,7 +249,20 @@ CtrlFileListUpdate(	IN OUT FileListPtr file_list,
 		return FALSE;
 	if(!top)
 		return TRUE;
-	return LIST(&(file_list->list), image, params, top);
+
+	// 强制设置列表项每项的宽度。
+	uint32 i;
+	for (i = 0; i < file_list->list.count; i++)
+	{
+		file_list->list.buttons[i].width = file_list->width;
+	}
+
+	LIST(&(file_list->list), image, params, top);
+	VSCROLL(&(file_list->vscroll), image, params, top);
+	BUTTON(&(file_list->button_back), image, params, top);
+	LABEL(&(file_list->label_path), image, params, top);
+
+	return TRUE;
 }
 
 BOOL
@@ -152,12 +281,24 @@ CtrlFileListSetPath(
 		return FALSE;
 	file_list->count = item_count;
 
+	INIT_VSCROLL(
+		&(file_list->vscroll),
+		file_list->list_x + file_list->width, file_list->list_y,
+		file_list->vscroll_width, file_list->list_height,
+		0,
+		0, (item_count > 0 ? item_count - 1 : 0),
+		_VScrollEvent
+	);
+	file_list->vscroll.vpext = file_list;
+
 	file_list->top = 0;
 	UtlCopyString(
 		file_list->path,
 		sizeof(file_list->path),
 		path
 	);
+
+	SET_LABEL_TEXT(&(file_list->label_path), path);
 
 	if(file_list->items != NULL)
 	{
@@ -249,12 +390,12 @@ CtrlFileListSetTop(
 				}
 				case FILE_LIST_ITEM_TYPE_DIR:
 				{
-					UtlCopyString(line, sizeof(line), "<DIR> ");
+					UtlCopyString(line, sizeof(line), "<DIR>  ");
 					break;
 				}
 				case FILE_LIST_ITEM_TYPE_SLINK:
 				{
-					UtlCopyString(line, sizeof(line), "<SLINK> ");
+					UtlCopyString(line, sizeof(line), "<SLNK> ");
 					break;
 				}
 				default:
@@ -263,6 +404,8 @@ CtrlFileListSetTop(
 					break;
 				}
 			}
+
+			
 
 			UtlConcatString(line, sizeof(line), file_list_item->name);
 

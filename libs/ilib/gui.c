@@ -551,3 +551,24 @@ ILGNewEdit(	IN int32 wid,
 	system_call(SCALL_GUI, SCALL_GUI_NEW_EDIT, &sparams);
 	return BOOL_SPARAM(sparams.param0);
 }
+
+BOOL
+ILGNewFileList(	IN int32 wid,
+				IN uint32 x,
+				IN uint32 y,
+				IN uint32 width,
+				IN uint32 height,
+				IN uint32 vscroll_width,
+				OUT int32 * cid)
+{
+	struct SParams sparams;
+	sparams.param0 = SPARAM(wid);
+	sparams.param1 = SPARAM(x);
+	sparams.param2 = SPARAM(y);
+	sparams.param3 = SPARAM(width);
+	sparams.param4 = SPARAM(height);
+	sparams.param5 = SPARAM(vscroll_width);
+	sparams.param6 = SPARAM(cid);
+	system_call(SCALL_GUI, SCALL_GUI_NEW_FILE_LIST, &sparams);
+	return BOOL_SPARAM(sparams.param0);
+}

@@ -40,6 +40,7 @@ $(Target):	bin	\
 	cd wapps/calc && make
 	cd wapps/wedit && make
 	cd wapps/tictactoe && make
+	cd wapps/explorer && make
 
 	cd sys/pci && make
 	cd sys/screen && make
@@ -184,6 +185,7 @@ clean:
 	cd wapps/calc && make clean
 	cd wapps/wedit && make clean
 	cd wapps/tictactoe && make clean
+	cd wapps/explorer && make clean
 
 	cd sys/pci && make clean
 	cd sys/screen && make clean
